@@ -1,0 +1,49 @@
+name: Template feedback
+description: Report repeated friction that should be fixed in the template.
+title: "[template-feedback] "
+labels:
+  - scope:template
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the friction or failure mode.
+      placeholder: The paper scaffold makes it hard to...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Explain how to reproduce the issue in a downstream paper repository.
+      placeholder: 1. Start from template/... 2. Run ...
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact
+      options:
+        - Blocks writing flow
+        - Causes repeated manual cleanup
+        - Makes AI guidance less reliable
+        - Documentation clarity issue
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_change
+    attributes:
+      label: Proposed change
+      description: Suggest a fix, even if partial.
+      placeholder: Add a hook, update a skill, adjust the scaffold...
+    validations:
+      required: false
+  - type: textarea
+    id: downstream_scope
+    attributes:
+      label: Downstream scope
+      description: List any repositories or situations where this has shown up.
+      placeholder: paper-lunar-cavity, paper-solar-wind-review, ...
+    validations:
+      required: false

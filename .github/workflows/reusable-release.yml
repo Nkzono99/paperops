@@ -1,0 +1,37 @@
+name: Reusable Release
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: Repository root to package.
+        required: false
+        type: string
+        default: .
+      artifact-name:
+        description: Name for the uploaded artifact.
+        required: false
+        type: string
+        default: arxiv-export
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Prepare export bundle
+        run: ./scripts/export-arxiv.sh
+
+      - name: Upload export artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.working-directory }}/dist/arxiv-export

@@ -1,0 +1,42 @@
+name: Reusable Build
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: Repository root to validate.
+        required: false
+        type: string
+        default: .
+      run-latex:
+        description: Attempt latexmk compilation when available.
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run harness checks
+        run: |
+          if [ "${{ inputs.run-latex }}" = "true" ]; then
+            export PAPER_TEMPLATE_RUN_LATEX=1
+          else
+            export PAPER_TEMPLATE_RUN_LATEX=0
+          fi
+          make ci
