@@ -20,6 +20,11 @@ Starter repository for a single paper project built from `paper-harness-template
 
 The local workflow prefers `.venv/bin/python` and otherwise falls back to `python3.11`.
 
+## Template feedback
+
+If you find repeated harness friction, route reusable improvements back to the source repository `Nkzono99/paper-harness-template`.
+Do not treat the distribution template repository as the primary issue tracker unless your team maintains its own forked source of truth.
+
 ## Directory highlights
 
 - `manuscript/`: bilingual source, shared style assets, and mirror-control files

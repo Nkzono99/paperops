@@ -1,6 +1,12 @@
 # raise-template-feedback
 
-Use this skill when a repeated problem should be fixed in the upstream `paper-template` repository.
+Use this skill when a repeated problem should be fixed in the upstream paper harness source repository.
+
+## Default upstream target
+
+- Source repository: `Nkzono99/paper-harness-template`
+- Do not file this feedback against the distribution repository unless your team has intentionally adopted that repository as its own source of truth.
+- If your team forked the harness and maintains its own source repository, use that fork instead.
 
 ## Gather
 
@@ -12,7 +18,7 @@ Use this skill when a repeated problem should be fixed in the upstream `paper-te
 
 ## Output
 
-Write the feedback in a form that can be pasted into the upstream `template-feedback` issue form.
+Write the feedback in a form that can be pasted into the upstream `template-feedback` issue form in `Nkzono99/paper-harness-template`.
 
 ## Scope guard
 

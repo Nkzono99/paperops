@@ -5,8 +5,10 @@ The downstream GitHub template repository is a published artifact generated from
 
 ## Repository roles
 
-- Source repository: maintains docs, issue forms, reusable workflows, and the scaffold source under `template/`
-- Distribution repository: contains only the scaffold at repository root and is marked as a GitHub template repository
+- Source repository: `Nkzono99/paper-harness-template`
+  - Maintains docs, issue forms, reusable workflows, and the scaffold source under `template/`
+- Distribution repository: `Nkzono99/paper-harness-scaffold-template`
+  - Contains only the scaffold at repository root and is marked as a GitHub template repository
 
 ## Publishing model
 
