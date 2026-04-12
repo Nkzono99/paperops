@@ -1,4 +1,4 @@
-.PHONY: venv smoke lint-bib mirror-check collect-context
+.PHONY: venv smoke lint-bib mirror-check collect-context publish-scaffold-dry-run
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3.11)
 
@@ -16,3 +16,7 @@ mirror-check:
 
 collect-context:
 	$(PYTHON) template/scripts/collect-note-context.py --root template --output template/notes/session-context.generated.md
+
+publish-scaffold-dry-run:
+	chmod +x scripts/publish-scaffold.sh
+	./scripts/publish-scaffold.sh --source-dir template --target-dir /tmp/paper-harness-scaffold-preview --dry-run

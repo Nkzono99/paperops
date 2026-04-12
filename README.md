@@ -15,10 +15,11 @@ It contains two layers:
 - [`.claude/skills/`](/home/b/b36291/large1/Github/paper-harness-template/.claude/skills): skills for template triage and maintenance
 - [`docs/`](/home/b/b36291/large1/Github/paper-harness-template/docs): template architecture, change policy, and triage rules
 - [`template/`](/home/b/b36291/large1/Github/paper-harness-template/template): ready-to-copy scaffold for an individual `paper-<topic>` repository
+- [`docs/distribution.md`](/home/b/b36291/large1/Github/paper-harness-template/docs/distribution.md): publish model for syncing `template/` into a separate GitHub template repository
 
 ## Quick start
 
-1. Copy `template/` into a new repository such as `paper-my-topic/`.
+1. Publish `template/` into the separate distribution repository, or copy it manually into a new repository such as `paper-my-topic/`.
 2. Run `make venv` to create a local `.venv` with Python 3.11.
 3. Rename the repository and update the following starter files:
    - `README.md`
@@ -36,6 +37,11 @@ It contains two layers:
 - Japanese and English manuscripts tracked as block-level mirrors
 - reusable maintenance workflows for the template itself
 - project-local Claude skills, hooks, and operating rules
+
+## Distribution
+
+If you want GitHub's `Use this template` flow, keep this repository as the source of truth and publish `template/` into a second repository whose root contains only the scaffold.
+This repository includes [`scripts/publish-scaffold.sh`](/home/b/b36291/large1/Github/paper-harness-template/scripts/publish-scaffold.sh) and [`.github/workflows/publish-scaffold.yml`](/home/b/b36291/large1/Github/paper-harness-template/.github/workflows/publish-scaffold.yml) for that sync path.
 
 ## Validation model
 

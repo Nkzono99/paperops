@@ -12,6 +12,7 @@ The repository root owns the assets that every downstream paper repository shoul
 - issue forms for template improvement
 - template-maintainer skills
 - changelog and governance docs
+- distribution automation for publishing the scaffold into a separate template repository
 
 This layer is intentionally small and stable. Its job is to evolve the harness safely.
 
@@ -33,4 +34,5 @@ That scaffold includes:
 - Track bilingual drift explicitly instead of relying on ad hoc translation.
 - Preserve local paths through aliases and ignored config files.
 - Push reusable automation into the template repository, not every paper repository.
+- Keep the distribution repository as a published artifact, not the editing surface.
 - Keep validation fast enough to run in interactive sessions and CI.

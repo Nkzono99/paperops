@@ -10,6 +10,7 @@ Template changes should improve multiple paper repositories, stay backwards-cons
 2. Treat `template/AGENTS.md`, `.claude/skills/`, and `scripts/` as user-facing interfaces.
 3. Require a documented migration note for any change that would force downstream repos to rename files, move directories, or rewrite hooks.
 4. Keep generated content out of version control unless it is a checked-in starter artifact.
+5. Treat the distribution repository as a publish target. Do not make it the primary editing surface.
 
 ## Release expectations
 

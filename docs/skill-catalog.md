@@ -31,3 +31,9 @@ The downstream scaffold ships these skills in `template/.claude/skills/`:
 - `raise-template-feedback`
 - `update-refs`
 - `resolve-local-paths`
+
+## Distribution automation
+
+The repository also ships a publish helper:
+
+- `scripts/publish-scaffold.sh`: syncs `template/` into a distribution repository root with `rsync`
