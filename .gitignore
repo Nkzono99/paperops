@@ -1,6 +1,9 @@
 .DS_Store
+template/**/__pycache__/
+template/**/*.pyc
 template/dist/
-template/manuscript/shared/build/
+template/manuscript/shared/build/*
+!template/manuscript/shared/build/README.md
 template/manuscript/mirror/reports/latest.md
 template/manuscript/mirror/reports/smoke-check.md
 template/notes/session-context.generated.md
