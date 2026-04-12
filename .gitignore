@@ -1,4 +1,5 @@
 .DS_Store
+.venv/
 template/**/__pycache__/
 template/**/*.pyc
 template/dist/

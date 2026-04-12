@@ -7,9 +7,17 @@ LANG_DIR="$ROOT/manuscript/en"
 BUILD_DIR="$ROOT/manuscript/shared/build/en"
 MAIN_TEX="$LANG_DIR/main.tex"
 
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+  PYTHON="$ROOT/.venv/bin/python"
+elif command -v python3.11 >/dev/null 2>&1; then
+  PYTHON="python3.11"
+else
+  PYTHON="python3"
+fi
+
 mkdir -p "$BUILD_DIR"
 
-python3 - <<'PY' "$MAIN_TEX"
+"$PYTHON" - <<'PY' "$MAIN_TEX"
 from pathlib import Path
 import re
 import sys

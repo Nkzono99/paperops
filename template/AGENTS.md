@@ -23,3 +23,4 @@ This repository is a writing harness for a bilingual research paper.
 - `make mirror-check`
 - `make lint-bib`
 - `make ci`
+- `make venv`

@@ -3,8 +3,17 @@
 set -euo pipefail
 
 INPUT="$(cat)"
+ROOT="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
 
-FILE_PATH="$(python3 - <<'PY' "$INPUT"
+if [[ -x "$ROOT/.venv/bin/python" ]]; then
+  PYTHON="$ROOT/.venv/bin/python"
+elif command -v python3.11 >/dev/null 2>&1; then
+  PYTHON="python3.11"
+else
+  PYTHON="python3"
+fi
+
+FILE_PATH="$("$PYTHON" - <<'PY' "$INPUT"
 import json
 import sys
 

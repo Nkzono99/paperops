@@ -19,14 +19,15 @@ It contains two layers:
 ## Quick start
 
 1. Copy `template/` into a new repository such as `paper-my-topic/`.
-2. Rename the repository and update the following starter files:
+2. Run `make venv` to create a local `.venv` with Python 3.11.
+3. Rename the repository and update the following starter files:
    - `README.md`
    - `docs/project-brief.md`
    - `docs/target-venue.md`
    - `docs/contribution-claims.md`
    - `refs/local/locations.toml` from `refs/local/locations.example.toml`
-3. Add your manuscript content to `manuscript/ja` first, then sync targeted sections into `manuscript/en`.
-4. Run `make ci` in the paper repository to lint bibliographies, validate mirror coverage, and exercise the build harness.
+4. Add your manuscript content to `manuscript/ja` first, then sync targeted sections into `manuscript/en`.
+5. Run `make ci` in the paper repository to lint bibliographies, validate mirror coverage, and exercise the build harness.
 
 ## What the scaffold optimizes for
 
@@ -40,6 +41,7 @@ It contains two layers:
 
 The template ships lightweight local checks instead of assuming a full TeX environment.
 `scripts/build-ja.sh` and `scripts/build-en.sh` compile with `latexmk` when available, and otherwise fall back to structural validation so CI can still exercise the writing harness on a clean runner.
+The intended local setup is `python3.11` inside a repo-local `.venv`.
 
 ## Upstream references
 
