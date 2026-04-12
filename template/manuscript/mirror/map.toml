@@ -1,0 +1,27 @@
+version = 1
+source_language = "ja"
+target_language = "en"
+
+[[file_pair]]
+ja = "ja/sections/00_abstract.tex"
+en = "en/sections/00_abstract.tex"
+
+[[file_pair]]
+ja = "ja/sections/10_intro.tex"
+en = "en/sections/10_intro.tex"
+
+[[file_pair]]
+ja = "ja/sections/20_method.tex"
+en = "en/sections/20_method.tex"
+
+[[file_pair]]
+ja = "ja/sections/30_results.tex"
+en = "en/sections/30_results.tex"
+
+[[file_pair]]
+ja = "ja/sections/40_discussion.tex"
+en = "en/sections/40_discussion.tex"
+
+[[file_pair]]
+ja = "ja/sections/90_conclusion.tex"
+en = "en/sections/90_conclusion.tex"

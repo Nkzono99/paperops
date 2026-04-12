@@ -1,0 +1,15 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: YOUR_ORG/paper-harness-template/.github/workflows/reusable-build.yml@main
+    with:
+      working-directory: .
+      run-latex: false

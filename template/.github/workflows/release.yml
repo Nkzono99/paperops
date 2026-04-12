@@ -1,0 +1,11 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    uses: YOUR_ORG/paper-harness-template/.github/workflows/reusable-release.yml@main
+    with:
+      working-directory: .
+      artifact-name: arxiv-export

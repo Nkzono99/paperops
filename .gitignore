@@ -1,4 +1,8 @@
 .DS_Store
+template/dist/
 template/manuscript/shared/build/
+template/manuscript/mirror/reports/latest.md
+template/manuscript/mirror/reports/smoke-check.md
+template/notes/session-context.generated.md
 template/refs/local/locations.toml
 template/.claude/settings.local.json

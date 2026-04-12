@@ -1,0 +1,20 @@
+name: Mirror Check
+
+on:
+  push:
+    paths:
+      - "manuscript/**"
+      - "scripts/mirror-check.py"
+      - ".github/workflows/mirror-check.yml"
+  pull_request:
+    paths:
+      - "manuscript/**"
+      - "scripts/mirror-check.py"
+      - ".github/workflows/mirror-check.yml"
+  workflow_dispatch:
+
+jobs:
+  mirror-check:
+    uses: YOUR_ORG/paper-harness-template/.github/workflows/reusable-mirror-check.yml@main
+    with:
+      working-directory: .
