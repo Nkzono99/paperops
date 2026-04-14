@@ -8,6 +8,13 @@
 - SessionStart フックを廃止（`/resume-session` スキルに統合）
 - `pull-template-updates` スキルを追加（上流テンプレート変更の下流取り込み）
 - AGENTS.md を CLAUDE.md と同一内容に統一
+- `git add` / `git commit` を permissions.allow に追加
+- bib ファイルからダミーエントリを除去（コメントのみに）
+- `/import-manuscript` スキルを追加（既存原稿のインポート支援）
+- `docs/` を情報フローに沿って再配置: project-brief, contribution-claims → `notes/`、target-venue → `manuscript/venue.md`、writing-policy → `.claude/rules/`
+- README のみのプレースホルダディレクトリ 17 個を削除、refs/ 構造をフラット化
+- 用語管理を `manuscript/mirror/terminology.yml` に統一（`docs/terminology-ja-en.md` を廃止）
+- `notes/session-context.md` と `notes/writing-log.md` を廃止（generated 版と handoff.md で代替）
 
 ## 0.1.0 - 2026-04-13
 

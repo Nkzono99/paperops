@@ -32,6 +32,7 @@
 - `update-refs`
 - `resolve-local-paths`
 - `pull-template-updates`
+- `import-manuscript`
 
 ## 配布自動化
 
