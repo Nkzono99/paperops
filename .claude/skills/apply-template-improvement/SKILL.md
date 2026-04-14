@@ -19,6 +19,28 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 - 編集前に影響を受けるディレクトリとスクリプトを確認する。
 - ユーザーに影響する変更は `CHANGELOG.md` を更新する。
-- `docs/` または `template/docs/` の関連ドキュメントを調整する。
+- `docs/` の関連ドキュメントを調整する。
 - `make smoke` を実行する。
 - 下流リポジトリに残るマイグレーション作業を要約する。
+
+## Issue とコミットの紐付け
+
+コミットメッセージに対応 Issue 番号を含めること:
+
+```
+fix: 問題の説明 (closes #123)
+feat: 機能の説明 (closes #456)
+design: 設計変更の説明 (closes #789)
+```
+
+複数の Issue を一つのコミットで解決する場合は、すべての番号を列挙する:
+
+```
+design: 構造変更の説明 (closes #4, closes #5)
+```
+
+実装完了後に手動で Issue をクローズする場合:
+
+```sh
+gh issue close <number> --comment "<commit-hash> で対応済み。<変更内容の要約>"
+```
