@@ -1,3 +1,9 @@
+---
+name: apply-template-improvement
+description: Implement an accepted template improvement safely with backwards compatibility and documentation updates.
+allowed-tools: Read, Edit, Write, Glob, Grep, Bash
+---
+
 # apply-template-improvement
 
 Use this skill when a template change has already been accepted and needs to be implemented safely.

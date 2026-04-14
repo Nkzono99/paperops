@@ -9,7 +9,7 @@ This is the **template maintenance repository** for `paper-harness-template`.
 Two-layer design:
 
 - **Root layer**: template governance, reusable workflows, distribution automation, template-maintenance skills
-- **`template/` layer**: per-paper scaffold that gets copied or published into individual `paper-<topic>` repositories
+- **`template/` layer**: per-paper scaffold copied into individual `paper-<topic>` repositories
 
 Do not confuse the two. Root-level files maintain the template itself; `template/` contains what downstream users receive.
 
@@ -17,7 +17,7 @@ Do not confuse the two. Root-level files maintain the template itself; `template
 
 ```sh
 make venv                      # create .venv with Python 3.11
-make smoke                     # run lint-bib + mirror-check + collect-context against template/
+make smoke                     # lint-bib + mirror-check + collect-context against template/
 make publish-scaffold-dry-run  # preview rsync of template/ into distribution repo
 ```
 
@@ -34,11 +34,12 @@ Read `docs/change-policy.md` and `docs/triage-rules.md` before landing changes.
 
 ## Rules
 
-- Treat `template/AGENTS.md`, `template/CLAUDE.md`, `template/.claude/skills/`, and `template/scripts/` as **user-facing interfaces**. Changes to these require a migration note.
+- Treat `template/AGENTS.md`, `template/CLAUDE.md`, `template/.claude/skills/`, and `template/scripts/` as **user-facing interfaces**. Changes require a migration note.
 - Prefer additive changes over structural rewrites.
 - Keep generated content out of version control.
-- The distribution repository (`scripts/publish-scaffold.sh`) is a **publish target**, not the editing surface. Edit here, publish there.
+- The distribution repository is a **publish target**, not the editing surface.
 - Always run `make smoke` after modifying anything under `template/`.
+- Perform manual `/compact` at ~50% context usage for long sessions.
 
 ## Repository map
 

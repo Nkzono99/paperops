@@ -1,3 +1,9 @@
+---
+name: resume-session
+description: Use at the start of a writing session to summarize manuscript state, identify mirror drift, and propose next steps.
+allowed-tools: Read, Glob, Grep
+---
+
 # resume-session
 
 Use this skill at the start of a writing session.

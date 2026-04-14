@@ -1,3 +1,9 @@
+---
+name: note-writing-session
+description: Record session progress near the end of a working session. Updates handoff, todo, writing-log, and session notes.
+allowed-tools: Read, Edit, Write, Glob
+---
+
 # note-writing-session
 
 Use this skill near the end of a working session.

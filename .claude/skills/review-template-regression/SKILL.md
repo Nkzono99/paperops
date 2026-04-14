@@ -1,3 +1,9 @@
+---
+name: review-template-regression
+description: Review template changes for regressions in mirror tracking, file protection, session continuity, or downstream compatibility.
+allowed-tools: Read, Glob, Grep
+---
+
 # review-template-regression
 
 Use this skill when reviewing a pull request or diff that modifies the template.

@@ -1,3 +1,10 @@
+---
+name: sync-ja-en
+description: Synchronize Japanese and English manuscripts at block level. Use when blocks are out of sync or after editing ja/ sections.
+argument-hint: "[section-file]"
+allowed-tools: Read, Edit, Write, Glob, Grep, Bash
+---
+
 # sync-ja-en
 
 Use this skill to keep the Japanese and English manuscripts aligned at the block level.

@@ -1,3 +1,9 @@
+---
+name: improve-writing-harness
+description: Identify and fix project-local friction in the writing harness. Use when scripts, hooks, or workflow create repeated problems.
+allowed-tools: Read, Edit, Write, Glob, Grep, Bash
+---
+
 # improve-writing-harness
 
 Use this skill when the repository structure, scripts, or agent workflow creates repeated friction during paper writing.

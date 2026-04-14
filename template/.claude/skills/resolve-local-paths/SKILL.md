@@ -1,3 +1,9 @@
+---
+name: resolve-local-paths
+description: Resolve local path aliases from refs/local/ for simulation outputs, figure sources, or external knowledge.
+allowed-tools: Read, Glob
+---
+
 # resolve-local-paths
 
 Use this skill when the writing session needs to access simulation outputs, figure sources, or external knowledge stored outside the repository.

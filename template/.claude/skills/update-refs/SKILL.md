@@ -1,3 +1,9 @@
+---
+name: update-refs
+description: Validate bibliography and reference knowledge alignment. Use when adding citations or after editing bib files.
+allowed-tools: Read, Edit, Write, Glob, Grep
+---
+
 # update-refs
 
 Use this skill when bibliography and reference knowledge need to be brought back in sync with the manuscript.

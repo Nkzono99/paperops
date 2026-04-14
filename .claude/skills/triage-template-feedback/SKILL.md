@@ -1,3 +1,9 @@
+---
+name: triage-template-feedback
+description: Evaluate incoming template feedback and decide scope, labels, and implementation surface. Use when triaging issues.
+allowed-tools: Read, Glob, Grep
+---
+
 # triage-template-feedback
 
 Use this skill when you are evaluating a template feedback issue or deciding whether a problem belongs in the template repository.

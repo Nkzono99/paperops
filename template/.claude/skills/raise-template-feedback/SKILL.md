@@ -1,3 +1,9 @@
+---
+name: raise-template-feedback
+description: Escalate reusable improvements to the upstream paper-harness-template. Use when friction is not project-specific.
+allowed-tools: Read, Glob, Grep
+---
+
 # raise-template-feedback
 
 Use this skill when a repeated problem should be fixed in the upstream paper harness source repository.
