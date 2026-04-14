@@ -23,9 +23,9 @@ AI 支援による論文執筆のための再利用可能なハーネス。
 2. `make venv` を実行して Python 3.11 のローカル `.venv` を作成する。
 3. リポジトリ名を変更し、以下のスターターファイルを更新する:
    - `README.md`
-   - `docs/project-brief.md`
-   - `docs/target-venue.md`
-   - `docs/contribution-claims.md`
+   - `notes/project-brief.md`
+   - `manuscript/venue.md`
+   - `notes/contribution-claims.md`
    - `refs/local/locations.example.toml` から `refs/local/locations.toml` を作成
 4. まず `manuscript/ja` に原稿を書き、必要なセクションを `manuscript/en` に同期する。
 5. 論文リポジトリで `make ci` を実行して、参考文献の lint、ミラーカバレッジの検証、ビルドハーネスの動作確認を行う。

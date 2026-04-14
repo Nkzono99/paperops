@@ -1,4 +1,4 @@
-# Open Questions
+# 未解決の質問
 
-- Which venue-specific class file should replace the starter `journal.cls`?
-- When should the project switch from Japanese-first drafting to English polish?
+- スターターの `journal.cls` を置き換える投稿先固有のクラスファイルはどれか？
+- プロジェクトを日本語優先の草稿から英語推敲に切り替えるタイミングはいつか？

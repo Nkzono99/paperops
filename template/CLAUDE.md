@@ -9,7 +9,7 @@
 ### 開始時
 
 1. `/resume-session` を実行する。
-2. 初回セッションの場合は `docs/project-brief.md` を読む。
+2. 初回セッションの場合は `notes/project-brief.md` を読む。
 3. 原稿テキストを編集する前に `manuscript/mirror/status.md` を確認する。
 
 ### 終了時
@@ -57,18 +57,19 @@ make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
 | `/raise-template-feedback` | 再利用可能な改善を上流テンプレートにエスカレート |
 | `/resolve-local-paths` | `refs/local/` からローカルパスエイリアスを解決 |
 | `/pull-template-updates` | 上流テンプレートの変更を安全に取り込む |
+| `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
 
 ## リポジトリマップ
 
 ```
 manuscript/ja/       日本語ソース（% block: ID 付きセクション）
 manuscript/en/       英語ミラー（対応するブロック ID）
-manuscript/shared/   図表、bib、スタイル、ビルド出力
+manuscript/shared/   figures, bib, style
 manuscript/mirror/   map.toml, terminology.yml, status.md, change-queue.md
-refs/                知識層: 論文、サマリー、bib、抜粋、ローカル
-notes/               セッション継続性: handoff, todo, decision-log, sessions/
+manuscript/venue.md  投稿先情報
+refs/                知識層: summaries, local（papers, bib, excerpts はスキルが必要時に作成）
+notes/               project-brief, contribution-claims, handoff, todo, decision-log
 scripts/             ビルド、lint、ミラーチェック、エクスポート、コンテキスト収集
-docs/                project-brief, target-venue, contribution-claims, ポリシー
 .claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
 ```
 

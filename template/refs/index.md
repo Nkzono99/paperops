@@ -1,15 +1,18 @@
-# Reference Index
+# 参照知識インデックス
 
-## Purpose
+## 目的
 
-`refs/` is the knowledge layer for writing, not just a raw paper dump.
+`refs/` は執筆のための知識層であり、生の論文 PDF 置き場ではない。
 
-## Layout
+## レイアウト
 
-- `papers/self/`: your own prior work and close derivatives
-- `papers/related/`: local copies or notes for related work
-- `papers/cited-core/`: the most central cited references
-- `summaries/`: structured summaries optimized for quick reuse
-- `bib/`: imported and curated bibliography records
-- `excerpts/`: extracted quotations or snippets with provenance
-- `local/`: ignored machine-specific path aliases
+- `summaries/`: 再利用に最適化された構造化サマリー（スキルが初回使用時にサブディレクトリを作成）
+- `local/`: ignored なマシン固有パスエイリアス
+
+## 必要に応じて作成されるディレクトリ
+
+以下は `/update-refs` や `/import-manuscript` の実行時に必要に応じて自動作成される:
+
+- `papers/`: 論文ファイル（self, related, cited-core）
+- `bib/`: インポート済み・キュレーション済みの参考文献レコード
+- `excerpts/`: 出典付きの引用・抜粋

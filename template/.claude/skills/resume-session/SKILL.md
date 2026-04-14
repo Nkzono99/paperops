@@ -10,11 +10,10 @@ allowed-tools: Read, Glob, Grep
 
 ## 最初に読むファイル
 
-- `notes/session-context.md`
 - `notes/handoff.md`
 - `notes/todo.md`
 - `notes/open-questions.md`
-- `docs/project-brief.md`
+- `notes/project-brief.md`
 - `manuscript/mirror/status.md`
 
 ## 目的

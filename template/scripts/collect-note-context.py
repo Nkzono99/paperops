@@ -5,8 +5,7 @@ from pathlib import Path
 
 
 SECTIONS = [
-    ("プロジェクト概要", "docs/project-brief.md"),
-    ("セッションコンテキスト", "notes/session-context.md"),
+    ("プロジェクト概要", "notes/project-brief.md"),
     ("引き継ぎ", "notes/handoff.md"),
     ("Todo", "notes/todo.md"),
     ("未解決の質問", "notes/open-questions.md"),

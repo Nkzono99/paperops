@@ -5,7 +5,6 @@
 *.pyc
 dist/
 manuscript/shared/build/*
-!manuscript/shared/build/README.md
 manuscript/mirror/reports/latest.md
 notes/session-context.generated.md
 refs/local/locations.toml

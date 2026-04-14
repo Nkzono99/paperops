@@ -1,6 +1,6 @@
 ---
 name: note-writing-session
-description: 作業セッションの終了近くにセッション進捗を記録する。handoff、todo、writing-log、セッションノートを更新。
+description: 作業セッションの終了近くにセッション進捗を記録する。handoff、todo、セッションノートを更新。
 allowed-tools: Read, Edit, Write, Glob
 ---
 
@@ -10,11 +10,11 @@ allowed-tools: Read, Edit, Write, Glob
 
 ## 必須更新
 
-1. `notes/sessions/` 配下に短いセッションノートを追加する。
-2. `notes/writing-log.md` を更新する。
-3. `notes/handoff.md` を更新する。
-4. `notes/todo.md` を更新する。
-5. 重要な決定が行われた場合、`notes/decision-log.md` に追加する。
+1. `notes/sessions/` 配下に短いセッションノートを追加する（ディレクトリが存在しなければ作成する）。
+2. `notes/handoff.md` を更新する。
+3. `notes/todo.md` を更新する。
+4. 重要な決定が行われた場合、`notes/decision-log.md` に追加する。
+5. 知見の更新があれば `notes/project-brief.md` や `notes/contribution-claims.md` も更新する。
 
 ## 推奨出力
 
