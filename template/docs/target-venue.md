@@ -1,15 +1,15 @@
-# Target Venue
+# 投稿先
 
-## Candidate venue
+## 候補ジャーナル/学会
 
-- Venue: TBD
-- Submission type: TBD
-- Deadline: TBD
+- 投稿先: 未定
+- 投稿タイプ: 未定
+- 締切: 未定
 
-## Constraints to track
+## 追跡すべき制約
 
-- page limit
-- figure limit
-- bibliography style
-- required sections
-- anonymization requirements
+- ページ制限
+- 図の制限
+- 参考文献スタイル
+- 必須セクション
+- 匿名化要件

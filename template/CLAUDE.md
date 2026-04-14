@@ -1,76 +1,76 @@
 # CLAUDE.md
 
-Communicate with the user in **Japanese**.
+ユーザーとは**日本語**でコミュニケーションすること。
 
-This is a **bilingual paper writing harness**. Japanese and English manuscripts are tracked as block-level mirrors.
+これは**日英バイリンガル論文執筆ハーネス**である。日本語と英語の原稿はブロックレベルのミラーとして追跡される。
 
-## Session protocol
+## セッションプロトコル
 
-### Start
+### 開始時
 
-1. Run `/resume-session`.
-2. Read `docs/project-brief.md` if this is the first session.
-3. Check `manuscript/mirror/status.md` before editing manuscript text.
+1. `/resume-session` を実行する。
+2. 初回セッションの場合は `docs/project-brief.md` を読む。
+3. 原稿テキストを編集する前に `manuscript/mirror/status.md` を確認する。
 
-### End
+### 終了時
 
-1. Run `/note-writing-session`.
-2. Run `make ci` if manuscript structure or references changed.
+1. `/note-writing-session` を実行する。
+2. 原稿構造や参考文献が変更された場合は `make ci` を実行する。
 
-### On compaction
+### コンパクション時
 
-Session context is automatically re-injected via PreCompact hook. After compaction, re-read `notes/handoff.md` and `notes/todo.md` if the task requires continuity.
+セッションコンテキストは PreCompact フックにより自動的に再注入される。コンパクション後、タスクの継続性が必要な場合は `notes/handoff.md` と `notes/todo.md` を再読する。
 
-## Key commands
+## 主要コマンド
 
 ```sh
-make venv           # create .venv with Python 3.11
-make build-ja       # compile Japanese manuscript (or structural validation)
-make build-en       # compile English manuscript (or structural validation)
-make lint-bib       # validate bibliography entries
-make mirror-check   # detect block-level drift between ja/ and en/
+make venv           # Python 3.11 で .venv を作成
+make build-ja       # 日本語原稿をコンパイル（または構造検証）
+make build-en       # 英語原稿をコンパイル（または構造検証）
+make lint-bib       # 参考文献エントリを検証
+make mirror-check   # ja/ と en/ のブロックレベルのドリフトを検出
 make ci             # lint-bib + mirror-check + build-ja + build-en
-make export-arxiv   # bundle English manuscript for arXiv submission
+make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
 ```
 
-## Rules
+## ルール
 
-- `manuscript/ja/` is the scientific source of truth unless `manuscript/mirror/status.md` says otherwise.
-- Preserve `% block: ...` identifiers. Never remove or renumber them.
-- Do not edit protected files directly: `manuscript/shared/figures/generated/**`, `refs/local/locations.toml`, `manuscript/shared/style/journal.cls` (hooks enforce this).
-- `refs/` is a **knowledge layer**. Prefer curated summaries over raw PDFs. Keep citation keys stable.
-- Use `/sync-ja-en` for mirror sync. Never overwrite both languages blindly.
-- End each session by updating `notes/handoff.md` and `notes/todo.md`.
-- Record durable decisions in `notes/decision-log.md`.
+- `manuscript/mirror/status.md` に別段の記載がない限り、`manuscript/ja/` が科学的なソースオブトゥルースである。
+- `% block: ...` 識別子を保持する。削除や番号の振り直しは行わない。
+- 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（フックが強制する）。
+- `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。引用キーは安定させる。
+- ミラー同期には `/sync-ja-en` を使用する。両言語を盲目的に上書きしない。
+- 各セッションの終了時に `notes/handoff.md` と `notes/todo.md` を更新する。
+- 恒久的な決定は `notes/decision-log.md` に記録する。
 
-File-specific rules are in `.claude/rules/` and load automatically when editing matching paths.
+ファイル固有のルールは `.claude/rules/` にあり、対応するパスの編集時に自動的にロードされる。
 
-## Available skills
+## 利用可能なスキル
 
-| Skill | Purpose |
-|-------|---------|
-| `/resume-session` | Summarize current state and propose next steps |
-| `/note-writing-session` | Record session progress and refresh handoff files |
-| `/sync-ja-en` | Synchronize Japanese and English blocks |
-| `/update-refs` | Validate bibliography and reference knowledge alignment |
-| `/improve-writing-harness` | Identify and fix project-local friction |
-| `/raise-template-feedback` | Escalate reusable improvements to upstream template |
-| `/resolve-local-paths` | Resolve local path aliases from `refs/local/` |
+| スキル | 用途 |
+|-------|------|
+| `/resume-session` | 現在の状態を要約し、次のステップを提案 |
+| `/note-writing-session` | セッション進捗を記録し、引き継ぎファイルを更新 |
+| `/sync-ja-en` | 日本語と英語のブロックを同期 |
+| `/update-refs` | 参考文献と参照知識の整合性を検証 |
+| `/improve-writing-harness` | プロジェクトローカルの摩擦を特定・修正 |
+| `/raise-template-feedback` | 再利用可能な改善を上流テンプレートにエスカレート |
+| `/resolve-local-paths` | `refs/local/` からローカルパスエイリアスを解決 |
 
-## Repository map
+## リポジトリマップ
 
 ```
-manuscript/ja/       Japanese source (sections with % block: IDs)
-manuscript/en/       English mirror (matching block IDs)
-manuscript/shared/   figures, tables, bib, style, build output
+manuscript/ja/       日本語ソース（% block: ID 付きセクション）
+manuscript/en/       英語ミラー（対応するブロック ID）
+manuscript/shared/   図表、bib、スタイル、ビルド出力
 manuscript/mirror/   map.toml, terminology.yml, status.md, change-queue.md
-refs/                knowledge layer: papers, summaries, bib, excerpts, local
-notes/               session continuity: handoff, todo, decision-log, sessions/
-scripts/             build, lint, mirror-check, export, context collection
-docs/                project-brief, target-venue, contribution-claims, policies
-.claude/             settings.json (hooks + permissions), skills/, rules/
+refs/                知識層: 論文、サマリー、bib、抜粋、ローカル
+notes/               セッション継続性: handoff, todo, decision-log, sessions/
+scripts/             ビルド、lint、ミラーチェック、エクスポート、コンテキスト収集
+docs/                project-brief, target-venue, contribution-claims, ポリシー
+.claude/             settings.json（フック＋権限）、skills/、rules/
 ```
 
-## Template feedback
+## テンプレートフィードバック
 
-If you find repeated harness friction, use `/raise-template-feedback` to route it to `Nkzono99/paper-harness-template`.
+繰り返しのハーネス摩擦を見つけた場合、`/raise-template-feedback` を使用して `Nkzono99/paper-harness-template` にルーティングする。

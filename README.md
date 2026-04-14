@@ -1,57 +1,57 @@
 # paper-harness-template
 
-Reusable harness for AI-assisted paper writing.
+AI 支援による論文執筆のための再利用可能なハーネス。
 
-This repository is structured as the `paper-template` side described in `SPEC.md`.
-It contains two layers:
+このリポジトリは `SPEC.md` に記述された `paper-template` 側として構成されている。
+二つの層で構成される:
 
-- repository-level assets for maintaining the template itself
-- a full per-paper scaffold under [`template/`](/home/b/b36291/large1/Github/paper-harness-template/template)
+- テンプレート自体を管理するためのリポジトリレベルのアセット
+- [`template/`](/home/b/b36291/large1/Github/paper-harness-template/template) 配下の個別論文用スキャフォールド一式
 
-## Repository layout
+## リポジトリ構成
 
-- [`.github/workflows/`](/home/b/b36291/large1/Github/paper-harness-template/.github/workflows): reusable GitHub Actions workflows callable from downstream paper repositories
-- [`.github/ISSUE_TEMPLATE/`](/home/b/b36291/large1/Github/paper-harness-template/.github/ISSUE_TEMPLATE): structured issue forms for feedback, skill requests, and structure changes
-- [`.claude/skills/`](/home/b/b36291/large1/Github/paper-harness-template/.claude/skills): skills for template triage and maintenance
-- [`docs/`](/home/b/b36291/large1/Github/paper-harness-template/docs): template architecture, change policy, and triage rules
-- [`template/`](/home/b/b36291/large1/Github/paper-harness-template/template): ready-to-copy scaffold for an individual `paper-<topic>` repository
-- [`docs/distribution.md`](/home/b/b36291/large1/Github/paper-harness-template/docs/distribution.md): publish model for syncing `template/` into a separate GitHub template repository
+- [`.github/workflows/`](/home/b/b36291/large1/Github/paper-harness-template/.github/workflows): 下流の論文リポジトリから呼び出し可能な再利用可能 GitHub Actions ワークフロー
+- [`.github/ISSUE_TEMPLATE/`](/home/b/b36291/large1/Github/paper-harness-template/.github/ISSUE_TEMPLATE): フィードバック、スキルリクエスト、構造変更用の構造化 Issue フォーム
+- [`.claude/skills/`](/home/b/b36291/large1/Github/paper-harness-template/.claude/skills): テンプレートトリアージ・保守用スキル
+- [`docs/`](/home/b/b36291/large1/Github/paper-harness-template/docs): テンプレートアーキテクチャ、変更ポリシー、トリアージルール
+- [`template/`](/home/b/b36291/large1/Github/paper-harness-template/template): 個別の `paper-<topic>` リポジトリにコピー可能なスキャフォールド
+- [`docs/distribution.md`](/home/b/b36291/large1/Github/paper-harness-template/docs/distribution.md): `template/` を別の GitHub テンプレートリポジトリに同期する配布モデル
 
-## Quick start
+## クイックスタート
 
-1. Publish `template/` into the separate distribution repository, or copy it manually into a new repository such as `paper-my-topic/`.
-2. Run `make venv` to create a local `.venv` with Python 3.11.
-3. Rename the repository and update the following starter files:
+1. `template/` を別の配布リポジトリに公開するか、`paper-my-topic/` などの新しいリポジトリに手動でコピーする。
+2. `make venv` を実行して Python 3.11 のローカル `.venv` を作成する。
+3. リポジトリ名を変更し、以下のスターターファイルを更新する:
    - `README.md`
    - `docs/project-brief.md`
    - `docs/target-venue.md`
    - `docs/contribution-claims.md`
-   - `refs/local/locations.toml` from `refs/local/locations.example.toml`
-4. Add your manuscript content to `manuscript/ja` first, then sync targeted sections into `manuscript/en`.
-5. Run `make ci` in the paper repository to lint bibliographies, validate mirror coverage, and exercise the build harness.
+   - `refs/local/locations.example.toml` から `refs/local/locations.toml` を作成
+4. まず `manuscript/ja` に原稿を書き、必要なセクションを `manuscript/en` に同期する。
+5. 論文リポジトリで `make ci` を実行して、参考文献の lint、ミラーカバレッジの検証、ビルドハーネスの動作確認を行う。
 
-## What the scaffold optimizes for
+## スキャフォールドが最適化するもの
 
-- `refs/` as a shared knowledge layer instead of a raw PDF dump
-- `notes/` as session handoff and continuity state
-- Japanese and English manuscripts tracked as block-level mirrors
-- reusable maintenance workflows for the template itself
-- project-local Claude skills, hooks, and operating rules
+- `refs/`: 生の PDF 置き場ではなく共有知識層として活用
+- `notes/`: セッション引き継ぎと継続性の状態管理
+- 日本語・英語の原稿をブロックレベルのミラーとして追跡
+- テンプレート自体の再利用可能な保守ワークフロー
+- プロジェクトローカルの Claude スキル、フック、運用ルール
 
-## Distribution
+## 配布
 
-If you want GitHub's `Use this template` flow, keep this repository as the source of truth and publish `template/` into a second repository whose root contains only the scaffold.
-This repository includes [`scripts/publish-scaffold.sh`](/home/b/b36291/large1/Github/paper-harness-template/scripts/publish-scaffold.sh) and [`.github/workflows/publish-scaffold.yml`](/home/b/b36291/large1/Github/paper-harness-template/.github/workflows/publish-scaffold.yml) for that sync path.
+GitHub の `Use this template` フローを使いたい場合、このリポジトリをソースオブトゥルースとして維持し、`template/` をスキャフォールドのみを含む別のリポジトリに公開する。
+このリポジトリには、その同期パス用の [`scripts/publish-scaffold.sh`](/home/b/b36291/large1/Github/paper-harness-template/scripts/publish-scaffold.sh) と [`.github/workflows/publish-scaffold.yml`](/home/b/b36291/large1/Github/paper-harness-template/.github/workflows/publish-scaffold.yml) が含まれている。
 
-## Validation model
+## 検証モデル
 
-The template ships lightweight local checks instead of assuming a full TeX environment.
-`scripts/build-ja.sh` and `scripts/build-en.sh` compile with `latexmk` when available, and otherwise fall back to structural validation so CI can still exercise the writing harness on a clean runner.
-The intended local setup is `python3.11` inside a repo-local `.venv`.
+テンプレートは完全な TeX 環境を前提とせず、軽量なローカルチェックを提供する。
+`scripts/build-ja.sh` と `scripts/build-en.sh` は `latexmk` が利用可能な場合はコンパイルを行い、そうでなければ構造検証にフォールバックするため、クリーンなランナーでも CI が執筆ハーネスを実行できる。
+想定されるローカルセットアップは、リポジトリローカルの `.venv` 内の `python3.11` である。
 
-## Upstream references
+## 上流リファレンス
 
-The hook and settings layout follows Anthropic's Claude Code documentation for project settings and hooks, and the GitHub automation files follow GitHub's reusable workflow and issue form docs:
+フックと設定のレイアウトは Anthropic の Claude Code ドキュメントのプロジェクト設定とフックに準拠しており、GitHub 自動化ファイルは GitHub の再利用可能ワークフローと Issue フォームのドキュメントに準拠している:
 
 - https://code.claude.com/docs/en/settings
 - https://code.claude.com/docs/en/hooks

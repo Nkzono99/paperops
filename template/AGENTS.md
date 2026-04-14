@@ -1,22 +1,22 @@
 # AGENTS
 
-This repository is a writing harness for a bilingual research paper.
+このリポジトリはバイリンガル研究論文の執筆ハーネスである。
 
-## Start here
+## ここから開始
 
-1. Read `docs/project-brief.md`.
-2. Read `notes/session-context.md`, `notes/handoff.md`, and `notes/todo.md`.
-3. Check `manuscript/mirror/status.md` before editing manuscript text.
+1. `docs/project-brief.md` を読む。
+2. `notes/session-context.md`、`notes/handoff.md`、`notes/todo.md` を読む。
+3. 原稿テキストを編集する前に `manuscript/mirror/status.md` を確認する。
 
-## Ground rules
+## 基本ルール
 
-- Japanese content is the source of truth unless `manuscript/mirror/status.md` says otherwise.
-- Preserve `% block: ...` identifiers in all mirrored sections.
-- Keep `refs/` organized as a knowledge layer, not a raw PDF dump.
-- Never commit personal absolute paths; use `refs/local/locations.example.toml` plus an ignored local override.
-- Update `notes/` before ending a working session.
+- `manuscript/mirror/status.md` に別段の記載がない限り、日本語コンテンツがソースオブトゥルースである。
+- すべてのミラー対象セクションで `% block: ...` 識別子を保持する。
+- `refs/` は知識層として整理する。生の PDF 置き場にしない。
+- 個人の絶対パスはコミットしない。`refs/local/locations.example.toml` と ignored なローカルオーバーライドを使用する。
+- 作業セッション終了前に `notes/` を更新する。
 
-## Standard commands
+## 標準コマンド
 
 - `make build-ja`
 - `make build-en`

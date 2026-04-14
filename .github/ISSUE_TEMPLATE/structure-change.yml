@@ -1,5 +1,5 @@
-name: Structure change
-description: Propose a change to the repository or scaffold structure.
+name: 構造変更
+description: リポジトリまたはスキャフォールドの構造変更を提案する。
 title: "[structure-change] "
 labels:
   - area:structure
@@ -7,31 +7,31 @@ body:
   - type: textarea
     id: current_pain
     attributes:
-      label: Current pain
-      description: What about the current layout is causing confusion or duplication?
+      label: 現在の問題点
+      description: 現在のレイアウトのどこが混乱や重複を引き起こしていますか？
     validations:
       required: true
   - type: textarea
     id: proposed_structure
     attributes:
-      label: Proposed structure
-      description: Describe the directory or file layout you want.
+      label: 提案する構造
+      description: 希望するディレクトリまたはファイルレイアウトを記述してください。
     validations:
       required: true
   - type: checkboxes
     id: compatibility
     attributes:
-      label: Compatibility considerations
+      label: 互換性の考慮事項
       options:
-        - label: This would require downstream repository migration.
-        - label: This can be introduced additively.
-        - label: Documentation updates would be needed.
+        - label: この変更には下流リポジトリのマイグレーションが必要になる。
+        - label: この変更は追加的に導入できる。
+        - label: ドキュメントの更新が必要になる。
     validations:
       required: true
   - type: textarea
     id: rationale
     attributes:
-      label: Rationale
-      description: Why is this structure better over time?
+      label: 根拠
+      description: なぜこの構造が長期的に優れているのですか？
     validations:
       required: true

@@ -1,19 +1,19 @@
-# Change Policy
+# 変更ポリシー
 
-## Goals
+## 目標
 
-Template changes should improve multiple paper repositories, stay backwards-conscious, and remain easy to adopt.
+テンプレートの変更は、複数の論文リポジトリを改善し、後方互換性を意識し、容易に導入できるものであるべきである。
 
-## Decision rules
+## 判断ルール
 
-1. Prefer additive changes over structural rewrites.
-2. Treat `template/AGENTS.md`, `template/CLAUDE.md`, `.claude/skills/`, and `scripts/` as user-facing interfaces.
-3. Require a documented migration note for any change that would force downstream repos to rename files, move directories, or rewrite hooks.
-4. Keep generated content out of version control unless it is a checked-in starter artifact.
-5. Treat the distribution repository as a publish target. Do not make it the primary editing surface.
+1. 構造的な書き換えよりも追加的な変更を優先する。
+2. `template/AGENTS.md`、`template/CLAUDE.md`、`.claude/skills/`、`scripts/` はユーザー向けインターフェースとして扱う。
+3. 下流リポジトリにファイル名変更、ディレクトリ移動、フックの書き換えを強いる変更には、文書化されたマイグレーションノートが必要。
+4. チェックイン済みのスターターアーティファクトでない限り、生成されたコンテンツをバージョン管理に含めない。
+5. 配布リポジトリは公開先として扱い、主要な編集場所にしない。
 
-## Release expectations
+## リリース要件
 
-- Update [`CHANGELOG.md`](/home/b/b36291/large1/Github/paper-harness-template/CHANGELOG.md) for every user-visible improvement.
-- If a change affects downstream setup, update [`README.md`](/home/b/b36291/large1/Github/paper-harness-template/README.md) and the relevant file inside `template/docs/`.
-- When in doubt, open a `template-feedback` issue first and triage scope before landing the change.
+- ユーザーに影響する改善ごとに [`CHANGELOG.md`](/home/b/b36291/large1/Github/paper-harness-template/CHANGELOG.md) を更新する。
+- 変更が下流のセットアップに影響する場合、[`README.md`](/home/b/b36291/large1/Github/paper-harness-template/README.md) と `template/docs/` 内の該当ファイルを更新する。
+- 判断に迷う場合は、まず `template-feedback` Issue を作成し、変更を反映する前にスコープをトリアージする。

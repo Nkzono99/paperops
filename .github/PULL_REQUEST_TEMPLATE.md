@@ -1,10 +1,10 @@
-## Summary
+## 概要
 
-Explain the template change and who benefits from it.
+テンプレートの変更内容と誰に恩恵があるかを説明する。
 
-## Checks
+## チェック項目
 
-- [ ] Updated relevant docs
-- [ ] Updated `CHANGELOG.md`
-- [ ] Ran `make smoke`
-- [ ] Noted downstream migration impact, if any
+- [ ] 関連ドキュメントを更新した
+- [ ] `CHANGELOG.md` を更新した
+- [ ] `make smoke` を実行した
+- [ ] 下流へのマイグレーション影響を記載した（該当する場合）

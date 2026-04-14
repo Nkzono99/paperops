@@ -1,10 +1,10 @@
-name: Reusable Mirror Check
+name: 再利用可能ミラーチェック
 
 on:
   workflow_call:
     inputs:
       working-directory:
-        description: Repository root to validate.
+        description: 検証対象のリポジトリルート。
         required: false
         type: string
         default: .
@@ -19,13 +19,13 @@ jobs:
       run:
         working-directory: ${{ inputs.working-directory }}
     steps:
-      - name: Check out repository
+      - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Python をセットアップ
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Run mirror check
+      - name: ミラーチェックを実行
         run: python3 scripts/mirror-check.py --root manuscript --report manuscript/mirror/reports/ci-report.md

@@ -1,34 +1,34 @@
 ---
 name: triage-template-feedback
-description: Evaluate incoming template feedback and decide scope, labels, and implementation surface. Use when triaging issues.
+description: 受信したテンプレートフィードバックを評価し、スコープ・ラベル・実装先を判断する。Issue トリアージ時に使用。
 allowed-tools: Read, Glob, Grep
 ---
 
 # triage-template-feedback
 
-Use this skill when you are evaluating a template feedback issue or deciding whether a problem belongs in the template repository.
+テンプレートフィードバックの Issue を評価する際、または問題がテンプレートリポジトリに属するかを判断する際にこのスキルを使用する。
 
-## Objectives
+## 目的
 
-1. Reproduce the problem from the issue body.
-2. Decide whether the change belongs to the template or should stay project-local.
-3. Classify the issue with `area:*`, `type:*`, and `scope:*` labels.
-4. Propose the smallest change that resolves the repeated friction.
+1. Issue 本文から問題を再現する。
+2. 変更がテンプレートに属するか、プロジェクトローカルに留めるべきかを判断する。
+3. `area:*`、`type:*`、`scope:*` ラベルで Issue を分類する。
+4. 繰り返される摩擦を解消する最小の変更を提案する。
 
-## Inputs to read
+## 読み込むべき入力
 
 - `README.md`
 - `docs/architecture.md`
 - `docs/change-policy.md`
 - `docs/triage-rules.md`
-- relevant files under `template/`
+- `template/` 配下の関連ファイル
 
-## Output format
+## 出力形式
 
-Produce a short triage note with:
+以下を含む簡潔なトリアージノートを作成する:
 
-- problem statement
-- reproduction
-- scope decision
-- proposed implementation surface
-- backwards-compatibility considerations
+- 問題の説明
+- 再現手順
+- スコープの判断
+- 提案する実装先
+- 後方互換性の考慮事項

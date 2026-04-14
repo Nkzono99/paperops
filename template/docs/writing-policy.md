@@ -1,16 +1,16 @@
-# Writing Policy
+# 執筆ポリシー
 
-## Source of truth
+## ソースオブトゥルース
 
-- Use `manuscript/ja/` as the scientific source of truth until the project explicitly switches to English polish mode.
-- Preserve `% block: ...` identifiers in both languages.
+- プロジェクトが明示的に英語推敲モードに切り替えるまで、`manuscript/ja/` を科学的なソースオブトゥルースとして使用する。
+- 両言語で `% block: ...` 識別子を保持する。
 
-## References
+## 参考文献
 
-- Add curated summaries before hoarding PDFs.
-- Keep citation keys stable after first manuscript use.
+- PDF を蓄積する前にキュレーション済みのサマリーを追加する。
+- 原稿で初めて使用した後は引用キーを安定させる。
 
-## Notes
+## ノート
 
-- End each session by updating `notes/session-context.md`, `notes/handoff.md`, and `notes/todo.md`.
-- Record durable decisions in `notes/decision-log.md`, not only in chat history.
+- 各セッションの終了時に `notes/session-context.md`、`notes/handoff.md`、`notes/todo.md` を更新する。
+- 恒久的な決定は `notes/decision-log.md` に記録する。チャット履歴だけに残さない。

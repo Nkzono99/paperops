@@ -1,24 +1,24 @@
 ---
 name: apply-template-improvement
-description: Implement an accepted template improvement safely with backwards compatibility and documentation updates.
+description: 承認されたテンプレート改善を、後方互換性とドキュメント更新を伴って安全に実装する。
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 ---
 
 # apply-template-improvement
 
-Use this skill when a template change has already been accepted and needs to be implemented safely.
+テンプレートの変更が承認され、安全に実装する必要がある場合にこのスキルを使用する。
 
-## Objectives
+## 目的
 
-1. Update the smallest possible set of root and `template/` files.
-2. Preserve existing downstream expectations unless a migration is explicitly intended.
-3. Refresh documentation and changelog entries alongside the implementation.
-4. Run the local smoke checks after the change.
+1. ルートと `template/` のファイルを最小限のセットで更新する。
+2. マイグレーションが明示的に意図されていない限り、既存の下流の期待を維持する。
+3. 実装と並行してドキュメントと変更履歴のエントリを更新する。
+4. 変更後にローカル smoke チェックを実行する。
 
-## Checklist
+## チェックリスト
 
-- Inspect the affected directories and scripts before editing.
-- Update `CHANGELOG.md` for user-visible changes.
-- Adjust the relevant docs in `docs/` or `template/docs/`.
-- Run `make smoke`.
-- Summarize any residual migration work for downstream repositories.
+- 編集前に影響を受けるディレクトリとスクリプトを確認する。
+- ユーザーに影響する変更は `CHANGELOG.md` を更新する。
+- `docs/` または `template/docs/` の関連ドキュメントを調整する。
+- `make smoke` を実行する。
+- 下流リポジトリに残るマイグレーション作業を要約する。

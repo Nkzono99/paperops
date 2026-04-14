@@ -1,28 +1,28 @@
-# Skill Catalog
+# スキルカタログ
 
-## Template maintenance skills
+## テンプレート保守スキル
 
 ### `triage-template-feedback`
 
-Reads incoming feedback and decides whether the fix belongs in:
+受信したフィードバックを読み取り、修正先を判断する:
 
-- `template/` structure
-- root documentation
-- reusable workflows
-- template-maintainer skills
-- project-local customization guidance
+- `template/` の構造
+- ルートドキュメント
+- 再利用可能ワークフロー
+- テンプレート保守者向けスキル
+- プロジェクトローカルのカスタマイズガイダンス
 
 ### `apply-template-improvement`
 
-Implements an accepted template improvement while preserving downstream compatibility and documenting the change.
+承認されたテンプレート改善を、下流の互換性を維持しつつ実装し、変更を文書化する。
 
 ### `review-template-regression`
 
-Checks whether a proposed template change weakens mirror tracking, note continuity, refs organization, or safety protections.
+提案されたテンプレート変更が、ミラー追跡、ノート継続性、refs 整理、安全性保護を弱めていないかチェックする。
 
-## Project-local skills included in the scaffold
+## スキャフォールドに含まれるプロジェクトローカルスキル
 
-The downstream scaffold ships these skills in `template/.claude/skills/`:
+下流スキャフォールドは `template/.claude/skills/` に以下のスキルを提供する:
 
 - `resume-session`
 - `sync-ja-en`
@@ -32,8 +32,8 @@ The downstream scaffold ships these skills in `template/.claude/skills/`:
 - `update-refs`
 - `resolve-local-paths`
 
-## Distribution automation
+## 配布自動化
 
-The repository also ships a publish helper:
+リポジトリには公開ヘルパーも提供される:
 
-- `scripts/publish-scaffold.sh`: syncs `template/` into a distribution repository root with `rsync`
+- `scripts/publish-scaffold.sh`: `rsync` で `template/` を配布リポジトリに同期

@@ -21,19 +21,19 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     *)
-      echo "Unknown argument: $1" >&2
+      echo "不明な引数: $1" >&2
       exit 2
       ;;
   esac
 done
 
 if [[ -z "$TARGET_DIR" ]]; then
-  echo "--target-dir is required" >&2
+  echo "--target-dir は必須です" >&2
   exit 2
 fi
 
 if [[ ! -d "$SOURCE_DIR" ]]; then
-  echo "Source directory not found: $SOURCE_DIR" >&2
+  echo "ソースディレクトリが見つかりません: $SOURCE_DIR" >&2
   exit 1
 fi
 
@@ -73,7 +73,7 @@ fi
 rsync "${RSYNC_ARGS[@]}" "$SOURCE_DIR"/ "$TARGET_DIR"/
 
 if [[ "$DRY_RUN" == "1" ]]; then
-  echo "Dry run complete."
+  echo "ドライラン完了。"
 else
-  echo "Published scaffold from $SOURCE_DIR to $TARGET_DIR"
+  echo "スキャフォールドを $SOURCE_DIR から $TARGET_DIR に公開しました"
 fi

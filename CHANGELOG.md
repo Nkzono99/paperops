@@ -1,8 +1,8 @@
-# Changelog
+# 変更履歴
 
 ## 0.1.0 - 2026-04-13
 
-- initialize the `paper-template` repository structure
-- add reusable GitHub workflows for build, mirror validation, and release packaging
-- add issue forms and template-maintenance skills
-- add the full downstream paper scaffold under `template/`
+- `paper-template` リポジトリ構造を初期化
+- ビルド、ミラー検証、リリースパッケージング用の再利用可能 GitHub ワークフローを追加
+- Issue フォームとテンプレート保守スキルを追加
+- `template/` 配下に下流論文スキャフォールド一式を追加

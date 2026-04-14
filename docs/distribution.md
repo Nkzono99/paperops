@@ -1,31 +1,31 @@
-# Distribution
+# 配布
 
-This repository is the source of truth for the paper-writing harness.
-The downstream GitHub template repository is a published artifact generated from `template/`.
+このリポジトリは論文執筆ハーネスのソースオブトゥルースである。
+下流の GitHub テンプレートリポジトリは `template/` から生成される公開アーティファクトである。
 
-## Repository roles
+## リポジトリの役割
 
-- Source repository: `Nkzono99/paper-harness-template`
-  - Maintains docs, issue forms, reusable workflows, and the scaffold source under `template/`
-- Distribution repository: `Nkzono99/paper-harness-scaffold-template`
-  - Contains only the scaffold at repository root and is marked as a GitHub template repository
+- ソースリポジトリ: `Nkzono99/paper-harness-template`
+  - ドキュメント、Issue フォーム、再利用可能ワークフロー、および `template/` 配下のスキャフォールドソースを管理
+- 配布リポジトリ: `Nkzono99/paper-harness-scaffold-template`
+  - スキャフォールドのみをリポジトリルートに含み、GitHub テンプレートリポジトリとしてマークされている
 
-## Publishing model
+## 公開モデル
 
-Changes are made here first.
-The `Publish Scaffold` workflow then syncs `template/` into the distribution repository root with `rsync`.
+変更はまずここで行う。
+`Publish Scaffold` ワークフローが `rsync` で `template/` を配布リポジトリルートに同期する。
 
-## Required GitHub Actions configuration
+## 必要な GitHub Actions 設定
 
-Set these in the source repository:
+ソースリポジトリで以下を設定する:
 
-- Actions variable `PUBLISH_TARGET_REPO`
-  - Example: `Nkzono99/paper-harness-scaffold-template`
-- Actions secret `PUBLISH_TEMPLATE_TOKEN`
-  - A token with access to push to the distribution repository
+- Actions 変数 `PUBLISH_TARGET_REPO`
+  - 例: `Nkzono99/paper-harness-scaffold-template`
+- Actions シークレット `PUBLISH_TEMPLATE_TOKEN`
+  - 配布リポジトリへのプッシュアクセスを持つトークン
 
-## Operational rules
+## 運用ルール
 
-- Do not edit the distribution repository by hand.
-- Route issues and improvements back to the source repository.
-- If the distribution repository must be patched directly in an emergency, mirror the same change back here immediately.
+- 配布リポジトリを手動で編集しない。
+- Issue や改善はソースリポジトリに戻す。
+- 緊急時に配布リポジトリを直接パッチする必要がある場合、同じ変更を直ちにここにミラーバックする。

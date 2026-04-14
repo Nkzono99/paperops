@@ -1,13 +1,13 @@
-# Contribution Claims
+# 貢献主張
 
-## Candidate claims
+## 候補となる主張
 
-1. Replace this with the strongest technical or scientific contribution.
-2. Replace this with the most defensible empirical or analytical contribution.
-3. Replace this with the practical or methodological contribution.
+1. 最も強力な技術的・科学的貢献に置き換えてください。
+2. 最も防御可能な実証的・分析的貢献に置き換えてください。
+3. 実用的・方法論的貢献に置き換えてください。
 
-## Evidence needed
+## 必要なエビデンス
 
-- results or derivations needed to support claim 1
-- results or derivations needed to support claim 2
-- results or derivations needed to support claim 3
+- 主張 1 を支持するために必要な結果または導出
+- 主張 2 を支持するために必要な結果または導出
+- 主張 3 を支持するために必要な結果または導出

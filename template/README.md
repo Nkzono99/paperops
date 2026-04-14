@@ -1,34 +1,34 @@
 # paper-my-topic
 
-Starter repository for a single paper project built from `paper-harness-template`.
+`paper-harness-template` から構築された個別論文プロジェクトのスターターリポジトリ。
 
-## Before first use
+## 初回使用前
 
-1. Rename the repository and update this README.
-2. Run `make venv` to create a local `.venv` with Python 3.11.
-3. Copy `refs/local/locations.example.toml` to `refs/local/locations.toml`.
-4. Replace the placeholder workflow references in `.github/workflows/*.yml` with your actual `paper-harness-template` repository path.
-5. Fill in `docs/project-brief.md`, `docs/target-venue.md`, and `docs/contribution-claims.md`.
+1. リポジトリ名を変更し、この README を更新する。
+2. `make venv` を実行して Python 3.11 のローカル `.venv` を作成する。
+3. `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーする。
+4. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paper-harness-template` リポジトリパスに置き換える。
+5. `docs/project-brief.md`、`docs/target-venue.md`、`docs/contribution-claims.md` を記入する。
 
-## Core workflow
+## 基本ワークフロー
 
-1. Start with `resume-session`.
-2. Write or revise in `manuscript/ja/`.
-3. Mirror the necessary blocks into `manuscript/en/`.
-4. Capture progress in `notes/`.
-5. Run `make ci` before sharing major changes.
+1. `resume-session` で開始する。
+2. `manuscript/ja/` で執筆または改訂する。
+3. 必要なブロックを `manuscript/en/` にミラーする。
+4. `notes/` に進捗を記録する。
+5. 主要な変更を共有する前に `make ci` を実行する。
 
-The local workflow prefers `.venv/bin/python` and otherwise falls back to `python3.11`.
+ローカルワークフローは `.venv/bin/python` を優先し、それ以外は `python3.11` にフォールバックする。
 
-## Template feedback
+## テンプレートフィードバック
 
-If you find repeated harness friction, route reusable improvements back to the source repository `Nkzono99/paper-harness-template`.
-Do not treat the distribution template repository as the primary issue tracker unless your team maintains its own forked source of truth.
+繰り返しのハーネス摩擦を見つけた場合、再利用可能な改善はソースリポジトリ `Nkzono99/paper-harness-template` に戻す。
+チームが独自のフォーク元を管理していない限り、配布テンプレートリポジトリを主要な Issue トラッカーとして扱わない。
 
-## Directory highlights
+## ディレクトリの概要
 
-- `manuscript/`: bilingual source, shared style assets, and mirror-control files
-- `refs/`: reference knowledge, bibliographies, excerpts, and local path aliases
-- `notes/`: session continuity and decision tracking
-- `.claude/`: project-local Claude settings, hooks, and skills
-- `scripts/`: lightweight validation and packaging helpers
+- `manuscript/`: バイリンガルソース、共有スタイルアセット、ミラー制御ファイル
+- `refs/`: 参照知識、参考文献、抜粋、ローカルパスエイリアス
+- `notes/`: セッション継続性と意思決定の追跡
+- `.claude/`: プロジェクトローカルの Claude 設定、フック、スキル
+- `scripts/`: 軽量な検証・パッケージングヘルパー

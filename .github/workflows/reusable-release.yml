@@ -1,15 +1,15 @@
-name: Reusable Release
+name: 再利用可能リリース
 
 on:
   workflow_call:
     inputs:
       working-directory:
-        description: Repository root to package.
+        description: パッケージ対象のリポジトリルート。
         required: false
         type: string
         default: .
       artifact-name:
-        description: Name for the uploaded artifact.
+        description: アップロードするアーティファクトの名前。
         required: false
         type: string
         default: arxiv-export
@@ -24,13 +24,13 @@ jobs:
       run:
         working-directory: ${{ inputs.working-directory }}
     steps:
-      - name: Check out repository
+      - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
 
-      - name: Prepare export bundle
+      - name: エクスポートバンドルを準備
         run: ./scripts/export-arxiv.sh
 
-      - name: Upload export artifact
+      - name: エクスポートアーティファクトをアップロード
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.artifact-name }}

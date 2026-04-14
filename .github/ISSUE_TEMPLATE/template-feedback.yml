@@ -1,5 +1,5 @@
-name: Template feedback
-description: Report repeated friction that should be fixed in the template.
+name: テンプレートフィードバック
+description: テンプレートで修正すべき繰り返しの摩擦を報告する。
 title: "[template-feedback] "
 labels:
   - scope:template
@@ -7,43 +7,43 @@ body:
   - type: textarea
     id: problem
     attributes:
-      label: Problem
-      description: Describe the friction or failure mode.
-      placeholder: The paper scaffold makes it hard to...
+      label: 問題
+      description: 摩擦または障害モードを説明してください。
+      placeholder: 論文スキャフォールドでは...が困難です
     validations:
       required: true
   - type: textarea
     id: reproduction
     attributes:
-      label: Reproduction
-      description: Explain how to reproduce the issue in a downstream paper repository.
-      placeholder: 1. Start from template/... 2. Run ...
+      label: 再現手順
+      description: 下流の論文リポジトリで問題を再現する方法を説明してください。
+      placeholder: 1. template/ から開始... 2. 実行...
     validations:
       required: true
   - type: dropdown
     id: impact
     attributes:
-      label: Impact
+      label: 影響度
       options:
-        - Blocks writing flow
-        - Causes repeated manual cleanup
-        - Makes AI guidance less reliable
-        - Documentation clarity issue
+        - 執筆フローをブロックする
+        - 手動クリーンアップの繰り返しが発生する
+        - AI のガイダンスの信頼性が低下する
+        - ドキュメントの明確さの問題
     validations:
       required: true
   - type: textarea
     id: proposed_change
     attributes:
-      label: Proposed change
-      description: Suggest a fix, even if partial.
-      placeholder: Add a hook, update a skill, adjust the scaffold...
+      label: 提案する変更
+      description: 部分的でも構わないので修正案を提案してください。
+      placeholder: フックを追加、スキルを更新、スキャフォールドを調整...
     validations:
       required: false
   - type: textarea
     id: downstream_scope
     attributes:
-      label: Downstream scope
-      description: List any repositories or situations where this has shown up.
+      label: 下流での影響範囲
+      description: この問題が発生したリポジトリや状況を列挙してください。
       placeholder: paper-lunar-cavity, paper-solar-wind-review, ...
     validations:
       required: false

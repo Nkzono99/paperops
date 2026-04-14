@@ -1,24 +1,24 @@
 ---
 name: review-template-regression
-description: Review template changes for regressions in mirror tracking, file protection, session continuity, or downstream compatibility.
+description: テンプレート変更がミラー追跡、ファイル保護、セッション継続性、下流互換性にリグレッションを起こしていないかレビューする。
 allowed-tools: Read, Glob, Grep
 ---
 
 # review-template-regression
 
-Use this skill when reviewing a pull request or diff that modifies the template.
+テンプレートを変更するプルリクエストや差分をレビューする際にこのスキルを使用する。
 
-## Review focus
+## レビューの重点
 
-- regressions in bilingual mirror tracking
-- weaker protection around generated files and local paths
-- loss of session continuity in `notes/`
-- broken starter scripts or reusable workflows
-- undocumented interface changes for downstream repositories
+- 日英ミラー追跡のリグレッション
+- 生成ファイルやローカルパスの保護の弱体化
+- `notes/` のセッション継続性の喪失
+- スタータースクリプトや再利用可能ワークフローの破損
+- 下流リポジトリに対する未文書化のインターフェース変更
 
-## Process
+## プロセス
 
-1. Read the changed files in full.
-2. Compare them against `docs/architecture.md` and `docs/change-policy.md`.
-3. Prioritize concrete breakages and missing migrations.
-4. Call out testing gaps if the smoke checks do not exercise the changed path.
+1. 変更されたファイルを全文読む。
+2. `docs/architecture.md` と `docs/change-policy.md` と比較する。
+3. 具体的な破損と不足しているマイグレーションを優先する。
+4. smoke チェックが変更されたパスを検証しない場合、テストギャップを指摘する。

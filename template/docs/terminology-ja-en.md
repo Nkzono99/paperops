@@ -1,7 +1,7 @@
-# Terminology JA-EN
+# 用語対訳表
 
-| Japanese | English | Notes |
+| 日本語 | 英語 | 備考 |
 | --- | --- | --- |
-| 帯電 | charging | use consistently for physical charging context |
-| 月面表面 | lunar surface | avoid switching to moon surface mid-draft |
-| 空洞 | cavity | update if the target venue expects a different term |
+| 帯電 | charging | 物理的帯電の文脈で一貫して使用 |
+| 月面表面 | lunar surface | 草稿の途中で moon surface に切り替えない |
+| 空洞 | cavity | 投稿先が別の用語を期待する場合は更新する |

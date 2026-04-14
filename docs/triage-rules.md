@@ -1,32 +1,32 @@
-# Triage Rules
+# トリアージルール
 
-Use these rules when processing incoming template feedback.
+テンプレートフィードバックの処理時にこれらのルールを使用する。
 
-## Scope test
+## スコープ判定
 
-- If the problem can affect multiple paper repositories, treat it as a template issue.
-- If the problem depends on a specific venue, manuscript topic, or local machine path, keep it project-local unless a reusable abstraction is obvious.
+- 問題が複数の論文リポジトリに影響しうる場合、テンプレートの問題として扱う。
+- 問題が特定の投稿先、原稿トピック、ローカルマシンパスに依存する場合、再利用可能な抽象化が明白でない限りプロジェクトローカルに留める。
 
-## Change type
+## 変更タイプ
 
-- `type:bug`: broken script, invalid workflow, incorrect file layout, missing protection
-- `type:enhancement`: smoother authoring flow or clearer documentation
-- `area:structure`: directories, naming, starter files
-- `area:skills`: skill coverage, skill prompts, handoff flow
-- `area:hooks`: protections or session hooks
-- `area:mirror`: bilingual sync and drift reporting
-- `area:refs`: bibliography or summary knowledge layer
+- `type:bug`: スクリプトの不具合、無効なワークフロー、不正なファイルレイアウト、保護の欠如
+- `type:enhancement`: より円滑な執筆フローまたはより明確なドキュメント
+- `area:structure`: ディレクトリ、命名、スターターファイル
+- `area:skills`: スキルのカバレッジ、スキルプロンプト、引き継ぎフロー
+- `area:hooks`: 保護またはセッションフック
+- `area:mirror`: 日英同期とドリフトレポート
+- `area:refs`: 参考文献またはサマリー知識層
 
-## Acceptance bar
+## 受理基準
 
-- The problem is reproducible.
-- The proposed change has a plausible downstream benefit.
-- The maintenance cost is lower than the expected repeated friction.
+- 問題が再現可能であること。
+- 提案された変更に妥当な下流メリットがあること。
+- 保守コストが予想される繰り返し摩擦より低いこと。
 
-## Backwards compatibility
+## 後方互換性
 
-When a change touches an existing file path in `template/`, explicitly document:
+変更が `template/` 内の既存ファイルパスに影響する場合、以下を明示的に文書化する:
 
-- what downstream repos must update
-- whether the old path still works
-- whether a migration helper is needed
+- 下流リポジトリが何を更新する必要があるか
+- 古いパスがまだ動作するか
+- マイグレーションヘルパーが必要か

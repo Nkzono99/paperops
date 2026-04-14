@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Usage question
+  - name: 一般的な使い方の質問
     url: https://github.com/OWNER/REPO/discussions
-    about: Ask general usage questions in Discussions.
+    about: 一般的な使い方の質問は Discussions で質問してください。

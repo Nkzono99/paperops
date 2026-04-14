@@ -1,20 +1,20 @@
-# Agent Operating Rules
+# エージェント運用ルール
 
-## Session start
+## セッション開始
 
-1. Run `resume-session`.
-2. Read `docs/project-brief.md` and `notes/session-context.md`.
-3. Check `manuscript/mirror/status.md` before editing bilingual content.
+1. `resume-session` を実行する。
+2. `docs/project-brief.md` と `notes/session-context.md` を読む。
+3. バイリンガルコンテンツを編集する前に `manuscript/mirror/status.md` を確認する。
 
-## Editing rules
+## 編集ルール
 
-- Do not edit `manuscript/shared/figures/generated/` directly.
-- Do not commit `refs/local/locations.toml`.
-- Avoid changing `manuscript/shared/style/journal.cls` unless the user explicitly requests a class-level update.
+- `manuscript/shared/figures/generated/` を直接編集しない。
+- `refs/local/locations.toml` をコミットしない。
+- ユーザーがクラスレベルの更新を明示的にリクエストしない限り、`manuscript/shared/style/journal.cls` を変更しない。
 
-## Session end
+## セッション終了
 
-1. Run `note-writing-session`.
-2. Refresh `notes/handoff.md`.
-3. Refresh `notes/todo.md`.
-4. Run `make ci` if manuscript structure or references changed.
+1. `note-writing-session` を実行する。
+2. `notes/handoff.md` を更新する。
+3. `notes/todo.md` を更新する。
+4. 原稿構造や参考文献が変更された場合は `make ci` を実行する。

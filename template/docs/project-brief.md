@@ -1,11 +1,11 @@
-# Project Brief
+# プロジェクト概要
 
-- Topic: Replace with your paper topic.
-- Goal: Capture the central scientific question and target contribution.
-- Primary source language: Japanese draft first, then mirrored English.
-- Current manuscript owner: Replace with names or initials.
-- Repository status: Starter scaffold initialized.
+- トピック: 論文のトピックに置き換えてください。
+- 目標: 中心的な科学的問いと目標とする貢献を記載する。
+- 主要言語: まず日本語で草稿、その後英語にミラー。
+- 現在の原稿担当者: 名前またはイニシャルに置き換えてください。
+- リポジトリ状態: スターターのスキャフォールドを初期化済み。
 
-## Why this paper exists
+## この論文が存在する理由
 
-Write the one-paragraph motivation for the paper here.
+この論文の動機を1段落で書いてください。

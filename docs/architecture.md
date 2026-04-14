@@ -1,38 +1,38 @@
-# Architecture
+# アーキテクチャ
 
-This repository separates template maintenance concerns from per-paper authoring concerns.
+このリポジトリはテンプレート保守の関心事と個別論文の執筆関心事を分離している。
 
-## Layers
+## 層構成
 
-### 1. Template repository layer
+### 1. テンプレートリポジトリ層
 
-The repository root owns the assets that every downstream paper repository should share:
+リポジトリルートは、すべての下流論文リポジトリで共有すべきアセットを管理する:
 
-- reusable GitHub workflows
-- issue forms for template improvement
-- template-maintainer skills
-- changelog and governance docs
-- distribution automation for publishing the scaffold into a separate template repository
+- 再利用可能な GitHub ワークフロー
+- テンプレート改善のための Issue フォーム
+- テンプレート保守者向けスキル
+- 変更履歴とガバナンスドキュメント
+- スキャフォールドを別のテンプレートリポジトリに公開するための配布自動化
 
-This layer is intentionally small and stable. Its job is to evolve the harness safely.
+この層は意図的に小さく安定している。ハーネスを安全に進化させることが役割である。
 
-### 2. Per-paper scaffold layer
+### 2. 個別論文スキャフォールド層
 
-[`template/`](/home/b/b36291/large1/Github/paper-harness-template/template) contains the complete structure for an individual manuscript repository.
-That scaffold includes:
+[`template/`](/home/b/b36291/large1/Github/paper-harness-template/template) は個別原稿リポジトリの完全な構造を含む。
+このスキャフォールドには以下が含まれる:
 
-- manuscript source split into `ja/` and `en/`
-- a mirror-control layer under `manuscript/mirror/`
-- reference knowledge under `refs/`
-- session continuity notes under `notes/`
-- project-local Claude skills and hooks
-- lightweight scripts for build, lint, export, and note collection
+- `ja/` と `en/` に分割された原稿ソース
+- `manuscript/mirror/` 配下のミラー制御層
+- `refs/` 配下の参照知識
+- `notes/` 配下のセッション継続性ノート
+- プロジェクトローカルの Claude スキルとフック
+- ビルド、lint、エクスポート、ノート収集のための軽量スクリプト
 
-## Design principles
+## 設計原則
 
-- Keep the manuscript repository self-describing.
-- Track bilingual drift explicitly instead of relying on ad hoc translation.
-- Preserve local paths through aliases and ignored config files.
-- Push reusable automation into the template repository, not every paper repository.
-- Keep the distribution repository as a published artifact, not the editing surface.
-- Keep validation fast enough to run in interactive sessions and CI.
+- 原稿リポジトリを自己記述的に保つ。
+- アドホックな翻訳に頼らず、日英のドリフトを明示的に追跡する。
+- エイリアスと ignored な設定ファイルによりローカルパスを保存する。
+- 再利用可能な自動化は各論文リポジトリではなくテンプレートリポジトリに集約する。
+- 配布リポジトリは公開アーティファクトであり、編集場所ではない。
+- 検証はインタラクティブセッションと CI の両方で実行できる速度を維持する。
