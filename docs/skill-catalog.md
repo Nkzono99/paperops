@@ -31,6 +31,7 @@
 - `raise-template-feedback`
 - `update-refs`
 - `resolve-local-paths`
+- `pull-template-updates`
 
 ## 配布自動化
 

@@ -37,7 +37,7 @@ make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
 
 - `manuscript/mirror/status.md` に別段の記載がない限り、`manuscript/ja/` が科学的なソースオブトゥルースである。
 - `% block: ...` 識別子を保持する。削除や番号の振り直しは行わない。
-- 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（フックが強制する）。
+- 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（settings.json の deny パターンが強制する）。
 - `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。引用キーは安定させる。
 - ミラー同期には `/sync-ja-en` を使用する。両言語を盲目的に上書きしない。
 - 各セッションの終了時に `notes/handoff.md` と `notes/todo.md` を更新する。
@@ -56,6 +56,7 @@ make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
 | `/improve-writing-harness` | プロジェクトローカルの摩擦を特定・修正 |
 | `/raise-template-feedback` | 再利用可能な改善を上流テンプレートにエスカレート |
 | `/resolve-local-paths` | `refs/local/` からローカルパスエイリアスを解決 |
+| `/pull-template-updates` | 上流テンプレートの変更を安全に取り込む |
 
 ## リポジトリマップ
 
@@ -68,7 +69,7 @@ refs/                知識層: 論文、サマリー、bib、抜粋、ローカ
 notes/               セッション継続性: handoff, todo, decision-log, sessions/
 scripts/             ビルド、lint、ミラーチェック、エクスポート、コンテキスト収集
 docs/                project-brief, target-venue, contribution-claims, ポリシー
-.claude/             settings.json（フック＋権限）、skills/、rules/
+.claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
 ```
 
 ## テンプレートフィードバック

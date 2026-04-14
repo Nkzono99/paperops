@@ -10,42 +10,17 @@
       "Bash(git status)",
       "Bash(git diff *)",
       "Bash(git log *)"
+    ],
+    "deny": [
+      "Edit(**/manuscript/shared/figures/generated/**)",
+      "Write(**/manuscript/shared/figures/generated/**)",
+      "Edit(**/refs/local/locations.toml)",
+      "Write(**/refs/local/locations.toml)",
+      "Edit(**/manuscript/shared/style/journal.cls)",
+      "Write(**/manuscript/shared/style/journal.cls)"
     ]
   },
   "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/refresh-session-context.sh"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-files.sh"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/validate-mirror.sh"
-          }
-        ]
-      }
-    ],
     "PreCompact": [
       {
         "matcher": "",
