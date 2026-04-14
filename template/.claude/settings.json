@@ -7,11 +7,13 @@
       "Grep(*)",
       "Bash(make *)",
       "Bash(python3 *)",
-      "Bash(git status)",
+      "Bash(git status*)",
       "Bash(git diff *)",
       "Bash(git log *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)"
     ],
     "deny": [
       "Edit(**/manuscript/shared/figures/generated/**)",
@@ -22,6 +24,9 @@
       "Write(**/manuscript/shared/style/journal.cls)"
     ]
   },
+  "env": {
+    "MANUSCRIPT_SOURCE_LANG": "ja"
+  },
   "hooks": {
     "PreCompact": [
       {
@@ -30,6 +35,7 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/refresh-session-context.sh",
+            "timeout": 10000,
             "once": true
           }
         ]
