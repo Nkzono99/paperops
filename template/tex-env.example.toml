@@ -1,0 +1,11 @@
+# TeX 環境設定
+# このファイルを tex-env.toml にコピーして編集する（.gitignore 対象）。
+# 設定がない場合、ビルドスクリプトは PATH から latexmk を探す従来の動作にフォールバックする。
+
+# ユーザー空間 TeX Live（HPC 等で root 権限がない場合）
+# [texlive]
+# root = "/path/to/texlive/2025"
+
+# Docker でビルドする場合
+# [docker]
+# image = "texlive/texlive:latest"

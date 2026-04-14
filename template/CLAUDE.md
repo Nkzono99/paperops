@@ -52,6 +52,10 @@ make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
 - `git push` は共有状態に影響するため、ユーザーの明示的な指示なしに実行しない。
 - `git reset --hard`、`git push --force` 等の破壊的操作は、ユーザーが明示的に求めた場合のみ実行する。
 
+## TeX 環境
+
+ユーザー空間 TeX Live や Docker を使用する場合、`tex-env.example.toml` を `tex-env.toml` にコピーして環境を設定する。`tex-env.toml` がなければ従来通り PATH から `latexmk` を探す。
+
 ## トラブルシューティング
 
 - コンテキストが長くなったら `/compact` を実行する（目安: 50% 超過時）。

@@ -3,6 +3,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+# tex-env.toml があれば PATH/TEXINPUTS を設定
+_TEX_ENV_ROOT="$ROOT" source "$ROOT/scripts/tex-env.sh"
+
 LANG_DIR="$ROOT/manuscript/ja"
 BUILD_DIR="$ROOT/manuscript/shared/build/ja"
 MAIN_TEX="$LANG_DIR/main.tex"
@@ -40,12 +44,22 @@ if missing:
 print(f"{main_tex} の入力ファイルを検証しました")
 PY
 
-if [[ "${PAPER_TEMPLATE_RUN_LATEX:-0}" == "1" ]] && command -v latexmk >/dev/null 2>&1; then
-  (
-    cd "$LANG_DIR"
-    export TEXINPUTS="../shared/style//:"
-    latexmk -interaction=nonstopmode -halt-on-error -pdf -output-directory="$BUILD_DIR" main.tex
-  )
+if [[ "${PAPER_TEMPLATE_RUN_LATEX:-0}" == "1" ]]; then
+  if [[ -n "${TEX_DOCKER_IMAGE:-}" ]]; then
+    docker run --rm -v "$ROOT:/work" -w /work/manuscript/ja \
+      "$TEX_DOCKER_IMAGE" \
+      latexmk -interaction=nonstopmode -halt-on-error -pdf \
+        -output-directory="/work/manuscript/shared/build/ja" main.tex
+  elif command -v latexmk >/dev/null 2>&1; then
+    (
+      cd "$LANG_DIR"
+      export TEXINPUTS="../shared/style//:"
+      latexmk -interaction=nonstopmode -halt-on-error -pdf -output-directory="$BUILD_DIR" main.tex
+    )
+  else
+    echo "latexmk が見つかりません。tex-env.toml で TeX Live パスを設定するか、Docker イメージを指定してください。"
+    echo "日本語原稿の構造検証を完了しました。"
+  fi
 else
-  echo "latexmk が利用不可または無効です。日本語原稿の構造検証を完了しました。"
+  echo "PAPER_TEMPLATE_RUN_LATEX=1 が未設定です。日本語原稿の構造検証を完了しました。"
 fi
