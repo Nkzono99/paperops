@@ -27,14 +27,14 @@ def iter_bib_files(root):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Lint bibliography files in the paper harness.")
+    parser = argparse.ArgumentParser(description="論文ハーネス内の参考文献ファイルを lint する。")
     parser.add_argument("--root", type=Path, default=Path("."))
     args = parser.parse_args()
 
     root = args.root.resolve()
     files = iter_bib_files(root)
     if not files:
-        print("no .bib files found")
+        print(".bib ファイルが見つかりません")
         return 1
 
     keys = {}
@@ -46,7 +46,7 @@ def main() -> int:
             key = match.group("key").strip()
             body = match.group("body")
             if key in keys:
-                errors.append(f"duplicate key '{key}' in {bib_file} and {keys[key]}")
+                errors.append(f"重複キー '{key}': {bib_file} と {keys[key]}")
             else:
                 keys[key] = bib_file
 
@@ -54,16 +54,16 @@ def main() -> int:
             missing = {"title", "author", "year"} - fields
             if missing:
                 errors.append(
-                    f"{bib_file}: entry '{key}' missing required fields: {', '.join(sorted(missing))}"
+                    f"{bib_file}: エントリ '{key}' に必須フィールドが不足: {', '.join(sorted(missing))}"
                 )
 
     if errors:
-        print("bibliography lint failed")
+        print("参考文献の lint に失敗しました")
         for error in errors:
             print(f"- {error}")
         return 1
 
-        print("bibliography lint passed for {} file(s) and {} entries".format(len(files), len(keys)))
+        print("参考文献の lint に成功しました: {} ファイル、{} エントリ".format(len(files), len(keys)))
     return 0
 
 

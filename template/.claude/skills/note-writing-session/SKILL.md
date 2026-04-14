@@ -1,24 +1,24 @@
 ---
 name: note-writing-session
-description: Record session progress near the end of a working session. Updates handoff, todo, writing-log, and session notes.
+description: 作業セッションの終了近くにセッション進捗を記録する。handoff、todo、writing-log、セッションノートを更新。
 allowed-tools: Read, Edit, Write, Glob
 ---
 
 # note-writing-session
 
-Use this skill near the end of a working session.
+作業セッションの終了近くにこのスキルを使用する。
 
-## Required updates
+## 必須更新
 
-1. Append a short session note under `notes/sessions/`.
-2. Update `notes/writing-log.md`.
-3. Refresh `notes/handoff.md`.
-4. Refresh `notes/todo.md`.
-5. If a major decision was made, add it to `notes/decision-log.md`.
+1. `notes/sessions/` 配下に短いセッションノートを追加する。
+2. `notes/writing-log.md` を更新する。
+3. `notes/handoff.md` を更新する。
+4. `notes/todo.md` を更新する。
+5. 重要な決定が行われた場合、`notes/decision-log.md` に追加する。
 
-## Suggested output
+## 推奨出力
 
-- what was written or revised
-- which files changed
-- what is blocked or still uncertain
-- the first task for the next session
+- 何を執筆・改訂したか
+- どのファイルが変更されたか
+- 何がブロックまたは不確実なまま残っているか
+- 次のセッションでの最初のタスク

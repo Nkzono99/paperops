@@ -1,10 +1,10 @@
-## Summary
+## 概要
 
-Describe the manuscript or harness change.
+原稿またはハーネスの変更内容を記述する。
 
-## Checks
+## チェック項目
 
-- [ ] Updated `notes/` if the writing state changed
-- [ ] Updated `manuscript/mirror/status.md` if bilingual content changed
-- [ ] Ran `make ci`
-- [ ] Added or curated refs as needed
+- [ ] 執筆状態が変わった場合は `notes/` を更新した
+- [ ] バイリンガルコンテンツが変わった場合は `manuscript/mirror/status.md` を更新した
+- [ ] `make ci` を実行した
+- [ ] 必要に応じて refs を追加・キュレーションした

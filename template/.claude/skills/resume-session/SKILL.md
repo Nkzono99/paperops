@@ -1,14 +1,14 @@
 ---
 name: resume-session
-description: Use at the start of a writing session to summarize manuscript state, identify mirror drift, and propose next steps.
+description: 執筆セッション開始時に原稿の状態を要約し、ミラーのドリフトを特定し、次のステップを提案する。
 allowed-tools: Read, Glob, Grep
 ---
 
 # resume-session
 
-Use this skill at the start of a writing session.
+執筆セッションの開始時にこのスキルを使用する。
 
-## Read first
+## 最初に読むファイル
 
 - `notes/session-context.md`
 - `notes/handoff.md`
@@ -17,18 +17,18 @@ Use this skill at the start of a writing session.
 - `docs/project-brief.md`
 - `manuscript/mirror/status.md`
 
-## Objectives
+## 目的
 
-1. Summarize the current manuscript state in five bullets or fewer.
-2. Identify the active source of truth for content changes.
-3. Call out mirror drift, missing refs work, and unresolved questions.
-4. Propose the next concrete writing step.
+1. 現在の原稿状態を5項目以内で要約する。
+2. コンテンツ変更のアクティブなソースオブトゥルースを特定する。
+3. ミラーのドリフト、refs の未完了作業、未解決の質問を指摘する。
+4. 次の具体的な執筆ステップを提案する。
 
-## Output structure
+## 出力構成
 
-- current focus
-- most recent progress
-- immediate next tasks
-- risks or drift to keep in view
+- 現在のフォーカス
+- 直近の進捗
+- 直近の次のタスク
+- 注視すべきリスクやドリフト
 
-Use the starter prompt in `templates/session-summary.md` when you need a fixed format.
+固定フォーマットが必要な場合は `templates/session-summary.md` のスタータープロンプトを使用する。

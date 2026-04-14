@@ -32,12 +32,12 @@ for match in pattern.finditer(text):
         missing.append(str(target))
 
 if missing:
-    print("missing inputs:")
+    print("不足している入力ファイル:")
     for item in missing:
         print(f"  - {item}")
     raise SystemExit(1)
 
-print(f"validated inputs for {main_tex}")
+print(f"{main_tex} の入力ファイルを検証しました")
 PY
 
 if [[ "${PAPER_TEMPLATE_RUN_LATEX:-0}" == "1" ]] && command -v latexmk >/dev/null 2>&1; then
@@ -47,5 +47,5 @@ if [[ "${PAPER_TEMPLATE_RUN_LATEX:-0}" == "1" ]] && command -v latexmk >/dev/nul
     latexmk -interaction=nonstopmode -halt-on-error -pdf -output-directory="$BUILD_DIR" main.tex
   )
 else
-  echo "latexmk unavailable or disabled; completed structural validation for ja manuscript."
+  echo "latexmk が利用不可または無効です。日本語原稿の構造検証を完了しました。"
 fi

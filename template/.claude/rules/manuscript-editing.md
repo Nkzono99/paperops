@@ -1,9 +1,9 @@
 # Glob: manuscript/**/*.tex
 
-## Manuscript editing rules
+## 原稿編集ルール
 
-- Preserve `% block: ...` identifiers. Never remove, rename, or renumber them.
-- Japanese (`ja/`) is the source of truth unless `manuscript/mirror/status.md` says otherwise.
-- After editing a ja/ section, note the affected block IDs for later `/sync-ja-en`.
-- Do not edit files under `manuscript/shared/figures/generated/` directly.
-- Keep `\input` paths relative to the manuscript root.
+- `% block: ...` 識別子を保持する。削除、名前変更、番号の振り直しを行わない。
+- `manuscript/mirror/status.md` に別段の記載がない限り、日本語（`ja/`）がソースオブトゥルースである。
+- ja/ セクションを編集した後は、後の `/sync-ja-en` のために影響を受けたブロック ID をメモする。
+- `manuscript/shared/figures/generated/` 配下のファイルを直接編集しない。
+- `\input` パスは原稿ルートからの相対パスにする。

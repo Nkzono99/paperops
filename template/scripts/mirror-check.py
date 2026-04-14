@@ -15,7 +15,7 @@ def resolve_manuscript_root(root):
         return root
     if (root / "manuscript" / "mirror" / "map.toml").exists():
         return root / "manuscript"
-    raise FileNotFoundError(f"Could not locate manuscript/mirror/map.toml under {root}")
+    raise FileNotFoundError(f"{root} 配下に manuscript/mirror/map.toml が見つかりません")
 
 
 def extract_blocks(path):
@@ -60,15 +60,15 @@ def build_report(manuscript_root):
         en_path = manuscript_root / en_rel
 
         if not ja_path.exists() or not en_path.exists():
-            failures.append(f"missing file pair: {ja_path} <-> {en_path}")
-            rows.append(f"| `{ja_rel}` | `{en_rel}` | missing-file |")
+            failures.append(f"ファイルペアが見つかりません: {ja_path} <-> {en_path}")
+            rows.append(f"| `{ja_rel}` | `{en_rel}` | ファイル不存在 |")
             continue
 
         ja_blocks = extract_blocks(ja_path)
         en_blocks = extract_blocks(en_path)
 
         if ja_blocks == en_blocks:
-            rows.append(f"| `{ja_rel}` | `{en_rel}` | aligned ({len(ja_blocks)} blocks) |")
+            rows.append(f"| `{ja_rel}` | `{en_rel}` | 整合 ({len(ja_blocks)} ブロック) |")
             continue
 
         missing_in_en = [block for block in ja_blocks if block not in en_blocks]
@@ -77,36 +77,36 @@ def build_report(manuscript_root):
 
         details = []
         if missing_in_en:
-            details.append(f"missing in en: {', '.join(missing_in_en)}")
+            details.append(f"en に不足: {', '.join(missing_in_en)}")
         if missing_in_ja:
-            details.append(f"missing in ja: {', '.join(missing_in_ja)}")
+            details.append(f"ja に不足: {', '.join(missing_in_ja)}")
         if order_differs:
-            details.append("block order differs")
+            details.append("ブロック順序が異なる")
 
         failures.append(f"{ja_rel} <-> {en_rel}: {'; '.join(details)}")
         rows.append(f"| `{ja_rel}` | `{en_rel}` | {'; '.join(details)} |")
 
-    status = "passed" if not failures else "failed"
+    status = "合格" if not failures else "不合格"
     report_lines = [
-        "# Mirror Check Report",
+        "# ミラーチェックレポート",
         "",
-        f"- status: {status}",
-        f"- manuscript root: `{manuscript_root}`",
+        f"- 状態: {status}",
+        f"- 原稿ルート: `{manuscript_root}`",
         "",
-        "| JA | EN | Result |",
+        "| JA | EN | 結果 |",
         "| --- | --- | --- |",
         *rows,
     ]
 
     if failures:
-        report_lines.extend(["", "## Failures", ""])
+        report_lines.extend(["", "## 不合格項目", ""])
         report_lines.extend([f"- {failure}" for failure in failures])
 
     return "\n".join(report_lines) + "\n", not failures
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Validate mirrored JA/EN manuscript block IDs.")
+    parser = argparse.ArgumentParser(description="日英ミラー原稿のブロック ID の整合性を検証する。")
     parser.add_argument("--root", type=Path, default=Path("manuscript"))
     parser.add_argument("--report", type=Path, default=None)
     args = parser.parse_args()

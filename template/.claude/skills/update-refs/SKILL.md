@@ -1,22 +1,22 @@
 ---
 name: update-refs
-description: Validate bibliography and reference knowledge alignment. Use when adding citations or after editing bib files.
+description: 参考文献と参照知識の整合性を検証する。引用の追加や bib ファイル編集後に使用。
 allowed-tools: Read, Edit, Write, Glob, Grep
 ---
 
 # update-refs
 
-Use this skill when bibliography and reference knowledge need to be brought back in sync with the manuscript.
+参考文献と参照知識を原稿と再同期させる必要がある場合にこのスキルを使用する。
 
-## Tasks
+## タスク
 
-1. Review `manuscript/shared/bib/*.bib` and `refs/bib/curated/`.
-2. Check whether high-value cited papers have summaries in `refs/summaries/`.
-3. Flag manuscript citations that lack curated metadata or a usable summary.
-4. Suggest the next reference curation tasks in priority order.
+1. `manuscript/shared/bib/*.bib` と `refs/bib/curated/` をレビューする。
+2. 重要な引用論文のサマリーが `refs/summaries/` にあるか確認する。
+3. キュレーション済みメタデータや利用可能なサマリーが不足している原稿内引用をフラグする。
+4. 優先順位に従って次の参照キュレーションタスクを提案する。
 
-## Principles
+## 原則
 
-- Prefer curated summaries over raw PDF accumulation.
-- Keep citation keys stable once they appear in the manuscript.
-- Log unresolved citation questions in `notes/open-questions.md` if they affect writing.
+- 生の PDF の蓄積よりキュレーション済みサマリーを優先する。
+- 原稿に登場した引用キーは安定させる。
+- 執筆に影響する未解決の引用問題は `notes/open-questions.md` に記録する。

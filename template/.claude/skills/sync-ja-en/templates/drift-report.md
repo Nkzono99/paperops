@@ -1,11 +1,11 @@
-# Drift Report
+# ドリフトレポート
 
-## Source of truth
+## ソースオブトゥルース
 
-## Blocks updated this session
+## このセッションで更新したブロック
 
-## Blocks still drifting
+## まだドリフトしているブロック
 
-## Terminology decisions
+## 用語の決定
 
-## Follow-up actions
+## フォローアップアクション

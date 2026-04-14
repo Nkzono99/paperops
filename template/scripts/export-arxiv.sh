@@ -17,10 +17,10 @@ cp -R "$ROOT/manuscript/shared/style/." "$DEST/manuscript/shared/style/"
 cp -R "$ROOT/manuscript/shared/figures/generated" "$DEST/manuscript/shared/figures/generated"
 
 cat >"$DEST/README.md" <<'EOF'
-# arXiv export bundle
+# arXiv エクスポートバンドル
 
-This directory was created by `scripts/export-arxiv.sh`.
-Review the contents before submission and remove starter assets that are not needed.
+このディレクトリは `scripts/export-arxiv.sh` によって作成されました。
+投稿前に内容を確認し、不要なスターターアセットを削除してください。
 EOF
 
-echo "Prepared export bundle at $DEST"
+echo "エクスポートバンドルを $DEST に準備しました"

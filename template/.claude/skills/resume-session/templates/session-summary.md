@@ -1,11 +1,11 @@
-# Session Summary Template
+# セッション要約テンプレート
 
-## Current focus
+## 現在のフォーカス
 
-## What changed recently
+## 最近の変更
 
-## Immediate next actions
+## 直近の次のアクション
 
-## Mirror and refs status
+## ミラーと refs の状態
 
-## Open questions
+## 未解決の質問

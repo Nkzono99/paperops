@@ -1,8 +1,8 @@
 # Glob: refs/**/*
 
-## Reference knowledge rules
+## 参照知識ルール
 
-- `refs/` is a knowledge layer, not a PDF dump. Prefer curated summaries over raw files.
-- Keep citation keys stable after first manuscript use.
-- Never commit absolute personal paths. Use `refs/local/locations.example.toml` as the template.
-- When adding a new reference, create a structured summary in `refs/summaries/` before or alongside adding the bib entry.
+- `refs/` は知識層であり、PDF 置き場ではない。生ファイルよりキュレーション済みサマリーを優先する。
+- 原稿で初めて使用した後は引用キーを安定させる。
+- 個人の絶対パスはコミットしない。テンプレートとして `refs/local/locations.example.toml` を使用する。
+- 新しい参考文献を追加する際は、bib エントリの追加と同時またはそれ以前に `refs/summaries/` に構造化サマリーを作成する。

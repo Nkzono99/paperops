@@ -1,31 +1,31 @@
 ---
 name: raise-template-feedback
-description: Escalate reusable improvements to the upstream paper-harness-template. Use when friction is not project-specific.
+description: 再利用可能な改善を上流の paper-harness-template にエスカレートする。プロジェクト固有でない摩擦がある場合に使用。
 allowed-tools: Read, Glob, Grep
 ---
 
 # raise-template-feedback
 
-Use this skill when a repeated problem should be fixed in the upstream paper harness source repository.
+繰り返しの問題を上流のペーパーハーネスソースリポジトリで修正すべき場合にこのスキルを使用する。
 
-## Default upstream target
+## デフォルトの上流ターゲット
 
-- Source repository: `Nkzono99/paper-harness-template`
-- Do not file this feedback against the distribution repository unless your team has intentionally adopted that repository as its own source of truth.
-- If your team forked the harness and maintains its own source repository, use that fork instead.
+- ソースリポジトリ: `Nkzono99/paper-harness-template`
+- チームが意図的に配布リポジトリを独自のソースオブトゥルースとして採用していない限り、配布リポジトリにフィードバックを提出しない。
+- チームがハーネスをフォークし独自のソースリポジトリを管理している場合は、そのフォークを使用する。
 
-## Gather
+## 収集する情報
 
-- observed pain point
-- reproduction in this repository
-- why the fix is reusable
-- proposed implementation surface
-- migration or compatibility concerns
+- 観測されたペインポイント
+- このリポジトリでの再現方法
+- 修正が再利用可能である理由
+- 提案する実装先
+- マイグレーションまたは互換性の懸念事項
 
-## Output
+## 出力
 
-Write the feedback in a form that can be pasted into the upstream `template-feedback` issue form in `Nkzono99/paper-harness-template`.
+`Nkzono99/paper-harness-template` の上流 `template-feedback` Issue フォームに貼り付け可能な形式でフィードバックを記述する。
 
-## Scope guard
+## スコープガード
 
-Do not escalate venue-specific wording, paper-specific scientific choices, or personal local path conventions.
+投稿先固有の表現、論文固有の科学的選択、個人的なローカルパス慣習はエスカレートしない。

@@ -1,23 +1,23 @@
 ---
 name: resolve-local-paths
-description: Resolve local path aliases from refs/local/ for simulation outputs, figure sources, or external knowledge.
+description: refs/local/ からシミュレーション出力、図のソース、外部知識のローカルパスエイリアスを解決する。
 allowed-tools: Read, Glob
 ---
 
 # resolve-local-paths
 
-Use this skill when the writing session needs to access simulation outputs, figure sources, or external knowledge stored outside the repository.
+執筆セッションでリポジトリ外に保存されたシミュレーション出力、図のソース、外部知識にアクセスする必要がある場合にこのスキルを使用する。
 
-## Read
+## 読み込むファイル
 
-- `refs/local/locations.toml` if present
-- otherwise `refs/local/locations.example.toml`
+- `refs/local/locations.toml`（存在する場合）
+- なければ `refs/local/locations.example.toml`
 - `refs/local/aliases.md`
 
-## Responsibilities
+## 責務
 
-1. Resolve the alias to a concrete path and explain what lives there.
-2. State whether the path is machine-specific or portable.
-3. Suggest which notes or refs file should record the usage.
+1. エイリアスを具体的なパスに解決し、そこに何があるかを説明する。
+2. パスがマシン固有かポータブルかを明示する。
+3. 使用履歴を記録すべき notes または refs ファイルを提案する。
 
-Never commit absolute personal paths into tracked files.
+個人の絶対パスをトラッキング対象ファイルにコミットしないこと。

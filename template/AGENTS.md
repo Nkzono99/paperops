@@ -1,26 +1,76 @@
-# AGENTS
+# AGENTS.md
 
-このリポジトリはバイリンガル研究論文の執筆ハーネスである。
+ユーザーとは**日本語**でコミュニケーションすること。
 
-## ここから開始
+これは**日英バイリンガル論文執筆ハーネス**である。日本語と英語の原稿はブロックレベルのミラーとして追跡される。
 
-1. `docs/project-brief.md` を読む。
-2. `notes/session-context.md`、`notes/handoff.md`、`notes/todo.md` を読む。
+## セッションプロトコル
+
+### 開始時
+
+1. `/resume-session` を実行する。
+2. 初回セッションの場合は `docs/project-brief.md` を読む。
 3. 原稿テキストを編集する前に `manuscript/mirror/status.md` を確認する。
 
-## 基本ルール
+### 終了時
 
-- `manuscript/mirror/status.md` に別段の記載がない限り、日本語コンテンツがソースオブトゥルースである。
-- すべてのミラー対象セクションで `% block: ...` 識別子を保持する。
-- `refs/` は知識層として整理する。生の PDF 置き場にしない。
-- 個人の絶対パスはコミットしない。`refs/local/locations.example.toml` と ignored なローカルオーバーライドを使用する。
-- 作業セッション終了前に `notes/` を更新する。
+1. `/note-writing-session` を実行する。
+2. 原稿構造や参考文献が変更された場合は `make ci` を実行する。
 
-## 標準コマンド
+### コンパクション時
 
-- `make build-ja`
-- `make build-en`
-- `make mirror-check`
-- `make lint-bib`
-- `make ci`
-- `make venv`
+セッションコンテキストは PreCompact フックにより自動的に再注入される。コンパクション後、タスクの継続性が必要な場合は `notes/handoff.md` と `notes/todo.md` を再読する。
+
+## 主要コマンド
+
+```sh
+make venv           # Python 3.11 で .venv を作成
+make build-ja       # 日本語原稿をコンパイル（または構造検証）
+make build-en       # 英語原稿をコンパイル（または構造検証）
+make lint-bib       # 参考文献エントリを検証
+make mirror-check   # ja/ と en/ のブロックレベルのドリフトを検出
+make ci             # lint-bib + mirror-check + build-ja + build-en
+make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
+```
+
+## ルール
+
+- `manuscript/mirror/status.md` に別段の記載がない限り、`manuscript/ja/` が科学的なソースオブトゥルースである。
+- `% block: ...` 識別子を保持する。削除や番号の振り直しは行わない。
+- 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（フックが強制する）。
+- `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。引用キーは安定させる。
+- ミラー同期には `/sync-ja-en` を使用する。両言語を盲目的に上書きしない。
+- 各セッションの終了時に `notes/handoff.md` と `notes/todo.md` を更新する。
+- 恒久的な決定は `notes/decision-log.md` に記録する。
+
+ファイル固有のルールは `.claude/rules/` にあり、対応するパスの編集時に自動的にロードされる。
+
+## 利用可能なスキル
+
+| スキル | 用途 |
+|-------|------|
+| `/resume-session` | 現在の状態を要約し、次のステップを提案 |
+| `/note-writing-session` | セッション進捗を記録し、引き継ぎファイルを更新 |
+| `/sync-ja-en` | 日本語と英語のブロックを同期 |
+| `/update-refs` | 参考文献と参照知識の整合性を検証 |
+| `/improve-writing-harness` | プロジェクトローカルの摩擦を特定・修正 |
+| `/raise-template-feedback` | 再利用可能な改善を上流テンプレートにエスカレート |
+| `/resolve-local-paths` | `refs/local/` からローカルパスエイリアスを解決 |
+
+## リポジトリマップ
+
+```
+manuscript/ja/       日本語ソース（% block: ID 付きセクション）
+manuscript/en/       英語ミラー（対応するブロック ID）
+manuscript/shared/   図表、bib、スタイル、ビルド出力
+manuscript/mirror/   map.toml, terminology.yml, status.md, change-queue.md
+refs/                知識層: 論文、サマリー、bib、抜粋、ローカル
+notes/               セッション継続性: handoff, todo, decision-log, sessions/
+scripts/             ビルド、lint、ミラーチェック、エクスポート、コンテキスト収集
+docs/                project-brief, target-venue, contribution-claims, ポリシー
+.claude/             settings.json（フック＋権限）、skills/、rules/
+```
+
+## テンプレートフィードバック
+
+繰り返しのハーネス摩擦を見つけた場合、`/raise-template-feedback` を使用して `Nkzono99/paper-harness-template` にルーティングする。
