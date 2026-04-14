@@ -24,6 +24,7 @@
 
 下流スキャフォールドは `template/.claude/skills/` に以下のスキルを提供する:
 
+- `setup`
 - `resume-session`
 - `sync-ja-en`
 - `note-writing-session`

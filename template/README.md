@@ -4,11 +4,14 @@
 
 ## 初回使用前
 
+`/setup` スキルで以下の手順を一括実行できる:
+
 1. リポジトリ名を変更し、この README を更新する。
 2. `make venv` を実行して Python 3.11 のローカル `.venv` を作成する。
 3. `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーする。
-4. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paper-harness-template` リポジトリパスに置き換える。
-5. `notes/project-brief.md`、`manuscript/venue.md`、`notes/contribution-claims.md` を記入する。
+4. `tex-env.example.toml` を `tex-env.toml` にコピーし、TeX 環境を設定する（任意）。
+5. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paper-harness-template` リポジトリパスに置き換える。
+6. `notes/project-brief.md`、`manuscript/venue.md`、`notes/contribution-claims.md` を記入する。
 
 ## 基本ワークフロー
 
