@@ -18,8 +18,9 @@
 1. `resume-session` で開始する。
 2. `manuscript/ja/` で執筆または改訂する。
 3. 必要なブロックを `manuscript/en/` にミラーする。
-4. `notes/` に進捗を記録する。
-5. 主要な変更を共有する前に `make ci` を実行する。
+4. 投稿先公式テンプレートへ展開する段階では `submission/<venue>/` を使い、`manuscript/` と混ぜない。
+5. `notes/` に進捗を記録する。
+6. 主要な変更を共有する前に `make ci` を実行する。
 
 既存原稿がある場合は `/import-manuscript` でインポートできる。
 
@@ -41,6 +42,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 ## ディレクトリの概要
 
 - `manuscript/`: バイリンガルソース、共有アセット、ミラー制御、投稿先情報
+- `submission/`: 投稿先公式テンプレートと最終提出用 TeX の分離スロット
 - `refs/`: 参照知識、サマリー、ローカルパスエイリアス（papers, bib 等はスキルが必要時に作成）
 - `notes/`: プロジェクト概要、貢献主張、引き継ぎ、意思決定の追跡
 - `.claude/`: プロジェクトローカルの設定、スキル、ルール、フック

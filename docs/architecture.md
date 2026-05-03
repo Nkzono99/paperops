@@ -25,6 +25,7 @@
 - `manuscript/mirror/` 配下のミラー制御層
 - `refs/` 配下の参照知識
 - `notes/` 配下のセッション継続性ノート
+- `submission/<venue>/` 配下の投稿先公式テンプレートと最終提出用 TeX
 - プロジェクトローカルの Claude / Codex スキルとフック
 - ビルド、lint、エクスポート、ノート収集のための軽量スクリプト
 

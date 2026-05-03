@@ -48,6 +48,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `% block: ...` 識別子を保持する。削除や番号の振り直しは行わない。
 - 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（settings.json の deny パターンが強制する）。
 - `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。引用キーは安定させる。
+- 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
 - ミラー同期には `/sync-ja-en` を使用する。両言語を盲目的に上書きしない。
 - 各セッションの終了時に `notes/handoff.md` と `notes/todo.md` を更新する。
 - 恒久的な決定は `notes/decision-log.md` に記録する。
@@ -92,6 +93,7 @@ manuscript/en/       英語ミラー（対応するブロック ID）
 manuscript/shared/   figures, bib, style
 manuscript/mirror/   map.toml, terminology.yml, status.md, change-queue.md
 manuscript/venue.md  投稿先情報
+submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: summaries, local（papers, bib, excerpts はスキルが必要時に作成）
 notes/               project-brief, contribution-claims, handoff, todo, decision-log
 scripts/             ビルド、lint、ミラーチェック、エクスポート、コンテキスト収集

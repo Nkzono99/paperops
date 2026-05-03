@@ -11,4 +11,5 @@ Codex で使う互換入口。実際の手順は `.claude/skills/import-manuscri
 
 - 既存原稿の `main.tex`、class/style、bib、figures、投稿先テンプレート assets を分けて棚卸しする。
 - `manuscript/ja` / `manuscript/en` のミラー原稿と投稿先固有ファイルを混ぜない。
+- 投稿先公式テンプレートを取り込む場合は `submission/<venue>/` に閉じる。
 - インポート後は `make lint-bib`、`make mirror-check`、可能なら build ターゲットを実行する。

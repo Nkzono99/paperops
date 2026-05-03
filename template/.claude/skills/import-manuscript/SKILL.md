@@ -53,12 +53,16 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 ### 4. アセットのコピー
 
+投稿先公式テンプレートをそのまま取り込む場合は、以下の表よりも `submission/<venue>/` を優先する。ハーネス原稿で共有する軽量な style と、提出用テンプレート assets を混ぜない。
+
 | ソース | コピー先 |
 |-------|---------|
 | bib ファイル | `manuscript/shared/bib/` |
 | 図ファイル（png, pdf, eps 等） | `manuscript/shared/figures/` |
 | スタイルファイル（cls, sty） | `manuscript/shared/style/` |
 | テーブルファイル | `manuscript/shared/tables/` |
+
+投稿先公式テンプレートの class/style、logo、supplement template、投稿用 build script は `submission/<venue>/` の中に閉じる。
 
 ### 5. main.tex の生成
 
