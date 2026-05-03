@@ -34,6 +34,7 @@
 - `resolve-local-paths`
 - `pull-template-updates`
 - `import-manuscript`
+- `review-public-manuscript`
 
 `.agents/skills/` は重複実装を避けるための薄い入口であり、恒久的な手順変更は `.claude/skills/<skill>/SKILL.md` 側を source of truth として更新する。
 

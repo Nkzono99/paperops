@@ -84,6 +84,7 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。各 Co
 | `/resolve-local-paths` | `refs/local/` からローカルパスエイリアスを解決 |
 | `/pull-template-updates` | 上流テンプレートの変更を安全に取り込む |
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
+| `/review-public-manuscript` | 公開原稿だけを入力に外部読者視点で投稿前レビュー |
 
 ## リポジトリマップ
 
