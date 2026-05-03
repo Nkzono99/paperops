@@ -15,6 +15,16 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 ## 手順
 
+### 0. 作業前確認
+
+```sh
+git rev-parse --show-toplevel
+git remote -v
+git status --short
+```
+
+nested private repo では親 repo と paper repo の変更を混ぜない。Windows の dubious ownership で git が止まる場合は、グローバル設定を変える前に `git -c safe.directory=<repo> -C <repo> ...` の per-command 回避を使う。
+
 ### 1. 差分の取得
 
 ```sh

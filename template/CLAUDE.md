@@ -57,6 +57,8 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 
 ## Git コミットルール
 
+- git 操作前に `git rev-parse --show-toplevel` と `git remote -v` で対象 repo を確認する。nested private repo 運用では、親 repo と paper repo の変更を同じ commit に混ぜない。
+- Windows の dubious ownership では、まず `git -c safe.directory=<repo> -C <repo> ...` の per-command 回避を使う。グローバル `safe.directory` 変更はユーザー判断にする。
 - 意味のある作業単位ごとにコミットする。大量の変更を一つのコミットにまとめない。
 - コミットメッセージは日本語で、変更の「なぜ」を記述する。
 - `git push` は共有状態に影響するため、ユーザーの明示的な指示なしに実行しない。
@@ -72,6 +74,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `make ci` が失敗したら、まず `make lint-bib` と `make mirror-check` を個別に実行して原因を特定する。
 - ミラーのドリフトが大量にある場合、`/sync-ja-en` で一括同期せず、セクション単位で対処する。
 - 設定の優先順: `.claude/settings.local.json`（個人） > `.claude/settings.json`（プロジェクト） > `~/.claude/settings.json`（グローバル）。
+- nested repo や `safe.directory` で迷ったら `TROUBLESHOOTING.md` を確認する。
 
 ## 利用可能なスキル
 
@@ -103,6 +106,7 @@ notes/               project-brief, contribution-claims, handoff, todo, decision
 scripts/             ビルド、lint、ミラーチェック、エクスポート、コンテキスト収集
 .claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
 .agents/             Codex 用 skills/ 互換入口
+TROUBLESHOOTING.md   nested repo と safe.directory の注意
 ```
 
 ## テンプレートフィードバック

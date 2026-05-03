@@ -39,6 +39,10 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 
 繰り返しのハーネス摩擦を見つけた場合、再利用可能な改善はソースリポジトリ `Nkzono99/paper-harness-template` に戻す。
 
+## トラブルシューティング
+
+nested private repo 運用や Windows の dubious ownership で git 操作が止まる場合は、[TROUBLESHOOTING.md](TROUBLESHOOTING.md) を参照する。
+
 ## ディレクトリの概要
 
 - `manuscript/`: バイリンガルソース、共有アセット、ミラー制御、投稿先情報
@@ -48,3 +52,4 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `.claude/`: プロジェクトローカルの設定、スキル、ルール、フック
 - `.agents/`: Codex 用のプロジェクトローカルスキル互換入口
 - `scripts/`: 軽量な検証・パッケージングヘルパー
+- `TROUBLESHOOTING.md`: nested repo、Windows safe.directory などの運用注意
