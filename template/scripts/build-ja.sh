@@ -48,12 +48,15 @@ if [[ "${PAPER_TEMPLATE_RUN_LATEX:-0}" == "1" ]]; then
   if [[ -n "${TEX_DOCKER_IMAGE:-}" ]]; then
     docker run --rm -v "$ROOT:/work" -w /work/manuscript/ja \
       "$TEX_DOCKER_IMAGE" \
+      env TEXINPUTS="../shared/style//:" BIBINPUTS="../shared/bib//:" BSTINPUTS="../shared/style//:" \
       latexmk -interaction=nonstopmode -halt-on-error -pdf \
         -output-directory="/work/manuscript/shared/build/ja" main.tex
   elif command -v latexmk >/dev/null 2>&1; then
     (
       cd "$LANG_DIR"
-      export TEXINPUTS="../shared/style//:"
+      export TEXINPUTS="../shared/style//:${TEXINPUTS:-}"
+      export BIBINPUTS="../shared/bib//:${BIBINPUTS:-}"
+      export BSTINPUTS="../shared/style//:${BSTINPUTS:-}"
       latexmk -interaction=nonstopmode -halt-on-error -pdf -output-directory="$BUILD_DIR" main.tex
     )
   else
