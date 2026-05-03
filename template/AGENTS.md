@@ -70,6 +70,8 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 
 ## 利用可能なスキル
 
+Codex では `.agents/skills/` の同名 skill を入口として使う。各 Codex skill は `.claude/skills/<skill>/SKILL.md` を source of truth として参照し、Claude 固有の `allowed-tools` や slash command 前提を Codex の tool とこの `AGENTS.md` のルールに読み替える。
+
 | スキル | 用途 |
 |-------|------|
 | `/resume-session` | 現在の状態を要約し、次のステップを提案 |
@@ -94,6 +96,7 @@ refs/                知識層: summaries, local（papers, bib, excerpts はス�
 notes/               project-brief, contribution-claims, handoff, todo, decision-log
 scripts/             ビルド、lint、ミラーチェック、エクスポート、コンテキスト収集
 .claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
+.agents/             Codex 用 skills/ 互換入口
 ```
 
 ## テンプレートフィードバック

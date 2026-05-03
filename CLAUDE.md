@@ -34,7 +34,7 @@ make publish-scaffold-dry-run  # template/ から配布リポジトリへの rsy
 
 ## ルール
 
-- `template/AGENTS.md`、`template/CLAUDE.md`、`template/.claude/skills/`、`template/scripts/` は**ユーザー向けインターフェース**として扱う。変更にはマイグレーションノートが必要。
+- `template/AGENTS.md`、`template/CLAUDE.md`、`template/.claude/skills/`、`template/.agents/skills/`、`template/scripts/` は**ユーザー向けインターフェース**として扱う。変更にはマイグレーションノートが必要。
 - 構造的な書き換えよりも追加的な変更を優先する。
 - 生成されたコンテンツはバージョン管理に含めない。
 - 配布リポジトリは**公開先**であり、編集場所ではない。
@@ -52,6 +52,7 @@ make publish-scaffold-dry-run  # template/ から配布リポジトリへの rsy
 ```
 docs/                  architecture, change-policy, triage-rules, skill-catalog, distribution
 .claude/skills/        triage-template-feedback, apply-template-improvement, review-template-regression
+template/.agents/      Codex 用の下流執筆スキル互換入口
 .github/workflows/     reusable-build, reusable-mirror-check, reusable-release, publish-scaffold
 .github/ISSUE_TEMPLATE/ template-feedback, skill-request, structure-change
 scripts/               publish-scaffold.sh

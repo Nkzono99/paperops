@@ -99,6 +99,7 @@ refs/                知識層: summaries, local（papers, bib, excerpts はス�
 notes/               project-brief, contribution-claims, handoff, todo, decision-log
 scripts/             ビルド、lint、ミラーチェック、エクスポート、コンテキスト収集
 .claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
+.agents/             Codex 用 skills/ 互換入口
 ```
 
 ## テンプレートフィードバック

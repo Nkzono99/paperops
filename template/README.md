@@ -44,4 +44,5 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `refs/`: 参照知識、サマリー、ローカルパスエイリアス（papers, bib 等はスキルが必要時に作成）
 - `notes/`: プロジェクト概要、貢献主張、引き継ぎ、意思決定の追跡
 - `.claude/`: プロジェクトローカルの設定、スキル、ルール、フック
+- `.agents/`: Codex 用のプロジェクトローカルスキル互換入口
 - `scripts/`: 軽量な検証・パッケージングヘルパー

@@ -22,7 +22,7 @@
 
 ## スキャフォールドに含まれるプロジェクトローカルスキル
 
-下流スキャフォールドは `template/.claude/skills/` に以下のスキルを提供する:
+下流スキャフォールドは `template/.claude/skills/` に実体となるスキルを提供し、Codex 用には `template/.agents/skills/` に同名の互換入口を提供する:
 
 - `setup`
 - `resume-session`
@@ -34,6 +34,8 @@
 - `resolve-local-paths`
 - `pull-template-updates`
 - `import-manuscript`
+
+`.agents/skills/` は重複実装を避けるための薄い入口であり、恒久的な手順変更は `.claude/skills/<skill>/SKILL.md` 側を source of truth として更新する。
 
 ## 配布自動化
 

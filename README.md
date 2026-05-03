@@ -13,6 +13,7 @@ AI 支援による論文執筆のための再利用可能なハーネス。
 - [`.github/workflows/`](/home/b/b36291/large1/Github/paper-harness-template/.github/workflows): 下流の論文リポジトリから呼び出し可能な再利用可能 GitHub Actions ワークフロー
 - [`.github/ISSUE_TEMPLATE/`](/home/b/b36291/large1/Github/paper-harness-template/.github/ISSUE_TEMPLATE): フィードバック、スキルリクエスト、構造変更用の構造化 Issue フォーム
 - [`.claude/skills/`](/home/b/b36291/large1/Github/paper-harness-template/.claude/skills): テンプレートトリアージ・保守用スキル
+- [`template/.agents/skills/`](/home/b/b36291/large1/Github/paper-harness-template/template/.agents/skills): Codex 用の下流執筆スキル互換入口
 - [`docs/`](/home/b/b36291/large1/Github/paper-harness-template/docs): テンプレートアーキテクチャ、変更ポリシー、トリアージルール
 - [`template/`](/home/b/b36291/large1/Github/paper-harness-template/template): 個別の `paper-<topic>` リポジトリにコピー可能なスキャフォールド
 - [`docs/distribution.md`](/home/b/b36291/large1/Github/paper-harness-template/docs/distribution.md): `template/` を別の GitHub テンプレートリポジトリに同期する配布モデル
@@ -36,7 +37,7 @@ AI 支援による論文執筆のための再利用可能なハーネス。
 - `notes/`: セッション引き継ぎと継続性の状態管理
 - 日本語・英語の原稿をブロックレベルのミラーとして追跡
 - テンプレート自体の再利用可能な保守ワークフロー
-- プロジェクトローカルの Claude スキル、フック、運用ルール
+- プロジェクトローカルの Claude / Codex スキル、フック、運用ルール
 
 ## 配布
 
