@@ -33,6 +33,15 @@ make ci             # lint-bib + mirror-check + build-ja + build-en
 make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
 ```
 
+Windows / PowerShell では、PDF 確認用に pinned Tectonic を `.tools/` へ取得する wrapper を使える:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/build-ja-pdf.ps1
+powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
+```
+
+ネットワーク取得を禁止する場合は `-NoDownload` を付ける。
+
 ## ルール
 
 - `manuscript/mirror/status.md` に別段の記載がない限り、`manuscript/ja/` が科学的なソースオブトゥルースである。

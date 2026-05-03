@@ -25,6 +25,15 @@
 
 ローカルワークフローは `.venv/bin/python` を優先し、それ以外は `python3.11` にフォールバックする。
 
+Windows / PowerShell で PDF を確認したい場合は、TeX Live の代わりに pinned Tectonic を `.tools/` に取得してビルドできる:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/build-ja-pdf.ps1
+powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
+```
+
+ネットワーク取得を禁止したい場合は `-NoDownload` を付ける。この場合、既に `.tools/` に取得済みの Tectonic または PATH 上の `tectonic.exe` が必要になる。
+
 ## テンプレートフィードバック
 
 繰り返しのハーネス摩擦を見つけた場合、再利用可能な改善はソースリポジトリ `Nkzono99/paper-harness-template` に戻す。
