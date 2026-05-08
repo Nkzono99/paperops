@@ -37,6 +37,11 @@
 - `review-public-manuscript`
 - `design-manuscript-claims`
 
+レビュー系スキルの使い分け:
+
+- `review-public-manuscript`: 公開原稿だけを読み、外部読者・一般研究者視点で未定義語、ローカル語、暗黙前提、再現性ギャップを検出する。
+- `design-manuscript-claims`: repo 内の brief / contribution claims / mirror status も読み、作業報告型の原稿を主張中心の構造へ再設計する。
+
 `.agents/skills/` は重複実装を避けるための薄い入口であり、恒久的な手順変更は `.claude/skills/<skill>/SKILL.md` 側を source of truth として更新する。
 
 ## 配布自動化
