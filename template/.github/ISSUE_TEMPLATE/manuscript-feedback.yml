@@ -1,0 +1,45 @@
+name: 原稿レビュー
+description: 本文、図表、主張、読者理解に関するフィードバック
+title: "[manuscript] "
+body:
+  - type: dropdown
+    id: target
+    attributes:
+      label: 対象
+      options:
+        - Abstract / Introduction
+        - Methods
+        - Results
+        - Discussion / Conclusion
+        - Figure / Table
+        - 全体構成
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: 指摘内容
+      description: 読者として詰まった点、主張が弱い箇所、図表で分からなかった点を書く。
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 根拠または該当箇所
+      description: ファイル、セクション、block ID、図表番号、引用キーなど。
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 優先度
+      options:
+        - Blocking
+        - Major
+        - Minor
+        - Question
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_fix
+    attributes:
+      label: 修正案
+      description: 可能なら具体的な追記、削除、図表修正、追加解析を書く。

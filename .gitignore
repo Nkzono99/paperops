@@ -1,4 +1,5 @@
 .DS_Store
+.codex-tmp/
 .venv/
 template/**/__pycache__/
 template/**/*.pyc

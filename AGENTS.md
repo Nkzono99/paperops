@@ -17,7 +17,7 @@
 
 ```sh
 make venv                      # Python 3.11 で .venv を作成
-make smoke                     # template/ に対して lint-bib + mirror-check + collect-context を実行
+make smoke                     # template/ に対して lint-bib + citation-check + mirror-check + collect-context + readiness-check を実行
 make publish-scaffold-dry-run  # template/ から配布リポジトリへの rsync をプレビュー
 ```
 
@@ -34,7 +34,7 @@ make publish-scaffold-dry-run  # template/ から配布リポジトリへの rsy
 
 ## ルール
 
-- `template/AGENTS.md`、`template/AGENTS.md`、`template/.Codex/skills/`、`template/scripts/` は**ユーザー向けインターフェース**として扱う。変更にはマイグレーションノートが必要。
+- `template/AGENTS.md`、`template/CLAUDE.md`、`template/.agents/skills/`、`template/.claude/skills/`、`template/scripts/` は**ユーザー向けインターフェース**として扱う。変更にはマイグレーションノートが必要。
 - 構造的な書き換えよりも追加的な変更を優先する。
 - 生成されたコンテンツはバージョン管理に含めない。
 - 配布リポジトリは**公開先**であり、編集場所ではない。

@@ -28,8 +28,11 @@ make venv           # Python 3.11 で .venv を作成
 make build-ja       # 日本語原稿をコンパイル（または構造検証）
 make build-en       # 英語原稿をコンパイル（または構造検証）
 make lint-bib       # 参考文献エントリを検証
+make citation-check # TeX の citation key が .bib に存在するか検証
 make mirror-check   # ja/ と en/ のブロックレベルのドリフトを検出
-make ci             # lint-bib + mirror-check + build-ja + build-en
+make ci             # lint-bib + citation-check + mirror-check + build-ja + build-en
+make readiness-check # 公開メタデータ、再現性メモ、workflow 参照の未記入を検出
+make pre-submit     # ci + readiness-check
 make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
 ```
 
@@ -49,6 +52,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（settings.json の deny パターンが強制する）。
 - `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。引用キーは安定させる。
 - 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
+- 公開・投稿前には `manuscript/publication-metadata.toml` と `notes/reproducibility.md` を更新し、`make pre-submit` を実行する。
 - ミラー同期には `/sync-ja-en` を使用する。両言語を盲目的に上書きしない。
 - 各セッションの終了時に `notes/handoff.md` と `notes/todo.md` を更新する。
 - 恒久的な決定は `notes/decision-log.md` に記録する。
@@ -101,10 +105,12 @@ manuscript/en/       英語ミラー（対応するブロック ID）
 manuscript/shared/   figures, bib, style
 manuscript/mirror/   map.toml, terminology.yml, status.md, change-queue.md
 manuscript/venue.md  投稿先情報
+manuscript/publication-metadata.toml  公開タイトル、著者、ライセンス、build provenance
 submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: summaries, local（papers, bib, excerpts はスキルが必要時に作成）
-notes/               project-brief, contribution-claims, handoff, todo, decision-log
-scripts/             ビルド、lint、ミラーチェック、エクスポート、コンテキスト収集
+notes/               project-brief, contribution-claims, reproducibility, handoff, todo, decision-log
+scripts/             ビルド、lint、citation-check、ミラーチェック、エクスポート、コンテキスト収集
+.github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
 .agents/             Codex 用 skills/ 互換入口
 TROUBLESHOOTING.md   nested repo と safe.directory の注意

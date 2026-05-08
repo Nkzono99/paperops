@@ -63,7 +63,7 @@ def main() -> int:
             print(f"- {error}")
         return 1
 
-        print("参考文献の lint に成功しました: {} ファイル、{} エントリ".format(len(files), len(keys)))
+    print("参考文献の lint に成功しました: {} ファイル、{} エントリ".format(len(files), len(keys)))
     return 0
 
 

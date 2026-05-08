@@ -1,0 +1,30 @@
+# 公開・投稿時に読者と CI が参照するメタデータ。
+# frontmatter/*.tex と矛盾しないように、初回セットアップ時と投稿前に更新する。
+
+[manuscript]
+title_ja = "未定"
+title_en = "Untitled"
+source_language = "ja"
+status = "draft"
+keywords = []
+
+[[authors]]
+name = "著者名"
+orcid = ""
+affiliation = "所属"
+email = ""
+corresponding = true
+
+[repository]
+url = ""
+primary_branch = "main"
+
+[licenses]
+manuscript = "未定"
+code = "未定"
+data = "未定"
+
+[provenance]
+last_public_build_commit = ""
+last_public_build_command = ""
+last_public_build_artifact = ""

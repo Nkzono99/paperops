@@ -11,4 +11,4 @@ Codex で使う互換入口。実際の手順は `.claude/skills/update-refs/SKI
 
 - `refs/` は生 PDF 置き場ではなく知識層として扱う。
 - citation key を安定させ、`manuscript/shared/bib/` と `refs/summaries/` の対応を確認する。
-- bib を編集したら `make lint-bib` を実行する。
+- bib や引用を編集したら `make lint-bib` と `make citation-check` を実行する。

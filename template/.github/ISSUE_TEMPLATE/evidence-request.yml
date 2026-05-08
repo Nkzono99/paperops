@@ -1,0 +1,39 @@
+name: エビデンス・解析リクエスト
+description: 主張を支えるデータ、解析、図表、再現性情報の不足を追跡
+title: "[evidence] "
+body:
+  - type: textarea
+    id: claim
+    attributes:
+      label: 対象の主張
+      description: "`notes/contribution-claims.md` の番号、本文 block ID、または図表番号を書く。"
+    validations:
+      required: true
+  - type: textarea
+    id: missing
+    attributes:
+      label: 不足しているエビデンス
+      description: 必要なデータ、統計値、対照、図表、再現手順を具体化する。
+    validations:
+      required: true
+  - type: textarea
+    id: reproducibility
+    attributes:
+      label: 再現性への影響
+      description: "`notes/reproducibility.md`、Data availability、解析エントリポイントへの追記が必要かを書く。"
+  - type: dropdown
+    id: effort
+    attributes:
+      label: 作業量の見込み
+      options:
+        - Small
+        - Medium
+        - Large
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: 完了条件
+      description: 何が揃えばこの Issue を閉じられるかを書く。

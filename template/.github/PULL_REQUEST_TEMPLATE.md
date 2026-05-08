@@ -6,5 +6,6 @@
 
 - [ ] 執筆状態が変わった場合は `notes/` を更新した
 - [ ] バイリンガルコンテンツが変わった場合は `manuscript/mirror/status.md` を更新した
-- [ ] `make ci` を実行した
+- [ ] `make ci` を実行した（参考文献、citation key、ミラー、ビルド構造）
+- [ ] 外部共有・投稿に近い変更の場合は `make pre-submit` を実行し、`manuscript/publication-metadata.toml` と `notes/reproducibility.md` を更新した
 - [ ] 必要に応じて refs を追加・キュレーションした

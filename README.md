@@ -37,6 +37,10 @@ AI 支援による論文執筆のための再利用可能なハーネス。
 - `notes/`: セッション引き継ぎと継続性の状態管理
 - 日本語・英語の原稿をブロックレベルのミラーとして追跡
 - `submission/<venue>/`: 投稿先公式テンプレートと最終提出用 TeX の分離
+- `manuscript/publication-metadata.toml` と `notes/reproducibility.md`: 公開メタデータ、計算環境、図表 provenance の投稿前確認
+- `make pre-submit`: `make ci` に加えてスタータープレースホルダー、workflow 参照、公開メタデータ不足を検出
+- `make citation-check`: TeX 本文中の citation key と `.bib` の不整合を早期検出
+- 下流論文リポジトリ用の Issue フォーム: 原稿レビュー、エビデンス不足、ハーネス摩擦を分けて収集
 - テンプレート自体の再利用可能な保守ワークフロー
 - プロジェクトローカルの Claude / Codex スキル、フック、運用ルール
 

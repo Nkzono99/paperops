@@ -15,6 +15,7 @@ allowed-tools: Read, Edit, Write, Glob
 3. `notes/todo.md` を更新する。
 4. 重要な決定が行われた場合、`notes/decision-log.md` に追加する。
 5. 知見の更新があれば `notes/project-brief.md` や `notes/contribution-claims.md` も更新する。
+6. データ、解析環境、図表生成、共有 artifact が変わった場合は `notes/reproducibility.md` を更新する。
 
 ## 推奨出力
 

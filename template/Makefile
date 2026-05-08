@@ -1,10 +1,11 @@
-.PHONY: venv build-ja build-en lint-bib mirror-check collect-context export-arxiv ci
+.PHONY: venv build-ja build-en lint-bib citation-check mirror-check collect-context readiness-check export-arxiv ci pre-submit
 
-PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3.11)
+PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
+PYTHON_BOOTSTRAP ?= python
 
 venv:
-	python3.11 -m venv .venv
-	./.venv/bin/python -m pip install --upgrade pip
+	$(PYTHON_BOOTSTRAP) -m venv .venv
+	@if [ -x .venv/bin/python ]; then .venv/bin/python -m pip install --upgrade pip; else .venv/Scripts/python.exe -m pip install --upgrade pip; fi
 
 build-ja:
 	./scripts/build-ja.sh
@@ -15,13 +16,21 @@ build-en:
 lint-bib:
 	$(PYTHON) scripts/lint-bib.py --root .
 
+citation-check:
+	$(PYTHON) scripts/check-citations.py --root .
+
 mirror-check:
 	$(PYTHON) scripts/mirror-check.py --root manuscript --report manuscript/mirror/reports/latest.md
 
 collect-context:
 	$(PYTHON) scripts/collect-note-context.py --root . --output notes/session-context.generated.md
 
+readiness-check:
+	$(PYTHON) scripts/readiness-check.py --root .
+
 export-arxiv:
 	./scripts/export-arxiv.sh
 
-ci: lint-bib mirror-check build-ja build-en
+ci: lint-bib citation-check mirror-check build-ja build-en
+
+pre-submit: ci readiness-check

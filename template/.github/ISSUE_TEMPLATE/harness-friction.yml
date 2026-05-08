@@ -1,0 +1,45 @@
+name: ハーネス摩擦
+description: スクリプト、ミラー、refs、notes、AI スキルの繰り返し問題を記録
+title: "[harness] "
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: 領域
+      options:
+        - scripts / build
+        - mirror
+        - refs
+        - notes
+        - submission
+        - skills / agents
+        - GitHub Actions
+    validations:
+      required: true
+  - type: textarea
+    id: friction
+    attributes:
+      label: 摩擦の内容
+      description: 何度も詰まる操作、エラー、曖昧な手順を書く。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 再現手順
+      description: コマンド、対象ファイル、期待した挙動、実際の挙動を書く。
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 修正スコープ
+      options:
+        - この論文リポジトリだけ
+        - 上流テンプレートにも戻したい
+        - 判断が必要
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: 改善案
+      description: 小さく追加できるガード、ドキュメント、スクリプト案があれば書く。
