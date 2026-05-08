@@ -91,6 +91,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 | `/pull-template-updates` | 上流テンプレートの変更を安全に取り込む |
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
 | `/review-public-manuscript` | 公開原稿だけを入力に外部読者視点で投稿前レビュー |
+| `/design-manuscript-claims` | 作業報告型の原稿を主張中心の構造へ再設計 |
 
 ## リポジトリマップ
 

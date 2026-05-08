@@ -88,6 +88,7 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。各 Co
 | `/pull-template-updates` | 上流テンプレートの変更を安全に取り込む |
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
 | `/review-public-manuscript` | 公開原稿だけを入力に外部読者視点で投稿前レビュー |
+| `/design-manuscript-claims` | 作業報告型の原稿を主張中心の構造へ再設計 |
 
 ## リポジトリマップ
 
