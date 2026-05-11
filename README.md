@@ -40,6 +40,7 @@ AI 支援による論文執筆のための再利用可能なハーネス。
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md`: 公開メタデータ、AI 利用開示、計算環境、図表 provenance の投稿前確認
 - `make pre-submit`: `make ci` に加えてスタータープレースホルダー、workflow 参照、公開メタデータ不足を検出
 - `make citation-check`: TeX 本文中の citation key と `.bib` の不整合を早期検出
+- `make public-terms-check` / `make claim-evidence-check`: 内部語の公開本文混入と supported claim の evidence 対応を早期検出
 - 下流論文リポジトリ用の Issue フォーム: 原稿レビュー、エビデンス不足、ハーネス摩擦を分けて収集
 - テンプレート自体の再利用可能な保守ワークフロー
 - プロジェクトローカルの Claude / Codex スキル、フック、運用ルール

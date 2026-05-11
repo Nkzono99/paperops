@@ -23,7 +23,7 @@
 6. 通読レビューでは `/start-manuscript-review` で review branch と inline comment ルールを確認し、終了後に `/collect-manuscript-review` で TeX diff と comment を台帳化する。
 7. 投稿先公式テンプレートへ展開する段階では `submission/<venue>/` を使い、`manuscript/` と混ぜない。
 8. `notes/` に進捗を記録し、AI が文献・解析・図表・投稿文面に関与した場合は `notes/ai-use.md` も更新する。
-9. 主要な変更を共有する前に `make ci` を実行し、参考文献、citation key、ミラー、ビルド構造を確認する。
+9. 主要な変更を共有する前に `make ci` を実行し、参考文献、citation key、ミラー、公開語彙、claim-evidence、ビルド構造を確認する。
 10. 投稿・外部共有の直前には `make pre-submit` を実行し、公開メタデータ、再現性メモ、workflow 参照、スタータープレースホルダーの残存を確認する。
 
 既存原稿がある場合は `/import-manuscript` でインポートできる。
@@ -57,5 +57,5 @@ nested private repo 運用や Windows の dubious ownership で git 操作が止
 - `.github/ISSUE_TEMPLATE/`: 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 - `.claude/`: プロジェクトローカルの設定、スキル、ルール、フック
 - `.agents/`: Codex 用のプロジェクトローカルスキル互換入口
-- `scripts/`: 軽量な検証・レビュー回収・パッケージングヘルパー
+- `scripts/`: 軽量な検証・公開語彙/claim-evidence チェック・レビュー回収・パッケージングヘルパー
 - `TROUBLESHOOTING.md`: nested repo、Windows safe.directory などの運用注意

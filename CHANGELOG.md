@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Sprint 2 の品質チェックとして、公開原稿に残る内部語・禁止語を検出する `scripts/check-public-terms.py` と、supported claim の evidence / scope / manuscript block 対応を確認する `scripts/check-claim-evidence.py` を追加し、`make ci` / `make smoke` に組み込んだ。PR テンプレートに論文品質チェックを追加し、refs summary template で文献サマリーの検証状態を記録できるようにした。あわせて Windows の `make` からも shell script target を実行できるよう、`build-ja` / `build-en` / `export-arxiv` は `bash scripts/...` 経由にした。既存下流リポジトリで取り込む場合は新規 script、Makefile target、PR テンプレート、`refs/summaries/summary-template.md`、`readiness-check.py` の placeholder 追加を反映する必要がある。
 - Sprint 1 の即効改善として、`scripts/export-arxiv.sh` が generated figures 不在でも失敗しないようにし、`/pull-template-updates` の古い `docs/` パス参照と `/setup` の `refs/local/locations.toml` 自動作成案内を現行の安全運用へ更新した（#16, #17, #18）。既存下流リポジトリでは任意導入だが、取り込む場合は該当 script と skill の更新、README の setup 案内を反映する必要がある。
 - 論文品質ゲートの土台として `notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`.claude/rules/writing-quality.md` を追加し、`manuscript/mirror/terminology.yml` を public terminology gate 形式に拡張した（#19, #20, #21）。既存下流リポジトリでは任意導入だが、取り込む場合は新規 notes/rule、`terminology.yml` schema、`readiness-check.py` の追加 placeholder チェック、AGENTS/CLAUDE/README の案内更新が必要。
 - TeX 直編集レビューの導線として `/start-manuscript-review` と `/collect-manuscript-review` を追加し、`scripts/collect-manuscript-review.py` で `git diff` と `% REVIEW:` / `% AI:` / `% Q:` / `% KEEP?:` / `% TODO-PAPER:` を `notes/reviews/review-YYYY-MM-DD.md` に回収できるようにした（#15）。既存下流リポジトリでは任意導入だが、この運用を使う場合は新しい skill、script、`.claude/settings.json` の追加許可、AGENTS/CLAUDE/README の案内を取り込む必要がある。

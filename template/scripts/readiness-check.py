@@ -13,7 +13,7 @@ except ModuleNotFoundError:
 
 
 PLACEHOLDER_RE = re.compile(
-    r"(paper-my-topic|YOUR_ORG/paper-harness-template|置き換えてください|未定|未記入|TBD|TODO|Untitled|著者名|所属|Title Goes Here)"
+    r"(paper-my-topic|YOUR_ORG/paper-harness-template|置き換えてください|未定|未記入|TBD|TODO|Untitled|著者名|所属|Title Goes Here|日本語論文タイトルの仮置き|Placeholder English Paper Title|Author A|Author B)"
 )
 
 
@@ -167,6 +167,7 @@ def main() -> int:
             "notes/ai-use.md",
             "notes/reproducibility.md",
             "manuscript/venue.md",
+            "manuscript/shared/style/macros.tex",
         ],
         findings,
         args.allow_placeholders,

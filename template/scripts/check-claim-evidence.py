@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+
+import argparse
+import re
+from dataclasses import dataclass
+from pathlib import Path
+
+
+PLACEHOLDER_RE = re.compile(r"(未記入|TBD|TODO|置き換えてください)")
+
+
+@dataclass
+class Finding:
+    severity: str
+    message: str
+
+
+def read_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def is_blank(value: str | None) -> bool:
+    return value is None or not value.strip() or PLACEHOLDER_RE.search(value) is not None
+
+
+def normalize_header(value: str) -> str:
+    return value.strip().lower().replace(" ", "_")
+
+
+def extract_claim_rows(text: str) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    headers: list[str] | None = None
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|") or not stripped.endswith("|"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if not cells:
+            continue
+        if all(set(cell.replace(" ", "")) <= {"-", ":"} for cell in cells):
+            continue
+        if "Claim ID" in cells:
+            headers = [normalize_header(cell) for cell in cells]
+            continue
+        if headers and len(cells) == len(headers):
+            rows.append(dict(zip(headers, cells)))
+    return rows
+
+
+def extract_not_claiming_items(text: str) -> list[str]:
+    items: list[str] = []
+    in_section = False
+    for line in text.splitlines():
+        if line.startswith("## "):
+            in_section = line.strip() == "## Not claiming"
+            continue
+        if in_section and line.strip().startswith("- "):
+            item = line.strip()[2:].strip()
+            if not is_blank(item) and "本論文では" not in item and "将来課題" not in item:
+                items.append(item)
+    return items
+
+
+def read_public_edge_text(root: Path) -> str:
+    candidates = [
+        "manuscript/ja/sections/00_abstract.tex",
+        "manuscript/ja/sections/90_conclusion.tex",
+        "manuscript/en/sections/00_abstract.tex",
+        "manuscript/en/sections/90_conclusion.tex",
+    ]
+    chunks = []
+    for rel_path in candidates:
+        path = root / rel_path
+        if path.exists():
+            chunks.append(read_text(path))
+    return "\n".join(chunks)
+
+
+def check_claims(root: Path, text: str) -> list[Finding]:
+    findings: list[Finding] = []
+    rows = extract_claim_rows(text)
+    if not rows:
+        return [Finding("warning", "`notes/claim-evidence-map.md` に Claim ledger が見つかりません")]
+
+    for row in rows:
+        claim_id = row.get("claim_id", "unknown")
+        status = row.get("status", "").strip().lower()
+        if status == "supported":
+            for key in ["claim", "evidence", "warrant_/_reasoning", "scope", "manuscript_blocks"]:
+                if is_blank(row.get(key)):
+                    findings.append(Finding("error", f"`{claim_id}` は supported ですが `{key}` が未記入です"))
+        if status == "overclaim risk" and is_blank(row.get("limitation")):
+            findings.append(Finding("warning", f"`{claim_id}` は overclaim risk ですが limitation が未記入です"))
+
+    public_edge_text = read_public_edge_text(root)
+    for item in extract_not_claiming_items(text):
+        if item in public_edge_text:
+            findings.append(Finding("warning", f"`Not claiming` の `{item}` が Abstract/Conclusion に出現しています"))
+
+    if all(row.get("status", "").strip().lower() == "draft" for row in rows):
+        findings.append(Finding("warning", "Claim ledger は draft のみです。投稿前には supported / overclaim risk / defer を整理してください"))
+    return findings
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="claim-evidence map の supported claim に証拠と本文対応があるか確認する。")
+    parser.add_argument("--root", type=Path, default=Path("."))
+    args = parser.parse_args()
+
+    root = args.root.resolve()
+    rel_path = "notes/claim-evidence-map.md"
+    path = root / rel_path
+    if not path.exists():
+        print("claim-evidence-check に失敗しました")
+        print(f"- `{rel_path}` が見つかりません")
+        return 1
+
+    findings = check_claims(root, read_text(path))
+    errors = [finding for finding in findings if finding.severity == "error"]
+    warnings = [finding for finding in findings if finding.severity == "warning"]
+
+    print("# claim-evidence-check")
+    print("")
+    if errors:
+        print("## Errors")
+        for finding in errors:
+            print(f"- {finding.message}")
+        print("")
+    if warnings:
+        print("## Warnings")
+        for finding in warnings:
+            print(f"- {finding.message}")
+        print("")
+    if not findings:
+        print("supported claim に evidence、scope、本文 block の対応があります。")
+    return 1 if errors else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

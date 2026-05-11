@@ -30,7 +30,9 @@ make build-en       # 英語原稿をコンパイル（または構造検証）
 make lint-bib       # 参考文献エントリを検証
 make citation-check # TeX の citation key が .bib に存在するか検証
 make mirror-check   # ja/ と en/ のブロックレベルのドリフトを検出
-make ci             # lint-bib + citation-check + mirror-check + build-ja + build-en
+make public-terms-check # 公開原稿に内部語・禁止語が残っていないか検証
+make claim-evidence-check # supported claim に証拠と本文対応があるか検証
+make ci             # lint-bib + citation-check + mirror-check + public-terms-check + claim-evidence-check + build-ja + build-en
 make readiness-check # 公開メタデータ、再現性メモ、workflow 参照の未記入を検出
 make pre-submit     # ci + readiness-check
 make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
@@ -111,7 +113,7 @@ manuscript/publication-metadata.toml  公開タイトル、著者、ライセン
 submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: summaries, local（papers, bib, excerpts はスキルが必要時に作成）
 notes/               project-brief, contribution-claims, claim-evidence-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
-scripts/             ビルド、lint、citation-check、ミラーチェック、レビュー回収、エクスポート、コンテキスト収集
+scripts/             ビルド、lint、citation-check、ミラーチェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
 .agents/             Codex 用 skills/ 互換入口
