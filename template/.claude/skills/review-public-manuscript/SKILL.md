@@ -1,13 +1,13 @@
 ---
 name: review-public-manuscript
-description: 投稿前原稿を外部読者・一般研究者視点でレビューする。PDF または公開原稿だけを入力に、未定義語・ローカル語・暗黙前提・再現性ギャップを洗い出す。
-argument-hint: "<pdf-or-public-manuscript-path> [general-researcher|reader-assumptions|local-terminology]"
+description: 節単位・週次・投稿前の公開原稿を外部読者・一般研究者視点でレビューする。PDF または公開原稿だけを入力に、未定義語・ローカル語・暗黙前提・再現性ギャップを洗い出す。
+argument-hint: "<pdf-or-public-manuscript-path> [section|weekly|pre-submit] [general-researcher|reader-assumptions|local-terminology]"
 allowed-tools: Read, Glob, Grep, Bash
 ---
 
 # review-public-manuscript
 
-投稿前原稿を、repo 内部の notes やローカル run 情報を知らない外部読者としてレビューする。
+節単位・週次・投稿前の公開原稿を、repo 内部の notes やローカル run 情報を知らない外部読者としてレビューする。
 
 通常の scientific review に加えて、一般研究者・隣接分野査読者・再現性重視の読者として、ローカル語、実装語、暗黙前提が公開原稿だけで理解できるかを検査する。
 
@@ -16,6 +16,14 @@ allowed-tools: Read, Glob, Grep, Bash
 - `<pdf-or-public-manuscript-path>`: 投稿前 PDF、または公開原稿として読者に見える TeX/Markdown/テキスト。
 - 入力が複数ある場合は、公開される本文・図表・補足資料だけを対象にする。
 - `manuscript/mirror/status.md` は source-of-truth 言語の確認に限って読んでよい。ただし、不足説明の補完には使わない。
+
+## 発動タイミング
+
+- `section`: 1 節を書いた直後に、その節と関連する figure/table caption だけを読む。修正コストが小さいうちに未定義語、主張の飛躍、読者前提を拾う。
+- `weekly`: 週 1 回、Abstract、Introduction、title candidates、figure/table captions だけを読む。中心主張、公開語彙、図表 story が読者に通るかを確認する。
+- `pre-submit`: 投稿前に PDF または投稿対象 TeX 全体を読む。Data/code availability、AI disclosure、reproducibility、local terminology、submission-specific formatting の詰まりを重点確認する。
+
+タイミング指定がない場合は、入力の粒度から最も近いモードを推定し、出力の冒頭で「今回は section / weekly / pre-submit のどれとして読んだか」を明記する。
 
 ## ペルソナ / チェックモード
 
@@ -38,8 +46,8 @@ allowed-tools: Read, Glob, Grep, Bash
 
 ## 手順
 
-1. 入力アーティファクトが公開読者に見えるものか確認する。足りない場合は、レビュー対象を限定して明記する。
-2. 原稿だけから、研究目的、データ、方法、結果、主張を再構成する。
+1. 入力アーティファクトが公開読者に見えるものか確認し、section / weekly / pre-submit のレビュー粒度を明記する。足りない場合は、レビュー対象を限定して明記する。
+2. 原稿だけから、研究目的、データ、方法、結果、主張を再構成する。weekly では Abstract + Introduction + captions から中心主張と figure story を再構成する。
 3. 内部文脈なしでは意味が取れない語を抽出する:
    - 未定義の event catalog、quality subset、run label、内部モデル名
    - campaign-internal label（例: `Series A/B/C`）や project-local naming
@@ -72,9 +80,12 @@ allowed-tools: Read, Glob, Grep, Bash
 
 Codex で subagent を使う場合、main agent は repo-aware editor として修正方針を統合し、subagent は `fork_context=false` 相当で一般研究者 reviewer として読む。subagent には `notes/`、private refs、run output を渡さない。
 
+repo-aware editor と public-only reviewer を同じ判断に混ぜない。public-only reviewer は読者が詰まる箇所を検出する役割に留め、修正実装や内部台帳への反映は repo-aware editor が行う。
+
 ## 出力形式
 
 - `Public-reader summary`: 外部読者として理解できた主張を 3-5 点で要約
+- `Review mode`: section / weekly / pre-submit のどれで読んだか
 - `Blocking gaps`: 投稿前に直すべき未定義語・再現性不足
 - `Reader-assumption gaps`: 公開原稿だけでは復元できない前提
 - `Local terminology`: local label / simulator term / artifact term と推奨 public term の表

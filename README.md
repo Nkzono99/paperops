@@ -38,10 +38,12 @@ AI 支援による論文執筆のための再利用可能なハーネス。
 - 日本語・英語の原稿をブロックレベルのミラーとして追跡
 - `submission/<venue>/`: 投稿先公式テンプレートと最終提出用 TeX の分離
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md`: 公開メタデータ、AI 利用開示、計算環境、図表 provenance の投稿前確認
-- `make pre-submit`: `make ci` に加えてスタータープレースホルダー、workflow 参照、公開メタデータ不足を検出
+- `make pre-submit`: `make ci` に加えて引用サマリー、submission slot、スタータープレースホルダー、workflow 参照、公開メタデータ不足を検出
 - `make citation-check`: TeX 本文中の citation key と `.bib` の不整合を早期検出
 - `make public-terms-check` / `make claim-evidence-check`: 内部語の公開本文混入と supported claim の evidence 対応を早期検出
 - `make mirror-freshness-check` / `make submission-drift-check`: 日英 block の同期鮮度と投稿版への科学的変更戻し忘れを点検
+- `make skill-mirror-check`: `.agents/skills/` が `.claude/skills/` の同名 source of truth を参照しているかを点検
+- `scripts/build-ja.sh` / `scripts/build-en.sh`: `\input` / `\include` / `\includegraphics` / bibliography / style 参照の構造検証を行い、TeX 環境があれば PDF ビルドへ進む
 - 下流論文リポジトリ用の Issue フォーム: 原稿レビュー、エビデンス不足、ハーネス摩擦を分けて収集
 - テンプレート自体の再利用可能な保守ワークフロー
 - プロジェクトローカルの Claude / Codex スキル、フック、運用ルール
@@ -54,7 +56,7 @@ GitHub の `Use this template` フローを使いたい場合、このリポジ�
 ## 検証モデル
 
 テンプレートは完全な TeX 環境を前提とせず、軽量なローカルチェックを提供する。
-`scripts/build-ja.sh` と `scripts/build-en.sh` は `latexmk` が利用可能な場合はコンパイルを行い、そうでなければ構造検証にフォールバックするため、クリーンなランナーでも CI が執筆ハーネスを実行できる。
+`scripts/build-ja.sh` と `scripts/build-en.sh` は `latexmk` が利用可能な場合はコンパイルを行い、そうでなければ `scripts/check-tex-structure.py` による構造検証にフォールバックするため、クリーンなランナーでも CI が執筆ハーネスを実行できる。
 想定されるローカルセットアップは、リポジトリローカルの `.venv` 内の `python3.11` である。
 
 ## 上流リファレンス

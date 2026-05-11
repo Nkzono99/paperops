@@ -11,3 +11,7 @@ template/manuscript/mirror/reports/smoke-check.md
 template/notes/session-context.generated.md
 template/refs/local/locations.toml
 template/.claude/settings.local.json
+template/refs/papers/**
+!template/refs/papers/.gitkeep
+template/**/*.pdf
+!template/manuscript/shared/figures/**/*.pdf

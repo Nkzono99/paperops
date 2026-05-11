@@ -21,10 +21,11 @@
 4. 新しい公開用語や内部語の置換が必要なら `manuscript/mirror/terminology.yml` に記録する。
 5. 必要なブロックを `manuscript/en/` にミラーし、確認済み同期後に `python scripts/mirror-freshness-check.py --root manuscript --update` で ledger を更新する。
 6. 通読レビューでは `/start-manuscript-review` で review branch と inline comment ルールを確認し、終了後に `/collect-manuscript-review` で TeX diff と comment を台帳化する。
-7. 投稿先公式テンプレートへ展開する段階では `submission/<venue>/` を使い、`manuscript/` と混ぜない。
-8. `notes/` に進捗を記録し、AI が文献・解析・図表・投稿文面に関与した場合は `notes/ai-use.md` も更新する。
-9. 主要な変更を共有する前に `make ci` を実行し、参考文献、citation key、ミラー、block freshness、公開語彙、claim-evidence、ビルド構造を確認する。
-10. 投稿・外部共有の直前には `make pre-submit` を実行し、公開メタデータ、再現性メモ、submission drift、workflow 参照、スタータープレースホルダーの残存を確認する。
+7. 1 節を書いた直後や週次レビューでは `/review-public-manuscript` を `section` / `weekly` として使い、公開原稿だけで読者が詰まる語彙・前提・figure story を確認する。
+8. 投稿先公式テンプレートへ展開する段階では `submission/<venue>/` を使い、`manuscript/` と混ぜない。
+9. `notes/` に進捗を記録し、AI が文献・解析・図表・投稿文面に関与した場合は `notes/ai-use.md` も更新する。
+10. 主要な変更を共有する前に `make ci` を実行し、参考文献、citation key、ミラー、block freshness、公開語彙、claim-evidence、skill 対応、ビルド構造を確認する。
+11. 投稿・外部共有の直前には `make pre-submit` を実行し、引用サマリー、公開メタデータ、再現性メモ、submission slot、submission drift、workflow 参照、スタータープレースホルダーの残存を確認する。
 
 既存原稿がある場合は `/import-manuscript` でインポートできる。
 
@@ -52,10 +53,10 @@ nested private repo 運用や Windows の dubious ownership で git 操作が止
 - `manuscript/`: バイリンガルソース、共有アセット、ミラー制御、投稿先情報
 - `manuscript/publication-metadata.toml`: 公開タイトル、著者、ライセンス、最後に共有した build provenance
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX の分離スロット
-- `refs/`: 参照知識、サマリー、ローカルパスエイリアス（papers, bib 等はスキルが必要時に作成）
+- `refs/`: 参照知識、サマリー、ローカルパスエイリアス（raw PDF は `refs/papers/` に置いても既定で ignore し、共有時は `refs/summaries/` を優先）
 - `notes/`: プロジェクト概要、貢献主張、claim-evidence map、読者モデル、AI 利用ログ、再現性メモ、引き継ぎ、意思決定の追跡
 - `.github/ISSUE_TEMPLATE/`: 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 - `.claude/`: プロジェクトローカルの設定、スキル、ルール、フック
 - `.agents/`: Codex 用のプロジェクトローカルスキル互換入口
-- `scripts/`: 軽量な検証・ミラー鮮度/submission drift・公開語彙/claim-evidence チェック・レビュー回収・パッケージングヘルパー
+- `scripts/`: 軽量な検証・TeX 構造/skill 対応・ミラー鮮度/submission drift・公開語彙/claim-evidence チェック・レビュー回収・パッケージングヘルパー
 - `TROUBLESHOOTING.md`: nested repo、Windows safe.directory などの運用注意

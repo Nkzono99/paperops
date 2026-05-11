@@ -1,4 +1,4 @@
-.PHONY: venv smoke lint-bib citation-check mirror-check mirror-freshness-check public-terms-check claim-evidence-check submission-drift-check collect-context template-readiness-check publish-scaffold-dry-run
+.PHONY: venv smoke lint-bib citation-check mirror-check mirror-freshness-check public-terms-check claim-evidence-check submission-drift-check skill-mirror-check collect-context template-readiness-check publish-scaffold-dry-run
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
 PYTHON_BOOTSTRAP ?= python
@@ -7,7 +7,7 @@ venv:
 	$(PYTHON_BOOTSTRAP) -m venv .venv
 	@if [ -x .venv/bin/python ]; then .venv/bin/python -m pip install --upgrade pip; else .venv/Scripts/python.exe -m pip install --upgrade pip; fi
 
-smoke: lint-bib citation-check mirror-check mirror-freshness-check public-terms-check claim-evidence-check submission-drift-check collect-context template-readiness-check
+smoke: lint-bib citation-check mirror-check mirror-freshness-check public-terms-check claim-evidence-check submission-drift-check skill-mirror-check collect-context template-readiness-check
 
 lint-bib:
 	$(PYTHON) template/scripts/lint-bib.py --root template
@@ -29,6 +29,9 @@ claim-evidence-check:
 
 submission-drift-check:
 	$(PYTHON) template/scripts/check-submission-drift.py --root template
+
+skill-mirror-check:
+	$(PYTHON) template/scripts/check-skill-mirror.py --root template
 
 collect-context:
 	$(PYTHON) template/scripts/collect-note-context.py --root template --output template/notes/session-context.generated.md

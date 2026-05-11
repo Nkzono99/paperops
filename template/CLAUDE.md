@@ -28,15 +28,17 @@ make venv           # Python 3.11 で .venv を作成
 make build-ja       # 日本語原稿をコンパイル（または構造検証）
 make build-en       # 英語原稿をコンパイル（または構造検証）
 make lint-bib       # 参考文献エントリを検証
+make lint-bib-pre-submit # 引用済み key に refs/summaries の検証サマリーがあるか検証
 make citation-check # TeX の citation key が .bib に存在するか検証
 make mirror-check   # ja/ と en/ のブロックレベルのドリフトを検出
 make mirror-freshness-check # 前回同期 ledger から ja/en block の更新を検出
 make public-terms-check # 公開原稿に内部語・禁止語が残っていないか検証
 make claim-evidence-check # supported claim に証拠と本文対応があるか検証
 make submission-drift-check # submission/<venue> と manuscript/en の同期注意点を検出
-make ci             # lint-bib + citation-check + mirror-check + mirror-freshness-check + public-terms-check + claim-evidence-check + build-ja + build-en
+make skill-mirror-check # .agents/skills と .claude/skills の対応を検証
+make ci             # lint-bib + citation-check + mirror-check + mirror-freshness-check + public-terms-check + claim-evidence-check + skill-mirror-check + build-ja + build-en
 make readiness-check # 公開メタデータ、再現性メモ、workflow 参照の未記入を検出
-make pre-submit     # ci + readiness-check + submission-drift-check
+make pre-submit     # ci + lint-bib-pre-submit + submission 必須 readiness + submission-drift-check
 make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
 ```
 
@@ -54,12 +56,13 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `manuscript/mirror/status.md` に別段の記載がない限り、`manuscript/ja/` が科学的なソースオブトゥルースである。
 - `% block: ...` 識別子を保持する。削除や番号の振り直しは行わない。
 - 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（settings.json の deny パターンが強制する）。
-- `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。引用キーは安定させる。
+- `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。raw PDF は既定で ignore される `refs/papers/` に留め、引用キーは安定させる。
 - 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
 - 公開・投稿前には `manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`notes/ai-use.md` を更新し、`make pre-submit` を実行する。
 - 新しい主張は `notes/claim-evidence-map.md` に evidence、scope、limitation とともに記録する。
 - 想定読者や投稿先制約が変わったら `notes/reviewer-model.md` と `manuscript/venue.md` を更新する。
 - 内部 run label、script name、directory name、artifact name を本文の公開語として使わず、必要な置換を `manuscript/mirror/terminology.yml` に記録する。
+- 1 節を書いた直後や週次の節目では `/review-public-manuscript` を `section` / `weekly` として使い、repo 内部文脈なしで公開語彙・暗黙前提・figure story を確認する。
 - ミラー同期には `/sync-ja-en` を使用する。両言語を盲目的に上書きしない。
 - 各セッションの終了時に `notes/handoff.md` と `notes/todo.md` を更新する。
 - 恒久的な決定は `notes/decision-log.md` に記録する。
@@ -101,7 +104,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 | `/resolve-local-paths` | `refs/local/` からローカルパスエイリアスを解決 |
 | `/pull-template-updates` | 上流テンプレートの変更を安全に取り込む |
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
-| `/review-public-manuscript` | 公開原稿だけを入力に外部読者視点で未定義語・ローカル語・暗黙前提をレビュー |
+| `/review-public-manuscript` | section / weekly / pre-submit の粒度で、公開原稿だけを入力に外部読者視点の未定義語・ローカル語・暗黙前提をレビュー |
 | `/start-manuscript-review` | TeX 直編集レビュー用 branch を用意し、人間向けの通読ガイドを表示 |
 | `/collect-manuscript-review` | TeX diff と inline comment からレビュー台帳を生成し、必要に応じて原稿へ反映 |
 | `/design-manuscript-claims` | 作業報告型の原稿を主張中心の構造へ再設計 |
@@ -124,7 +127,7 @@ manuscript/publication-metadata.toml  公開タイトル、著者、ライセン
 submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: summaries, local（papers, bib, excerpts はスキルが必要時に作成）
 notes/               project-brief, contribution-claims, claim-evidence-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
-scripts/             ビルド、lint、citation-check、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
+scripts/             ビルド、TeX 構造、lint、citation-check、skill 対応、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
 .agents/             Codex 用 skills/ 互換入口

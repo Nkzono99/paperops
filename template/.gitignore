@@ -12,3 +12,7 @@ manuscript/mirror/reports/latest.md
 notes/session-context.generated.md
 refs/local/locations.toml
 tex-env.toml
+refs/papers/**
+!refs/papers/.gitkeep
+*.pdf
+!manuscript/shared/figures/**/*.pdf

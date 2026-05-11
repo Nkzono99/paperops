@@ -20,7 +20,7 @@ else
   _TEX_ENV_PYTHON="python3"
 fi
 
-# TOML を解析して shell 変数を出力
+# TOML を解析し、shell eval なしで値を取り込む
 _tex_env_vars=$("$_TEX_ENV_PYTHON" - "$_TEX_ENV_TOML" <<'PY'
 import sys
 try:
@@ -42,20 +42,29 @@ if "texlive" in config:
             # アーキテクチャ別サブディレクトリ（例: x86_64-linux）
             arch_dirs = [d for d in bin_dir.iterdir() if d.is_dir()]
             if arch_dirs:
-                print(f"TEXLIVE_BIN={arch_dirs[0]}")
+                print(f"TEXLIVE_BIN\t{arch_dirs[0]}")
             else:
-                print(f"TEXLIVE_BIN={bin_dir}")
+                print(f"TEXLIVE_BIN\t{bin_dir}")
         else:
-            print(f"TEXLIVE_BIN={root}")
+            print(f"TEXLIVE_BIN\t{root}")
 
 if "docker" in config:
     image = config["docker"].get("image", "")
     if image:
-        print(f"TEX_DOCKER_IMAGE={image}")
+        print(f"TEX_DOCKER_IMAGE\t{image}")
 PY
 )
 
-eval "$_tex_env_vars"
+while IFS=$'\t' read -r _tex_env_key _tex_env_value; do
+  case "$_tex_env_key" in
+    TEXLIVE_BIN)
+      TEXLIVE_BIN="$_tex_env_value"
+      ;;
+    TEX_DOCKER_IMAGE)
+      TEX_DOCKER_IMAGE="$_tex_env_value"
+      ;;
+  esac
+done <<< "$_tex_env_vars"
 
 if [[ -n "${TEXLIVE_BIN:-}" ]]; then
   export PATH="$TEXLIVE_BIN:$PATH"
@@ -65,4 +74,4 @@ if [[ -n "${TEX_DOCKER_IMAGE:-}" ]]; then
   export TEX_DOCKER_IMAGE
 fi
 
-unset _TEX_ENV_ROOT _TEX_ENV_TOML _TEX_ENV_PYTHON _tex_env_vars
+unset _TEX_ENV_ROOT _TEX_ENV_TOML _TEX_ENV_PYTHON _tex_env_vars _tex_env_key _tex_env_value

@@ -28,3 +28,4 @@ submission/
 3. 投稿先が固まったら `manuscript/venue.md` に制約と `submission/<venue>/` の場所を書く。
 4. `manuscript/en/` の公開本文を `submission/<venue>/main.tex` に展開し、投稿先固有の class/style に合わせる。
 5. 投稿版で生じた科学的変更は `manuscript/` 側にも戻し、二重管理にしない。
+6. 投稿前は `make pre-submit` を実行し、`submission/<venue>/README.md` または `submission/<venue>/main.tex` の存在と drift を確認する。

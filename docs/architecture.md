@@ -23,13 +23,13 @@
 
 - `ja/` と `en/` に分割された原稿ソース
 - `manuscript/mirror/` 配下のミラー制御層と block freshness ledger
-- `refs/` 配下の参照知識
+- `refs/` 配下の参照知識。raw PDF は `refs/papers/` でローカル保持しても既定では ignore し、共有知識は `refs/summaries/` に集約する
 - `notes/` 配下のセッション継続性ノート、主張・証拠台帳、読者モデル、AI 利用ログ
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md` による公開メタデータ・AI 利用ログ・再現性メモ
 - `submission/<venue>/` 配下の投稿先公式テンプレートと最終提出用 TeX
 - 下流論文リポジトリ用の GitHub Issue フォーム
 - プロジェクトローカルの Claude / Codex スキルとフック
-- ビルド、lint、citation key 検証、エクスポート、ノート収集、投稿前 readiness 確認のための軽量スクリプト
+- ビルド、TeX 構造、lint、citation key 検証、skill 対応、エクスポート、ノート収集、投稿前 readiness 確認のための軽量スクリプト
 
 ## 設計原則
 

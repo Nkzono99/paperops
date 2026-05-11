@@ -21,28 +21,7 @@ fi
 
 mkdir -p "$BUILD_DIR"
 
-"$PYTHON" - <<'PY' "$MAIN_TEX"
-from pathlib import Path
-import re
-import sys
-
-main_tex = Path(sys.argv[1])
-text = main_tex.read_text(encoding="utf-8")
-pattern = re.compile(r"\\input\{(?P<target>[^}]+)\}")
-missing = []
-for match in pattern.finditer(text):
-    target = (main_tex.parent / f"{match.group('target')}.tex").resolve()
-    if not target.exists():
-        missing.append(str(target))
-
-if missing:
-    print("不足している入力ファイル:")
-    for item in missing:
-        print(f"  - {item}")
-    raise SystemExit(1)
-
-print(f"{main_tex} の入力ファイルを検証しました")
-PY
+"$PYTHON" "$ROOT/scripts/check-tex-structure.py" --root "$ROOT" --main "$MAIN_TEX" --label "日本語原稿"
 
 if [[ "${PAPER_TEMPLATE_RUN_LATEX:-0}" == "1" ]]; then
   if [[ -n "${TEX_DOCKER_IMAGE:-}" ]]; then
