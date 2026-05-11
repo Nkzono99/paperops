@@ -9,6 +9,6 @@ Codex で使う互換入口。実際の手順は `.claude/skills/resume-session/
 
 ## Codex 実行メモ
 
-- `notes/handoff.md`、`notes/todo.md`、`notes/open-questions.md`、`manuscript/mirror/status.md` を優先して読む。
+- `notes/handoff.md`、`notes/todo.md`、`notes/open-questions.md`、`notes/project-brief.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/mirror/status.md` を優先して読む。
 - 原稿編集前に ja/en のミラー状態を確認し、必要なら `make mirror-check` を実行する。
-- ユーザーには、現在状態、次に安全に進める作業、未解決リスクを短く返す。
+- ユーザーには、現在状態、中心主張、次に安全に進める作業、未解決リスクを短く返す。

@@ -9,13 +9,15 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 原稿全体または指定範囲を、実施項目の網羅ではなく、読者に伝えるべき主張を中心に再設計する。
 
-`review-public-manuscript` は公開原稿だけを外部読者として読むレビューである。この skill は repo 内の brief、contribution claims、mirror status、JA source of truth も読み、論文の主張階層と rewrite plan を設計する。
+`review-public-manuscript` は公開原稿だけを外部読者として読むレビューである。この skill は repo 内の brief、claim-evidence map、reviewer model、mirror status、JA source of truth も読み、論文の主張階層と rewrite plan を設計する。
 
 ## 入力
 
 - `manuscript/mirror/status.md`
 - `notes/project-brief.md`
 - `notes/contribution-claims.md`
+- `notes/claim-evidence-map.md`
+- `notes/reviewer-model.md`
 - `manuscript/ja/sections/*.tex`（原則として source of truth）
 - 必要に応じて `manuscript/en/sections/*.tex`
 - figure captions、section headings、abstract、conclusion
@@ -41,7 +43,9 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 4. section headings
 5. figure captions
 6. `notes/contribution-claims.md`
-7. `manuscript/mirror/status.md`
+7. `notes/claim-evidence-map.md`
+8. `notes/reviewer-model.md`
+9. `manuscript/mirror/status.md`
 
 この段階で、原稿が読者に約束している主張を仮説として書き出す。
 
@@ -65,6 +69,7 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 |-------|--------------------|---------------------|----------|--------|----------------|
 
 `Current blocks` には `% block: ...` ID または section file を入れる。block ID がない範囲は section と近い見出しで示す。
+設計後、ユーザーが了承した claim / evidence / scope / limitation は `notes/claim-evidence-map.md` に反映する。
 
 ### 4. 本文の配置を決める
 

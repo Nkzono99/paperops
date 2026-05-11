@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Sprint 1 の即効改善として、`scripts/export-arxiv.sh` が generated figures 不在でも失敗しないようにし、`/pull-template-updates` の古い `docs/` パス参照と `/setup` の `refs/local/locations.toml` 自動作成案内を現行の安全運用へ更新した（#16, #17, #18）。既存下流リポジトリでは任意導入だが、取り込む場合は該当 script と skill の更新、README の setup 案内を反映する必要がある。
+- 論文品質ゲートの土台として `notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`.claude/rules/writing-quality.md` を追加し、`manuscript/mirror/terminology.yml` を public terminology gate 形式に拡張した（#19, #20, #21）。既存下流リポジトリでは任意導入だが、取り込む場合は新規 notes/rule、`terminology.yml` schema、`readiness-check.py` の追加 placeholder チェック、AGENTS/CLAUDE/README の案内更新が必要。
 - TeX 直編集レビューの導線として `/start-manuscript-review` と `/collect-manuscript-review` を追加し、`scripts/collect-manuscript-review.py` で `git diff` と `% REVIEW:` / `% AI:` / `% Q:` / `% KEEP?:` / `% TODO-PAPER:` を `notes/reviews/review-YYYY-MM-DD.md` に回収できるようにした（#15）。既存下流リポジトリでは任意導入だが、この運用を使う場合は新しい skill、script、`.claude/settings.json` の追加許可、AGENTS/CLAUDE/README の案内を取り込む必要がある。
 - Manubot、Quarto journal templates、rrtools を一時クローンして参考にし、下流論文リポジトリ向けに `make readiness-check` / `make pre-submit`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md`、原稿レビュー・エビデンス不足・ハーネス摩擦の Issue フォームを追加。既存下流リポジトリでは任意導入だが、共有・投稿前の運用に使う場合は新規ファイルをコピーし、`Makefile` と PR テンプレートを更新する必要がある。
 - TeX 本文中の `\cite{...}` / `\citep{...}` 等が `.bib` に存在するかを確認する `scripts/check-citations.py` と `make citation-check` を追加し、`make ci` / `make smoke` に組み込んだ。既存下流リポジトリで取り込む場合は `scripts/check-citations.py` と `Makefile` の target 更新が必要。

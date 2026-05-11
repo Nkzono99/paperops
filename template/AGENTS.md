@@ -52,7 +52,10 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（settings.json の deny パターンが強制する）。
 - `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。引用キーは安定させる。
 - 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
-- 公開・投稿前には `manuscript/publication-metadata.toml` と `notes/reproducibility.md` を更新し、`make pre-submit` を実行する。
+- 公開・投稿前には `manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`notes/ai-use.md` を更新し、`make pre-submit` を実行する。
+- 新しい主張は `notes/claim-evidence-map.md` に evidence、scope、limitation とともに記録する。
+- 想定読者や投稿先制約が変わったら `notes/reviewer-model.md` と `manuscript/venue.md` を更新する。
+- 内部 run label、script name、directory name、artifact name を本文の公開語として使わず、必要な置換を `manuscript/mirror/terminology.yml` に記録する。
 - ミラー同期には `/sync-ja-en` を使用する。両言語を盲目的に上書きしない。
 - 各セッションの終了時に `notes/handoff.md` と `notes/todo.md` を更新する。
 - 恒久的な決定は `notes/decision-log.md` に記録する。
@@ -107,7 +110,7 @@ manuscript/venue.md  投稿先情報
 manuscript/publication-metadata.toml  公開タイトル、著者、ライセンス、build provenance
 submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: summaries, local（papers, bib, excerpts はスキルが必要時に作成）
-notes/               project-brief, contribution-claims, reproducibility, handoff, todo, decision-log
+notes/               project-brief, contribution-claims, claim-evidence-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
 scripts/             ビルド、lint、citation-check、ミラーチェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills/、rules/、hooks/

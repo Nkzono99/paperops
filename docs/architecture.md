@@ -24,8 +24,8 @@
 - `ja/` と `en/` に分割された原稿ソース
 - `manuscript/mirror/` 配下のミラー制御層
 - `refs/` 配下の参照知識
-- `notes/` 配下のセッション継続性ノート
-- `manuscript/publication-metadata.toml` と `notes/reproducibility.md` による公開メタデータ・再現性メモ
+- `notes/` 配下のセッション継続性ノート、主張・証拠台帳、読者モデル、AI 利用ログ
+- `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md` による公開メタデータ・AI 利用ログ・再現性メモ
 - `submission/<venue>/` 配下の投稿先公式テンプレートと最終提出用 TeX
 - 下流論文リポジトリ用の GitHub Issue フォーム
 - プロジェクトローカルの Claude / Codex スキルとフック

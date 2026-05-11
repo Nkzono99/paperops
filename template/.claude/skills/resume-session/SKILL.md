@@ -14,14 +14,17 @@ allowed-tools: Read, Glob, Grep
 - `notes/todo.md`
 - `notes/open-questions.md`
 - `notes/project-brief.md`
+- `notes/claim-evidence-map.md`
+- `notes/reviewer-model.md`
 - `manuscript/mirror/status.md`
 
 ## 目的
 
 1. 現在の原稿状態を5項目以内で要約する。
 2. コンテンツ変更のアクティブなソースオブトゥルースを特定する。
-3. ミラーのドリフト、refs の未完了作業、未解決の質問を指摘する。
-4. 次の具体的な執筆ステップを提案する。
+3. 中心主張、必須 evidence、想定読者の懸念を確認する。
+4. ミラーのドリフト、refs の未完了作業、未解決の質問を指摘する。
+5. 次の具体的な執筆ステップを提案する。
 
 ## 出力構成
 

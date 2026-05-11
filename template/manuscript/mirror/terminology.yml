@@ -1,6 +1,19 @@
 source_language: ja
 target_language: en
 terms:
-  帯電: charging
-  月面表面: lunar surface
-  空洞: cavity
+  - id: T001
+    ja: "中心概念を記入"
+    en_public: "public scientific term"
+    status: "needs_definition"  # public | needs_definition | internal_only | forbidden
+    first_definition_required: true
+    first_definition_location: ""
+    avoid:
+      - "internal_run_label"
+      - "local_directory_name"
+    allowed_context:
+      - "manuscript-if-defined"
+      - "notes"
+    replacement_rule: "内部ラベルではなく、読者に通じる物理条件・選別基準・診断量として記述する。"
+    figure_label_rule: "axis、legend、caption では en_public または定義済み略語を使う。"
+    owner: ""
+    last_reviewed: ""
