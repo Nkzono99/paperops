@@ -92,6 +92,8 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。各 Co
 | `/pull-template-updates` | 上流テンプレートの変更を安全に取り込む |
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
 | `/review-public-manuscript` | 公開原稿だけを入力に外部読者視点で未定義語・ローカル語・暗黙前提をレビュー |
+| `/start-manuscript-review` | TeX 直編集レビュー用 branch を用意し、人間向けの通読ガイドを表示 |
+| `/collect-manuscript-review` | TeX diff と inline comment からレビュー台帳を生成し、必要に応じて原稿へ反映 |
 | `/design-manuscript-claims` | 作業報告型の原稿を主張中心の構造へ再設計 |
 
 ## リポジトリマップ
@@ -106,7 +108,7 @@ manuscript/publication-metadata.toml  公開タイトル、著者、ライセン
 submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: summaries, local（papers, bib, excerpts はスキルが必要時に作成）
 notes/               project-brief, contribution-claims, reproducibility, handoff, todo, decision-log
-scripts/             ビルド、lint、citation-check、ミラーチェック、エクスポート、コンテキスト収集
+scripts/             ビルド、lint、citation-check、ミラーチェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
 .agents/             Codex 用 skills/ 互換入口

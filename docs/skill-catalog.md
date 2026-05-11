@@ -35,11 +35,15 @@
 - `pull-template-updates`
 - `import-manuscript`
 - `review-public-manuscript`
+- `start-manuscript-review`
+- `collect-manuscript-review`
 - `design-manuscript-claims`
 
 レビュー系スキルの使い分け:
 
 - `review-public-manuscript`: 公開原稿だけを読み、外部読者・一般研究者視点で未定義語、ローカル語、暗黙前提、再現性ギャップを検出する。
+- `start-manuscript-review`: 人間が TeX/PDF を通読して直接編集するための review branch と inline comment ルールを準備する。
+- `collect-manuscript-review`: TeX の直接編集 diff と `% REVIEW:` などの inline comment から `notes/reviews/review-YYYY-MM-DD.md` を生成し、必要に応じて source-of-truth 原稿と EN mirror に反映する。
 - `design-manuscript-claims`: repo 内の brief / contribution claims / mirror status も読み、作業報告型の原稿を主張中心の構造へ再設計する。
 
 セットアップとセッション記録のスキルは、`manuscript/publication-metadata.toml` と `notes/reproducibility.md` も公開・投稿前状態として扱う。

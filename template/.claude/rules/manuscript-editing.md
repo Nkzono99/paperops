@@ -5,5 +5,6 @@
 - `% block: ...` 識別子を保持する。削除、名前変更、番号の振り直しを行わない。
 - `manuscript/mirror/status.md` に別段の記載がない限り、日本語（`ja/`）がソースオブトゥルースである。
 - ja/ セクションを編集した後は、後の `/sync-ja-en` のために影響を受けたブロック ID をメモする。
+- 通読レビュー中に直しきれない違和感は `% REVIEW:`, `% AI:`, `% Q:`, `% KEEP?:`, `% TODO-PAPER:` の TeX コメントで残し、後で `/collect-manuscript-review` に回収させる。
 - `manuscript/shared/figures/generated/` 配下のファイルを直接編集しない。
 - `\input` パスは原稿ルートからの相対パスにする。
