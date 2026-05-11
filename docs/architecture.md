@@ -22,7 +22,7 @@
 このスキャフォールドには以下が含まれる:
 
 - `ja/` と `en/` に分割された原稿ソース
-- `manuscript/mirror/` 配下のミラー制御層
+- `manuscript/mirror/` 配下のミラー制御層と block freshness ledger
 - `refs/` 配下の参照知識
 - `notes/` 配下のセッション継続性ノート、主張・証拠台帳、読者モデル、AI 利用ログ
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md` による公開メタデータ・AI 利用ログ・再現性メモ

@@ -38,6 +38,12 @@
 - `start-manuscript-review`
 - `collect-manuscript-review`
 - `design-manuscript-claims`
+- `calibrate-claims`
+- `public-terminology-pass`
+- `paragraph-surgery`
+- `figure-story-audit`
+- `venue-fit-review`
+- `ai-disclosure-check`
 
 レビュー系スキルの使い分け:
 
@@ -45,6 +51,12 @@
 - `start-manuscript-review`: 人間が TeX/PDF を通読して直接編集するための review branch と inline comment ルールを準備する。
 - `collect-manuscript-review`: TeX の直接編集 diff と `% REVIEW:` などの inline comment から `notes/reviews/review-YYYY-MM-DD.md` を生成し、必要に応じて source-of-truth 原稿と EN mirror に反映する。
 - `design-manuscript-claims`: repo 内の brief / contribution claims / mirror status も読み、作業報告型の原稿を主張中心の構造へ再設計する。
+- `calibrate-claims`: evidence strength に合わせて防御的文体と過剰主張を調整する。
+- `public-terminology-pass`: ローカル語・内部語・未定義略語を public terminology gate に沿って公開語へ置換する。
+- `paragraph-surgery`: 段落単位で old-to-new flow、topic sentence、stress position を整える。
+- `figure-story-audit`: figure/table が claim, evidence, boundary を支えているか監査する。
+- `venue-fit-review`: 投稿先・読者モデルに照らして title、abstract、構成、必須要件を点検する。
+- `ai-disclosure-check`: `notes/ai-use.md` と投稿先ポリシーに照らして AI 利用開示と人間検証を点検する。
 
 セットアップとセッション記録のスキルは、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md` も公開・投稿前状態として扱う。
 

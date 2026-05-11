@@ -30,11 +30,13 @@ make build-en       # 英語原稿をコンパイル（または構造検証）
 make lint-bib       # 参考文献エントリを検証
 make citation-check # TeX の citation key が .bib に存在するか検証
 make mirror-check   # ja/ と en/ のブロックレベルのドリフトを検出
+make mirror-freshness-check # 前回同期 ledger から ja/en block の更新を検出
 make public-terms-check # 公開原稿に内部語・禁止語が残っていないか検証
 make claim-evidence-check # supported claim に証拠と本文対応があるか検証
-make ci             # lint-bib + citation-check + mirror-check + public-terms-check + claim-evidence-check + build-ja + build-en
+make submission-drift-check # submission/<venue> と manuscript/en の同期注意点を検出
+make ci             # lint-bib + citation-check + mirror-check + mirror-freshness-check + public-terms-check + claim-evidence-check + build-ja + build-en
 make readiness-check # 公開メタデータ、再現性メモ、workflow 参照の未記入を検出
-make pre-submit     # ci + readiness-check
+make pre-submit     # ci + readiness-check + submission-drift-check
 make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
 ```
 
@@ -103,6 +105,12 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 | `/start-manuscript-review` | TeX 直編集レビュー用 branch を用意し、人間向けの通読ガイドを表示 |
 | `/collect-manuscript-review` | TeX diff と inline comment からレビュー台帳を生成し、必要に応じて原稿へ反映 |
 | `/design-manuscript-claims` | 作業報告型の原稿を主張中心の構造へ再設計 |
+| `/calibrate-claims` | evidence strength に合わせて防御的文体と過剰主張を調整 |
+| `/public-terminology-pass` | ローカル語・内部語・未定義略語を公開語へ置換 |
+| `/paragraph-surgery` | 段落単位の flow、topic sentence、stress position を整える |
+| `/figure-story-audit` | figure/table の claim, evidence, boundary と本文参照を監査 |
+| `/venue-fit-review` | 投稿先・読者モデルに対する title/abstract/構成の fit を点検 |
+| `/ai-disclosure-check` | AI 利用ログ、投稿先ポリシー、人間検証、開示文案を点検 |
 
 ## リポジトリマップ
 
@@ -110,13 +118,13 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 manuscript/ja/       日本語ソース（% block: ID 付きセクション）
 manuscript/en/       英語ミラー（対応するブロック ID）
 manuscript/shared/   figures, bib, style
-manuscript/mirror/   map.toml, terminology.yml, status.md, change-queue.md
+manuscript/mirror/   map.toml, block-ledger.yml, terminology.yml, status.md, change-queue.md
 manuscript/venue.md  投稿先情報
 manuscript/publication-metadata.toml  公開タイトル、著者、ライセンス、build provenance
 submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: summaries, local（papers, bib, excerpts はスキルが必要時に作成）
 notes/               project-brief, contribution-claims, claim-evidence-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
-scripts/             ビルド、lint、citation-check、ミラーチェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
+scripts/             ビルド、lint、citation-check、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
 .agents/             Codex 用 skills/ 互換入口
