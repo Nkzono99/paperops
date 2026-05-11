@@ -26,6 +26,9 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 - `.github/workflows/*.yml` に `YOUR_ORG/paper-harness-template` が残っているか
 - `manuscript/publication-metadata.toml` にプレースホルダーが残っているか
 - `notes/project-brief.md` にプレースホルダーが残っているか
+- `notes/claim-evidence-map.md` が未記入か
+- `notes/reviewer-model.md` が未記入か
+- `notes/ai-use.md` が未記入か
 - `manuscript/venue.md` が未記入か
 - `notes/contribution-claims.md` がプレースホルダーのままか
 - `notes/reproducibility.md` が未記入か
@@ -53,14 +56,27 @@ make venv
 
 既に `.venv/` が存在する場合はスキップする。
 
-### 4. ローカル設定ファイルの生成
+### 4. ローカル設定ファイルの案内
 
 #### refs/local/locations.toml
 
-`refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーし、ユーザーに以下を案内する:
+`refs/local/locations.toml` はローカル絶対パスを含みうるため、AI は自動作成・自動編集しない。存在しない場合は、ユーザーに以下の copy command と編集方針を案内する:
+
+```sh
+cp refs/local/locations.example.toml refs/local/locations.toml
+```
+
+Windows / PowerShell の場合:
+
+```powershell
+Copy-Item refs/local/locations.example.toml refs/local/locations.toml
+```
+
+ユーザーに以下を案内する:
 
 - パスをプロジェクトのシミュレーション出力や図のソースに合わせて編集すること
 - このファイルは `.gitignore` 対象なので個人パスを含めてよいこと
+- `.claude/settings.json` では `refs/local/locations.toml` の AI 編集を deny しているため、値の記入はユーザーが行うこと
 
 #### tex-env.toml（任意）
 
@@ -107,6 +123,21 @@ make venv
 
 - トピックに基づく貢献主張のドラフトを提案（ユーザーに確認を求める）
 - 具体的でない場合はプレースホルダーを維持
+
+#### notes/claim-evidence-map.md
+
+- Core claim、essential results、Not claiming の初期案を提案する
+- evidence が未確定の場合は `draft` のまま残し、過剰主張しない
+
+#### notes/reviewer-model.md
+
+- 投稿先候補、article type、primary reader、likely skepticism を初期案として記入する
+- 未定項目は TODO として残す
+
+#### notes/ai-use.md
+
+- セットアップ時点では policy stance を確認し、未使用の場合は利用ログを未記入のまま残す
+- AI が文献、解析、図表に関与した場合は人間検証が必要であることを案内する
 
 #### notes/reproducibility.md
 

@@ -50,7 +50,7 @@ git clone --depth 1 https://github.com/Nkzono99/paper-harness-template.git /tmp/
 | 設定 | `.claude/settings.json` | ローカルの allow/deny カスタマイズを保持しつつマージ |
 | スクリプト | `scripts/*.py`, `scripts/*.sh` | 上流を優先、ローカルパッチがあれば手動確認 |
 | ワークフロー | `.github/workflows/*.yml` | ローカルのリポジトリパス参照を保持 |
-| ドキュメント | `docs/agent-operating-rules.md`, `docs/writing-policy.md` | 上流を優先 |
+| ドキュメント | `README.md`, `TROUBLESHOOTING.md`, `notes/*.md`, `manuscript/venue.md` | プロジェクト固有内容を保護しつつ手動マージ |
 | テンプレート | `CLAUDE.md`, `AGENTS.md` | 上流を優先 |
 | Makefile | `Makefile` | 上流を優先、ローカルターゲットがあれば追加 |
 
@@ -58,16 +58,25 @@ git clone --depth 1 https://github.com/Nkzono99/paper-harness-template.git /tmp/
 
 以下はプロジェクト固有の内容を含むため、上流で上書きしない:
 
-- `docs/project-brief.md`
-- `docs/target-venue.md`
-- `docs/contribution-claims.md`
-- `docs/terminology-ja-en.md`
+- `notes/project-brief.md`
+- `notes/contribution-claims.md`
+- `notes/claim-evidence-map.md`
+- `notes/reviewer-model.md`
+- `notes/ai-use.md`
+- `notes/reproducibility.md`
+- `notes/handoff.md`
+- `notes/todo.md`
+- `notes/decision-log.md`
+- `manuscript/venue.md`
+- `manuscript/mirror/terminology.yml`
 - `manuscript/` 配下すべて
 - `refs/` 配下すべて
 - `notes/` 配下すべて
 - `README.md`（プロジェクト固有）
 - `.claude/settings.local.json`
 - `refs/local/locations.toml`
+
+旧テンプレートから更新する場合のみ、歴史的な `docs/project-brief.md`、`docs/target-venue.md`、`docs/contribution-claims.md`、`docs/terminology-ja-en.md` が残っていないか確認し、現行の `notes/`、`manuscript/venue.md`、`manuscript/mirror/terminology.yml` へ手動で移す。
 
 ### 4. マージの実行
 
