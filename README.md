@@ -11,7 +11,8 @@
 ```sh
 uvx --from paper-harness-cli pops init paper-my-topic
 cd paper-my-topic
-pops setup
+.venv\Scripts\Activate.ps1  # Windows / PowerShell
+# source .venv/bin/activate  # macOS / Linux
 pops doctor
 ```
 
@@ -19,11 +20,14 @@ pops doctor
 
 ```sh
 cd paper-my-topic
-pops migrate --apply
+uvx --from paper-harness-cli pops setup
+.venv\Scripts\Activate.ps1  # Windows / PowerShell
+# source .venv/bin/activate  # macOS / Linux
 pops doctor
 ```
 
 `template/` はこのリポジトリ内の source of truth であり、`paper-harness-cli` パッケージに bundled scaffold として同梱される。
+`pops init` / `pops setup` はプロジェクトローカルの `.venv` を作成し、その中に `paper-harness-cli` をインストールする。以後の `pops` は、この `.venv` を activate して実行する想定である。
 
 ## AI 前提の作業ループ
 

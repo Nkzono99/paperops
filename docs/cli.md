@@ -25,10 +25,24 @@ make smoke
 uvx --from paper-harness-cli pops version
 ```
 
+新規プロジェクトでは、最初の `uvx` は bootstrap 用である:
+
+```sh
+uvx --from paper-harness-cli pops init paper-my-topic
+cd paper-my-topic
+.venv\Scripts\Activate.ps1  # Windows / PowerShell
+# source .venv/bin/activate  # macOS / Linux
+pops doctor
+```
+
+`pops init` / `pops setup` は `.venv` を作成し、既定では `paper-harness-cli==<実行中のバージョン>` を project-local にインストールする。
+以後の `pops` は activate した `.venv` の console script を使う。
+環境構築を分ける場合は `--skip-venv` / `--skip-install`、インストール元を変える場合は `--install-spec` を使う。
+
 ## コマンド
 
-- `pops init [path]`: bundled scaffold から新規論文リポジトリを作成し、`.pops/manifest.toml` を追加する。
-- `pops setup [path]`: 既存論文リポジトリに `.pops/manifest.toml` を追加し、必要なら `make venv` を実行する。
+- `pops init [path]`: bundled scaffold から新規論文リポジトリを作成し、`.pops/manifest.toml` を追加し、project-local `.venv` に `pops` を用意する。
+- `pops setup [path]`: 既存論文リポジトリに `.pops/manifest.toml` を追加し、project-local `.venv` に `pops` を用意する。
 - `pops setup <git-url> --path <dir>`: 既存 Git リポジトリを clone してから setup する。
 - `pops doctor [path]`: 必須ディレクトリ、`.pops` 管理情報、Git / make、workflow placeholder、ローカル設定ファイルの状態を確認する。
 - `pops update-harness`: bundled scaffold または `--source` で指定した scaffold から、管理対象ハーネスファイルの更新計画を表示する。

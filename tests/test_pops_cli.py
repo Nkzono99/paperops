@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -26,7 +27,7 @@ class PopsCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
 
-            code, _out, err = run_cli(["init", str(target)])
+            code, _out, err = run_cli(["init", str(target), "--skip-venv"])
 
             self.assertEqual(code, 0, err)
             self.assertTrue((target / "AGENTS.md").is_file())
@@ -34,10 +35,32 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / ".pops" / "manifest.toml").is_file())
             self.assertFalse((target / "refs" / "local" / "locations.toml").exists())
 
+    def test_init_bootstraps_project_local_cli_by_default(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+
+            def fake_make_venv(root: Path) -> bool:
+                scripts = "Scripts" if sys.platform.startswith("win") else "bin"
+                (root / ".venv" / scripts).mkdir(parents=True)
+                return True
+
+            with (
+                mock.patch("paperops.cli.main.run_make_venv", side_effect=fake_make_venv)
+                as make_venv,
+                mock.patch("paperops.cli.main.install_project_cli", return_value=True)
+                as install,
+            ):
+                code, _out, err = run_cli(["init", str(target)])
+
+            self.assertEqual(code, 0, err)
+            make_venv.assert_called_once()
+            install.assert_called_once()
+            self.assertTrue((target / ".venv").is_dir())
+
     def test_doctor_accepts_initialized_project(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
-            run_cli(["init", str(target)])
+            run_cli(["init", str(target), "--skip-venv"])
 
             code, out, err = run_cli(["doctor", str(target)])
 
@@ -89,6 +112,18 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn('local_key = "keep-too"', text)
             self.assertIn("[audit]", text)
             self.assertIn('owner = "downstream"', text)
+
+    def test_write_manifest_records_project_local_cli(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+
+            write_manifest(target, cli_install_spec="paper-harness-cli==0.1.0")
+            text = (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
+
+            self.assertIn("[cli]", text)
+            self.assertIn('package = "paper-harness-cli"', text)
+            self.assertIn('install_spec = "paper-harness-cli==0.1.0"', text)
+            self.assertIn('venv = ".venv"', text)
 
     def test_update_harness_adopt_can_record_template_ref(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

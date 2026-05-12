@@ -19,16 +19,22 @@
 ```sh
 uvx --from paper-harness-cli pops init paper-my-topic
 cd paper-my-topic
-pops setup
+.venv\Scripts\Activate.ps1  # Windows / PowerShell
+# source .venv/bin/activate  # macOS / Linux
 pops doctor
 ```
 
 既存プロジェクトは `.pops/manifest.toml` を追加して CLI 管理へ寄せる:
 
 ```sh
-pops migrate --apply
+uvx --from paper-harness-cli pops setup
+.venv\Scripts\Activate.ps1  # Windows / PowerShell
+# source .venv/bin/activate  # macOS / Linux
 pops doctor
 ```
+
+`pops init` / `pops setup` は `.venv` を作成し、既定では `paper-harness-cli==<実行中のバージョン>` をその `.venv` にインストールする。これにより、下流プロジェクトでは activate 後に project-local な `pops` を使う。
+環境構築を分けたい場合は `--skip-venv` または `--skip-install` を使う。開発版や別配布元を試す場合は `--install-spec` で `.venv` へ入れる package spec を指定できる。
 
 ## 更新モデル
 

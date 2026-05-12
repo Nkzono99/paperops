@@ -107,6 +107,21 @@ def build_parser() -> argparse.ArgumentParser:
         default="",
         help="Optional upstream template ref to record in .pops/manifest.toml.",
     )
+    init_parser.add_argument(
+        "--skip-venv",
+        action="store_true",
+        help="Do not create .venv or install project-local pops.",
+    )
+    init_parser.add_argument(
+        "--skip-install",
+        action="store_true",
+        help="Create .venv but do not install project-local pops.",
+    )
+    init_parser.add_argument(
+        "--install-spec",
+        default="",
+        help="Package spec to install into .venv, defaults to paper-harness-cli==version.",
+    )
     init_parser.set_defaults(func=cmd_init)
 
     setup_parser = subcommands.add_parser(
@@ -121,6 +136,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Destination or existing project directory.",
     )
     setup_parser.add_argument("--skip-venv", action="store_true", help="Do not create .venv.")
+    setup_parser.add_argument(
+        "--skip-install",
+        action="store_true",
+        help="Do not install project-local pops into .venv.",
+    )
+    setup_parser.add_argument(
+        "--install-spec",
+        default="",
+        help="Package spec to install into .venv, defaults to paper-harness-cli==version.",
+    )
     setup_parser.set_defaults(func=cmd_setup)
 
     doctor_parser = subcommands.add_parser("doctor", help="Check local project health.")
@@ -229,10 +254,17 @@ def cmd_init(args: argparse.Namespace) -> int:
     write_manifest(target, template_ref=args.template_ref)
     print(f"Initialized paper project: {target}")
     print_copy_summary(plan)
-    print("Next steps:")
-    print("  cd " + str(target))
-    print("  pops setup")
-    print("  pops doctor")
+
+    bootstrapped = bootstrap_project(
+        target,
+        skip_venv=args.skip_venv,
+        skip_install=args.skip_install,
+        install_spec=args.install_spec,
+    )
+    if not bootstrapped:
+        return 1
+
+    print_next_steps(target)
     return 0
 
 
@@ -248,14 +280,14 @@ def cmd_setup(args: argparse.Namespace) -> int:
         write_manifest(root)
         print("Created .pops/manifest.toml")
 
-    if args.skip_venv:
-        print("Skipped .venv creation.")
-    elif (root / ".venv").exists():
-        print(".venv already exists.")
-    else:
-        created = run_make_venv(root)
-        if not created:
-            return 1
+    bootstrapped = bootstrap_project(
+        root,
+        skip_venv=args.skip_venv,
+        skip_install=args.skip_install,
+        install_spec=args.install_spec,
+    )
+    if not bootstrapped:
+        return 1
 
     print_manual_setup_hints(root)
     return 0
@@ -277,6 +309,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     check_path(root, "notes", errors)
     check_path(root, "scripts", errors)
     check_path(root, ".pops/manifest.toml", warnings)
+    check_project_local_cli(root, warnings)
     check_executable("git", warnings)
     check_executable("make", warnings)
     check_workflow_placeholders(root, warnings)
@@ -560,7 +593,12 @@ def same_file_content(left: Path, right: Path) -> bool:
         return False
 
 
-def write_manifest(root: Path, *, template_ref: str = "") -> None:
+def write_manifest(
+    root: Path,
+    *,
+    template_ref: str = "",
+    cli_install_spec: str | None = None,
+) -> None:
     pops_dir = root / ".pops"
     pops_dir.mkdir(parents=True, exist_ok=True)
     manifest = pops_dir / "manifest.toml"
@@ -581,6 +619,16 @@ def write_manifest(root: Path, *, template_ref: str = "") -> None:
     merged = dict(existing)
     merged["project"] = project
     merged["scaffold"] = scaffold
+
+    if cli_install_spec is not None:
+        cli = as_table(existing.get("cli"))
+        cli["package"] = PACKAGE_NAME
+        cli["version"] = package_version()
+        cli["install_spec"] = cli_install_spec
+        cli["venv"] = ".venv"
+        cli["updated_at"] = now
+        merged["cli"] = cli
+
     manifest.write_text(dumps_manifest_toml(merged), encoding="utf-8")
 
 
@@ -610,7 +658,7 @@ def dumps_manifest_toml(data: dict[str, Any]) -> str:
 
 
 def ordered_manifest_sections(data: dict[str, Any]) -> list[str]:
-    preferred = ["project", "scaffold"]
+    preferred = ["project", "scaffold", "cli"]
     return [item for item in preferred if item in data] + [
         item for item in data if item not in preferred
     ]
@@ -726,17 +774,143 @@ def repo_name_from_url(url: str) -> str:
     return name or "paper-project"
 
 
+def bootstrap_project(
+    root: Path,
+    *,
+    skip_venv: bool,
+    skip_install: bool,
+    install_spec: str,
+) -> bool:
+    venv_dir = root / ".venv"
+    if venv_dir.exists():
+        print(".venv already exists.")
+    elif skip_venv:
+        print("Skipped .venv creation.")
+        if not skip_install:
+            print("Skipped project-local pops install because .venv is missing.")
+        return True
+    else:
+        created = run_make_venv(root)
+        if not created:
+            return False
+
+    if skip_install:
+        print("Skipped project-local pops install.")
+        return True
+
+    return install_project_cli(root, install_spec=install_spec or default_install_spec())
+
+
 def run_make_venv(root: Path) -> bool:
     print("Creating .venv via make venv...")
     try:
         result = subprocess.run(["make", "venv"], cwd=root, check=False)
     except FileNotFoundError:
         print("make was not found; falling back to python -m venv .venv")
-        result = subprocess.run([sys.executable, "-m", "venv", ".venv"], cwd=root, check=False)
+        result = run_python_venv(root)
+    if result.returncode != 0:
+        print("make venv failed; falling back to python -m venv .venv")
+        result = run_python_venv(root)
     if result.returncode != 0:
         print("error: failed to create .venv", file=sys.stderr)
         return False
     return True
+
+
+def run_python_venv(root: Path) -> subprocess.CompletedProcess[bytes]:
+    return subprocess.run([sys.executable, "-m", "venv", ".venv"], cwd=root, check=False)
+
+
+def install_project_cli(root: Path, *, install_spec: str) -> bool:
+    python = project_venv_python(root)
+    if not python.exists():
+        print(f"error: .venv Python was not found: {python}", file=sys.stderr)
+        return False
+
+    command, label = build_install_command(python, install_spec)
+    print(f"Installing project-local pops via {label}: {install_spec}")
+    try:
+        result = subprocess.run(
+            command,
+            cwd=root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+    except OSError as exc:
+        print(f"error: failed to install project-local pops: {exc}", file=sys.stderr)
+        return False
+
+    if result.returncode != 0:
+        message = (result.stderr or result.stdout or "").strip()
+        print(
+            f"error: failed to install project-local pops: {message[:500]}",
+            file=sys.stderr,
+        )
+        return False
+
+    write_manifest(root, cli_install_spec=install_spec)
+    print(f"Project-local pops is ready: {project_venv_pops(root)}")
+    return True
+
+
+def build_install_command(python: Path, install_spec: str) -> tuple[list[str], str]:
+    uv = shutil.which("uv")
+    if uv:
+        return (
+            [uv, "pip", "install", "--python", str(python), install_spec],
+            "uv pip install",
+        )
+    return (
+        [str(python), "-m", "pip", "install", install_spec],
+        "python -m pip install",
+    )
+
+
+def default_install_spec() -> str:
+    return f"{PACKAGE_NAME}=={package_version()}"
+
+
+def project_venv_python(root: Path) -> Path:
+    if sys.platform.startswith("win"):
+        return root / ".venv" / "Scripts" / "python.exe"
+    return root / ".venv" / "bin" / "python"
+
+
+def project_venv_pops(root: Path) -> Path:
+    if sys.platform.startswith("win"):
+        return root / ".venv" / "Scripts" / "pops.exe"
+    return root / ".venv" / "bin" / "pops"
+
+
+def activate_command() -> str:
+    if sys.platform.startswith("win"):
+        return r".venv\Scripts\Activate.ps1"
+    return "source .venv/bin/activate"
+
+
+def print_next_steps(target: Path) -> None:
+    print("Next steps:")
+    print("  cd " + str(target))
+    if not project_venv_pops(target).exists():
+        print(f"  uvx --from {PACKAGE_NAME} pops setup")
+    print("  " + activate_command())
+    print("  pops doctor")
+
+
+def check_project_local_cli(root: Path, warnings: list[str]) -> None:
+    venv_dir = root / ".venv"
+    if not venv_dir.exists():
+        warnings.append(".venv is missing; run pops setup to create project-local pops.")
+        return
+    if not project_venv_python(root).exists():
+        warnings.append(".venv exists but its Python executable was not found.")
+    if not project_venv_pops(root).exists():
+        warnings.append(
+            "project-local pops was not found in .venv; run pops setup to install it."
+        )
 
 
 def print_manual_setup_hints(root: Path) -> None:
@@ -750,7 +924,7 @@ def print_manual_setup_hints(root: Path) -> None:
             "Optional: copy tex-env.example.toml to tex-env.toml when you need "
             "a custom TeX environment."
         )
-    print("Run pops doctor to verify the project.")
+    print("Run pops doctor after activating the project .venv.")
 
 
 def check_path(root: Path, rel: str, errors: list[str]) -> None:

@@ -7,7 +7,7 @@
 `/setup` スキルで以下の手順を一括実行できる:
 
 1. リポジトリ名を変更し、この README を更新する。
-2. `make venv` を実行して Python 3.11 のローカル `.venv` を作成する。
+2. `pops init` / `pops setup` が作成した `.venv` と project-local `pops` を確認し、不足していれば `pops setup` で用意する。
 3. `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーし、ローカルパスはユーザー自身で記入する。
 4. `tex-env.example.toml` を `tex-env.toml` にコピーし、TeX 環境を設定する（任意）。
 5. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paperops` リポジトリパスに置き換える。
