@@ -1,11 +1,11 @@
 {
-  "harnessops_version": "0.1.1",
+  "harnessops_version": "0.1.2",
   "layout_version": "0.1",
   "managed_files": {
-    "harness-lab/README.md": "sha256:6a3aaa4ce2fb2b54ceeb57e3586428b12bab46377936894b712a1cacf8cee69c",
-    "harness-lab/views/backlog.md": "sha256:e81ae92047d3fa9753eab522afa928d7d5c1a3709a1ac9dd0c7e4c63bd5270e2",
+    "harness-lab/README.md": "sha256:440eea30a3b85b64a5b79ea8a8e9f497f029328ca1b18e96fb9bf13a372348b5",
+    "harness-lab/views/backlog.md": "sha256:0ed4436872ad24f9c73737b7f84290306dc4baaf36154b7e36be521e985b791c",
     "harness-lab/views/imported-feedback.md": "sha256:92dfefe5d52cf3f3c6e5925c562fc238b8780dfab80ea3ea43a3902f80e7533e",
-    "harness-lab/views/score-trajectory.md": "sha256:b3db5939de12e2521052aa0087771eb9e86449964062aa683490f889c35e88a2"
+    "harness-lab/views/score-trajectory.md": "sha256:a3d2f445609e5e9da0269ece3b10aff2414f3830bd185ad257d32ae19026b616"
   },
   "migrations": [],
   "overlay": {
