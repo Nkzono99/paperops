@@ -1,0 +1,22 @@
+{
+  "harnessops_version": "0.1.0",
+  "layout_version": "0.1",
+  "managed_files": {
+    "harness-lab/README.md": "sha256:6a3aaa4ce2fb2b54ceeb57e3586428b12bab46377936894b712a1cacf8cee69c",
+    "harness-lab/views/backlog.md": "sha256:e81ae92047d3fa9753eab522afa928d7d5c1a3709a1ac9dd0c7e4c63bd5270e2",
+    "harness-lab/views/imported-feedback.md": "sha256:f7fa0fdbd6344e879bbd3bcc228b07b3b0906c9daeda7ed0cdefb9ab9f4b6ea4",
+    "harness-lab/views/score-trajectory.md": "sha256:b3db5939de12e2521052aa0087771eb9e86449964062aa683490f889c35e88a2"
+  },
+  "migrations": [],
+  "overlay": {
+    "mode": "upstream-lab",
+    "path": "harness-lab"
+  },
+  "profile": {
+    "fingerprint": "sha256:e65e63942317b419245dfd651e164caf6429ff4db4ff10e5d6b1a68dfb84f438",
+    "id": "paper-harness-upstream",
+    "source": "builtin",
+    "version": "0.1.0"
+  },
+  "schema_version": "0.1"
+}

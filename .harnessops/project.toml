@@ -1,0 +1,29 @@
+schema_version = "0.1"
+layout_version = "0.1"
+
+[project]
+name = "paper-harness-template"
+root = "."
+kind = "target-repository"
+
+[profile]
+id = "paper-harness-upstream"
+version = "0.1.0"
+source = "builtin"
+adapter = "paper_harness_upstream"
+
+[overlay]
+mode = "upstream-lab"
+path = "harness-lab"
+managed_by = "harnessops"
+
+[privacy]
+default_visibility = "private-until-sanitized"
+
+[agents]
+codex = true
+claude = true
+
+[target_harness]
+provider = "paper-harness"
+manifest = ".harness/manifest.toml"

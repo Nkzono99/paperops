@@ -1,0 +1,16 @@
+schema_version = "0.1"
+
+[harness]
+provider = "paper-harness"
+kind = "target-repository"
+version = "0.1.0"
+
+[commands]
+doctor = "paper-harness doctor"
+update = "paper-harness update-harness"
+migrate = "paper-harness migrate"
+feedback = "paper-harness feedback"
+version = "paper-harness version"
+
+[harnessops]
+recommended_profile = "paper-harness-upstream"
