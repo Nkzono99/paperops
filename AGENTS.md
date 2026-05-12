@@ -2,7 +2,7 @@
 
 ユーザーとは**日本語**でコミュニケーションすること。
 
-これは `paper-harness-template` の**テンプレート管理リポジトリ**である。
+これは `paperops` の**テンプレート管理リポジトリ**である。
 
 ## アーキテクチャ
 
@@ -37,7 +37,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 - `template/AGENTS.md`、`template/CLAUDE.md`、`template/.agents/skills/`、`template/.claude/skills/`、`template/scripts/` は**ユーザー向けインターフェース**として扱う。変更にはマイグレーションノートが必要。
 - 構造的な書き換えよりも追加的な変更を優先する。
 - 生成されたコンテンツはバージョン管理に含めない。
-- 下流作成は `pops init` に統一し、GitHub template repository への publish 導線を復活させない。
+- 下流作成は `pops init` に統一する。
 - `template/` 配下を変更した後は必ず `make smoke` を実行する。
 - 長時間セッションでは、コンテキスト使用量が約50%の時点で手動で `/compact` を実行する。
 
@@ -52,7 +52,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 ```
 docs/                  architecture, change-policy, triage-rules, skill-catalog, distribution
 .Codex/skills/        triage-template-feedback, apply-template-improvement, review-template-regression
-.github/workflows/     reusable-build, reusable-mirror-check, reusable-release
+.github/workflows/     reusable-build, reusable-mirror-check, reusable-release, publish-pypi
 .github/ISSUE_TEMPLATE/ template-feedback, skill-request, structure-change
 src/paperops/          pops CLI
 scripts/               smoke helpers

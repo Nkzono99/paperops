@@ -136,4 +136,4 @@ TROUBLESHOOTING.md   nested repo と safe.directory の注意
 
 ## テンプレートフィードバック
 
-繰り返しのハーネス摩擦を見つけた場合、`/feedback-paper-harness` を使用して `Nkzono99/paper-harness-template` にルーティングする。
+繰り返しのハーネス摩擦を見つけた場合、`/feedback-paper-harness` を使用して `Nkzono99/paperops` にルーティングする。

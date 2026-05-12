@@ -15,8 +15,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-PACKAGE_NAME = "paper-ops"
-UPSTREAM_REPO = "Nkzono99/paper-harness-template"
+PACKAGE_NAME = "paper-harness-cli"
+UPSTREAM_REPO = "Nkzono99/paperops"
 
 EXCLUDED_SCAFFOLD_PATTERNS = (
     ".git",
@@ -658,7 +658,7 @@ def check_workflow_placeholders(root: Path, warnings: list[str]) -> None:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        if "YOUR_ORG/paper-harness-template" in text:
+        if "YOUR_ORG/paperops" in text:
             warnings.append(f"workflow placeholder remains in {path.relative_to(root).as_posix()}")
 
 

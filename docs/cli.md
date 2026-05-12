@@ -1,6 +1,6 @@
 # pops CLI
 
-`pops` は、`paper-harness-template` の `template/` を論文リポジトリとして初期化し、最低限の保守操作を安定したコマンド面に寄せるための CLI である。
+`pops` は、`paperops` の `template/` を論文リポジトリとして初期化し、最低限の保守操作を安定したコマンド面に寄せるための CLI である。
 
 この CLI は将来の標準化前の薄い実行カーネルとして扱う。Agent やスキルは研究判断、原稿編集、手順選択を担当し、`pops` はファイル生成、診断、管理対象ハーネス更新のような決定的操作を担当する。
 
@@ -22,7 +22,7 @@ make smoke
 パッケージ化後は console script を使う:
 
 ```sh
-uvx --from paper-ops pops version
+uvx --from paper-harness-cli pops version
 ```
 
 ## コマンド
@@ -38,7 +38,7 @@ uvx --from paper-ops pops version
 - `pops update-harness --adopt`: 現在のプロジェクトを CLI 管理対象として採用し、`.pops/manifest.toml` を更新する。
 - `pops migrate [path]`: 旧 scaffold 由来のプロジェクトに `.pops` 管理情報を追加する計画を表示する。
 - `pops migrate --apply`: `.pops/manifest.toml` を作成する。
-- `pops feedback`: 上流 `paper-harness-template` へ戻す改善フィードバックの下書きを出力する。
+- `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出力する。
 - `pops version`: CLI と上流情報を表示する。
 - `pops --version`: `pops version` と同じ情報を表示する。
 

@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    uses: YOUR_ORG/paper-harness-template/.github/workflows/reusable-build.yml@main
+    uses: YOUR_ORG/paperops/.github/workflows/reusable-build.yml@main
     with:
       working-directory: .
       run-latex: false

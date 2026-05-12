@@ -10,10 +10,10 @@
 2. `template/AGENTS.md`、`template/CLAUDE.md`、`template/.claude/skills/`、`template/.agents/skills/`、`template/scripts/` はユーザー向けインターフェースとして扱う。
 3. 下流リポジトリにファイル名変更、ディレクトリ移動、フックの書き換えを強いる変更には、文書化されたマイグレーションノートが必要。
 4. チェックイン済みのスターターアーティファクトでない限り、生成されたコンテンツをバージョン管理に含めない。
-5. 下流プロジェクトの作成導線は `pops init` に統一し、GitHub template repository への publish 導線を復活させない。
+5. 下流プロジェクトの作成導線は `pops init` に統一する。
 
 ## リリース要件
 
-- ユーザーに影響する改善ごとに [`CHANGELOG.md`](/home/b/b36291/large1/Github/paper-harness-template/CHANGELOG.md) を更新する。
-- 変更が下流のセットアップに影響する場合、[`README.md`](/home/b/b36291/large1/Github/paper-harness-template/README.md)、[`docs/cli.md`](/home/b/b36291/large1/Github/paper-harness-template/docs/cli.md)、および `template/` 内の該当ファイルを更新する。
+- ユーザーに影響する改善ごとに `CHANGELOG.md` を更新する。
+- 変更が下流のセットアップに影響する場合、`README.md`、`docs/cli.md`、および `template/` 内の該当ファイルを更新する。
 - 判断に迷う場合は、まず `template-feedback` Issue を作成し、変更を反映する前にスコープをトリアージする。

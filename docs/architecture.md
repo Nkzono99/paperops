@@ -19,7 +19,7 @@
 
 ### 2. 個別論文スキャフォールド層
 
-[`template/`](/home/b/b36291/large1/Github/paper-harness-template/template) は個別原稿リポジトリの完全な構造を含む。
+`template/` は個別原稿リポジトリの完全な構造を含む。
 このスキャフォールドには以下が含まれる:
 
 - `ja/` と `en/` に分割された原稿ソース
@@ -40,5 +40,5 @@
 - 共有・投稿時に、公開メタデータ、再現性、図表 provenance、workflow 設定の未記入を検出する。
 - 再利用可能な自動化は各論文リポジトリではなくテンプレートリポジトリに集約する。
 - CLI は `template/` を source of truth として展開し、下流プロジェクト固有の原稿・notes・refs を自動上書きしない。
-- GitHub template repository への publish 導線は持たず、下流作成は `pops init` に統一する。
+- 下流作成は `pops init` に統一する。
 - 検証はインタラクティブセッションと CI の両方で実行できる速度を維持する。

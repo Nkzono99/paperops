@@ -1,6 +1,6 @@
 # paper-my-topic
 
-`pops init` で `paper-harness-template` から構築された個別論文プロジェクトのスターターリポジトリ。
+`pops init` で `paperops` から構築された個別論文プロジェクトのスターターリポジトリ。
 
 ## 初回使用前
 
@@ -10,7 +10,7 @@
 2. `make venv` を実行して Python 3.11 のローカル `.venv` を作成する。
 3. `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーし、ローカルパスはユーザー自身で記入する。
 4. `tex-env.example.toml` を `tex-env.toml` にコピーし、TeX 環境を設定する（任意）。
-5. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paper-harness-template` リポジトリパスに置き換える。
+5. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paperops` リポジトリパスに置き換える。
 6. `manuscript/publication-metadata.toml`、`notes/project-brief.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/venue.md`、`notes/contribution-claims.md`、`notes/reproducibility.md` を記入する。
 
 ## 基本ワークフロー
@@ -42,7 +42,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 
 ## テンプレートフィードバック
 
-繰り返しのハーネス摩擦を見つけた場合、`/feedback-paper-harness` または `pops feedback` で再利用可能な改善をソースリポジトリ `Nkzono99/paper-harness-template` に戻す。
+繰り返しのハーネス摩擦を見つけた場合、`/feedback-paper-harness` または `pops feedback` で再利用可能な改善をソースリポジトリ `Nkzono99/paperops` に戻す。
 
 ## トラブルシューティング
 

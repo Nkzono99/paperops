@@ -1,15 +1,15 @@
-# paper-harness-template
+# paperops
 
-`paper-harness-template` は、AI エージェントと論文を書くためのプロジェクトハーネスである。
+`paperops` は、AI エージェントと論文を書くためのプロジェクトハーネスである。
 
-人間が `template/` を手でコピーしたり、GitHub の template repository から作成したりするための道具ではない。主導線は `pops` CLI で、Agent が安全に project state を初期化・診断・更新するための execution kernel として扱う。
+人間が `template/` を手でコピーして使う道具ではない。主導線は `pops` CLI で、Agent が安全に project state を初期化・診断・更新するための execution kernel として扱う。
 
 ## 最小セットアップ
 
 新規論文プロジェクト:
 
 ```sh
-uvx --from paper-ops pops init paper-my-topic
+uvx --from paper-harness-cli pops init paper-my-topic
 cd paper-my-topic
 pops setup
 pops doctor
@@ -23,7 +23,7 @@ pops migrate --apply
 pops doctor
 ```
 
-GitHub template repository への publish 導線は廃止した。`template/` はこのリポジトリ内の source of truth であり、`paper-ops` パッケージに bundled scaffold として同梱される。
+`template/` はこのリポジトリ内の source of truth であり、`paper-harness-cli` パッケージに bundled scaffold として同梱される。
 
 ## AI 前提の作業ループ
 
@@ -34,7 +34,7 @@ GitHub template repository への publish 導線は廃止した。`template/` �
 3. `pops` が init / setup / doctor / update-harness のような決定的操作を担う。
 4. 原稿は `manuscript/ja` を中心に進め、必要な block を `manuscript/en` へ同期する。
 5. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
-6. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paper-harness-template` に戻す。
+6. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
 
 CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
@@ -88,6 +88,12 @@ pops version
 ```
 
 このコマンド面は将来の CLI 標準化前の最小形である。標準化までは、実装を小さく保ち、既存 skill と Makefile の運用を壊さないことを優先する。
+
+## PyPI 公開
+
+`paper-harness-cli` は release publish または手動 dispatch で PyPI に公開する。
+GitHub Actions の `PyPI 公開` workflow は distribution を build / check し、PyPI Trusted Publishing で `paper-harness-cli` にアップロードする。
+PyPI 側では trusted publisher として、この repository、workflow `.github/workflows/publish-pypi.yml`、environment `pypi` を設定しておく。
 
 ## 開発と検証
 

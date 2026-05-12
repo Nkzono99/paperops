@@ -13,7 +13,7 @@ except ModuleNotFoundError:
 
 
 PLACEHOLDER_RE = re.compile(
-    r"(paper-my-topic|YOUR_ORG/paper-harness-template|置き換えてください|未定|未記入|TBD|TODO|Untitled|著者名|所属|Title Goes Here|日本語論文タイトルの仮置き|Placeholder English Paper Title|Author A|Author B)"
+    r"(paper-my-topic|YOUR_ORG/paperops|置き換えてください|未定|未記入|TBD|TODO|Untitled|著者名|所属|Title Goes Here|日本語論文タイトルの仮置き|Placeholder English Paper Title|Author A|Author B)"
 )
 
 
@@ -129,7 +129,7 @@ def check_workflows(root: Path, findings: list[Finding], allow_placeholders: boo
     for workflow in sorted(workflow_dir.glob("*.yml")):
         rel_path = workflow.relative_to(root).as_posix()
         for number, line in enumerate(read_text(workflow).splitlines(), start=1):
-            if "YOUR_ORG/paper-harness-template" in line:
+            if "YOUR_ORG/paperops" in line:
                 add(findings, severity, f"`{rel_path}:{number}` の reusable workflow 参照が未設定です")
 
 
