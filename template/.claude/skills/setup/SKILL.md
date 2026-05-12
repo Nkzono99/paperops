@@ -10,7 +10,7 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 ## 前提条件
 
-- `paper-harness-template` の `template/` からコピーまたはテンプレートリポジトリから生成したリポジトリであること。
+- `pops init` で `paper-harness-template` から生成したリポジトリであること。
 - プレースホルダーがまだ置き換えられていない状態であること。
 
 ## 手順

@@ -1,6 +1,6 @@
 # paper-my-topic
 
-`paper-harness-template` から構築された個別論文プロジェクトのスターターリポジトリ。
+`pops init` で `paper-harness-template` から構築された個別論文プロジェクトのスターターリポジトリ。
 
 ## 初回使用前
 
@@ -42,7 +42,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 
 ## テンプレートフィードバック
 
-繰り返しのハーネス摩擦を見つけた場合、再利用可能な改善はソースリポジトリ `Nkzono99/paper-harness-template` に戻す。
+繰り返しのハーネス摩擦を見つけた場合、`/feedback-paper-harness` または `pops feedback` で再利用可能な改善をソースリポジトリ `Nkzono99/paper-harness-template` に戻す。
 
 ## トラブルシューティング
 

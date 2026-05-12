@@ -8,7 +8,7 @@
 
 二層構成:
 
-- **ルート層**: テンプレートガバナンス、再利用可能ワークフロー、配布自動化、テンプレート保守スキル
+- **ルート層**: テンプレートガバナンス、再利用可能ワークフロー、`pops` CLI、テンプレート保守スキル
 - **`template/` 層**: 個別の `paper-<topic>` リポジトリにコピーされる論文用スキャフォールド
 
 この二つを混同しないこと。ルートレベルのファイルはテンプレート自体を管理し、`template/` は下流ユーザーが受け取る内容を格納する。
@@ -18,7 +18,7 @@
 ```sh
 make venv                      # Python 3.11 で .venv を作成
 make smoke                     # template/ に対して lint-bib + citation-check + mirror-check + collect-context + readiness-check を実行
-make publish-scaffold-dry-run  # template/ から配布リポジトリへの rsync をプレビュー
+make cli-smoke                 # pops CLI の最小 smoke test を実行
 ```
 
 ## 変更ワークフロー
@@ -37,7 +37,7 @@ make publish-scaffold-dry-run  # template/ から配布リポジトリへの rsy
 - `template/AGENTS.md`、`template/CLAUDE.md`、`template/.agents/skills/`、`template/.claude/skills/`、`template/scripts/` は**ユーザー向けインターフェース**として扱う。変更にはマイグレーションノートが必要。
 - 構造的な書き換えよりも追加的な変更を優先する。
 - 生成されたコンテンツはバージョン管理に含めない。
-- 配布リポジトリは**公開先**であり、編集場所ではない。
+- 下流作成は `pops init` に統一し、GitHub template repository への publish 導線を復活させない。
 - `template/` 配下を変更した後は必ず `make smoke` を実行する。
 - 長時間セッションでは、コンテキスト使用量が約50%の時点で手動で `/compact` を実行する。
 
@@ -52,8 +52,9 @@ make publish-scaffold-dry-run  # template/ から配布リポジトリへの rsy
 ```
 docs/                  architecture, change-policy, triage-rules, skill-catalog, distribution
 .Codex/skills/        triage-template-feedback, apply-template-improvement, review-template-regression
-.github/workflows/     reusable-build, reusable-mirror-check, reusable-release, publish-scaffold
+.github/workflows/     reusable-build, reusable-mirror-check, reusable-release
 .github/ISSUE_TEMPLATE/ template-feedback, skill-request, structure-change
-scripts/               publish-scaffold.sh
+src/paperops/          pops CLI
+scripts/               smoke helpers
 template/              下流スキャフォールド一式（template/AGENTS.md を参照）
 ```

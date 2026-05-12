@@ -29,7 +29,7 @@
 - `sync-ja-en`
 - `note-writing-session`
 - `improve-writing-harness`
-- `raise-template-feedback`
+- `feedback-paper-harness`
 - `update-refs`
 - `resolve-local-paths`
 - `pull-template-updates`
@@ -62,8 +62,11 @@
 
 `.agents/skills/` は重複実装を避けるための薄い入口であり、恒久的な手順変更は `.claude/skills/<skill>/SKILL.md` 側を source of truth として更新する。`make skill-mirror-check` は同名 skill の存在と source-of-truth 参照を機械的に確認する。
 
-## 配布自動化
+## CLI 配布
 
-リポジトリには公開ヘルパーも提供される:
+下流プロジェクトの作成と更新は `pops` CLI に統一する:
 
-- `scripts/publish-scaffold.sh`: `rsync` で `template/` を配布リポジトリに同期
+- `pops init`: `template/` 由来の bundled scaffold から新規論文プロジェクトを作成
+- `pops doctor`: 初期化後のハーネス状態を診断
+- `pops update-harness`: 管理対象ハーネスファイルの更新計画を表示・適用
+- `pops feedback`: 上流へ戻す改善フィードバックの下書きを生成

@@ -97,7 +97,7 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。各 Co
 | `/sync-ja-en` | 日本語と英語のブロックを同期 |
 | `/update-refs` | 参考文献と参照知識の整合性を検証 |
 | `/improve-writing-harness` | プロジェクトローカルの摩擦を特定・修正 |
-| `/raise-template-feedback` | 再利用可能な改善を上流テンプレートにエスカレート |
+| `/feedback-paper-harness` | 再利用可能な改善を上流ハーネスにフィードバック |
 | `/resolve-local-paths` | `refs/local/` からローカルパスエイリアスを解決 |
 | `/pull-template-updates` | 上流テンプレートの変更を安全に取り込む |
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
@@ -133,4 +133,4 @@ TROUBLESHOOTING.md   nested repo と safe.directory の注意
 
 ## テンプレートフィードバック
 
-繰り返しのハーネス摩擦を見つけた場合、`/raise-template-feedback` を使用して `Nkzono99/paper-harness-template` にルーティングする。
+繰り返しのハーネス摩擦を見つけた場合、`/feedback-paper-harness` を使用して `Nkzono99/paper-harness-template` にルーティングする。

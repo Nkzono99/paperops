@@ -1,35 +1,62 @@
 # paper-harness-template
 
-AI 支援による論文執筆のための再利用可能なハーネス。
+`paper-harness-template` は、AI エージェントと論文を書くためのプロジェクトハーネスである。
 
-このリポジトリは `SPEC.md` に記述された `paper-template` 側として構成されている。
-二つの層で構成される:
+人間が `template/` を手でコピーしたり、GitHub の template repository から作成したりするための道具ではない。主導線は `pops` CLI で、Agent が安全に project state を初期化・診断・更新するための execution kernel として扱う。
 
-- テンプレート自体を管理するためのリポジトリレベルのアセット
-- [`template/`](/home/b/b36291/large1/Github/paper-harness-template/template) 配下の個別論文用スキャフォールド一式
+## 最小セットアップ
+
+新規論文プロジェクト:
+
+```sh
+uvx --from paper-ops pops init paper-my-topic
+cd paper-my-topic
+pops setup
+pops doctor
+```
+
+既存プロジェクトを CLI 管理へ寄せる:
+
+```sh
+cd paper-my-topic
+pops migrate --apply
+pops doctor
+```
+
+GitHub template repository への publish 導線は廃止した。`template/` はこのリポジトリ内の source of truth であり、`paper-ops` パッケージに bundled scaffold として同梱される。
+
+## AI 前提の作業ループ
+
+日常運用の主役は、CLI そのものではなく Agent との会話である。
+
+1. 人間が論文トピック、制約、投稿先候補、判断を伝える。
+2. Agent が `notes/project-brief.md`、`notes/claim-evidence-map.md`、`manuscript/venue.md` を整える。
+3. `pops` が init / setup / doctor / update-harness のような決定的操作を担う。
+4. 原稿は `manuscript/ja` を中心に進め、必要な block を `manuscript/en` へ同期する。
+5. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
+6. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paper-harness-template` に戻す。
+
+CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
+
+## コア設計思想
+
+- `template/` は個別論文リポジトリに展開される scaffold の source of truth。
+- `src/paperops/` は `template/` を展開・診断・更新する薄い CLI。
+- `notes/` はセッション継続性、主張・証拠、読者モデル、AI 利用ログの共有 memory。
+- `manuscript/ja` と `manuscript/en` は block ID で対応するバイリンガル原稿。
+- `refs/` は raw PDF 置き場ではなく、キュレーション済みの参照知識層。
+- `submission/<venue>/` は投稿先公式テンプレートと最終提出用 TeX の隔離スロット。
+- `pops update-harness` はハーネス管理ファイルだけを扱い、下流固有の `manuscript/`、`notes/`、`refs/`、`submission/` を自動上書きしない。
 
 ## リポジトリ構成
 
-- [`.github/workflows/`](/home/b/b36291/large1/Github/paper-harness-template/.github/workflows): 下流の論文リポジトリから呼び出し可能な再利用可能 GitHub Actions ワークフロー
-- [`.github/ISSUE_TEMPLATE/`](/home/b/b36291/large1/Github/paper-harness-template/.github/ISSUE_TEMPLATE): フィードバック、スキルリクエスト、構造変更用の構造化 Issue フォーム
-- [`.claude/skills/`](/home/b/b36291/large1/Github/paper-harness-template/.claude/skills): テンプレートトリアージ・保守用スキル
-- [`template/.agents/skills/`](/home/b/b36291/large1/Github/paper-harness-template/template/.agents/skills): Codex 用の下流執筆スキル互換入口
-- [`docs/`](/home/b/b36291/large1/Github/paper-harness-template/docs): テンプレートアーキテクチャ、変更ポリシー、トリアージルール
-- [`template/`](/home/b/b36291/large1/Github/paper-harness-template/template): 個別の `paper-<topic>` リポジトリにコピー可能なスキャフォールド
-- [`docs/distribution.md`](/home/b/b36291/large1/Github/paper-harness-template/docs/distribution.md): `template/` を別の GitHub テンプレートリポジトリに同期する配布モデル
-
-## クイックスタート
-
-1. `template/` を別の配布リポジトリに公開するか、`paper-my-topic/` などの新しいリポジトリに手動でコピーする。
-2. `make venv` を実行して Python 3.11 のローカル `.venv` を作成する。
-3. リポジトリ名を変更し、以下のスターターファイルを更新する:
-   - `README.md`
-   - `notes/project-brief.md`
-   - `manuscript/venue.md`
-   - `notes/contribution-claims.md`
-   - `refs/local/locations.example.toml` から `refs/local/locations.toml` を作成し、ローカルパスはユーザー自身で記入
-4. まず `manuscript/ja` に原稿を書き、必要なセクションを `manuscript/en` に同期する。
-5. 論文リポジトリで `make ci` を実行して、参考文献の lint、ミラーカバレッジの検証、ビルドハーネスの動作確認を行う。
+- `src/paperops/`: `pops` CLI
+- `template/`: 論文プロジェクトに展開される scaffold
+- `.github/workflows/`: 下流論文リポジトリから呼び出し可能な再利用可能 GitHub Actions workflow
+- `.github/ISSUE_TEMPLATE/`: テンプレート改善、スキル要求、構造変更の Issue フォーム
+- `.claude/skills/`, `.agents/skills/`: テンプレート保守用 skill
+- `docs/`: アーキテクチャ、変更ポリシー、トリアージルール、CLI と配布方針
+- `tests/`: `pops` CLI の最小 smoke tests
 
 ## スキャフォールドが最適化するもの
 
@@ -48,16 +75,31 @@ AI 支援による論文執筆のための再利用可能なハーネス。
 - テンプレート自体の再利用可能な保守ワークフロー
 - プロジェクトローカルの Claude / Codex スキル、フック、運用ルール
 
-## 配布
+## CLI
 
-GitHub の `Use this template` フローを使いたい場合、このリポジトリをソースオブトゥルースとして維持し、`template/` をスキャフォールドのみを含む別のリポジトリに公開する。
-このリポジトリには、その同期パス用の [`scripts/publish-scaffold.sh`](/home/b/b36291/large1/Github/paper-harness-template/scripts/publish-scaffold.sh) と [`.github/workflows/publish-scaffold.yml`](/home/b/b36291/large1/Github/paper-harness-template/.github/workflows/publish-scaffold.yml) が含まれている。
+```sh
+pops init paper-my-topic
+pops setup
+pops doctor
+pops update-harness --dry-run
+pops migrate --apply
+pops feedback
+pops version
+```
 
-## 検証モデル
+このコマンド面は将来の CLI 標準化前の最小形である。標準化までは、実装を小さく保ち、既存 skill と Makefile の運用を壊さないことを優先する。
+
+## 開発と検証
 
 テンプレートは完全な TeX 環境を前提とせず、軽量なローカルチェックを提供する。
 `scripts/build-ja.sh` と `scripts/build-en.sh` は `latexmk` が利用可能な場合はコンパイルを行い、そうでなければ `scripts/check-tex-structure.py` による構造検証にフォールバックするため、クリーンなランナーでも CI が執筆ハーネスを実行できる。
 想定されるローカルセットアップは、リポジトリローカルの `.venv` 内の `python3.11` である。
+
+```sh
+make venv
+make smoke
+python -m pip wheel . --no-deps -w .codex-tmp/wheelhouse
+```
 
 ## 上流リファレンス
 

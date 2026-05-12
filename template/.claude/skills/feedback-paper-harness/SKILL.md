@@ -1,18 +1,18 @@
 ---
-name: raise-template-feedback
-description: 再利用可能な改善を上流の paper-harness-template にエスカレートする。プロジェクト固有でない摩擦がある場合に使用。
+name: feedback-paper-harness
+description: 再利用可能な改善を上流の paper-harness-template にフィードバックする。プロジェクト固有でない摩擦がある場合に使用。
 allowed-tools: Read, Glob, Grep
 ---
 
-# raise-template-feedback
+# feedback-paper-harness
 
 繰り返しの問題を上流のペーパーハーネスソースリポジトリで修正すべき場合にこのスキルを使用する。
 
 ## デフォルトの上流ターゲット
 
 - ソースリポジトリ: `Nkzono99/paper-harness-template`
-- チームが意図的に配布リポジトリを独自のソースオブトゥルースとして採用していない限り、配布リポジトリにフィードバックを提出しない。
 - チームがハーネスをフォークし独自のソースリポジトリを管理している場合は、そのフォークを使用する。
+- GitHub template repository や配布専用リポジトリではなく、`pops` CLI と `template/` の source repository へ戻す。
 
 ## 収集する情報
 
@@ -24,7 +24,7 @@ allowed-tools: Read, Glob, Grep
 
 ## 出力
 
-`Nkzono99/paper-harness-template` の上流 `template-feedback` Issue フォームに貼り付け可能な形式でフィードバックを記述する。
+`pops feedback` または `Nkzono99/paper-harness-template` の上流 `template-feedback` Issue フォームに貼り付け可能な形式でフィードバックを記述する。
 
 ## スコープガード
 

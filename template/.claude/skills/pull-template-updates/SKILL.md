@@ -11,7 +11,8 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 ## 前提
 
 - 上流リポジトリ: `Nkzono99/paper-harness-template`（`template/` 配下がこのリポジトリのルートに対応）
-- 配布リポジトリ: `Nkzono99/paper-harness-scaffold-template`（上流の `template/` がそのままルートに展開される）
+- 下流プロジェクトは `pops init` で作成し、`.pops/manifest.toml` を持つ。
+- GitHub template repository 由来の配布リポジトリは使用しない。
 
 ## 手順
 
@@ -28,11 +29,10 @@ nested private repo では親 repo と paper repo の変更を混ぜない。Win
 ### 1. 差分の取得
 
 ```sh
-# 配布リポジトリの最新を一時ディレクトリにクローン
-git clone --depth 1 https://github.com/Nkzono99/paper-harness-scaffold-template.git /tmp/template-latest
+pops update-harness --dry-run
 ```
 
-または上流リポジトリの `template/` を直接参照:
+`pops` が使えない場合のみ、上流リポジトリの `template/` を直接参照:
 
 ```sh
 git clone --depth 1 https://github.com/Nkzono99/paper-harness-template.git /tmp/template-source
