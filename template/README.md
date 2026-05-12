@@ -29,7 +29,9 @@
 
 既存原稿がある場合は `/import-manuscript` でインポートできる。
 
-ローカルワークフローは `.venv/bin/python` を優先し、それ以外は `python3.11` にフォールバックする。
+ローカルワークフローは `.venv/bin/python` / `.venv/Scripts/python.exe` を優先し、それ以外は `python3.11`、`python3`、`python` の順にフォールバックする。
+
+`tex-env.toml` では TeX Live / Docker だけでなく、JA / EN ごとの `latexmk` mode と engine も設定できる。日本語ドラフトで `uplatex + dvipdfmx` が必要な場合は、`tex-env.example.toml` の `[latex.ja]` 例をコピーする。
 
 Windows / PowerShell で PDF を確認したい場合は、TeX Live の代わりに pinned Tectonic を `.tools/` に取得してビルドできる:
 

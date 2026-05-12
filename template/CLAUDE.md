@@ -80,7 +80,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 
 ## TeX 環境
 
-ユーザー空間 TeX Live や Docker を使用する場合、`tex-env.example.toml` を `tex-env.toml` にコピーして環境を設定する。`tex-env.toml` がなければ従来通り PATH から `latexmk` を探す。
+ユーザー空間 TeX Live、Docker、または JA / EN ごとの LaTeX engine を使用する場合、`tex-env.example.toml` を `tex-env.toml` にコピーして環境を設定する。`tex-env.toml` がなければ従来通り PATH から `latexmk` を探し、既定の `latexmk -pdf` でビルドする。日本語ドラフトで `uplatex + dvipdfmx` が必要な場合は `[latex.ja]` の `latexmk_mode = "pdfdvi"`、`latex`、`dvipdf` を設定する。
 
 ## トラブルシューティング
 

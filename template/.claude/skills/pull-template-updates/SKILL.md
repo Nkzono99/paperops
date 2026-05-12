@@ -1,16 +1,16 @@
 ---
 name: pull-template-updates
-description: 上流の paper-harness-template の変更を下流の論文リポジトリに安全に取り込む。テンプレート更新の適用時に使用。
+description: 上流の paperops scaffold の変更を下流の論文リポジトリに安全に取り込む。テンプレート更新の適用時に使用。
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 ---
 
 # pull-template-updates
 
-上流テンプレートリポジトリ（`paper-harness-template`）の変更を、この論文リポジトリに安全に取り込むためのスキル。
+上流 `paperops` scaffold の変更を、この論文リポジトリに安全に取り込むためのスキル。
 
 ## 前提
 
-- 上流リポジトリ: `Nkzono99/paper-harness-template`（`template/` 配下がこのリポジトリのルートに対応）
+- 上流リポジトリ: `Nkzono99/paperops`（`template/` 配下がこのリポジトリのルートに対応）
 - 下流プロジェクトは `pops init` で作成し、`.pops/manifest.toml` を持つ。
 - GitHub template repository 由来の配布リポジトリは使用しない。
 
@@ -35,8 +35,8 @@ pops update-harness --dry-run
 `pops` が使えない場合のみ、上流リポジトリの `template/` を直接参照:
 
 ```sh
-git clone --depth 1 https://github.com/Nkzono99/paper-harness-template.git /tmp/template-source
-# /tmp/template-source/template/ がこのリポジトリのルートに対応
+git clone --depth 1 https://github.com/Nkzono99/paperops.git /tmp/paperops-source
+# /tmp/paperops-source/template/ がこのリポジトリのルートに対応
 ```
 
 ### 2. 変更の特定

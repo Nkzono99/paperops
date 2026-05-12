@@ -1,6 +1,6 @@
 ---
 name: pull-template-updates
-description: Codex で上流 paper-harness-template の変更を下流論文リポジトリに取り込む。
+description: Codex で上流 paperops scaffold の変更を下流論文リポジトリに取り込む。
 ---
 
 # pull-template-updates

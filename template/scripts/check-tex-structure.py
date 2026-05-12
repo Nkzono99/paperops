@@ -87,10 +87,17 @@ def discover_graphics_paths(path: Path, text: str) -> list[Path]:
     return paths
 
 
-def resolve_graphic(root: Path, current_file: Path, graphics_paths: list[Path], target: str) -> Path | None:
+def resolve_graphic(
+    root: Path,
+    current_file: Path,
+    main_dir: Path,
+    graphics_paths: list[Path],
+    target: str,
+) -> Path | None:
     search_dirs = [
         *graphics_paths,
         current_file.parent,
+        main_dir,
         root / "manuscript" / "shared" / "figures",
         root / "manuscript" / "shared" / "figures" / "generated",
     ]
@@ -115,15 +122,22 @@ def resolve_bib(root: Path, current_file: Path, target: str) -> Path | None:
     return None
 
 
-def resolve_bst(root: Path, current_file: Path, target: str) -> Path | None:
+def resolve_bst(root: Path, current_file: Path, main_dir: Path, target: str) -> Path | None:
     search_dirs = [
         current_file.parent,
+        main_dir,
         root / "manuscript" / "shared" / "style",
     ]
     for directory in search_dirs:
         found = resolve_existing(directory, target, ["", ".bst"])
         if found is not None:
             return found
+    style_root = root / "manuscript" / "shared" / "style"
+    if style_root.is_dir() and "/" not in target and "\\" not in target:
+        for candidate in with_suffix_candidates(target, ["", ".bst"]):
+            for path in style_root.rglob(candidate):
+                if path.is_file():
+                    return path.resolve()
     return None
 
 
@@ -133,6 +147,8 @@ def scan_file(
     findings: list[Finding],
     visited: set[Path],
     stack: list[Path],
+    main_dir: Path,
+    inherited_graphics_paths: list[Path],
 ) -> None:
     path = path.resolve()
     if path in stack:
@@ -148,7 +164,7 @@ def scan_file(
     visited.add(path)
     stack.append(path)
     text = read_tex(path)
-    graphics_paths = discover_graphics_paths(path, text)
+    graphics_paths = [*inherited_graphics_paths, *discover_graphics_paths(path, text)]
 
     for match in INPUT_RE.finditer(text):
         target = match.group("target").strip()
@@ -161,11 +177,11 @@ def scan_file(
                 )
             )
             continue
-        scan_file(root, found, findings, visited, stack)
+        scan_file(root, found, findings, visited, stack, main_dir, graphics_paths)
 
     for match in GRAPHICS_RE.finditer(text):
         target = match.group("target").strip()
-        if resolve_graphic(root, path, graphics_paths, target) is None:
+        if resolve_graphic(root, path, main_dir, graphics_paths, target) is None:
             findings.append(
                 Finding("error", f"`{rel(path, root)}` の `\\includegraphics{{{target}}}` が見つかりません")
             )
@@ -181,7 +197,7 @@ def scan_file(
         target = match.group("target").strip()
         if "/" not in target and "\\" not in target and target in BUILTIN_BST_STYLES:
             continue
-        if resolve_bst(root, path, target) is None:
+        if resolve_bst(root, path, main_dir, target) is None:
             severity = "error" if "/" in target or "\\" in target else "warning"
             findings.append(
                 Finding(
@@ -204,7 +220,7 @@ def main() -> int:
     main_tex = args.main.resolve()
     findings: list[Finding] = []
 
-    scan_file(root, main_tex, findings, set(), [])
+    scan_file(root, main_tex, findings, set(), [], main_tex.parent, [])
 
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]

@@ -1,7 +1,8 @@
 .PHONY: venv build-ja build-en lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check public-terms-check claim-evidence-check submission-drift-check skill-mirror-check collect-context readiness-check export-arxiv ci pre-submit
 
-PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
-PYTHON_BOOTSTRAP ?= python
+PYTHON_FALLBACK := $(shell command -v python3.11 2>/dev/null || command -v python3 2>/dev/null || command -v python 2>/dev/null)
+PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(PYTHON_FALLBACK)))
+PYTHON_BOOTSTRAP ?= $(PYTHON_FALLBACK)
 
 venv:
 	$(PYTHON_BOOTSTRAP) -m venv .venv

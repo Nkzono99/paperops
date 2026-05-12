@@ -35,7 +35,8 @@ uvx --from paper-harness-cli pops version
 - `pops update-harness --apply`: 不足している管理対象ファイルだけを追加する。
 - `pops update-harness --apply --force`: 差分がある管理対象ファイルも上書きする。実行前に plan を確認すること。
 - `pops update-harness --only AGENTS.md,.claude/skills`: 対象 prefix を絞り込む。
-- `pops update-harness --adopt`: 現在のプロジェクトを CLI 管理対象として採用し、`.pops/manifest.toml` を更新する。
+- `pops update-harness --template-ref <ref>`: 適用した scaffold の commit/ref を `.pops/manifest.toml` に記録する。`--source` が Git worktree 内なら、`--apply` 時に可能な限り自動検出する。
+- `pops update-harness --adopt`: 現在のプロジェクトを CLI 管理対象として採用し、`.pops/manifest.toml` を更新する。既存 manifest の未知 key や `template_ref` は保持する。
 - `pops migrate [path]`: 旧 scaffold 由来のプロジェクトに `.pops` 管理情報を追加する計画を表示する。
 - `pops migrate --apply`: `.pops/manifest.toml` を作成する。
 - `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出力する。

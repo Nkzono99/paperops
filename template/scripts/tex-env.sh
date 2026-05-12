@@ -14,10 +14,14 @@ fi
 # Python を特定（ビルドスクリプトと同じ優先順）
 if [[ -x "$_TEX_ENV_ROOT/.venv/bin/python" ]]; then
   _TEX_ENV_PYTHON="$_TEX_ENV_ROOT/.venv/bin/python"
+elif [[ -x "$_TEX_ENV_ROOT/.venv/Scripts/python.exe" ]]; then
+  _TEX_ENV_PYTHON="$_TEX_ENV_ROOT/.venv/Scripts/python.exe"
 elif command -v python3.11 >/dev/null 2>&1; then
   _TEX_ENV_PYTHON="python3.11"
-else
+elif command -v python3 >/dev/null 2>&1; then
   _TEX_ENV_PYTHON="python3"
+else
+  _TEX_ENV_PYTHON="python"
 fi
 
 # TOML を解析し、shell eval なしで値を取り込む
@@ -52,6 +56,22 @@ if "docker" in config:
     image = config["docker"].get("image", "")
     if image:
         print(f"TEX_DOCKER_IMAGE\t{image}")
+
+latex = config.get("latex", {})
+if isinstance(latex, dict):
+    for lang in ("ja", "en"):
+        settings = latex.get(lang, {})
+        if not isinstance(settings, dict):
+            continue
+        prefix = f"PAPEROPS_{lang.upper()}"
+        for key, env_name in {
+            "latexmk_mode": f"{prefix}_LATEXMK_MODE",
+            "latex": f"{prefix}_LATEX",
+            "dvipdf": f"{prefix}_DVIPDF",
+        }.items():
+            value = settings.get(key, "")
+            if value:
+                print(f"{env_name}\t{value}")
 PY
 )
 
@@ -63,6 +83,24 @@ while IFS=$'\t' read -r _tex_env_key _tex_env_value; do
     TEX_DOCKER_IMAGE)
       TEX_DOCKER_IMAGE="$_tex_env_value"
       ;;
+    PAPEROPS_JA_LATEXMK_MODE)
+      PAPEROPS_JA_LATEXMK_MODE="${PAPEROPS_JA_LATEXMK_MODE:-$_tex_env_value}"
+      ;;
+    PAPEROPS_JA_LATEX)
+      PAPEROPS_JA_LATEX="${PAPEROPS_JA_LATEX:-$_tex_env_value}"
+      ;;
+    PAPEROPS_JA_DVIPDF)
+      PAPEROPS_JA_DVIPDF="${PAPEROPS_JA_DVIPDF:-$_tex_env_value}"
+      ;;
+    PAPEROPS_EN_LATEXMK_MODE)
+      PAPEROPS_EN_LATEXMK_MODE="${PAPEROPS_EN_LATEXMK_MODE:-$_tex_env_value}"
+      ;;
+    PAPEROPS_EN_LATEX)
+      PAPEROPS_EN_LATEX="${PAPEROPS_EN_LATEX:-$_tex_env_value}"
+      ;;
+    PAPEROPS_EN_DVIPDF)
+      PAPEROPS_EN_DVIPDF="${PAPEROPS_EN_DVIPDF:-$_tex_env_value}"
+      ;;
   esac
 done <<< "$_tex_env_vars"
 
@@ -73,5 +111,12 @@ fi
 if [[ -n "${TEX_DOCKER_IMAGE:-}" ]]; then
   export TEX_DOCKER_IMAGE
 fi
+
+export PAPEROPS_JA_LATEXMK_MODE="${PAPEROPS_JA_LATEXMK_MODE:-pdf}"
+export PAPEROPS_EN_LATEXMK_MODE="${PAPEROPS_EN_LATEXMK_MODE:-pdf}"
+export PAPEROPS_JA_LATEX="${PAPEROPS_JA_LATEX:-}"
+export PAPEROPS_EN_LATEX="${PAPEROPS_EN_LATEX:-}"
+export PAPEROPS_JA_DVIPDF="${PAPEROPS_JA_DVIPDF:-}"
+export PAPEROPS_EN_DVIPDF="${PAPEROPS_EN_DVIPDF:-}"
 
 unset _TEX_ENV_ROOT _TEX_ENV_TOML _TEX_ENV_PYTHON _tex_env_vars _tex_env_key _tex_env_value

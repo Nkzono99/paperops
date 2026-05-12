@@ -2,11 +2,15 @@ from __future__ import annotations
 
 import contextlib
 import io
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-from paperops.cli.main import main
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+
+from paperops.cli.main import main, write_manifest
 
 
 def run_cli(args: list[str]) -> tuple[int, str, str]:
@@ -52,6 +56,52 @@ class PopsCliTest(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertIn("Harness update plan", out)
             self.assertIn("unchanged managed files: 1", out)
+
+    def test_write_manifest_preserves_existing_scaffold_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            manifest = target / ".pops" / "manifest.toml"
+            manifest.parent.mkdir(parents=True)
+            manifest.write_text(
+                "\n".join(
+                    [
+                        "[project]",
+                        'tool = "pops"',
+                        'local_note = "keep"',
+                        "",
+                        "[scaffold]",
+                        'package = "paper-harness-cli"',
+                        'template_ref = "abc123"',
+                        'local_key = "keep-too"',
+                        "",
+                        "[audit]",
+                        'owner = "downstream"',
+                        "",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            write_manifest(target)
+            text = manifest.read_text(encoding="utf-8")
+
+            self.assertIn('template_ref = "abc123"', text)
+            self.assertIn('local_key = "keep-too"', text)
+            self.assertIn("[audit]", text)
+            self.assertIn('owner = "downstream"', text)
+
+    def test_update_harness_adopt_can_record_template_ref(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target), "--template-ref", "old"])
+
+            code, _out, err = run_cli(
+                ["update-harness", "--adopt", "--template-ref", "new", str(target)]
+            )
+
+            self.assertEqual(code, 0, err)
+            text = (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
+            self.assertIn('template_ref = "new"', text)
 
     def test_feedback_can_write_draft(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

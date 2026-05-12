@@ -9,3 +9,15 @@
 # Docker でビルドする場合
 # [docker]
 # image = "texlive/texlive:latest"
+
+# LaTeX engine を切り替える場合
+# 既定は JA / EN ともに latexmk -pdf。
+# JA で uplatex + dvipdfmx を使う例:
+# [latex.ja]
+# latexmk_mode = "pdfdvi"
+# latex = "uplatex -interaction=nonstopmode -halt-on-error %O %S"
+# dvipdf = "dvipdfmx %O -o %D %S"
+#
+# EN 側を明示する例:
+# [latex.en]
+# latexmk_mode = "pdf"

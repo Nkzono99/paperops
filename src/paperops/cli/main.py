@@ -9,11 +9,13 @@ import importlib.resources
 import shutil
 import subprocess
 import sys
+import tomllib
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 PACKAGE_NAME = "paper-harness-cli"
 UPSTREAM_REPO = "Nkzono99/paperops"
@@ -162,6 +164,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Use a scaffold directory instead of the bundled scaffold.",
     )
+    update_parser.add_argument(
+        "--template-ref",
+        default="",
+        help="Template commit/ref to record in .pops/manifest.toml.",
+    )
     update_parser.set_defaults(func=cmd_update_harness)
 
     migrate_parser = subcommands.add_parser(
@@ -303,17 +310,25 @@ def cmd_update_harness(args: argparse.Namespace) -> int:
         return 2
 
     if args.adopt:
-        write_manifest(root)
+        template_ref = args.template_ref or detect_template_ref(args.source)
+        write_manifest(root, template_ref=template_ref)
         print("Adopted current project into .pops/manifest.toml")
         return 0
 
     source_context = source_dir_context(args.source)
     with source_context as source:
+        template_ref = args.template_ref or detect_template_ref(source)
         only = parse_only(args.only)
         plan = plan_managed_update(source, root, only_prefixes=only)
         print_update_plan(plan)
         if args.apply:
-            applied = apply_managed_update(source, root, plan, overwrite=args.force)
+            applied = apply_managed_update(
+                source,
+                root,
+                plan,
+                overwrite=args.force,
+                template_ref=template_ref,
+            )
             print(f"Applied files: {applied}")
             if plan.changed and not args.force:
                 print(
@@ -491,7 +506,14 @@ def plan_managed_update(
     return CopyPlan(missing=missing, changed=changed, unchanged=unchanged, excluded=excluded)
 
 
-def apply_managed_update(source: Path, root: Path, plan: CopyPlan, *, overwrite: bool) -> int:
+def apply_managed_update(
+    source: Path,
+    root: Path,
+    plan: CopyPlan,
+    *,
+    overwrite: bool,
+    template_ref: str = "",
+) -> int:
     candidates = list(plan.missing)
     if overwrite:
         candidates.extend(plan.changed)
@@ -502,7 +524,7 @@ def apply_managed_update(source: Path, root: Path, plan: CopyPlan, *, overwrite:
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dst)
     if candidates:
-        write_manifest(root)
+        write_manifest(root, template_ref=template_ref)
     return len(candidates)
 
 
@@ -541,24 +563,116 @@ def same_file_content(left: Path, right: Path) -> bool:
 def write_manifest(root: Path, *, template_ref: str = "") -> None:
     pops_dir = root / ".pops"
     pops_dir.mkdir(parents=True, exist_ok=True)
+    manifest = pops_dir / "manifest.toml"
+    existing = read_manifest(manifest)
     now = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-    ref_line = f'template_ref = "{escape_toml(template_ref)}"\n' if template_ref else ""
-    content = (
-        "[project]\n"
-        'tool = "pops"\n'
-        f'updated_at = "{now}"\n'
-        "\n"
-        "[scaffold]\n"
-        f'package = "{PACKAGE_NAME}"\n'
-        f'version = "{escape_toml(package_version())}"\n'
-        f'source = "{UPSTREAM_REPO}"\n'
-        f"{ref_line}"
-    )
-    (pops_dir / "manifest.toml").write_text(content, encoding="utf-8")
+
+    project = as_table(existing.get("project"))
+    project["tool"] = "pops"
+    project["updated_at"] = now
+
+    scaffold = as_table(existing.get("scaffold"))
+    scaffold["package"] = PACKAGE_NAME
+    scaffold["version"] = package_version()
+    scaffold["source"] = UPSTREAM_REPO
+    if template_ref:
+        scaffold["template_ref"] = template_ref
+
+    merged = dict(existing)
+    merged["project"] = project
+    merged["scaffold"] = scaffold
+    manifest.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+
+
+def read_manifest(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        data = tomllib.loads(path.read_text(encoding="utf-8"))
+    except (OSError, tomllib.TOMLDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def as_table(value: object) -> dict[str, Any]:
+    return dict(value) if isinstance(value, dict) else {}
+
+
+def dumps_manifest_toml(data: dict[str, Any]) -> str:
+    lines: list[str] = []
+    for section in ordered_manifest_sections(data):
+        value = data[section]
+        if isinstance(value, dict):
+            append_toml_table(lines, section, value)
+        else:
+            lines.append(f"{toml_key(section)} = {toml_value(value)}")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def ordered_manifest_sections(data: dict[str, Any]) -> list[str]:
+    preferred = ["project", "scaffold"]
+    return [item for item in preferred if item in data] + [
+        item for item in data if item not in preferred
+    ]
+
+
+def append_toml_table(lines: list[str], name: str, table: dict[str, Any]) -> None:
+    if lines and lines[-1] != "":
+        lines.append("")
+    lines.append(f"[{toml_dotted_key(name)}]")
+    nested: list[tuple[str, dict[str, Any]]] = []
+    for key, value in table.items():
+        if isinstance(value, dict):
+            nested.append((key, value))
+        else:
+            lines.append(f"{toml_key(key)} = {toml_value(value)}")
+    for key, value in nested:
+        append_toml_table(lines, f"{name}.{key}", value)
+
+
+def toml_dotted_key(name: str) -> str:
+    return ".".join(toml_key(part) for part in name.split("."))
+
+
+def toml_key(key: str) -> str:
+    if key and all(char.isascii() and (char.isalnum() or char in "_-") for char in key):
+        return key
+    return f'"{escape_toml(key)}"'
+
+
+def toml_value(value: object) -> str:
+    if isinstance(value, str):
+        return f'"{escape_toml(value)}"'
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, int | float):
+        return str(value)
+    if isinstance(value, list):
+        return "[" + ", ".join(toml_value(item) for item in value) + "]"
+    return f'"{escape_toml(str(value))}"'
 
 
 def escape_toml(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def detect_template_ref(source: Path | None) -> str:
+    if source is None:
+        return ""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(source), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
+        )
+    except OSError:
+        return ""
+    if result.returncode != 0:
+        return ""
+    return result.stdout.strip()
 
 
 def find_project_root(start: Path) -> Path | None:

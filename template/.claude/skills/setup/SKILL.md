@@ -10,7 +10,7 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 ## 前提条件
 
-- `pops init` で `paper-harness-template` から生成したリポジトリであること。
+- `pops init` で `paperops` から生成したリポジトリであること。
 - プレースホルダーがまだ置き換えられていない状態であること。
 
 ## 手順
@@ -23,7 +23,7 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 - `.venv/` が存在するか
 - `refs/local/locations.toml` が存在するか
 - `tex-env.toml` が存在するか
-- `.github/workflows/*.yml` に `YOUR_ORG/paper-harness-template` が残っているか
+- `.github/workflows/*.yml` に `YOUR_ORG/paperops` が残っているか
 - `manuscript/publication-metadata.toml` にプレースホルダーが残っているか
 - `notes/project-brief.md` にプレースホルダーが残っているか
 - `notes/claim-evidence-map.md` が未記入か
@@ -43,7 +43,7 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 - **論文トピック**: 1行の説明
 - **公開タイトル**: 日本語・英語（未定でも可）
 - **著者**: 名前（複数可）
-- **上流テンプレートリポジトリ**: GitHub のオーナー/リポジトリ名（例 `Nkzono99/paper-harness-template`）
+- **上流テンプレートリポジトリ**: GitHub のオーナー/リポジトリ名（例 `Nkzono99/paperops`）
 - **投稿先候補**（未定でも可）: ジャーナル名、締切、ページ制限等
 - **TeX 環境**（任意）: ユーザー空間 TeX Live のパス、Docker イメージ、またはシステム TeX Live（デフォルト）
 - **公開ライセンス**（未定でも可）: 原稿、コード、データの扱い
@@ -87,7 +87,7 @@ Copy-Item refs/local/locations.example.toml refs/local/locations.toml
 
 ### 5. GitHub ワークフローの設定
 
-`.github/workflows/*.yml` 内の `YOUR_ORG/paper-harness-template` を、ユーザーが指定した実際のテンプレートリポジトリパスに置換する。
+`.github/workflows/*.yml` 内の `YOUR_ORG/paperops` を、ユーザーが指定した実際の `paperops` ソースリポジトリパスに置換する。
 
 対象ファイル:
 - `.github/workflows/ci.yml`
