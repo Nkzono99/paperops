@@ -20,6 +20,7 @@ PATH に `hops` がない環境では `uv run --with-editable . hops <command>` 
 - `hops propose --from <Eid>`
 - `hops eval --case <Eid> --manual`
 - `hops decide --from <id> --status <status>`
+- `hops update-harness`
 - `hops migrate --check`
 
 外部共有前にサニタイズ済みバンドルを確認し、ローカルパス、非公開語、未公開研究の文脈を残さないでください。
