@@ -32,6 +32,13 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 変更を反映する前に `docs/change-policy.md` と `docs/triage-rules.md` を確認すること。
 
+## GitHub Flow
+
+- `main` への直接 push は禁止。すべての変更は `codex/<topic>` などの topic branch から Pull Request 経由で取り込む。
+- Pull Request では `Smoke / smoke` を必須チェックとして通す。
+- release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。PyPI publish workflow も tag commit が `origin/main` から到達可能な場合だけ公開する。
+- 緊急修正でも `main` 直 push は避け、短命 branch と PR を使う。
+
 ## ルール
 
 - `template/AGENTS.md`、`template/CLAUDE.md`、`template/.agents/skills/`、`template/.claude/skills/`、`template/scripts/` は**ユーザー向けインターフェース**として扱う。変更にはマイグレーションノートが必要。
@@ -45,7 +52,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 - 意味のある作業単位ごとにコミットする。大量の変更を一つのコミットにまとめない。
 - コミットメッセージは日本語で、変更の「なぜ」を記述する。
-- `git push` はユーザーの明示的な指示なしに実行しない。
+- `git push` はユーザーの明示的な指示なしに実行しない。明示された場合も `main` ではなく topic branch を push する。
 
 ## リポジトリマップ
 

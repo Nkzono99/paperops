@@ -14,6 +14,9 @@
 
 ## リリース要件
 
+- `main` は GitHub Flow の保護対象とし、変更は Pull Request で取り込む。
+- PR の必須チェックとして `Smoke / smoke` を通す。
 - ユーザーに影響する改善ごとに `CHANGELOG.md` を更新する。
 - 変更が下流のセットアップに影響する場合、`README.md`、`docs/cli.md`、および `template/` 内の該当ファイルを更新する。
 - 判断に迷う場合は、まず `template-feedback` Issue を作成し、変更を反映する前にスコープをトリアージする。
+- release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。

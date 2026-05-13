@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- GitHub Flow を採用し、`main` への直接 push を禁止する運用へ移行した。PR では `Smoke / smoke` を必須チェックとして通し、release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。PyPI publish workflow も release tag が `origin/main` から到達可能な場合だけ公開するようにした。
+
 ## 0.2.0 - 2026-05-14
 
 - Python 実行環境の案内を Python 3.11 固定ではなく Python 3.11 以上の要件として明確化した。既存下流リポジトリで取り込む場合は `AGENTS.md`、`CLAUDE.md`、`README.md` の文言更新のみで、マイグレーション作業は不要。
