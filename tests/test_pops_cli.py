@@ -92,7 +92,7 @@ class PopsCliTest(unittest.TestCase):
                     "paperops.cli.main.available_package_versions",
                     return_value=["0.1.0", "0.2.5", "0.3.4"],
                 ),
-                mock.patch("paperops.cli.main.subprocess.run") as run,
+                mock.patch("paperops.cli.upgrade.subprocess.run") as run,
             ):
                 run.return_value = mock.Mock(returncode=0)
                 code, out, err = run_cli(
@@ -274,7 +274,7 @@ class PopsCliTest(unittest.TestCase):
             with (
                 mock.patch.dict("os.environ", env, clear=False),
                 mock.patch(
-                    "paperops.cli.main.fetch_latest_package_version",
+                    "paperops.cli.pypi.fetch_latest_package_version",
                     return_value="9.9.9",
                 ),
             ):
@@ -304,7 +304,7 @@ class PopsCliTest(unittest.TestCase):
             with (
                 mock.patch.dict("os.environ", env, clear=False),
                 mock.patch(
-                    "paperops.cli.main.fetch_latest_package_version",
+                    "paperops.cli.pypi.fetch_latest_package_version",
                     return_value=None,
                 ),
             ):
@@ -332,7 +332,7 @@ class PopsCliTest(unittest.TestCase):
             with (
                 mock.patch.dict("os.environ", env, clear=False),
                 mock.patch(
-                    "paperops.cli.main.fetch_latest_package_version",
+                    "paperops.cli.pypi.fetch_latest_package_version",
                     return_value=None,
                 ),
             ):
@@ -360,7 +360,7 @@ class PopsCliTest(unittest.TestCase):
             with (
                 mock.patch.dict("os.environ", env, clear=False),
                 mock.patch(
-                    "paperops.cli.main.fetch_latest_package_version",
+                    "paperops.cli.pypi.fetch_latest_package_version",
                     return_value="0.2.0",
                 ),
             ):
@@ -381,7 +381,7 @@ class PopsCliTest(unittest.TestCase):
             with (
                 mock.patch.dict("os.environ", env, clear=False),
                 mock.patch(
-                    "paperops.cli.main.fetch_latest_package_version",
+                    "paperops.cli.pypi.fetch_latest_package_version",
                     return_value="9.9.9",
                 ) as fetch,
             ):
