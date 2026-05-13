@@ -26,7 +26,7 @@
 ```sh
 pops setup          # .pops と project-local .venv/pops を準備
 pops doctor         # ハーネス状態を診断
-make venv           # Python 3.11 で .venv を作成
+make venv           # Python 3.11 以上で .venv を作成
 make build-ja       # 日本語原稿をコンパイル（または構造検証）
 make build-en       # 英語原稿をコンパイル（または構造検証）
 make lint-bib       # 参考文献エントリを検証

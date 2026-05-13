@@ -103,7 +103,7 @@ PyPI 側では trusted publisher として、この repository、workflow `.gith
 
 テンプレートは完全な TeX 環境を前提とせず、軽量なローカルチェックを提供する。
 `scripts/build-ja.sh` と `scripts/build-en.sh` は `latexmk` が利用可能な場合はコンパイルを行い、そうでなければ `scripts/check-tex-structure.py` による構造検証にフォールバックするため、クリーンなランナーでも CI が執筆ハーネスを実行できる。
-想定されるローカルセットアップは、リポジトリローカルの `.venv` 内の `python3.11` である。
+想定されるローカルセットアップは、リポジトリローカルの `.venv` 内の Python 3.11 以上である。
 
 ```sh
 make venv

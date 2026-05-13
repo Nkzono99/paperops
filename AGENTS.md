@@ -16,7 +16,7 @@
 ## 主要コマンド
 
 ```sh
-make venv                      # Python 3.11 で .venv を作成
+make venv                      # Python 3.11 以上で .venv を作成
 make smoke                     # template/ に対して lint-bib + citation-check + mirror-check + collect-context + readiness-check を実行
 make cli-smoke                 # pops CLI の最小 smoke test を実行
 ```
