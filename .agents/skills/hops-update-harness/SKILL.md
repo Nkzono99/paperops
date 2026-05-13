@@ -5,6 +5,7 @@ description: HarnessOps にリンク済みのリポジトリを、現在の hops
 
 `.harnessops/`、`harness-feedback/`、`harness-lab/` の構造を直接組み替えない。更新は `hops update-harness` に委譲します。
 事前確認だけをしたい場合は `hops doctor --check-overlay --check-records` を使います。
+PATH に `hops` がない環境では、PyPI の `harnessops` パッケージから `uvx --from harnessops hops <command>` として実行します。
 
 基本手順:
 

@@ -1,11 +1,28 @@
 {
-  "harnessops_version": "0.1.2",
+  "agent_bridge": {
+    "managed_files": {
+      ".agents/skills/harnessops-bridge/SKILL.md": "sha256:e1cd4b867a42ff696966fa940b6e28395ce2032591879a44549a60bf2de858c4",
+      ".agents/skills/hops-add-failure/SKILL.md": "sha256:9b0af3872ce278c259b9bb236a74bedede30091adc89bdc04cac16bcc7d9311a",
+      ".agents/skills/hops-compact-lab-memory/SKILL.md": "sha256:0c3c2cf6d20a890d9891aab38d6884d4290f3c7809bbc43a85e940c4ae06fd90",
+      ".agents/skills/hops-diagnose/SKILL.md": "sha256:4790f04f993d43d30ec12a7d87f733e67c7d8fa480d0154c5215d9af8ab7b7b0",
+      ".agents/skills/hops-export-feedback/SKILL.md": "sha256:27181f12ce1c52e45bec594fa19f79f66a215edfbe6be537731ed0d6f1fc7fde",
+      ".agents/skills/hops-import-feedback/SKILL.md": "sha256:6217f50620c257960ce7baef1e2eba3779ad6a52c6950e227fb42a903b1ba595",
+      ".agents/skills/hops-issue-triage/SKILL.md": "sha256:b1721ee2b8f9f402c6039bb1ebf0a3c93cf3a56438d973063cdc10c12ae75152",
+      ".agents/skills/hops-research-improvements/SKILL.md": "sha256:6fae33ca49e3b146700fd8e7d7f53c496336197143ad0ca0aee855c7644a9df4",
+      ".agents/skills/hops-route-feedback/SKILL.md": "sha256:ab79862ca9447e8cad818c2e4aa315748ac09cce9cc355490b62cae3b382ff95",
+      ".agents/skills/hops-run-lab/SKILL.md": "sha256:0db84c5bb89cee088e382eb8e2f87c8fc385392daf2d5002f458c7080f6e1527",
+      ".agents/skills/hops-update-harness/SKILL.md": "sha256:909ce62093f7633406377ff934381afd65b472bf33afb34c5eab231d404abafb"
+    }
+  },
+  "harnessops_version": "0.1.3",
   "layout_version": "0.1",
   "managed_files": {
-    "harness-lab/README.md": "sha256:440eea30a3b85b64a5b79ea8a8e9f497f029328ca1b18e96fb9bf13a372348b5",
-    "harness-lab/views/backlog.md": "sha256:0ed4436872ad24f9c73737b7f84290306dc4baaf36154b7e36be521e985b791c",
-    "harness-lab/views/imported-feedback.md": "sha256:92dfefe5d52cf3f3c6e5925c562fc238b8780dfab80ea3ea43a3902f80e7533e",
-    "harness-lab/views/score-trajectory.md": "sha256:a3d2f445609e5e9da0269ece3b10aff2414f3830bd185ad257d32ae19026b616"
+    "harness-lab/README.md": "sha256:4b63ed3a58b696578ef328c0292c82f103aa47597a69ccb69eb32b4594308cce",
+    "harness-lab/views/backlog.md": "sha256:e81ae92047d3fa9753eab522afa928d7d5c1a3709a1ac9dd0c7e4c63bd5270e2",
+    "harness-lab/views/imported-feedback.md": "sha256:a724335d6ec4f04a8e4e33f3ad153281fd040ec4a6ae45852a40aaf57f9a17f6",
+    "harness-lab/views/improvements.md": "sha256:1ae95085536b1cdb963cff7aea376275fcf3ac39d8d608e8513d49615e781f05",
+    "harness-lab/views/research-scans.md": "sha256:bd0369a4e7e23a36aa2f807c69b58d166c6b53cad01363a4856e8916537f5d11",
+    "harness-lab/views/score-trajectory.md": "sha256:b3db5939de12e2521052aa0087771eb9e86449964062aa683490f889c35e88a2"
   },
   "migrations": [],
   "overlay": {
