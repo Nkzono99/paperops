@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.0 - 2026-05-14
+
 - Python 実行環境の案内を Python 3.11 固定ではなく Python 3.11 以上の要件として明確化した。既存下流リポジトリで取り込む場合は `AGENTS.md`、`CLAUDE.md`、`README.md` の文言更新のみで、マイグレーション作業は不要。
 - `pops` の標準実行経路を `uvx --from paper-harness-cli pops ...` に一本化した。`pops init` / `pops setup` は `.pops/manifest.toml` の作成・採用だけを行い、project-local `.venv` への `paper-harness-cli` インストールは行わない。`pops doctor` は `.venv/pops` 不在を警告せず、既存 `.venv` が壊れている場合と `uvx` / `uv` 不在だけを警告する。既存下流リポジトリの `.venv` は論文プロジェクト用 Python 環境として残してよいが、`pops` 実行には使わない。
 - `pops update-paperops --plan` / `--apply-chain` を追加し、minor checkpoint ごとの exact `uvx --from paper-harness-cli==<version>` 呼び替えで scaffold を段階更新できるようにした。`.pops/manifest.toml` には `scaffold.layout_version` と `[upgrade]` を記録し、最新 `pops` に古い migration を無限保持しない方針を `docs/upgrade-policy.md` に明文化した。既存下流リポジトリで取り込む場合は、まず `uvx --from paper-harness-cli pops update-paperops --plan` で chain を確認する。

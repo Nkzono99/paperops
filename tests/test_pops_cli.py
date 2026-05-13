@@ -11,6 +11,7 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from paperops import __version__
 from paperops.cli.main import main, write_manifest
 
 
@@ -20,6 +21,16 @@ def run_cli(args: list[str]) -> tuple[int, str, str]:
     with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
         code = main(args)
     return code, stdout.getvalue(), stderr.getvalue()
+
+
+def set_scaffold_version(root: Path, version: str) -> None:
+    manifest = root / ".pops" / "manifest.toml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8").replace(
+            f'version = "{__version__}"', f'version = "{version}"', 1
+        ),
+        encoding="utf-8",
+    )
 
 
 class PopsCliTest(unittest.TestCase):
@@ -72,6 +83,7 @@ class PopsCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             run_cli(["init", str(target)])
+            set_scaffold_version(target, "0.1.0")
             with mock.patch(
                 "paperops.cli.main.available_package_versions",
                 return_value=["0.1.0", "0.1.2", "0.2.0", "0.2.5", "0.3.4"],
@@ -87,6 +99,7 @@ class PopsCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             run_cli(["init", str(target)])
+            set_scaffold_version(target, "0.1.0")
             with (
                 mock.patch(
                     "paperops.cli.main.available_package_versions",
@@ -115,7 +128,7 @@ class PopsCliTest(unittest.TestCase):
             manifest = target / ".pops" / "manifest.toml"
             manifest.write_text(
                 manifest.read_text(encoding="utf-8").replace(
-                    'version = "0.1.0"', 'version = "0.9.0"', 1
+                    f'version = "{__version__}"', 'version = "0.9.0"', 1
                 ),
                 encoding="utf-8",
             )
@@ -188,7 +201,8 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn('command = "uvx --from paper-harness-cli pops"', text)
             self.assertIn('layout_version = "0.1"', text)
             self.assertIn("[upgrade]", text)
-            self.assertIn('last_checkpoint = "0.1"', text)
+            checkpoint = ".".join(__version__.split(".")[:2])
+            self.assertIn(f'last_checkpoint = "{checkpoint}"', text)
             self.assertNotIn('venv = ".venv"', text)
 
     def test_setup_refreshes_cli_runner_without_changing_scaffold_version(self) -> None:
@@ -263,7 +277,7 @@ class PopsCliTest(unittest.TestCase):
         code, out, err = run_cli(["--version"])
 
         self.assertEqual(code, 0, err)
-        self.assertIn("pops 0.1.0", out)
+        self.assertIn(f"pops {__version__}", out)
 
     def test_update_notice_points_to_update_paperops_skill(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -293,7 +307,7 @@ class PopsCliTest(unittest.TestCase):
             manifest = target / ".pops" / "manifest.toml"
             manifest.write_text(
                 manifest.read_text(encoding="utf-8").replace(
-                    'version = "0.1.0"', 'version = "0.0.1"', 1
+                    f'version = "{__version__}"', 'version = "0.0.1"', 1
                 ),
                 encoding="utf-8",
             )
@@ -311,7 +325,7 @@ class PopsCliTest(unittest.TestCase):
                 code, _out, err = run_cli(["doctor", str(target)])
 
         self.assertEqual(code, 0, err)
-        self.assertIn("paperops ハーネス更新候補: 0.0.1 -> 0.1.0", err)
+        self.assertIn(f"paperops ハーネス更新候補: 0.0.1 -> {__version__}", err)
         self.assertIn("uvx --from paper-harness-cli pops update-paperops --plan", err)
 
     def test_update_notice_detects_running_cli_older_than_applied_scaffold(self) -> None:
@@ -321,7 +335,7 @@ class PopsCliTest(unittest.TestCase):
             manifest = target / ".pops" / "manifest.toml"
             manifest.write_text(
                 manifest.read_text(encoding="utf-8").replace(
-                    'version = "0.1.0"', 'version = "0.2.0"', 1
+                    f'version = "{__version__}"', 'version = "0.3.0"', 1
                 ),
                 encoding="utf-8",
             )
@@ -349,7 +363,7 @@ class PopsCliTest(unittest.TestCase):
             manifest = target / ".pops" / "manifest.toml"
             manifest.write_text(
                 manifest.read_text(encoding="utf-8").replace(
-                    'version = "0.1.0"', 'version = "0.3.0"', 1
+                    f'version = "{__version__}"', 'version = "0.4.0"', 1
                 ),
                 encoding="utf-8",
             )
@@ -361,15 +375,15 @@ class PopsCliTest(unittest.TestCase):
                 mock.patch.dict("os.environ", env, clear=False),
                 mock.patch(
                     "paperops.cli.pypi.fetch_latest_package_version",
-                    return_value="0.2.0",
+                    return_value="0.3.0",
                 ),
             ):
                 code, _out, err = run_cli(["doctor", str(target)])
 
         self.assertEqual(code, 0, err)
-        self.assertIn("実行中の pops が古いです: 0.1.0 -> 0.2.0", err)
+        self.assertIn(f"実行中の pops が古いです: {__version__} -> 0.3.0", err)
         self.assertIn("実行中の pops がこのプロジェクトの適用済み scaffold より古い", err)
-        self.assertNotIn("paperops ハーネス更新候補: 0.3.0 -> 0.2.0", err)
+        self.assertNotIn("paperops ハーネス更新候補: 0.4.0 -> 0.3.0", err)
 
     def test_update_notice_can_be_disabled(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

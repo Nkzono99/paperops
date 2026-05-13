@@ -20,6 +20,10 @@
 
 提案されたテンプレート変更が、ミラー追跡、ノート継続性、refs 整理、安全性保護を弱めていないかチェックする。
 
+### `release`
+
+`paperops` のリリースノート作成、version 更新、検証、タグ作成、GitHub Release 公開、PyPI publish workflow 確認までを行う。
+
 ## スキャフォールドに含まれるプロジェクトローカルスキル
 
 下流スキャフォールドは `template/.claude/skills/` に実体となるスキルを提供し、Codex 用には `template/.agents/skills/` に同名の互換入口を提供する:

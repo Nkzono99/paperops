@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release"
+  short_description: "Prepare notes, tag, publish, and verify a paperops release"
+  default_prompt: "paperops のリリースノートを書いてリリースして"
