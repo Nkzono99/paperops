@@ -27,6 +27,8 @@ UPSTREAM_REPO = "Nkzono99/paperops"
 CHANGELOG_URL = f"https://github.com/{UPSTREAM_REPO}/blob/main/CHANGELOG.md"
 PYPI_JSON_URL = f"https://pypi.org/pypi/{PACKAGE_NAME}/json"
 UPDATE_CHECK_INTERVAL_SECONDS = 24 * 60 * 60
+LAYOUT_VERSION = "0.1"
+UPGRADE_CHAIN_SUPPORTED_SINCE = "0.1.0"
 
 EXCLUDED_SCAFFOLD_PATTERNS = (
     ".git",
@@ -72,6 +74,16 @@ class CopyPlan:
     changed: list[str]
     unchanged: list[str]
     excluded: list[str]
+
+
+@dataclass(frozen=True)
+class UpgradeStep:
+    from_version: str
+    to_version: str
+
+    @property
+    def is_major(self) -> bool:
+        return major_version(self.from_version) != major_version(self.to_version)
 
 
 def app() -> None:
@@ -240,12 +252,39 @@ def add_update_paperops_parser(
         action="store_true",
         help="Show the plan without writing.",
     )
+    update_parser.add_argument(
+        "--plan",
+        action="store_true",
+        help="Show a versioned upgrade chain without writing.",
+    )
     update_parser.add_argument("--apply", action="store_true", help="Apply missing-file updates.")
+    update_parser.add_argument(
+        "--apply-chain",
+        action="store_true",
+        help="Run a versioned upgrade chain via exact uvx package versions.",
+    )
     update_parser.add_argument(
         "--force",
         action="store_true",
         help="Overwrite changed managed files when used with --apply.",
     )
+    update_parser.add_argument(
+        "--target",
+        default="latest",
+        help="Upgrade chain target version or minor prefix, defaults to latest.",
+    )
+    update_parser.add_argument(
+        "--allow-major",
+        action="store_true",
+        help="Allow --apply-chain to cross a major version boundary.",
+    )
+    update_parser.add_argument(
+        "--upgrade-step",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
+    update_parser.add_argument("--from-version", default="", help=argparse.SUPPRESS)
+    update_parser.add_argument("--to-version", default="", help=argparse.SUPPRESS)
     update_parser.add_argument(
         "--adopt",
         action="store_true",
@@ -357,6 +396,12 @@ def cmd_update_paperops(args: argparse.Namespace) -> int:
     if args.apply and args.dry_run:
         print("error: --apply and --dry-run cannot be used together.", file=sys.stderr)
         return 2
+    if args.apply_chain and (args.apply or args.dry_run):
+        print(
+            "error: --apply-chain cannot be combined with --apply or --dry-run.",
+            file=sys.stderr,
+        )
+        return 2
 
     root = find_project_root(args.path or Path.cwd())
     if root is None:
@@ -364,6 +409,12 @@ def cmd_update_paperops(args: argparse.Namespace) -> int:
         return 2
 
     args.project_root = root
+    if args.upgrade_step:
+        return cmd_upgrade_step(args, root)
+
+    if args.plan or args.apply_chain:
+        return cmd_upgrade_chain(args, root)
+
     if args.adopt:
         template_ref = args.template_ref or detect_template_ref(args.source)
         write_manifest(root, template_ref=template_ref)
@@ -423,6 +474,81 @@ def cmd_migrate(args: argparse.Namespace) -> int:
             print(f"  {path}")
     else:
         print("No known legacy docs paths found.")
+    return 0
+
+
+def cmd_upgrade_chain(args: argparse.Namespace, root: Path) -> int:
+    applied = applied_scaffold_version(root) or package_version()
+    versions = available_package_versions()
+    if not versions:
+        print("error: could not resolve available paperops versions.", file=sys.stderr)
+        return 1
+
+    target = resolve_upgrade_target(args.target, versions)
+    if target is None:
+        print(f"error: target version was not found: {args.target}", file=sys.stderr)
+        return 2
+
+    chain = plan_upgrade_chain(applied, target, versions)
+    print_upgrade_chain(applied, target, chain)
+    if not chain:
+        return 0
+
+    if args.apply_chain and any(step.is_major for step in chain) and not args.allow_major:
+        print(
+            "error: upgrade chain crosses a major version; re-run with --allow-major "
+            "after reviewing the plan.",
+            file=sys.stderr,
+        )
+        return 2
+
+    if args.apply_chain:
+        return run_upgrade_chain(root, chain, force=args.force)
+
+    return 0
+
+
+def cmd_upgrade_step(args: argparse.Namespace, root: Path) -> int:
+    if not args.from_version or not args.to_version:
+        print(
+            "error: --upgrade-step requires --from-version and --to-version.",
+            file=sys.stderr,
+        )
+        return 2
+
+    applied = applied_scaffold_version(root)
+    if applied is not None and compare_versions(applied, args.from_version) != 0:
+        print(
+            "error: upgrade step expected scaffold "
+            f"{args.from_version}, but manifest records {applied}.",
+            file=sys.stderr,
+        )
+        return 2
+
+    source_context = source_dir_context(args.source)
+    with source_context as source:
+        template_ref = args.template_ref or f"{PACKAGE_NAME}=={package_version()}"
+        only = parse_only(args.only)
+        plan = plan_managed_update(source, root, only_prefixes=only)
+        print(
+            f"Paperops upgrade step: {args.from_version} -> {args.to_version}"
+        )
+        print_update_plan(plan)
+        if args.apply:
+            applied_count = apply_managed_update(
+                source,
+                root,
+                plan,
+                overwrite=args.force,
+                template_ref=template_ref,
+            )
+            write_manifest(root, template_ref=template_ref)
+            print(f"Applied files: {applied_count}")
+            if plan.changed and not args.force:
+                print(
+                    "Changed managed files were left untouched. Re-run this step "
+                    "with --force only after reviewing the plan."
+                )
     return 0
 
 
@@ -509,8 +635,8 @@ def maybe_print_update_notice(args: argparse.Namespace, exit_code: int) -> None:
         if applied is None:
             print(
                 "[pops notice] 論文プロジェクト内では "
-                f"{uvx_pops_command('update-paperops', '--dry-run')} "
-                "で scaffold 差分を確認してください。",
+                f"{uvx_pops_command('update-paperops', '--plan')} "
+                "で upgrade chain を確認してください。",
                 file=sys.stderr,
             )
             print(
@@ -540,7 +666,7 @@ def maybe_print_update_notice(args: argparse.Namespace, exit_code: int) -> None:
             file=sys.stderr,
         )
         print(
-            f"[pops notice] 差分確認: {uvx_pops_command('update-paperops', '--dry-run')}",
+            f"[pops notice] chain確認: {uvx_pops_command('update-paperops', '--plan')}",
             file=sys.stderr,
         )
         print(
@@ -596,6 +722,18 @@ def latest_package_version() -> str | None:
     return None
 
 
+def available_package_versions() -> list[str]:
+    versions = fetch_available_package_versions()
+    if versions:
+        return versions
+    current = package_version()
+    latest = latest_package_version()
+    candidates = [current]
+    if latest is not None:
+        candidates.append(latest)
+    return sorted_versions(candidates)
+
+
 def fetch_latest_package_version() -> str | None:
     request = urllib.request.Request(
         PYPI_JSON_URL,
@@ -612,6 +750,34 @@ def fetch_latest_package_version() -> str | None:
     info = data.get("info") if isinstance(data, dict) else None
     version = info.get("version") if isinstance(info, dict) else None
     return version if isinstance(version, str) and version else None
+
+
+def fetch_available_package_versions() -> list[str]:
+    request = urllib.request.Request(
+        PYPI_JSON_URL,
+        headers={
+            "Accept": "application/json",
+            "User-Agent": f"pops/{package_version()}",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=2) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except (OSError, TimeoutError, json.JSONDecodeError, urllib.error.URLError):
+        return []
+    releases = data.get("releases") if isinstance(data, dict) else None
+    if not isinstance(releases, dict):
+        return []
+    candidates: list[str] = []
+    for version, files in releases.items():
+        if not release_version_tuple(version):
+            continue
+        if isinstance(files, list) and files and all(
+            isinstance(item, dict) and item.get("yanked") for item in files
+        ):
+            continue
+        candidates.append(version)
+    return sorted_versions(candidates)
 
 
 def read_update_check_cache() -> dict[str, Any] | None:
@@ -657,14 +823,137 @@ def as_float(value: object) -> float | None:
 
 
 def is_newer_version(latest: str, current: str) -> bool:
-    latest_release = release_version_tuple(latest)
-    current_release = release_version_tuple(current)
-    if not latest_release or not current_release:
-        return latest != current and latest > current
-    width = max(len(latest_release), len(current_release))
-    return latest_release + (0,) * (width - len(latest_release)) > current_release + (
-        0,
-    ) * (width - len(current_release))
+    return compare_versions(latest, current) > 0
+
+
+def compare_versions(left: str, right: str) -> int:
+    left_release = release_version_tuple(left)
+    right_release = release_version_tuple(right)
+    if not left_release or not right_release:
+        if left == right:
+            return 0
+        return 1 if left > right else -1
+    width = max(len(left_release), len(right_release))
+    left_padded = left_release + (0,) * (width - len(left_release))
+    right_padded = right_release + (0,) * (width - len(right_release))
+    if left_padded == right_padded:
+        return 0
+    return 1 if left_padded > right_padded else -1
+
+
+def sorted_versions(versions: Sequence[str] | Iterator[str]) -> list[str]:
+    unique = {version for version in versions if release_version_tuple(version)}
+    return sorted(unique, key=release_version_tuple)
+
+
+def major_version(version: str) -> int:
+    release = release_version_tuple(version)
+    return release[0] if release else 0
+
+
+def minor_checkpoint(version: str) -> str:
+    release = release_version_tuple(version)
+    if len(release) >= 2:
+        return f"{release[0]}.{release[1]}"
+    if len(release) == 1:
+        return f"{release[0]}.0"
+    return "0.0"
+
+
+def resolve_upgrade_target(target: str, versions: list[str]) -> str | None:
+    if not versions:
+        return None
+    if target == "latest":
+        return versions[-1]
+    if target in versions:
+        return target
+    target_release = release_version_tuple(target)
+    if not target_release:
+        return None
+    matches = [
+        version
+        for version in versions
+        if release_version_tuple(version)[: len(target_release)] == target_release
+    ]
+    return matches[-1] if matches else None
+
+
+def plan_upgrade_chain(
+    applied: str,
+    target: str,
+    versions: list[str],
+) -> list[UpgradeStep]:
+    if compare_versions(target, applied) <= 0:
+        return []
+
+    candidates = [
+        version
+        for version in sorted_versions([*versions, target])
+        if compare_versions(version, applied) > 0
+        and compare_versions(version, target) <= 0
+    ]
+    by_minor: dict[str, str] = {}
+    applied_minor = minor_checkpoint(applied)
+    target_minor = minor_checkpoint(target)
+    for version in candidates:
+        checkpoint = minor_checkpoint(version)
+        if checkpoint == applied_minor and checkpoint != target_minor:
+            continue
+        by_minor[checkpoint] = version
+
+    steps: list[UpgradeStep] = []
+    current = applied
+    for checkpoint in sorted_versions(by_minor.values()):
+        if compare_versions(checkpoint, current) > 0:
+            steps.append(UpgradeStep(from_version=current, to_version=checkpoint))
+            current = checkpoint
+    return steps
+
+
+def print_upgrade_chain(applied: str, target: str, chain: list[UpgradeStep]) -> None:
+    print("Paperops upgrade chain:")
+    print(f"  current repo artifacts: {applied}")
+    print(f"  target package:          {target}")
+    if not chain:
+        print("  status: already up to date")
+        return
+    print("")
+    print("planned upgrade chain:")
+    for index, step in enumerate(chain, start=1):
+        kind = "major" if step.is_major else "minor"
+        print(f"{index}. {step.from_version} -> {step.to_version} ({kind})")
+
+
+def run_upgrade_chain(root: Path, chain: list[UpgradeStep], *, force: bool) -> int:
+    for step in chain:
+        command = [
+            "uvx",
+            "--from",
+            f"{PACKAGE_NAME}=={step.to_version}",
+            "pops",
+            "update-paperops",
+            "--upgrade-step",
+            "--from-version",
+            step.from_version,
+            "--to-version",
+            step.to_version,
+            "--apply",
+        ]
+        if force:
+            command.append("--force")
+        print("Running: " + " ".join(command))
+        try:
+            result = subprocess.run(command, cwd=root, check=False)
+        except OSError as exc:
+            print(f"error: failed to run upgrade step: {exc}", file=sys.stderr)
+            return 1
+        if result.returncode != 0:
+            print(
+                f"error: upgrade step failed with exit code {result.returncode}",
+                file=sys.stderr,
+            )
+            return result.returncode
+    return 0
 
 
 def release_version_tuple(version: str) -> tuple[int, ...]:
@@ -839,6 +1128,7 @@ def write_manifest(
     scaffold = as_table(existing.get("scaffold"))
     scaffold["package"] = PACKAGE_NAME
     scaffold["version"] = package_version()
+    scaffold["layout_version"] = LAYOUT_VERSION
     scaffold["source"] = UPSTREAM_REPO
     if template_ref:
         scaffold["template_ref"] = template_ref
@@ -846,6 +1136,7 @@ def write_manifest(
     merged = dict(existing)
     merged["project"] = project
     merged["scaffold"] = scaffold
+    merged["upgrade"] = upgrade_manifest_table(existing.get("upgrade"), now=now)
 
     merged["cli"] = cli_manifest_table(
         existing.get("cli"),
@@ -886,6 +1177,15 @@ def cli_manifest_table(
     return cli
 
 
+def upgrade_manifest_table(existing: object, *, now: str) -> dict[str, Any]:
+    upgrade = as_table(existing)
+    upgrade["last_applied"] = package_version()
+    upgrade["last_checkpoint"] = minor_checkpoint(package_version())
+    upgrade["chain_supported_since"] = UPGRADE_CHAIN_SUPPORTED_SINCE
+    upgrade["updated_at"] = now
+    return upgrade
+
+
 def read_manifest(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
@@ -912,7 +1212,7 @@ def dumps_manifest_toml(data: dict[str, Any]) -> str:
 
 
 def ordered_manifest_sections(data: dict[str, Any]) -> list[str]:
-    preferred = ["project", "scaffold", "cli"]
+    preferred = ["project", "scaffold", "upgrade", "cli"]
     return [item for item in preferred if item in data] + [
         item for item in data if item not in preferred
     ]

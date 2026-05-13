@@ -82,12 +82,14 @@ uvx --from paper-harness-cli pops init paper-my-topic
 uvx --from paper-harness-cli pops setup
 uvx --from paper-harness-cli pops doctor
 uvx --from paper-harness-cli pops update-paperops --dry-run
+uvx --from paper-harness-cli pops update-paperops --plan
 uvx --from paper-harness-cli pops migrate --apply
 uvx --from paper-harness-cli pops feedback
 uvx --from paper-harness-cli pops version
 ```
 
 このコマンド面は `uvx` 経由に一本化する。実装は小さく保ち、既存 skill と Makefile の運用を壊さないことを優先する。
+version を跨ぐ scaffold 更新では、`update-paperops --plan` で minor checkpoint ごとの upgrade chain を確認し、必要に応じて `--apply-chain` で exact version の `pops` を順に呼び替える。詳細は [`docs/upgrade-policy.md`](docs/upgrade-policy.md) を参照する。
 
 ## PyPI 公開
 

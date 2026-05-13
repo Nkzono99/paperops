@@ -44,7 +44,17 @@ uvx --from paper-harness-cli pops update-paperops --apply
 `update-paperops` は `AGENTS.md`、`CLAUDE.md`、`Makefile`、`scripts/`、`.agents/`、`.claude/`、`.github/ISSUE_TEMPLATE/` などのハーネス管理面だけを扱う。
 `manuscript/`、`notes/`、`refs/`、`submission/` は下流プロジェクト固有内容として自動上書きしない。
 
-`pops` は TTY 上の通常実行時に PyPI の `paper-harness-cli` 最新版、実行中の `pops` version、`.pops/manifest.toml` の適用済み scaffold version を低頻度で確認し、更新がある場合は `uvx --from paper-harness-cli pops update-paperops --dry-run` と `/update-paperops` スキルの使用を案内する。既存の `pops update-harness` は互換 alias として残す。
+`pops` は TTY 上の通常実行時に PyPI の `paper-harness-cli` 最新版、実行中の `pops` version、`.pops/manifest.toml` の適用済み scaffold version を低頻度で確認し、更新がある場合は `uvx --from paper-harness-cli pops update-paperops --plan` と `/update-paperops` スキルの使用を案内する。既存の `pops update-harness` は互換 alias として残す。
+
+下流互換性を最新 CLI に積み続けないため、更新は versioned upgrade chain で行える:
+
+```sh
+uvx --from paper-harness-cli pops update-paperops --plan
+uvx --from paper-harness-cli pops update-paperops --apply-chain
+```
+
+chain runner は minor ごとの checkpoint release を exact version で呼び替える。major version を跨ぐ場合は、計画確認後に `--allow-major` を明示する。
+詳細は `docs/upgrade-policy.md` を参照する。
 
 ## PyPI 公開モデル
 

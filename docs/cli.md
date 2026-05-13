@@ -59,9 +59,33 @@ uvx --from paper-harness-cli pops doctor
 
 ## 更新通知
 
-TTY 上で通常コマンドが成功した場合、`pops` は1日1回を上限に PyPI の `paper-harness-cli` 最新版を確認する。新しい版がある場合や、`.pops/manifest.toml` に記録された適用済み scaffold version が実行中の `pops` より古い場合は、`uvx --from paper-harness-cli pops update-paperops --dry-run` と `/update-paperops` スキルで scaffold 差分を確認するよう通知する。
+TTY 上で通常コマンドが成功した場合、`pops` は1日1回を上限に PyPI の `paper-harness-cli` 最新版を確認する。新しい版がある場合や、`.pops/manifest.toml` に記録された適用済み scaffold version が実行中の `pops` より古い場合は、`uvx --from paper-harness-cli pops update-paperops --plan` と `/update-paperops` スキルで upgrade chain を確認するよう通知する。
 
 この確認は非阻害で、ネットワーク取得に失敗してもコマンド結果には影響しない。無効化する場合は `POPS_DISABLE_VERSION_CHECK=1` を設定する。
+
+## Versioned upgrade chain
+
+後方互換性を最新 `pops` に積み続けないため、`update-paperops` は versioned upgrade chain を持つ。
+まず plan を確認する:
+
+```sh
+uvx --from paper-harness-cli pops update-paperops --plan
+```
+
+必要に応じて checkpoint ごとの `pops` を exact version で呼び替える:
+
+```sh
+uvx --from paper-harness-cli pops update-paperops --apply-chain
+uvx --from paper-harness-cli pops update-paperops --target 0.3 --apply-chain
+```
+
+major version を跨ぐ chain は既定では停止する。計画を確認したうえで明示的に許可する:
+
+```sh
+uvx --from paper-harness-cli pops update-paperops --target latest --allow-major --apply-chain
+```
+
+詳しい保持方針は [`docs/upgrade-policy.md`](upgrade-policy.md) を参照する。
 
 ## 更新対象
 

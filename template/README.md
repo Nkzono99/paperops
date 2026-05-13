@@ -29,7 +29,7 @@
 
 既存原稿がある場合は `/import-manuscript` でインポートできる。
 
-`pops` は `uvx --from paper-harness-cli pops ...` で実行する。ローカルワークフローは Python 3.11 以上の `.venv/bin/python` / `.venv/Scripts/python.exe` を優先し、`.venv` が無い場合は Makefile とビルドヘルパーが利用可能な Python 3.11 以上の interpreter を探索する。
+`pops` は `uvx --from paper-harness-cli pops ...` で実行する。複数 version を跨ぐ更新は `uvx --from paper-harness-cli pops update-paperops --plan` で chain を確認する。ローカルワークフローは Python 3.11 以上の `.venv/bin/python` / `.venv/Scripts/python.exe` を優先し、`.venv` が無い場合は Makefile とビルドヘルパーが利用可能な Python 3.11 以上の interpreter を探索する。
 
 `tex-env.toml` では TeX Live / Docker だけでなく、JA / EN ごとの `latexmk` mode と engine も設定できる。日本語ドラフトで `uplatex + dvipdfmx` が必要な場合は、`tex-env.example.toml` の `[latex.ja]` 例をコピーする。
 

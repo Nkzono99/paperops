@@ -68,6 +68,68 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("Paperops update plan", out)
             self.assertIn("unchanged managed files: 1", out)
 
+    def test_update_paperops_plans_versioned_upgrade_chain(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            with mock.patch(
+                "paperops.cli.main.available_package_versions",
+                return_value=["0.1.0", "0.1.2", "0.2.0", "0.2.5", "0.3.4"],
+            ):
+                code, out, err = run_cli(["update-paperops", "--plan", str(target)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("Paperops upgrade chain", out)
+            self.assertIn("1. 0.1.0 -> 0.2.5", out)
+            self.assertIn("2. 0.2.5 -> 0.3.4", out)
+
+    def test_update_paperops_apply_chain_invokes_exact_uvx_versions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            with (
+                mock.patch(
+                    "paperops.cli.main.available_package_versions",
+                    return_value=["0.1.0", "0.2.5", "0.3.4"],
+                ),
+                mock.patch("paperops.cli.main.subprocess.run") as run,
+            ):
+                run.return_value = mock.Mock(returncode=0)
+                code, out, err = run_cli(
+                    ["update-paperops", "--apply-chain", str(target)]
+                )
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("Running: uvx --from paper-harness-cli==0.2.5", out)
+            self.assertIn("Running: uvx --from paper-harness-cli==0.3.4", out)
+            commands = [call.args[0] for call in run.call_args_list]
+            self.assertEqual(commands[0][:3], ["uvx", "--from", "paper-harness-cli==0.2.5"])
+            self.assertIn("--upgrade-step", commands[0])
+            self.assertIn("--apply", commands[0])
+            self.assertEqual(commands[1][:3], ["uvx", "--from", "paper-harness-cli==0.3.4"])
+
+    def test_update_paperops_apply_chain_requires_allow_major(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            manifest = target / ".pops" / "manifest.toml"
+            manifest.write_text(
+                manifest.read_text(encoding="utf-8").replace(
+                    'version = "0.1.0"', 'version = "0.9.0"', 1
+                ),
+                encoding="utf-8",
+            )
+            with mock.patch(
+                "paperops.cli.main.available_package_versions",
+                return_value=["0.9.0", "1.0.0"],
+            ):
+                code, _out, err = run_cli(
+                    ["update-paperops", "--apply-chain", str(target)]
+                )
+
+            self.assertEqual(code, 2)
+            self.assertIn("--allow-major", err)
+
     def test_update_harness_alias_still_works(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
@@ -124,6 +186,9 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn('package = "paper-harness-cli"', text)
             self.assertIn('runner = "uvx"', text)
             self.assertIn('command = "uvx --from paper-harness-cli pops"', text)
+            self.assertIn('layout_version = "0.1"', text)
+            self.assertIn("[upgrade]", text)
+            self.assertIn('last_checkpoint = "0.1"', text)
             self.assertNotIn('venv = ".venv"', text)
 
     def test_setup_refreshes_cli_runner_without_changing_scaffold_version(self) -> None:
@@ -218,7 +283,7 @@ class PopsCliTest(unittest.TestCase):
         self.assertEqual(code, 0, err)
         self.assertIn("実行中の pops が古いです", err)
         self.assertIn("uvx --from paper-harness-cli pops <command>", err)
-        self.assertIn("uvx --from paper-harness-cli pops update-paperops --dry-run", err)
+        self.assertIn("uvx --from paper-harness-cli pops update-paperops --plan", err)
         self.assertIn("/update-paperops", err)
 
     def test_update_notice_compares_applied_scaffold_version(self) -> None:
@@ -247,7 +312,7 @@ class PopsCliTest(unittest.TestCase):
 
         self.assertEqual(code, 0, err)
         self.assertIn("paperops ハーネス更新候補: 0.0.1 -> 0.1.0", err)
-        self.assertIn("uvx --from paper-harness-cli pops update-paperops --dry-run", err)
+        self.assertIn("uvx --from paper-harness-cli pops update-paperops --plan", err)
 
     def test_update_notice_detects_running_cli_older_than_applied_scaffold(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

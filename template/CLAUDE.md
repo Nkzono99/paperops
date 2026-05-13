@@ -26,6 +26,7 @@
 ```sh
 uvx --from paper-harness-cli pops setup  # .pops を準備
 uvx --from paper-harness-cli pops doctor # ハーネス状態を診断
+uvx --from paper-harness-cli pops update-paperops --plan # 更新 chain を確認
 make venv           # Python 3.11 以上で .venv を作成
 make build-ja       # 日本語原稿をコンパイル（または構造検証）
 make build-en       # 英語原稿をコンパイル（または構造検証）

@@ -41,6 +41,22 @@ uvx --from paper-harness-cli pops version
 
 ### 2. 差分の取得
 
+複数 version を跨ぐ可能性がある場合は、まず upgrade chain を確認する:
+
+```sh
+uvx --from paper-harness-cli pops update-paperops --plan
+```
+
+minor checkpoint ごとに順番に更新してよい場合は、chain runner を使う:
+
+```sh
+uvx --from paper-harness-cli pops update-paperops --apply-chain
+```
+
+major version を跨ぐ場合は既定で停止する。計画を確認してから `--allow-major` を付ける。
+
+単一 version の管理対象ファイル差分だけを見る場合は dry-run を使う:
+
 ```sh
 uvx --from paper-harness-cli pops update-paperops --dry-run
 ```
@@ -77,10 +93,11 @@ uvx --from paper-harness-cli pops update-paperops --dry-run
 
 ### 5. マージの実行
 
-1. `uvx --from paper-harness-cli pops update-paperops --apply` で不足している管理対象ファイルを追加する。
-2. 変更済み管理対象ファイルは plan を確認し、必要なものだけ手動マージする。
-3. 差分を上流に完全置換してよいと判断できる場合のみ `uvx --from paper-harness-cli pops update-paperops --apply --force` を使う。
-4. 変更内容を `notes/decision-log.md` に記録する。
+1. 複数 version を跨ぐ場合は `uvx --from paper-harness-cli pops update-paperops --apply-chain` で checkpoint ごとの `pops` を exact version で呼び替える。
+2. 単一 version 内では `uvx --from paper-harness-cli pops update-paperops --apply` で不足している管理対象ファイルを追加する。
+3. 変更済み管理対象ファイルは plan を確認し、必要なものだけ手動マージする。
+4. 差分を上流に完全置換してよいと判断できる場合のみ `uvx --from paper-harness-cli pops update-paperops --apply --force` を使う。
+5. 変更内容を `notes/decision-log.md` に記録する。
 
 ### 6. 検証
 
