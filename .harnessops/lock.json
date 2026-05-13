@@ -8,13 +8,13 @@
       ".agents/skills/hops-export-feedback/SKILL.md": "sha256:27181f12ce1c52e45bec594fa19f79f66a215edfbe6be537731ed0d6f1fc7fde",
       ".agents/skills/hops-import-feedback/SKILL.md": "sha256:6217f50620c257960ce7baef1e2eba3779ad6a52c6950e227fb42a903b1ba595",
       ".agents/skills/hops-issue-triage/SKILL.md": "sha256:b1721ee2b8f9f402c6039bb1ebf0a3c93cf3a56438d973063cdc10c12ae75152",
-      ".agents/skills/hops-research-improvements/SKILL.md": "sha256:6fae33ca49e3b146700fd8e7d7f53c496336197143ad0ca0aee855c7644a9df4",
+      ".agents/skills/hops-research-improvements/SKILL.md": "sha256:87a5998847a3b3a36fac831a9ba4b64079da32363a961ef3f7964e39e8150943",
       ".agents/skills/hops-route-feedback/SKILL.md": "sha256:ab79862ca9447e8cad818c2e4aa315748ac09cce9cc355490b62cae3b382ff95",
       ".agents/skills/hops-run-lab/SKILL.md": "sha256:0db84c5bb89cee088e382eb8e2f87c8fc385392daf2d5002f458c7080f6e1527",
       ".agents/skills/hops-update-harness/SKILL.md": "sha256:909ce62093f7633406377ff934381afd65b472bf33afb34c5eab231d404abafb"
     }
   },
-  "harnessops_version": "0.1.4",
+  "harnessops_version": "0.1.5",
   "layout_version": "0.1",
   "managed_files": {
     "harness-lab/README.md": "sha256:4b63ed3a58b696578ef328c0292c82f103aa47597a69ccb69eb32b4594308cce",
