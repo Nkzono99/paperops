@@ -11,9 +11,7 @@
 ```sh
 uvx --from paper-harness-cli pops init paper-my-topic
 cd paper-my-topic
-.venv\Scripts\Activate.ps1  # Windows / PowerShell
-# source .venv/bin/activate  # macOS / Linux
-pops doctor
+uvx --from paper-harness-cli pops doctor
 ```
 
 既存プロジェクトを CLI 管理へ寄せる:
@@ -21,13 +19,11 @@ pops doctor
 ```sh
 cd paper-my-topic
 uvx --from paper-harness-cli pops setup
-.venv\Scripts\Activate.ps1  # Windows / PowerShell
-# source .venv/bin/activate  # macOS / Linux
-pops doctor
+uvx --from paper-harness-cli pops doctor
 ```
 
 `template/` はこのリポジトリ内の source of truth であり、`paper-harness-cli` パッケージに bundled scaffold として同梱される。
-`pops init` / `pops setup` はプロジェクトローカルの `.venv` を作成し、その中に `paper-harness-cli` をインストールする。以後の `pops` は、この `.venv` を activate して実行する想定である。
+`pops` は `uvx --from paper-harness-cli pops ...` で実行する。`.venv` は CLI 用ではなく、論文プロジェクトの Python 実行環境が必要な場合に `make venv` で作成する。
 
 ## AI 前提の作業ループ
 
@@ -35,7 +31,7 @@ pops doctor
 
 1. 人間が論文トピック、制約、投稿先候補、判断を伝える。
 2. Agent が `notes/project-brief.md`、`notes/claim-evidence-map.md`、`manuscript/venue.md` を整える。
-3. `pops` が init / setup / doctor / update-paperops のような決定的操作を担う。
+3. `uvx --from paper-harness-cli pops ...` が init / setup / doctor / update-paperops のような決定的操作を担う。
 4. 原稿は `manuscript/ja` を中心に進め、必要な block を `manuscript/en` へ同期する。
 5. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
 6. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
@@ -82,16 +78,16 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 ## CLI
 
 ```sh
-pops init paper-my-topic
-pops setup
-pops doctor
-pops update-paperops --dry-run
-pops migrate --apply
-pops feedback
-pops version
+uvx --from paper-harness-cli pops init paper-my-topic
+uvx --from paper-harness-cli pops setup
+uvx --from paper-harness-cli pops doctor
+uvx --from paper-harness-cli pops update-paperops --dry-run
+uvx --from paper-harness-cli pops migrate --apply
+uvx --from paper-harness-cli pops feedback
+uvx --from paper-harness-cli pops version
 ```
 
-このコマンド面は将来の CLI 標準化前の最小形である。標準化までは、実装を小さく保ち、既存 skill と Makefile の運用を壊さないことを優先する。
+このコマンド面は `uvx` 経由に一本化する。実装は小さく保ち、既存 skill と Makefile の運用を壊さないことを優先する。
 
 ## PyPI 公開
 
@@ -103,7 +99,7 @@ PyPI 側では trusted publisher として、この repository、workflow `.gith
 
 テンプレートは完全な TeX 環境を前提とせず、軽量なローカルチェックを提供する。
 `scripts/build-ja.sh` と `scripts/build-en.sh` は `latexmk` が利用可能な場合はコンパイルを行い、そうでなければ `scripts/check-tex-structure.py` による構造検証にフォールバックするため、クリーンなランナーでも CI が執筆ハーネスを実行できる。
-想定されるローカルセットアップは、リポジトリローカルの `.venv` 内の Python 3.11 以上である。
+開発時のローカルセットアップは、リポジトリローカルの `.venv` 内の Python 3.11 以上である。
 
 ```sh
 make venv

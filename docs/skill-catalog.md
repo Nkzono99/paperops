@@ -65,7 +65,7 @@
 
 ## CLI 配布
 
-下流プロジェクトの作成と更新は `pops` CLI に統一する:
+下流プロジェクトの作成と更新は `pops` CLI に統一する。標準実行は `uvx --from paper-harness-cli pops ...` である:
 
 - `pops init`: `template/` 由来の bundled scaffold から新規論文プロジェクトを作成
 - `pops doctor`: 初期化後のハーネス状態を診断

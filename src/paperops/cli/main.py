@@ -120,17 +120,17 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.add_argument(
         "--skip-venv",
         action="store_true",
-        help="Do not create .venv or install project-local pops.",
+        help=argparse.SUPPRESS,
     )
     init_parser.add_argument(
         "--skip-install",
         action="store_true",
-        help="Create .venv but do not install project-local pops.",
+        help=argparse.SUPPRESS,
     )
     init_parser.add_argument(
         "--install-spec",
         default="",
-        help="Package spec to install into .venv, defaults to paper-harness-cli==version.",
+        help=argparse.SUPPRESS,
     )
     init_parser.set_defaults(func=cmd_init)
 
@@ -145,16 +145,20 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         help="Destination or existing project directory.",
     )
-    setup_parser.add_argument("--skip-venv", action="store_true", help="Do not create .venv.")
+    setup_parser.add_argument(
+        "--skip-venv",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
     setup_parser.add_argument(
         "--skip-install",
         action="store_true",
-        help="Do not install project-local pops into .venv.",
+        help=argparse.SUPPRESS,
     )
     setup_parser.add_argument(
         "--install-spec",
         default="",
-        help="Package spec to install into .venv, defaults to paper-harness-cli==version.",
+        help=argparse.SUPPRESS,
     )
     setup_parser.set_defaults(func=cmd_setup)
 
@@ -277,17 +281,10 @@ def cmd_init(args: argparse.Namespace) -> int:
         plan = copy_scaffold(source, target, overwrite=False)
 
     write_manifest(target, template_ref=args.template_ref)
+    args.project_root = target
     print(f"Initialized paper project: {target}")
     print_copy_summary(plan)
-
-    bootstrapped = bootstrap_project(
-        target,
-        skip_venv=args.skip_venv,
-        skip_install=args.skip_install,
-        install_spec=args.install_spec,
-    )
-    if not bootstrapped:
-        return 1
+    warn_ignored_bootstrap_options(args)
 
     print_next_steps(target)
     return 0
@@ -301,18 +298,15 @@ def cmd_setup(args: argparse.Namespace) -> int:
         return 2
 
     print(f"Project root: {root}")
+    args.project_root = root
     if not (root / ".pops" / "manifest.toml").exists():
         write_manifest(root)
         print("Created .pops/manifest.toml")
+    else:
+        write_cli_metadata(root)
+        print("Updated .pops CLI runner metadata")
 
-    bootstrapped = bootstrap_project(
-        root,
-        skip_venv=args.skip_venv,
-        skip_install=args.skip_install,
-        install_spec=args.install_spec,
-    )
-    if not bootstrapped:
-        return 1
+    warn_ignored_bootstrap_options(args)
 
     print_manual_setup_hints(root)
     return 0
@@ -327,6 +321,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         print("error: this does not look like a paper harness project.", file=sys.stderr)
         return 2
 
+    args.project_root = root
     print(f"Project root: {root}")
     print(f"Python: {sys.version.split()[0]}")
     check_path(root, "Makefile", errors)
@@ -334,7 +329,8 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     check_path(root, "notes", errors)
     check_path(root, "scripts", errors)
     check_path(root, ".pops/manifest.toml", warnings)
-    check_project_local_cli(root, warnings)
+    check_uvx_available(warnings)
+    check_project_venv_if_present(root, warnings)
     check_executable("git", warnings)
     check_executable("make", warnings)
     check_workflow_placeholders(root, warnings)
@@ -367,6 +363,7 @@ def cmd_update_paperops(args: argparse.Namespace) -> int:
         print("error: this does not look like a paper harness project.", file=sys.stderr)
         return 2
 
+    args.project_root = root
     if args.adopt:
         template_ref = args.template_ref or detect_template_ref(args.source)
         write_manifest(root, template_ref=template_ref)
@@ -402,6 +399,7 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         print("error: this does not look like a paper harness project.", file=sys.stderr)
         return 2
 
+    args.project_root = root
     manifest = root / ".pops" / "manifest.toml"
     legacy_paths = [
         "docs/project-brief.md",
@@ -489,28 +487,86 @@ def maybe_print_update_notice(args: argparse.Namespace, exit_code: int) -> None:
         return
 
     current = package_version()
+    project_root = getattr(args, "project_root", None)
+    if not isinstance(project_root, Path):
+        project_root = find_project_root(Path.cwd())
+    applied = applied_scaffold_version(project_root) if project_root is not None else None
     latest = latest_package_version()
-    if latest is None or not is_newer_version(latest, current):
+    update_target = current
+    printed = False
+    latest_is_newer = latest is not None and is_newer_version(latest, current)
+
+    if latest_is_newer:
+        update_target = latest
+        print(
+            f"[pops notice] 実行中の pops が古いです: {current} -> {latest}",
+            file=sys.stderr,
+        )
+        print(
+            f"[pops notice] 標準実行: {uvx_pops_command('<command>')}",
+            file=sys.stderr,
+        )
+        if applied is None:
+            print(
+                "[pops notice] 論文プロジェクト内では "
+                f"{uvx_pops_command('update-paperops', '--dry-run')} "
+                "で scaffold 差分を確認してください。",
+                file=sys.stderr,
+            )
+            print(
+                "[pops notice] 反映は agent に /update-paperops "
+                "（未導入なら /pull-template-updates）で依頼してください。",
+                file=sys.stderr,
+            )
+        printed = True
+
+    if applied is not None and is_newer_version(applied, current):
+        print(
+            "[pops notice] 実行中の pops がこのプロジェクトの適用済み "
+            f"scaffold より古いです: {current} -> {applied}",
+            file=sys.stderr,
+        )
+        if not latest_is_newer:
+            print(
+                f"[pops notice] 標準実行: {uvx_pops_command('<command>')}",
+                file=sys.stderr,
+            )
+        printed = True
+
+    if applied is not None and is_newer_version(update_target, applied):
+        print(
+            "[pops notice] このプロジェクトの paperops ハーネス更新候補: "
+            f"{applied} -> {update_target}",
+            file=sys.stderr,
+        )
+        print(
+            f"[pops notice] 差分確認: {uvx_pops_command('update-paperops', '--dry-run')}",
+            file=sys.stderr,
+        )
+        print(
+            "[pops notice] 反映は agent に /update-paperops "
+            "（未導入なら /pull-template-updates）で依頼してください。",
+            file=sys.stderr,
+        )
+        printed = True
+
+    if not printed:
         return
 
-    print(f"[pops notice] paperops の更新があります: {current} -> {latest}", file=sys.stderr)
-    print(
-        f"[pops notice] 更新内容: {CHANGELOG_URL}",
-        file=sys.stderr,
-    )
-    print(
-        f"[pops notice] CLI更新: uvx --from {PACKAGE_NAME} pops setup",
-        file=sys.stderr,
-    )
-    print(
-        "[pops notice] その後、agent に /update-paperops "
-        "（未導入なら /pull-template-updates）で差分確認を依頼してください。",
-        file=sys.stderr,
-    )
+    print(f"[pops notice] 更新内容: {CHANGELOG_URL}", file=sys.stderr)
     print(
         "[pops notice] この確認を止めるには POPS_DISABLE_VERSION_CHECK=1 を設定します。",
         file=sys.stderr,
     )
+
+
+def applied_scaffold_version(root: Path) -> str | None:
+    manifest = read_manifest(root / ".pops" / "manifest.toml")
+    scaffold = manifest.get("scaffold")
+    if not isinstance(scaffold, dict):
+        return None
+    version = scaffold.get("version")
+    return version if isinstance(version, str) and version else None
 
 
 def latest_package_version() -> str | None:
@@ -791,16 +847,43 @@ def write_manifest(
     merged["project"] = project
     merged["scaffold"] = scaffold
 
-    if cli_install_spec is not None:
-        cli = as_table(existing.get("cli"))
-        cli["package"] = PACKAGE_NAME
-        cli["version"] = package_version()
-        cli["install_spec"] = cli_install_spec
-        cli["venv"] = ".venv"
-        cli["updated_at"] = now
-        merged["cli"] = cli
+    merged["cli"] = cli_manifest_table(
+        existing.get("cli"),
+        now=now,
+        legacy_install_spec=cli_install_spec,
+    )
 
     manifest.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+
+
+def write_cli_metadata(root: Path) -> None:
+    manifest = root / ".pops" / "manifest.toml"
+    existing = read_manifest(manifest)
+    if not existing:
+        return
+    now = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    merged = dict(existing)
+    merged["cli"] = cli_manifest_table(existing.get("cli"), now=now)
+    manifest.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+
+
+def cli_manifest_table(
+    existing: object,
+    *,
+    now: str,
+    legacy_install_spec: str | None = None,
+) -> dict[str, Any]:
+    cli = as_table(existing)
+    cli["package"] = PACKAGE_NAME
+    cli["version"] = package_version()
+    cli["runner"] = "uvx"
+    cli["command"] = uvx_pops_command()
+    cli["updated_at"] = now
+    cli.pop("install_spec", None)
+    cli.pop("venv", None)
+    if legacy_install_spec is not None:
+        cli["legacy_install_spec"] = legacy_install_spec
+    return cli
 
 
 def read_manifest(path: Path) -> dict[str, Any]:
@@ -945,103 +1028,23 @@ def repo_name_from_url(url: str) -> str:
     return name or "paper-project"
 
 
-def bootstrap_project(
-    root: Path,
-    *,
-    skip_venv: bool,
-    skip_install: bool,
-    install_spec: str,
-) -> bool:
-    venv_dir = root / ".venv"
-    if venv_dir.exists():
-        print(".venv already exists.")
-    elif skip_venv:
-        print("Skipped .venv creation.")
-        if not skip_install:
-            print("Skipped project-local pops install because .venv is missing.")
-        return True
-    else:
-        created = run_make_venv(root)
-        if not created:
-            return False
-
-    if skip_install:
-        print("Skipped project-local pops install.")
-        return True
-
-    return install_project_cli(root, install_spec=install_spec or default_install_spec())
-
-
-def run_make_venv(root: Path) -> bool:
-    print("Creating .venv via make venv...")
-    try:
-        result = subprocess.run(["make", "venv"], cwd=root, check=False)
-    except FileNotFoundError:
-        print("make was not found; falling back to python -m venv .venv")
-        result = run_python_venv(root)
-    if result.returncode != 0:
-        print("make venv failed; falling back to python -m venv .venv")
-        result = run_python_venv(root)
-    if result.returncode != 0:
-        print("error: failed to create .venv", file=sys.stderr)
-        return False
-    return True
-
-
-def run_python_venv(root: Path) -> subprocess.CompletedProcess[bytes]:
-    return subprocess.run([sys.executable, "-m", "venv", ".venv"], cwd=root, check=False)
-
-
-def install_project_cli(root: Path, *, install_spec: str) -> bool:
-    python = project_venv_python(root)
-    if not python.exists():
-        print(f"error: .venv Python was not found: {python}", file=sys.stderr)
-        return False
-
-    command, label = build_install_command(python, install_spec)
-    print(f"Installing project-local pops via {label}: {install_spec}")
-    try:
-        result = subprocess.run(
-            command,
-            cwd=root,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            check=False,
-        )
-    except OSError as exc:
-        print(f"error: failed to install project-local pops: {exc}", file=sys.stderr)
-        return False
-
-    if result.returncode != 0:
-        message = (result.stderr or result.stdout or "").strip()
-        print(
-            f"error: failed to install project-local pops: {message[:500]}",
-            file=sys.stderr,
-        )
-        return False
-
-    write_manifest(root, cli_install_spec=install_spec)
-    print(f"Project-local pops is ready: {project_venv_pops(root)}")
-    return True
-
-
-def build_install_command(python: Path, install_spec: str) -> tuple[list[str], str]:
-    uv = shutil.which("uv")
-    if uv:
-        return (
-            [uv, "pip", "install", "--python", str(python), install_spec],
-            "uv pip install",
-        )
-    return (
-        [str(python), "-m", "pip", "install", install_spec],
-        "python -m pip install",
+def warn_ignored_bootstrap_options(args: argparse.Namespace) -> None:
+    if not (
+        getattr(args, "skip_venv", False)
+        or getattr(args, "skip_install", False)
+        or getattr(args, "install_spec", "")
+    ):
+        return
+    print(
+        "[pops notice] project-local pops bootstrap options are deprecated; "
+        f"use {uvx_pops_command('<command>')} for CLI commands.",
+        file=sys.stderr,
     )
 
 
-def default_install_spec() -> str:
-    return f"{PACKAGE_NAME}=={package_version()}"
+def uvx_pops_command(*pops_args: str) -> str:
+    command = ["uvx", "--from", PACKAGE_NAME, "pops", *pops_args]
+    return " ".join(command)
 
 
 def project_venv_python(root: Path) -> Path:
@@ -1050,38 +1053,27 @@ def project_venv_python(root: Path) -> Path:
     return root / ".venv" / "bin" / "python"
 
 
-def project_venv_pops(root: Path) -> Path:
-    if sys.platform.startswith("win"):
-        return root / ".venv" / "Scripts" / "pops.exe"
-    return root / ".venv" / "bin" / "pops"
-
-
-def activate_command() -> str:
-    if sys.platform.startswith("win"):
-        return r".venv\Scripts\Activate.ps1"
-    return "source .venv/bin/activate"
-
-
 def print_next_steps(target: Path) -> None:
     print("Next steps:")
     print("  cd " + str(target))
-    if not project_venv_pops(target).exists():
-        print(f"  uvx --from {PACKAGE_NAME} pops setup")
-    print("  " + activate_command())
-    print("  pops doctor")
+    print("  " + uvx_pops_command("doctor"))
+    print("  make venv  # optional: create a project Python environment")
 
 
-def check_project_local_cli(root: Path, warnings: list[str]) -> None:
+def check_uvx_available(warnings: list[str]) -> None:
+    if shutil.which("uvx") is None and shutil.which("uv") is None:
+        warnings.append(
+            "uvx/uv is not on PATH; standard pops commands use "
+            f"{uvx_pops_command('<command>')}."
+        )
+
+
+def check_project_venv_if_present(root: Path, warnings: list[str]) -> None:
     venv_dir = root / ".venv"
     if not venv_dir.exists():
-        warnings.append(".venv is missing; run pops setup to create project-local pops.")
         return
     if not project_venv_python(root).exists():
         warnings.append(".venv exists but its Python executable was not found.")
-    if not project_venv_pops(root).exists():
-        warnings.append(
-            "project-local pops was not found in .venv; run pops setup to install it."
-        )
 
 
 def print_manual_setup_hints(root: Path) -> None:
@@ -1095,7 +1087,7 @@ def print_manual_setup_hints(root: Path) -> None:
             "Optional: copy tex-env.example.toml to tex-env.toml when you need "
             "a custom TeX environment."
         )
-    print("Run pops doctor after activating the project .venv.")
+    print("Run " + uvx_pops_command("doctor") + ".")
 
 
 def check_path(root: Path, rel: str, errors: list[str]) -> None:

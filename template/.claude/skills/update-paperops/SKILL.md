@@ -6,9 +6,9 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 # update-paperops
 
-上流 `paperops` scaffold と project-local `pops` の更新を、この論文リポジトリに安全に取り込むためのスキル。
+上流 `paperops` scaffold の更新を、この論文リポジトリに安全に取り込むためのスキル。
 
-`pops` が paperops 更新通知を出した場合、まず CLI を PyPI の最新配布版で更新し、その後に管理対象ハーネス差分を確認する。
+`pops` が paperops 更新通知を出した場合、PyPI の最新配布版を `uvx` で実行し、管理対象ハーネス差分を確認する。
 
 ## 前提
 
@@ -29,24 +29,23 @@ git status --short
 
 nested private repo では親 repo と paper repo の変更を混ぜない。Windows の dubious ownership で git が止まる場合は、グローバル設定を変える前に `git -c safe.directory=<repo> -C <repo> ...` の per-command 回避を使う。
 
-### 1. pops 自体の更新
+### 1. pops 実行版の確認
 
-`pops` が更新通知を出した場合、または project-local `.venv` の `pops` が古い場合は、PyPI の最新配布版から setup を再実行する。
+`pops` は project-local `.venv` ではなく、PyPI の配布版を `uvx` から実行する。
 
 ```sh
-uvx --from paper-harness-cli pops setup
-pops version
+uvx --from paper-harness-cli pops version
 ```
 
-`uvx` が使えない環境では、同等の package spec で `.venv` 内の `paper-harness-cli` を更新してから `pops version` を確認する。
+`uvx` が使えない環境では `uv` の導入を案内し、project-local `.venv` への `pops` インストールで代替しない。
 
 ### 2. 差分の取得
 
 ```sh
-pops update-paperops --dry-run
+uvx --from paper-harness-cli pops update-paperops --dry-run
 ```
 
-旧 CLI を使っている場合のみ、互換 alias として `pops update-harness --dry-run` が使える。
+旧 CLI を使っている場合のみ、互換 alias として `uvx --from paper-harness-cli pops update-harness --dry-run` が使える。
 
 ### 3. 変更の特定
 
@@ -78,15 +77,15 @@ pops update-paperops --dry-run
 
 ### 5. マージの実行
 
-1. `pops update-paperops --apply` で不足している管理対象ファイルを追加する。
+1. `uvx --from paper-harness-cli pops update-paperops --apply` で不足している管理対象ファイルを追加する。
 2. 変更済み管理対象ファイルは plan を確認し、必要なものだけ手動マージする。
-3. 差分を上流に完全置換してよいと判断できる場合のみ `pops update-paperops --apply --force` を使う。
+3. 差分を上流に完全置換してよいと判断できる場合のみ `uvx --from paper-harness-cli pops update-paperops --apply --force` を使う。
 4. 変更内容を `notes/decision-log.md` に記録する。
 
 ### 6. 検証
 
 ```sh
-pops doctor
+uvx --from paper-harness-cli pops doctor
 make ci
 ```
 

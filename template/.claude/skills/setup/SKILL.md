@@ -48,21 +48,21 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 - **TeX 環境**（任意）: ユーザー空間 TeX Live のパス、Docker イメージ、またはシステム TeX Live（デフォルト）
 - **公開ライセンス**（未定でも可）: 原稿、コード、データの扱い
 
-### 3. Python 環境と project-local pops の確認
+### 3. pops 実行経路と Python 環境の確認
 
-`pops init` / `pops setup` は通常、`.venv/` を作成し、その中に project-local な `pops` をインストールする。
+`pops` は project-local `.venv` ではなく、`uvx` から実行する。
 以下を確認する:
 
-- `.venv/` が存在するか
-- `.venv/bin/pops` または `.venv/Scripts/pops.exe` が存在するか
+- `uvx` または `uv` が PATH 上にあるか
+- `.pops/manifest.toml` が存在するか
 
-不足している場合は、グローバルではなく bootstrap 用の `uvx` から setup を再実行する:
+`.pops/manifest.toml` が不足している場合は、`uvx` から setup を実行する:
 
 ```sh
 uvx --from paper-harness-cli pops setup
 ```
 
-`pops` のインストールを伴わない最小 Python 環境だけが必要な場合の fallback として、`make venv` を使ってよい。
+論文プロジェクト用の Python 環境が必要な場合は、`make venv` で `.venv/` を作成してよい。`.venv` に `pops` をインストールする必要はない。
 
 ### 4. ローカル設定ファイルの案内
 
@@ -174,5 +174,5 @@ make ci
 
 - 既存の内容を上書きしない。プレースホルダーのみ置換する。
 - 判断に迷う場合はユーザーに確認する。
-- `pops setup` / `make venv` の実行には Python 3.11 が必要。見つからない場合はインストールを案内する。
+- `make venv` の実行には Python 3.11 以上が必要。見つからない場合はインストールを案内する。
 - セットアップの決定を `notes/decision-log.md` に記録する。

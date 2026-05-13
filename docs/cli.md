@@ -19,30 +19,29 @@ make cli-smoke
 make smoke
 ```
 
-パッケージ化後は console script を使う:
+パッケージ化後は `uvx` から console script を実行する:
 
 ```sh
 uvx --from paper-harness-cli pops version
 ```
 
-新規プロジェクトでは、最初の `uvx` は bootstrap 用である:
+新規プロジェクトでも日常運用でも、`pops` は同じ `uvx` 経由で実行する:
 
 ```sh
 uvx --from paper-harness-cli pops init paper-my-topic
 cd paper-my-topic
-.venv\Scripts\Activate.ps1  # Windows / PowerShell
-# source .venv/bin/activate  # macOS / Linux
-pops doctor
+uvx --from paper-harness-cli pops doctor
 ```
 
-`pops init` / `pops setup` は `.venv` を作成し、既定では `paper-harness-cli==<実行中のバージョン>` を project-local にインストールする。
-以後の `pops` は activate した `.venv` の console script を使う。
-環境構築を分ける場合は `--skip-venv` / `--skip-install`、インストール元を変える場合は `--install-spec` を使う。
+`pops init` / `pops setup` は `.pops/manifest.toml` を作成・採用するが、CLI 用の project-local `.venv` や `pops` は作成しない。
+`.venv` は論文プロジェクト側の Python 実行環境が必要な場合に `make venv` で作成する。
+
+以後のコマンド例で `pops ...` と書く場合も、標準動線では `uvx --from paper-harness-cli pops ...` として実行する。
 
 ## コマンド
 
-- `pops init [path]`: bundled scaffold から新規論文リポジトリを作成し、`.pops/manifest.toml` を追加し、project-local `.venv` に `pops` を用意する。
-- `pops setup [path]`: 既存論文リポジトリに `.pops/manifest.toml` を追加し、project-local `.venv` に `pops` を用意する。
+- `pops init [path]`: bundled scaffold から新規論文リポジトリを作成し、`.pops/manifest.toml` を追加する。
+- `pops setup [path]`: 既存論文リポジトリに `.pops/manifest.toml` を追加する。
 - `pops setup <git-url> --path <dir>`: 既存 Git リポジトリを clone してから setup する。
 - `pops doctor [path]`: 必須ディレクトリ、`.pops` 管理情報、Git / make、workflow placeholder、ローカル設定ファイルの状態を確認する。
 - `pops update-paperops`: bundled scaffold または `--source` で指定した scaffold から、管理対象ハーネスファイルの更新計画を表示する。
@@ -60,7 +59,7 @@ pops doctor
 
 ## 更新通知
 
-TTY 上で通常コマンドが成功した場合、`pops` は1日1回を上限に PyPI の `paper-harness-cli` 最新版を確認する。新しい版がある場合は、`uvx --from paper-harness-cli pops setup` で project-local `pops` を更新し、agent に `/update-paperops` スキルで scaffold 差分を確認してもらうよう通知する。
+TTY 上で通常コマンドが成功した場合、`pops` は1日1回を上限に PyPI の `paper-harness-cli` 最新版を確認する。新しい版がある場合や、`.pops/manifest.toml` に記録された適用済み scaffold version が実行中の `pops` より古い場合は、`uvx --from paper-harness-cli pops update-paperops --dry-run` と `/update-paperops` スキルで scaffold 差分を確認するよう通知する。
 
 この確認は非阻害で、ネットワーク取得に失敗してもコマンド結果には影響しない。無効化する場合は `POPS_DISABLE_VERSION_CHECK=1` を設定する。
 

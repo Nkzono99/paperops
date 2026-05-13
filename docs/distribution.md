@@ -19,36 +19,32 @@
 ```sh
 uvx --from paper-harness-cli pops init paper-my-topic
 cd paper-my-topic
-.venv\Scripts\Activate.ps1  # Windows / PowerShell
-# source .venv/bin/activate  # macOS / Linux
-pops doctor
+uvx --from paper-harness-cli pops doctor
 ```
 
 既存プロジェクトは `.pops/manifest.toml` を追加して CLI 管理へ寄せる:
 
 ```sh
 uvx --from paper-harness-cli pops setup
-.venv\Scripts\Activate.ps1  # Windows / PowerShell
-# source .venv/bin/activate  # macOS / Linux
-pops doctor
+uvx --from paper-harness-cli pops doctor
 ```
 
-`pops init` / `pops setup` は `.venv` を作成し、既定では `paper-harness-cli==<実行中のバージョン>` をその `.venv` にインストールする。これにより、下流プロジェクトでは activate 後に project-local な `pops` を使う。
-環境構築を分けたい場合は `--skip-venv` または `--skip-install` を使う。開発版や別配布元を試す場合は `--install-spec` で `.venv` へ入れる package spec を指定できる。
+`pops init` / `pops setup` は `.pops/manifest.toml` を作成・採用する。CLI 実行は project-local `.venv` に固定せず、常に `uvx --from paper-harness-cli pops ...` に寄せる。
+`.venv` は論文プロジェクトの Python 実行環境が必要な場合に `make venv` で作成する。
 
 ## 更新モデル
 
-下流プロジェクトでは `pops update-paperops` を使って、管理対象ハーネスファイルの更新計画を確認する。
+下流プロジェクトでは `pops update-paperops` を使って、管理対象ハーネスファイルの更新計画を確認する。標準実行は `uvx --from paper-harness-cli pops update-paperops ...` である。
 
 ```sh
-pops update-paperops --dry-run
-pops update-paperops --apply
+uvx --from paper-harness-cli pops update-paperops --dry-run
+uvx --from paper-harness-cli pops update-paperops --apply
 ```
 
 `update-paperops` は `AGENTS.md`、`CLAUDE.md`、`Makefile`、`scripts/`、`.agents/`、`.claude/`、`.github/ISSUE_TEMPLATE/` などのハーネス管理面だけを扱う。
 `manuscript/`、`notes/`、`refs/`、`submission/` は下流プロジェクト固有内容として自動上書きしない。
 
-`pops` は TTY 上の通常実行時に PyPI の `paper-harness-cli` 最新版を低頻度で確認し、更新がある場合は `uvx --from paper-harness-cli pops setup` と `/update-paperops` スキルの使用を案内する。既存の `pops update-harness` は互換 alias として残す。
+`pops` は TTY 上の通常実行時に PyPI の `paper-harness-cli` 最新版、実行中の `pops` version、`.pops/manifest.toml` の適用済み scaffold version を低頻度で確認し、更新がある場合は `uvx --from paper-harness-cli pops update-paperops --dry-run` と `/update-paperops` スキルの使用を案内する。既存の `pops update-harness` は互換 alias として残す。
 
 ## PyPI 公開モデル
 

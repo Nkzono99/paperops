@@ -7,7 +7,7 @@
 `/setup` スキルで以下の手順を一括実行できる:
 
 1. リポジトリ名を変更し、この README を更新する。
-2. `pops init` / `pops setup` が作成した `.venv` と project-local `pops` を確認し、不足していれば `pops setup` で用意する。
+2. `uvx --from paper-harness-cli pops setup` / `doctor` で `.pops/manifest.toml` とハーネス状態を確認する。
 3. `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーし、ローカルパスはユーザー自身で記入する。
 4. `tex-env.example.toml` を `tex-env.toml` にコピーし、TeX 環境を設定する（任意）。
 5. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paperops` リポジトリパスに置き換える。
@@ -29,7 +29,7 @@
 
 既存原稿がある場合は `/import-manuscript` でインポートできる。
 
-ローカルワークフローは Python 3.11 以上の `.venv/bin/python` / `.venv/Scripts/python.exe` を優先し、`.venv` が無い場合は Makefile とビルドヘルパーが利用可能な Python 3.11 以上の interpreter を探索する。
+`pops` は `uvx --from paper-harness-cli pops ...` で実行する。ローカルワークフローは Python 3.11 以上の `.venv/bin/python` / `.venv/Scripts/python.exe` を優先し、`.venv` が無い場合は Makefile とビルドヘルパーが利用可能な Python 3.11 以上の interpreter を探索する。
 
 `tex-env.toml` では TeX Live / Docker だけでなく、JA / EN ごとの `latexmk` mode と engine も設定できる。日本語ドラフトで `uplatex + dvipdfmx` が必要な場合は、`tex-env.example.toml` の `[latex.ja]` 例をコピーする。
 
