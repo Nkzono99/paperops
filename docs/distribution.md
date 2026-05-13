@@ -38,15 +38,17 @@ pops doctor
 
 ## 更新モデル
 
-下流プロジェクトでは `pops update-harness` を使って、管理対象ハーネスファイルの更新計画を確認する。
+下流プロジェクトでは `pops update-paperops` を使って、管理対象ハーネスファイルの更新計画を確認する。
 
 ```sh
-pops update-harness --dry-run
-pops update-harness --apply
+pops update-paperops --dry-run
+pops update-paperops --apply
 ```
 
-`update-harness` は `AGENTS.md`、`CLAUDE.md`、`Makefile`、`scripts/`、`.agents/`、`.claude/`、`.github/ISSUE_TEMPLATE/` などのハーネス管理面だけを扱う。
+`update-paperops` は `AGENTS.md`、`CLAUDE.md`、`Makefile`、`scripts/`、`.agents/`、`.claude/`、`.github/ISSUE_TEMPLATE/` などのハーネス管理面だけを扱う。
 `manuscript/`、`notes/`、`refs/`、`submission/` は下流プロジェクト固有内容として自動上書きしない。
+
+`pops` は TTY 上の通常実行時に PyPI の `paper-harness-cli` 最新版を低頻度で確認し、更新がある場合は `uvx --from paper-harness-cli pops setup` と `/update-paperops` スキルの使用を案内する。既存の `pops update-harness` は互換 alias として残す。
 
 ## PyPI 公開モデル
 
@@ -69,4 +71,4 @@ PyPI 側では trusted publisher として以下を設定する:
 - `template/` の変更はまずこのリポジトリで行う。
 - 配布専用リポジトリを編集・同期対象にしない。
 - ユーザーに影響する CLI / scaffold 変更は `CHANGELOG.md` に記録する。
-- 下流互換性に影響する変更は `pops migrate` または `pops update-harness` の挙動と docs に反映する。
+- 下流互換性に影響する変更は `pops migrate` または `pops update-paperops` の挙動と docs に反映する。

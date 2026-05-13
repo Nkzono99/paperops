@@ -5,7 +5,9 @@ description: Codex で上流 paperops scaffold の変更を下流論文リポジ
 
 # pull-template-updates
 
-Codex で使う互換入口。実際の手順は `.claude/skills/pull-template-updates/SKILL.md` を source of truth として読む。
+旧名の互換入口。新規作業では `/update-paperops` を使う。
+
+この入口自体の source of truth は `.claude/skills/pull-template-updates/SKILL.md`。実際の更新手順はそこから `.claude/skills/update-paperops/SKILL.md` に委譲される。
 
 ## Codex 実行メモ
 

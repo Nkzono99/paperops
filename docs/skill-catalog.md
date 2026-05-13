@@ -32,6 +32,7 @@
 - `feedback-paper-harness`
 - `update-refs`
 - `resolve-local-paths`
+- `update-paperops`
 - `pull-template-updates`
 - `import-manuscript`
 - `review-public-manuscript`
@@ -68,5 +69,7 @@
 
 - `pops init`: `template/` 由来の bundled scaffold から新規論文プロジェクトを作成
 - `pops doctor`: 初期化後のハーネス状態を診断
-- `pops update-harness`: 管理対象ハーネスファイルの更新計画を表示・適用
+- `pops update-paperops`: 管理対象ハーネスファイルの更新計画を表示・適用
 - `pops feedback`: 上流へ戻す改善フィードバックの下書きを生成
+
+`pull-template-updates` は旧名の互換入口であり、新規の更新導線では `update-paperops` を使う。

@@ -67,7 +67,20 @@ class PopsCliTest(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertIn("doctor: ok", out)
 
-    def test_update_harness_can_plan_single_file(self) -> None:
+    def test_update_paperops_can_plan_single_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+
+            code, out, err = run_cli(
+                ["update-paperops", "--dry-run", "--only", "AGENTS.md", str(target)]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("Paperops update plan", out)
+            self.assertIn("unchanged managed files: 1", out)
+
+    def test_update_harness_alias_still_works(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             run_cli(["init", str(target)])
@@ -77,8 +90,7 @@ class PopsCliTest(unittest.TestCase):
             )
 
             self.assertEqual(code, 0, err)
-            self.assertIn("Harness update plan", out)
-            self.assertIn("unchanged managed files: 1", out)
+            self.assertIn("Paperops update plan", out)
 
     def test_write_manifest_preserves_existing_scaffold_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -131,7 +143,7 @@ class PopsCliTest(unittest.TestCase):
             run_cli(["init", str(target), "--template-ref", "old"])
 
             code, _out, err = run_cli(
-                ["update-harness", "--adopt", "--template-ref", "new", str(target)]
+                ["update-paperops", "--adopt", "--template-ref", "new", str(target)]
             )
 
             self.assertEqual(code, 0, err)
@@ -162,6 +174,46 @@ class PopsCliTest(unittest.TestCase):
 
         self.assertEqual(code, 0, err)
         self.assertIn("pops 0.1.0", out)
+
+    def test_update_notice_points_to_update_paperops_skill(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            env = {
+                "POPS_FORCE_VERSION_CHECK": "1",
+                "POPS_UPDATE_CHECK_CACHE": str(Path(tmp) / "cache.json"),
+            }
+            with (
+                mock.patch.dict("os.environ", env, clear=False),
+                mock.patch(
+                    "paperops.cli.main.fetch_latest_package_version",
+                    return_value="9.9.9",
+                ),
+            ):
+                code, _out, err = run_cli(["feedback", "--title", "notice"])
+
+        self.assertEqual(code, 0, err)
+        self.assertIn("paperops の更新があります", err)
+        self.assertIn("uvx --from paper-harness-cli pops setup", err)
+        self.assertIn("/update-paperops", err)
+
+    def test_update_notice_can_be_disabled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            env = {
+                "POPS_DISABLE_VERSION_CHECK": "1",
+                "POPS_FORCE_VERSION_CHECK": "1",
+                "POPS_UPDATE_CHECK_CACHE": str(Path(tmp) / "cache.json"),
+            }
+            with (
+                mock.patch.dict("os.environ", env, clear=False),
+                mock.patch(
+                    "paperops.cli.main.fetch_latest_package_version",
+                    return_value="9.9.9",
+                ) as fetch,
+            ):
+                code, _out, err = run_cli(["feedback", "--title", "notice"])
+
+        self.assertEqual(code, 0, err)
+        self.assertEqual("", err)
+        fetch.assert_not_called()
 
 
 if __name__ == "__main__":

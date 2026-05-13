@@ -105,7 +105,8 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。各 Co
 | `/improve-writing-harness` | プロジェクトローカルの摩擦を特定・修正 |
 | `/feedback-paper-harness` | 再利用可能な改善を上流ハーネスにフィードバック |
 | `/resolve-local-paths` | `refs/local/` からローカルパスエイリアスを解決 |
-| `/pull-template-updates` | 上流テンプレートの変更を安全に取り込む |
+| `/update-paperops` | pops 更新通知や上流 paperops scaffold の変更を安全に取り込む |
+| `/pull-template-updates` | 旧名。新規作業では `/update-paperops` を使う |
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
 | `/review-public-manuscript` | section / weekly / pre-submit の粒度で、公開原稿だけを入力に外部読者視点の未定義語・ローカル語・暗黙前提をレビュー |
 | `/start-manuscript-review` | TeX 直編集レビュー用 branch を用意し、人間向けの通読ガイドを表示 |

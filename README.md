@@ -35,7 +35,7 @@ pops doctor
 
 1. 人間が論文トピック、制約、投稿先候補、判断を伝える。
 2. Agent が `notes/project-brief.md`、`notes/claim-evidence-map.md`、`manuscript/venue.md` を整える。
-3. `pops` が init / setup / doctor / update-harness のような決定的操作を担う。
+3. `pops` が init / setup / doctor / update-paperops のような決定的操作を担う。
 4. 原稿は `manuscript/ja` を中心に進め、必要な block を `manuscript/en` へ同期する。
 5. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
 6. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
@@ -50,7 +50,7 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 - `manuscript/ja` と `manuscript/en` は block ID で対応するバイリンガル原稿。
 - `refs/` は raw PDF 置き場ではなく、キュレーション済みの参照知識層。
 - `submission/<venue>/` は投稿先公式テンプレートと最終提出用 TeX の隔離スロット。
-- `pops update-harness` はハーネス管理ファイルだけを扱い、下流固有の `manuscript/`、`notes/`、`refs/`、`submission/` を自動上書きしない。
+- `pops update-paperops` はハーネス管理ファイルだけを扱い、下流固有の `manuscript/`、`notes/`、`refs/`、`submission/` を自動上書きしない。
 
 ## リポジトリ構成
 
@@ -85,7 +85,7 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 pops init paper-my-topic
 pops setup
 pops doctor
-pops update-harness --dry-run
+pops update-paperops --dry-run
 pops migrate --apply
 pops feedback
 pops version

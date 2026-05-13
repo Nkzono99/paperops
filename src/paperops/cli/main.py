@@ -6,10 +6,15 @@ import argparse
 import fnmatch
 import importlib.metadata
 import importlib.resources
+import json
+import os
 import shutil
 import subprocess
 import sys
+import time
 import tomllib
+import urllib.error
+import urllib.request
 from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -19,6 +24,9 @@ from typing import Any
 
 PACKAGE_NAME = "paper-harness-cli"
 UPSTREAM_REPO = "Nkzono99/paperops"
+CHANGELOG_URL = f"https://github.com/{UPSTREAM_REPO}/blob/main/CHANGELOG.md"
+PYPI_JSON_URL = f"https://pypi.org/pypi/{PACKAGE_NAME}/json"
+UPDATE_CHECK_INTERVAL_SECONDS = 24 * 60 * 60
 
 EXCLUDED_SCAFFOLD_PATTERNS = (
     ".git",
@@ -80,7 +88,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not hasattr(args, "func"):
         parser.print_help()
         return 0
-    return args.func(args)
+    code = args.func(args)
+    maybe_print_update_notice(args, code)
+    return code
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -157,44 +167,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     doctor_parser.set_defaults(func=cmd_doctor)
 
-    update_parser = subcommands.add_parser(
+    add_update_paperops_parser(
+        subcommands,
+        "update-paperops",
+        "Plan or apply managed paperops updates.",
+    )
+    add_update_paperops_parser(
+        subcommands,
         "update-harness",
-        help="Plan or apply managed harness updates.",
+        "Backward-compatible alias for update-paperops.",
     )
-    update_parser.add_argument(
-        "path",
-        nargs="?",
-        type=Path,
-        help="Project directory, defaults to cwd.",
-    )
-    update_parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show the plan without writing.",
-    )
-    update_parser.add_argument("--apply", action="store_true", help="Apply missing-file updates.")
-    update_parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Overwrite changed managed files when used with --apply.",
-    )
-    update_parser.add_argument(
-        "--adopt",
-        action="store_true",
-        help="Create or refresh .pops/manifest.toml without copying files.",
-    )
-    update_parser.add_argument("--only", help="Comma-separated path prefixes to consider.")
-    update_parser.add_argument(
-        "--source",
-        type=Path,
-        help="Use a scaffold directory instead of the bundled scaffold.",
-    )
-    update_parser.add_argument(
-        "--template-ref",
-        default="",
-        help="Template commit/ref to record in .pops/manifest.toml.",
-    )
-    update_parser.set_defaults(func=cmd_update_harness)
 
     migrate_parser = subcommands.add_parser(
         "migrate",
@@ -235,6 +217,49 @@ def build_parser() -> argparse.ArgumentParser:
     version_parser.set_defaults(func=cmd_version)
 
     return parser
+
+
+def add_update_paperops_parser(
+    subcommands: argparse._SubParsersAction[argparse.ArgumentParser],
+    name: str,
+    help_text: str,
+) -> argparse.ArgumentParser:
+    update_parser = subcommands.add_parser(name, help=help_text)
+    update_parser.add_argument(
+        "path",
+        nargs="?",
+        type=Path,
+        help="Project directory, defaults to cwd.",
+    )
+    update_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show the plan without writing.",
+    )
+    update_parser.add_argument("--apply", action="store_true", help="Apply missing-file updates.")
+    update_parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite changed managed files when used with --apply.",
+    )
+    update_parser.add_argument(
+        "--adopt",
+        action="store_true",
+        help="Create or refresh .pops/manifest.toml without copying files.",
+    )
+    update_parser.add_argument("--only", help="Comma-separated path prefixes to consider.")
+    update_parser.add_argument(
+        "--source",
+        type=Path,
+        help="Use a scaffold directory instead of the bundled scaffold.",
+    )
+    update_parser.add_argument(
+        "--template-ref",
+        default="",
+        help="Template commit/ref to record in .pops/manifest.toml.",
+    )
+    update_parser.set_defaults(func=cmd_update_paperops)
+    return update_parser
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -332,7 +357,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_update_harness(args: argparse.Namespace) -> int:
+def cmd_update_paperops(args: argparse.Namespace) -> int:
     if args.apply and args.dry_run:
         print("error: --apply and --dry-run cannot be used together.", file=sys.stderr)
         return 2
@@ -453,6 +478,152 @@ def package_version() -> str:
         from paperops import __version__
 
         return __version__
+
+
+def maybe_print_update_notice(args: argparse.Namespace, exit_code: int) -> None:
+    if exit_code != 0 or args.command == "version":
+        return
+    if env_truthy("POPS_DISABLE_VERSION_CHECK"):
+        return
+    if not (sys.stderr.isatty() or env_truthy("POPS_FORCE_VERSION_CHECK")):
+        return
+
+    current = package_version()
+    latest = latest_package_version()
+    if latest is None or not is_newer_version(latest, current):
+        return
+
+    print(f"[pops notice] paperops の更新があります: {current} -> {latest}", file=sys.stderr)
+    print(
+        f"[pops notice] 更新内容: {CHANGELOG_URL}",
+        file=sys.stderr,
+    )
+    print(
+        f"[pops notice] CLI更新: uvx --from {PACKAGE_NAME} pops setup",
+        file=sys.stderr,
+    )
+    print(
+        "[pops notice] その後、agent に /update-paperops "
+        "（未導入なら /pull-template-updates）で差分確認を依頼してください。",
+        file=sys.stderr,
+    )
+    print(
+        "[pops notice] この確認を止めるには POPS_DISABLE_VERSION_CHECK=1 を設定します。",
+        file=sys.stderr,
+    )
+
+
+def latest_package_version() -> str | None:
+    now = time.time()
+    cached = read_update_check_cache()
+    if cached is not None:
+        checked_at = as_float(cached.get("checked_at"))
+        latest = cached.get("latest_version")
+        if (
+            isinstance(latest, str)
+            and checked_at is not None
+            and now - checked_at < UPDATE_CHECK_INTERVAL_SECONDS
+        ):
+            return latest
+        if (
+            latest is None
+            and checked_at is not None
+            and now - checked_at < UPDATE_CHECK_INTERVAL_SECONDS
+        ):
+            return None
+
+    latest = fetch_latest_package_version()
+    if latest is not None:
+        write_update_check_cache({"checked_at": now, "latest_version": latest})
+        return latest
+    write_update_check_cache({"checked_at": now})
+    return None
+
+
+def fetch_latest_package_version() -> str | None:
+    request = urllib.request.Request(
+        PYPI_JSON_URL,
+        headers={
+            "Accept": "application/json",
+            "User-Agent": f"pops/{package_version()}",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=2) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except (OSError, TimeoutError, json.JSONDecodeError, urllib.error.URLError):
+        return None
+    info = data.get("info") if isinstance(data, dict) else None
+    version = info.get("version") if isinstance(info, dict) else None
+    return version if isinstance(version, str) and version else None
+
+
+def read_update_check_cache() -> dict[str, Any] | None:
+    path = update_check_cache_path()
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def write_update_check_cache(data: dict[str, Any]) -> None:
+    path = update_check_cache_path()
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(data, sort_keys=True), encoding="utf-8")
+    except OSError:
+        return
+
+
+def update_check_cache_path() -> Path:
+    override = os.environ.get("POPS_UPDATE_CHECK_CACHE")
+    if override:
+        return Path(override).expanduser()
+    if sys.platform.startswith("win") and os.environ.get("LOCALAPPDATA"):
+        base = Path(os.environ["LOCALAPPDATA"])
+    elif os.environ.get("XDG_CACHE_HOME"):
+        base = Path(os.environ["XDG_CACHE_HOME"]).expanduser()
+    else:
+        base = Path.home() / ".cache"
+    return base / "pops" / "update-check.json"
+
+
+def env_truthy(name: str) -> bool:
+    value = os.environ.get(name, "")
+    return value.lower() in {"1", "true", "yes", "on"}
+
+
+def as_float(value: object) -> float | None:
+    if isinstance(value, int | float):
+        return float(value)
+    return None
+
+
+def is_newer_version(latest: str, current: str) -> bool:
+    latest_release = release_version_tuple(latest)
+    current_release = release_version_tuple(current)
+    if not latest_release or not current_release:
+        return latest != current and latest > current
+    width = max(len(latest_release), len(current_release))
+    return latest_release + (0,) * (width - len(latest_release)) > current_release + (
+        0,
+    ) * (width - len(current_release))
+
+
+def release_version_tuple(version: str) -> tuple[int, ...]:
+    release = version.split("+", 1)[0].split("-", 1)[0]
+    parts: list[int] = []
+    for raw in release.split("."):
+        digits = ""
+        for char in raw:
+            if not char.isdigit():
+                break
+            digits += char
+        if not digits:
+            break
+        parts.append(int(digits))
+    return tuple(parts)
 
 
 @contextmanager
@@ -958,7 +1129,7 @@ def print_copy_summary(plan: CopyPlan) -> None:
 
 
 def print_update_plan(plan: CopyPlan) -> None:
-    print("Harness update plan:")
+    print("Paperops update plan:")
     print(f"  missing managed files: {len(plan.missing)}")
     for rel in plan.missing[:20]:
         print(f"    + {rel}")
