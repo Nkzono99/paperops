@@ -58,11 +58,11 @@ chain runner は minor ごとの checkpoint release を exact version で呼び�
 
 ## PyPI 公開モデル
 
-`.github/workflows/publish-pypi.yml` は、release publish または手動 dispatch で `paper-harness-cli` を PyPI に公開する。
+`.github/workflows/publish-pypi.yml` は、release publish または手動 dispatch で `paper-harness-cli` を PyPI に公開する。ただし公開対象は `main` 由来に限定する。release publish の場合は tag が指す commit が `origin/main` から到達可能であることを検証し、手動 dispatch の場合は `main` ref からの実行だけを許可する。
 
 workflow は build job と publish job を分ける:
 
-- build job: `python -m build` で distribution を作成し、`twine check` で検証する。
+- build job: release / dispatch が `main` 由来であることを確認し、`python -m build` で distribution を作成し、`twine check` で検証する。
 - publish job: build artifact を取得し、PyPI Trusted Publishing で `pypa/gh-action-pypi-publish@release/v1` から公開する。
 
 PyPI 側では trusted publisher として以下を設定する:
@@ -74,7 +74,10 @@ PyPI 側では trusted publisher として以下を設定する:
 
 ## 運用ルール
 
+- `main` への直接 push は禁止し、変更は Pull Request 経由で取り込む。
+- PR では `Smoke / smoke` を必須チェックとして通す。
 - `template/` の変更はまずこのリポジトリで行う。
 - 配布専用リポジトリを編集・同期対象にしない。
 - ユーザーに影響する CLI / scaffold 変更は `CHANGELOG.md` に記録する。
 - 下流互換性に影響する変更は `pops migrate` または `pops update-paperops` の挙動と docs に反映する。
+- release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。

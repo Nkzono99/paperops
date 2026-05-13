@@ -20,6 +20,24 @@ jobs:
     steps:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: main 由来の release だけを許可
+        run: |
+          git fetch origin main --tags
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${GITHUB_REF_NAME}" != "main" ]; then
+              echo "::error::Manual PyPI publish must run from main."
+              exit 1
+            fi
+            exit 0
+          fi
+          release_commit="$(git rev-list -n 1 "${GITHUB_REF_NAME}")"
+          if ! git merge-base --is-ancestor "${release_commit}" origin/main; then
+            echo "::error::Release tag ${GITHUB_REF_NAME} does not point to a commit reachable from origin/main."
+            exit 1
+          fi
 
       - name: Python をセットアップ
         uses: actions/setup-python@v5
