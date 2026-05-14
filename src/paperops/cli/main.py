@@ -9,6 +9,7 @@ from pathlib import Path
 
 from paperops.cli.constants import PACKAGE_NAME, UPSTREAM_REPO
 from paperops.cli.doctor import (
+    check_link_registry,
     check_executable,
     check_path,
     check_project_venv_if_present,
@@ -333,6 +334,7 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     check_executable("git", warnings)
     check_executable("make", warnings)
     check_workflow_placeholders(root, warnings)
+    check_link_registry(root, errors, warnings)
 
     local_locations = root / "refs" / "local" / "locations.toml"
     if not local_locations.exists():

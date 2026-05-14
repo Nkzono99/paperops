@@ -24,7 +24,7 @@
 
 - `ja/` と `en/` に分割された原稿ソース
 - `manuscript/mirror/` 配下のミラー制御層と block freshness ledger
-- `refs/` 配下の参照知識。raw PDF は `refs/papers/` でローカル保持しても既定では ignore し、共有知識は `refs/summaries/` に集約する
+- `refs/` 配下の参照知識。外部 project / directory は `refs/links.toml` に共有 metadata だけを置き、ローカル絶対パスは `refs/local/locations.toml` に分離する。raw PDF は `refs/papers/` でローカル保持しても既定では ignore し、共有知識は `refs/summaries/` に集約する
 - `notes/` 配下のセッション継続性ノート、主張・証拠台帳、読者モデル、AI 利用ログ
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md` による公開メタデータ・AI 利用ログ・再現性メモ
 - `submission/<venue>/` 配下の投稿先公式テンプレートと最終提出用 TeX
@@ -36,7 +36,7 @@
 
 - 原稿リポジトリを自己記述的に保つ。
 - アドホックな翻訳に頼らず、日英のドリフトを明示的に追跡する。
-- エイリアスと ignored な設定ファイルによりローカルパスを保存する。
+- tracked な link registry と ignored な設定ファイルにより、共有可能な外部参照 metadata とローカル絶対パスを分離する。
 - 共有・投稿時に、公開メタデータ、再現性、図表 provenance、workflow 設定の未記入を検出する。
 - 再利用可能な自動化は各論文リポジトリではなくテンプレートリポジトリに集約する。
 - CLI は `template/` を source of truth として展開し、下流プロジェクト固有の原稿・notes・refs を自動上書きしない。
