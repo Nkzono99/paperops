@@ -21,6 +21,12 @@ make smoke                     # template/ に対して lint-bib + citation-chec
 make cli-smoke                 # pops CLI の最小 smoke test を実行
 ```
 
+## HarnessOps
+
+- このリポジトリは `.harnessops/project.toml` 上では `target-repository` で、HOPS overlay は `harness-lab/` を使う。
+- HarnessOps 管理ファイルは直接組み替えず、確認は `uvx --from harnessops hops doctor --check-overlay --check-records`、更新は `uvx --refresh-package harnessops --from harnessops hops update-harness` を使う。
+- repo-local skill の更新や bridge 再展開が必要な場合は `.agents/skills/hops-update-harness/SKILL.md` の手順に従う。
+
 ## 変更ワークフロー
 
 1. 構造化された Issue フォーム（`template-feedback`, `skill-request`, `structure-change`）で Issue を受理する。
