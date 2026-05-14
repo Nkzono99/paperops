@@ -35,6 +35,8 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 ## GitHub Flow
 
 - `main` への直接 push は禁止。すべての変更は `codex/<topic>` などの topic branch から Pull Request 経由で取り込む。
+- ユーザーが「mergeして」「pushして」と依頼した場合も、明示的に `main` 直 push を求めていない限り、topic branch を push して Pull Request を作成し、GitHub 上で merge する。
+- ローカル `main` に誤って commit や merge を作った場合も、`origin/main` へ直接 push せず、その commit を topic branch から Pull Request に出し、merge 後にローカル `main` を `origin/main` へ fast-forward する。
 - Pull Request では `Smoke / smoke` を必須チェックとして通す。
 - release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。PyPI publish workflow も tag commit が `origin/main` から到達可能な場合だけ公開する。
 - 緊急修正でも `main` 直 push は避け、短命 branch と PR を使う。
