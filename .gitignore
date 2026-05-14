@@ -1,6 +1,5 @@
 .DS_Store
 .codex-tmp/
-.harnessops/cache/
 .venv/
 __pycache__/
 src/**/__pycache__/
@@ -21,3 +20,9 @@ template/refs/papers/**
 !template/refs/papers/.gitkeep
 template/**/*.pdf
 !template/manuscript/shared/figures/**/*.pdf
+
+# BEGIN harnessops
+.harnessops/cache/*
+!.harnessops/cache/.gitkeep
+.harnessops/tmp/
+# END harnessops

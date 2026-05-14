@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- HarnessOps 0.1.10 の repo-local skill / bridge 更新を取り込み、`AGENTS.md` に `doctor` と `update-harness` の短い運用導線を追加した。
 - GitHub Flow を採用し、`main` への直接 push を禁止する運用へ移行した。PR では `Smoke / smoke` を必須チェックとして通し、release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。PyPI publish workflow も release tag が `origin/main` から到達可能な場合だけ公開するようにした。
 
 ## 0.2.0 - 2026-05-14
