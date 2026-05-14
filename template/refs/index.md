@@ -7,6 +7,8 @@
 ## レイアウト
 
 - `summaries/`: 再利用に最適化された構造化サマリー（スキルが初回使用時にサブディレクトリを作成）
+- `links.toml`: 外部 project / directory の共有可能な metadata registry。絶対パスは含めず、`refs/local/locations.toml` の alias を参照する
+- `links.md`: link registry の schema と運用メモ
 - `local/`: ignored なマシン固有パスエイリアス
 - `papers/`: raw PDF などのローカル保持枠。`.gitkeep` 以外は既定で ignore し、共有知識は `summaries/` に転記する
 

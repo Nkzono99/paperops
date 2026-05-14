@@ -11,8 +11,8 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from paperops import __version__
-from paperops.cli.main import main, write_manifest
+from paperops import __version__  # noqa: E402
+from paperops.cli.main import main, write_manifest  # noqa: E402
 
 
 def run_cli(args: list[str]) -> tuple[int, str, str]:
@@ -43,6 +43,7 @@ class PopsCliTest(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertTrue((target / "AGENTS.md").is_file())
             self.assertTrue((target / "manuscript").is_dir())
+            self.assertTrue((target / "refs" / "links.toml").is_file())
             self.assertTrue((target / ".pops" / "manifest.toml").is_file())
             self.assertFalse((target / "refs" / "local" / "locations.toml").exists())
 
@@ -64,6 +65,40 @@ class PopsCliTest(unittest.TestCase):
             code, out, err = run_cli(["doctor", str(target)])
 
             self.assertEqual(code, 0, err)
+            self.assertIn("doctor: ok", out)
+
+    def test_doctor_rejects_invalid_link_registry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            (target / "refs" / "links.toml").write_text("not = [valid", encoding="utf-8")
+
+            code, out, _err = run_cli(["doctor", str(target)])
+
+            self.assertEqual(code, 1)
+            self.assertIn("refs/links.toml is invalid TOML", out)
+            self.assertIn("doctor: failed", out)
+
+    def test_doctor_warns_when_link_alias_is_not_in_local_locations(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            (target / "refs" / "local" / "locations.toml").write_text(
+                "\n".join(
+                    [
+                        "[paths.runops_main]",
+                        'kind = "runops_project"',
+                        'host = "local"',
+                        'path = "/tmp/runops"',
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            code, out, err = run_cli(["doctor", str(target)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("missing from refs/local/locations.toml: external_data", out)
             self.assertIn("doctor: ok", out)
 
     def test_update_paperops_can_plan_single_file(self) -> None:

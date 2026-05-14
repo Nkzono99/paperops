@@ -63,7 +63,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `manuscript/mirror/status.md` に別段の記載がない限り、`manuscript/ja/` が科学的なソースオブトゥルースである。
 - `% block: ...` 識別子を保持する。削除や番号の振り直しは行わない。
 - 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（settings.json の deny パターンが強制する）。
-- `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。raw PDF は既定で ignore される `refs/papers/` に留め、引用キーは安定させる。
+- `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。外部 project / directory は `refs/links.toml` に共有 metadata だけを記録し、ローカル絶対パスは `refs/local/locations.toml` に分離する。raw PDF は既定で ignore される `refs/papers/` に留め、引用キーは安定させる。
 - 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
 - 公開・投稿前には `manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`notes/ai-use.md` を更新し、`make pre-submit` を実行する。
 - 新しい主張は `notes/claim-evidence-map.md` に evidence、scope、limitation とともに記録する。
@@ -105,7 +105,7 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。各 Co
 | `/update-refs` | 参考文献と参照知識の整合性を検証 |
 | `/improve-writing-harness` | プロジェクトローカルの摩擦を特定・修正 |
 | `/feedback-paper-harness` | 再利用可能な改善を上流ハーネスにフィードバック |
-| `/resolve-local-paths` | `refs/local/` からローカルパスエイリアスを解決 |
+| `/resolve-local-paths` | `refs/links.toml` と `refs/local/` から外部 link とローカルパスエイリアスを解決 |
 | `/update-paperops` | pops 更新通知や上流 paperops scaffold の変更を安全に取り込む |
 | `/pull-template-updates` | 旧名。新規作業では `/update-paperops` を使う |
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
@@ -130,7 +130,7 @@ manuscript/mirror/   map.toml, block-ledger.yml, terminology.yml, status.md, cha
 manuscript/venue.md  投稿先情報
 manuscript/publication-metadata.toml  公開タイトル、著者、ライセンス、build provenance
 submission/          投稿先公式テンプレート、最終提出用 TeX
-refs/                知識層: summaries, local（papers, bib, excerpts はスキルが必要時に作成）
+refs/                知識層: summaries, links.toml, local（papers, bib, excerpts はスキルが必要時に作成）
 notes/               project-brief, contribution-claims, claim-evidence-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
 scripts/             ビルド、TeX 構造、lint、citation-check、skill 対応、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム

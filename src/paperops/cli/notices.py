@@ -33,7 +33,7 @@ def maybe_print_update_notice(args: argparse.Namespace, exit_code: int) -> None:
     printed = False
     latest_is_newer = latest is not None and is_newer_version(latest, current)
 
-    if latest_is_newer:
+    if latest is not None and latest_is_newer:
         update_target = latest
         print(
             f"[pops notice] 実行中の pops が古いです: {current} -> {latest}",

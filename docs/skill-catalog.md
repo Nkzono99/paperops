@@ -63,6 +63,8 @@
 - `venue-fit-review`: 投稿先・読者モデルに照らして title、abstract、構成、必須要件を点検する。
 - `ai-disclosure-check`: `notes/ai-use.md` と投稿先ポリシーに照らして AI 利用開示と人間検証を点検する。
 
+`resolve-local-paths` は `refs/links.toml` を共有可能な external link registry、`refs/local/locations.toml` を untracked なローカル解決先として扱う。
+
 セットアップとセッション記録のスキルは、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md` も公開・投稿前状態として扱う。
 
 `.agents/skills/` は重複実装を避けるための薄い入口であり、恒久的な手順変更は `.claude/skills/<skill>/SKILL.md` 側を source of truth として更新する。`make skill-mirror-check` は同名 skill の存在と source-of-truth 参照を機械的に確認する。

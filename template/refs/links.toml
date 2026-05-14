@@ -1,0 +1,23 @@
+# Shared external link registry for this paper.
+# Keep machine-specific absolute paths in refs/local/locations.toml.
+schema_version = "0.1"
+
+[[links]]
+alias = "runops-main"
+kind = "runops_project"
+local_path_alias = "runops_main"
+title = "Main RunOps project"
+description = "Experiment project that produces analysis results or figures for this paper."
+expected_contents = "configs, run metadata, result tables, and figure inputs"
+share_status = "private-source"
+notes = "Replace this starter entry with the project actually used by the paper."
+
+[[links]]
+alias = "external-data"
+kind = "directory"
+local_path_alias = "external_data"
+title = "External analysis directory"
+description = "General directory outside this repository that contains supporting data or derived artifacts."
+expected_contents = "non-committed inputs or intermediate outputs referenced from notes"
+share_status = "local-only"
+notes = "Use refs/summaries or notes for shareable conclusions, not absolute paths."

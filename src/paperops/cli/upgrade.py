@@ -59,7 +59,7 @@ def plan_upgrade_chain(
 
     steps: list[UpgradeStep] = []
     current = applied
-    for checkpoint in sorted_versions(by_minor.values()):
+    for checkpoint in sorted_versions(list(by_minor.values())):
         if compare_versions(checkpoint, current) > 0:
             steps.append(UpgradeStep(from_version=current, to_version=checkpoint))
             current = checkpoint

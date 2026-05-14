@@ -8,7 +8,7 @@
 
 1. リポジトリ名を変更し、この README を更新する。
 2. `uvx --from paper-harness-cli pops setup` / `doctor` で `.pops/manifest.toml` とハーネス状態を確認する。
-3. `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーし、ローカルパスはユーザー自身で記入する。
+3. 必要に応じて `refs/links.toml` に外部 project / directory の共有 metadata を追加し、`refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーしてローカルパスはユーザー自身で記入する。
 4. `tex-env.example.toml` を `tex-env.toml` にコピーし、TeX 環境を設定する（任意）。
 5. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paperops` リポジトリパスに置き換える。
 6. `manuscript/publication-metadata.toml`、`notes/project-brief.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/venue.md`、`notes/contribution-claims.md`、`notes/reproducibility.md` を記入する。
@@ -55,7 +55,7 @@ nested private repo 運用や Windows の dubious ownership で git 操作が止
 - `manuscript/`: バイリンガルソース、共有アセット、ミラー制御、投稿先情報
 - `manuscript/publication-metadata.toml`: 公開タイトル、著者、ライセンス、最後に共有した build provenance
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX の分離スロット
-- `refs/`: 参照知識、サマリー、ローカルパスエイリアス（raw PDF は `refs/papers/` に置いても既定で ignore し、共有時は `refs/summaries/` を優先）
+- `refs/`: 参照知識、サマリー、外部 link registry、ローカルパスエイリアス（raw PDF は `refs/papers/` に置いても既定で ignore し、共有時は `refs/summaries/` を優先）
 - `notes/`: プロジェクト概要、貢献主張、claim-evidence map、読者モデル、AI 利用ログ、再現性メモ、引き継ぎ、意思決定の追跡
 - `.github/ISSUE_TEMPLATE/`: 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 - `.claude/`: プロジェクトローカルの設定、スキル、ルール、フック
