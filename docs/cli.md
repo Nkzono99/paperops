@@ -54,6 +54,8 @@ uvx --from paper-harness-cli pops doctor
 - `pops migrate [path]`: 旧 scaffold 由来のプロジェクトに `.pops` 管理情報を追加する計画を表示する。
 - `pops migrate --apply`: `.pops/manifest.toml` を作成する。
 - `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出力する。
+- `pops links list [path]`: `refs/links.toml` に登録された外部 project / directory link を表示する。`--resolve-local` を付けた場合だけ `refs/local/locations.toml` の実パスも表示する。
+- `pops links check [path]`: `refs/links.toml` の schema、link id、kind、`location_ref` と `refs/local` の対応を検証する。
 - `pops version`: CLI と上流情報を表示する。
 - `pops --version`: `pops version` と同じ情報を表示する。
 
@@ -102,3 +104,7 @@ uvx --from paper-harness-cli pops update-paperops --target latest --allow-major 
 - `.github/PULL_REQUEST_TEMPLATE.md`
 
 `README.md`、`notes/`、`manuscript/`、`refs/`、`submission/` はプロジェクト固有内容として自動更新対象にしない。
+
+## Link registry
+
+paper draft が runops project や外部ディレクトリを参照する場合、共有可能な link intent は `refs/links.toml` に、個人環境の絶対パスは ignored な `refs/local/locations.toml` に分離する。`pops links check` は `refs/links.toml` と `refs/local/locations.example.toml` の対応を確認し、ローカルパスを共有ファイルへ混ぜずに運用できるかを検査する。

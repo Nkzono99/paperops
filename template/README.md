@@ -8,7 +8,7 @@
 
 1. リポジトリ名を変更し、この README を更新する。
 2. `uvx --from paper-harness-cli pops setup` / `doctor` で `.pops/manifest.toml` とハーネス状態を確認する。
-3. `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーし、ローカルパスはユーザー自身で記入する。
+3. `refs/links.toml` で外部 project / directory への共有 link を調整し、`refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーして実パスをユーザー自身で記入する。
 4. `tex-env.example.toml` を `tex-env.toml` にコピーし、TeX 環境を設定する（任意）。
 5. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paperops` リポジトリパスに置き換える。
 6. `manuscript/publication-metadata.toml`、`notes/project-brief.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/venue.md`、`notes/contribution-claims.md`、`notes/reproducibility.md` を記入する。
@@ -30,6 +30,8 @@
 既存原稿がある場合は `/import-manuscript` でインポートできる。
 
 `pops` は `uvx --from paper-harness-cli pops ...` で実行する。複数 version を跨ぐ更新は `uvx --from paper-harness-cli pops update-paperops --plan` で chain を確認する。ローカルワークフローは Python 3.11 以上の `.venv/bin/python` / `.venv/Scripts/python.exe` を優先し、`.venv` が無い場合は Makefile とビルドヘルパーが利用可能な Python 3.11 以上の interpreter を探索する。
+
+外部 project やローカルディレクトリを論文に紐づける場合は `refs/links.toml` を共有台帳として使う。実パスは ignored な `refs/local/locations.toml` に分離し、確認には `uvx --from paper-harness-cli pops links check` または `make links-check` を使う。`kind = "runops_project"` の link は runops MCP / publication export manifest から結果や図表候補を調べる入口として扱う。
 
 `tex-env.toml` では TeX Live / Docker だけでなく、JA / EN ごとの `latexmk` mode と engine も設定できる。日本語ドラフトで `uplatex + dvipdfmx` が必要な場合は、`tex-env.example.toml` の `[latex.ja]` 例をコピーする。
 
@@ -55,8 +57,8 @@ nested private repo 運用や Windows の dubious ownership で git 操作が止
 - `manuscript/`: バイリンガルソース、共有アセット、ミラー制御、投稿先情報
 - `manuscript/publication-metadata.toml`: 公開タイトル、著者、ライセンス、最後に共有した build provenance
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX の分離スロット
-- `refs/`: 参照知識、サマリー、ローカルパスエイリアス（raw PDF は `refs/papers/` に置いても既定で ignore し、共有時は `refs/summaries/` を優先）
-- `notes/`: プロジェクト概要、貢献主張、claim-evidence map、読者モデル、AI 利用ログ、再現性メモ、引き継ぎ、意思決定の追跡
+- `refs/`: 参照知識、サマリー、外部 link 台帳、ローカルパスエイリアス（raw PDF は `refs/papers/` に置いても既定で ignore し、共有時は `refs/summaries/` を優先）
+- `notes/`: プロジェクト概要、貢献主張、claim-evidence map、追加解析・実験要望、読者モデル、AI 利用ログ、再現性メモ、引き継ぎ、意思決定の追跡
 - `.github/ISSUE_TEMPLATE/`: 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 - `.claude/`: プロジェクトローカルの設定、スキル、ルール、フック
 - `.agents/`: Codex 用のプロジェクトローカルスキル互換入口

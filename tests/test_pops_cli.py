@@ -273,6 +273,42 @@ class PopsCliTest(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertIn("CLI feedback", output.read_text(encoding="utf-8"))
 
+    def test_links_commands_list_and_check_registry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+
+            code, out, err = run_cli(["links", "list", str(target)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("runops-main", out)
+            self.assertIn("figure-sources", out)
+
+            code, out, err = run_cli(["links", "check", str(target)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("links: ok", out)
+
+    def test_links_check_reports_invalid_kind(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            links_path = target / "refs" / "links.toml"
+            links_path.write_text(
+                links_path.read_text(encoding="utf-8").replace(
+                    'kind = "runops_project"',
+                    'kind = "mystery"',
+                    1,
+                ),
+                encoding="utf-8",
+            )
+
+            code, out, _err = run_cli(["links", "check", str(target)])
+
+            self.assertEqual(code, 1)
+            self.assertIn("[error]", out)
+            self.assertIn("mystery", out)
+
     def test_top_level_version_flag(self) -> None:
         code, out, err = run_cli(["--version"])
 

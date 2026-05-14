@@ -4,6 +4,13 @@ host = "local-desktop"
 path = "/path/to/simulations/runset_A"
 description = "Main production runs for this paper"
 
+[paths.runops_main]
+kind = "runops_project"
+host = "local-desktop"
+path = "/path/to/runops/project"
+description = "Runops project linked from refs/links.toml"
+mcp_provider = "runops"
+
 [paths.knowledge_topic]
 kind = "knowledge"
 host = "local-desktop"
@@ -15,3 +22,15 @@ kind = "figure_source"
 host = "wsl"
 path = "/path/to/figure-sources"
 description = "Scripts and editable sources for figures"
+
+[paths.figure_sources]
+kind = "directory"
+host = "local-desktop"
+path = "/path/to/editable/figure-sources"
+description = "Editable figure sources linked from refs/links.toml"
+
+[paths.external_notes]
+kind = "directory"
+host = "local-desktop"
+path = "/path/to/external/notes"
+description = "External notes linked from refs/links.toml"

@@ -44,6 +44,8 @@ uvx --from paper-harness-cli pops update-paperops --apply
 `update-paperops` は `AGENTS.md`、`CLAUDE.md`、`Makefile`、`scripts/`、`.agents/`、`.claude/`、`.github/ISSUE_TEMPLATE/` などのハーネス管理面だけを扱う。
 `manuscript/`、`notes/`、`refs/`、`submission/` は下流プロジェクト固有内容として自動上書きしない。
 
+`refs/links.toml` は新規 scaffold では同梱するが、既存下流プロジェクトでは project 固有の link 台帳として扱う。取り込む場合は `pops update-paperops --apply` の自動上書きではなく、必要に応じて手動で追加し、`pops links check` で検証する。
+
 `pops` は TTY 上の通常実行時に PyPI の `paper-harness-cli` 最新版、実行中の `pops` version、`.pops/manifest.toml` の適用済み scaffold version を低頻度で確認し、更新がある場合は `uvx --from paper-harness-cli pops update-paperops --plan` と `/update-paperops` スキルの使用を案内する。既存の `pops update-harness` は互換 alias として残す。
 
 下流互換性を最新 CLI に積み続けないため、更新は versioned upgrade chain で行える:

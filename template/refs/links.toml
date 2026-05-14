@@ -1,0 +1,34 @@
+# Shared logical links from this paper draft to external projects or directories.
+#
+# Keep machine-specific absolute paths in refs/local/locations.toml, which is
+# intentionally ignored. Each link here uses location_ref to point at one entry
+# in refs/local/locations.example.toml / refs/local/locations.toml.
+
+schema_version = 1
+
+[[links]]
+id = "runops-main"
+kind = "runops_project"
+location_ref = "runops_main"
+description = "Primary runops project that produces experiment outputs for this draft."
+paper_roles = ["results", "figures", "reproducibility"]
+access = "read"
+mcp_provider = "runops"
+mcp_server = "runops"
+preferred_export_paper_id = "paper-my-topic"
+
+[[links]]
+id = "figure-sources"
+kind = "directory"
+location_ref = "figure_sources"
+description = "Editable source files for paper figures that live outside this repository."
+paper_roles = ["figures"]
+access = "read_write"
+
+[[links]]
+id = "external-notes"
+kind = "directory"
+location_ref = "external_notes"
+description = "Prior notes, slide fragments, or local knowledge used during drafting."
+paper_roles = ["background", "discussion"]
+access = "read"
