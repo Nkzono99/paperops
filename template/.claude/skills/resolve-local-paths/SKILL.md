@@ -14,6 +14,7 @@ allowed-tools: Read, Glob
 - `refs/local/locations.toml`（存在する場合）
 - なければ `refs/local/locations.example.toml`
 - `refs/local/aliases.md`
+- `refs/links.md`
 
 ## 責務
 

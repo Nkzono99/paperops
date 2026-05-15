@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 from paperops.cli.constants import (
-    PACKAGE_NAME,
     PYPI_JSON_URL,
     UPDATE_CHECK_INTERVAL_SECONDS,
 )

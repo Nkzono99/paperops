@@ -43,7 +43,7 @@ uvx --from paper-harness-cli pops doctor
 - `pops init [path]`: bundled scaffold から新規論文リポジトリを作成し、`.pops/manifest.toml` を追加する。
 - `pops setup [path]`: 既存論文リポジトリに `.pops/manifest.toml` を追加する。
 - `pops setup <git-url> --path <dir>`: 既存 Git リポジトリを clone してから setup する。
-- `pops doctor [path]`: 必須ディレクトリ、`.pops` 管理情報、Git / make、workflow placeholder、ローカル設定ファイルの状態を確認する。
+- `pops doctor [path]`: 必須ディレクトリ、`.pops` 管理情報、Git / make、workflow placeholder、link registry、ローカル設定ファイルの状態を確認する。
 - `pops update-paperops`: bundled scaffold または `--source` で指定した scaffold から、管理対象ハーネスファイルの更新計画を表示する。
 - `pops update-paperops --apply`: 不足している管理対象ファイルだけを追加する。
 - `pops update-paperops --apply --force`: 差分がある管理対象ファイルも上書きする。実行前に plan を確認すること。
