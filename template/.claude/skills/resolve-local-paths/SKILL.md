@@ -25,6 +25,18 @@ allowed-tools: Read, Glob
 
 個人の絶対パスをトラッキング対象ファイルにコミットしないこと。
 
+## runops project の扱い
+
+`kind = "runops_project"` の link では、ローカルパスを直接読みに行く前に、利用可能なら runops MCP の read / inspect / plan tool を優先する。
+
+- 結果・図表候補: `runops.analysis.artifacts`, `runops.survey.summary`, `runops.analysis.plot_columns`
+- 論文向け export: `runops.publication.exports.list`, `runops.publication.export.inspect`
+- 追加解析・図表・実験要望: `runops.paper.request.draft`, `runops.paper.requests.list`, `runops.paper.request.plan`
+
+追加作業が必要な場合は、まず `notes/research-requests.md` に paper 側の文脈を残す。runops 側へ渡す前に `runops.paper.request.draft` で候補 request を検証し、`data.valid = true` かつ `existing_queue.duplicate_id = false` の場合だけ `toml_snippet` を採用する。duplicate id warning がある場合は、snippet が返っていても追記せず、別の id で draft し直す。
+
+このスキルは runops の run creation、survey expansion、job submit は行わない。必要な場合は runops project 側の明示操作として提案する。
+
 ## 記録先の使い分け
 
 - 共有 link の意味: `refs/links.toml`

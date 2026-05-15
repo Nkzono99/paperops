@@ -12,3 +12,4 @@ Codex で使う互換入口。実際の手順は `.claude/skills/resolve-local-p
 - `refs/links.toml` は共有 link 台帳、`refs/local/locations.toml` は個人環境ファイルとして扱う。
 - `refs/local/locations.toml` は明示依頼なしに作成・編集しない。
 - 共有可能な情報は `refs/local/aliases.md` や `refs/summaries/` に残し、ローカル絶対パスを原稿や共有ドキュメントへ混ぜない。
+- runops project link では `.claude` 側の手順に従い、`runops.paper.request.draft` で検証してから request handoff する。
