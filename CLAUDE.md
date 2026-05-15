@@ -17,9 +17,16 @@
 
 ```sh
 make venv                      # Python 3.11 以上で .venv を作成
-make smoke                     # template/ に対して lint-bib + mirror-check + collect-context を実行
+make smoke                     # template/ に対して lint-bib + citation-check + mirror-check + collect-context + readiness-check を実行
 make cli-smoke                 # pops CLI の最小 smoke test を実行
 ```
+
+## HarnessOps
+
+- このリポジトリは `.harnessops/project.toml` 上では `target-repository` で、HOPS overlay は `harness-lab/` を使う。
+- HarnessOps 管理ファイルは直接組み替えず、確認は `uvx --from harnessops hops doctor --check-overlay --check-records`、更新は `uvx --refresh-package harnessops --from harnessops hops update-harness` を使う。
+- GitHub Flow 作業を HOPS に委譲する場合は `.agents/skills/hops-github-flow/SKILL.md` と `uvx --from harnessops hops github-flow ...` を使う。
+- repo-local skill の更新や bridge 再展開が必要な場合は `.agents/skills/hops-update-harness/SKILL.md` の手順に従う。
 
 ## 変更ワークフロー
 
@@ -31,6 +38,15 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 6. ユーザーに影響する変更ごとに `CHANGELOG.md` を更新する。
 
 変更を反映する前に `docs/change-policy.md` と `docs/triage-rules.md` を確認すること。
+
+## GitHub Flow
+
+- `main` への直接 push は禁止。すべての変更は `codex/<topic>` などの topic branch から Pull Request 経由で取り込む。
+- ユーザーが「mergeして」「pushして」と依頼した場合も、明示的に `main` 直 push を求めていない限り、topic branch を push して Pull Request を作成し、GitHub 上で merge する。
+- ローカル `main` に誤って commit や merge を作った場合も、`origin/main` へ直接 push せず、その commit を topic branch から Pull Request に出し、merge 後にローカル `main` を `origin/main` へ fast-forward する。
+- Pull Request では `Smoke / smoke` を必須チェックとして通す。
+- release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。PyPI publish workflow も tag commit が `origin/main` から到達可能な場合だけ公開する。
+- 緊急修正でも `main` 直 push は避け、短命 branch と PR を使う。
 
 ## ルール
 
@@ -45,7 +61,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 - 意味のある作業単位ごとにコミットする。大量の変更を一つのコミットにまとめない。
 - コミットメッセージは日本語で、変更の「なぜ」を記述する。
-- `git push` はユーザーの明示的な指示なしに実行しない。
+- `git push` はユーザーの明示的な指示なしに実行しない。明示された場合も `main` ではなく topic branch を push する。
 
 ## リポジトリマップ
 
