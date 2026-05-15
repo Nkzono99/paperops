@@ -17,6 +17,8 @@
 
 個人環境の絶対パスは `refs/local/locations.toml` にだけ書く。原稿、notes、tracked な refs にはローカル絶対パスを混ぜず、必要な provenance は export manifest、artifact index、または `notes/reproducibility.md` に公開可能な形で記録する。
 
+runops project へ追加解析・図表・追加実験の要望を戻す場合は、まず `notes/research-requests.md` に paper 側の文脈を残し、runops 側の `research/paper_requests.toml` に同じ request を転記する。転記後は runops MCP の `runops.paper.requests.list` と `runops.paper.request.plan` で queue と routing を確認する。
+
 ## サマリー形式
 
 新しい文献サマリーを作るときは `refs/summaries/summary-template.md` をコピーし、citation key、DOI/URL、引用してよい主張、引用してはいけない主張、人間の検証状態を記録する。

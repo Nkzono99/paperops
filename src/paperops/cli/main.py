@@ -629,6 +629,14 @@ def cmd_links(args: argparse.Namespace) -> int:
         print(f"- {link_id} ({kind}) -> {location_ref}{suffix}")
         if description:
             print(f"  {description}")
+        mcp_provider = str(row.get("mcp_provider", "")).strip()
+        mcp_server = str(row.get("mcp_server", "")).strip()
+        if mcp_provider or mcp_server:
+            server_text = f"/{mcp_server}" if mcp_server else ""
+            print(f"  mcp: {mcp_provider}{server_text}")
+        paper_request_queue = str(row.get("paper_request_queue", "")).strip()
+        if paper_request_queue:
+            print(f"  paper requests: {paper_request_queue}")
         if args.resolve_local and row.get("local_path"):
             host = str(row.get("local_host", ""))
             host_text = f" [{host}]" if host else ""

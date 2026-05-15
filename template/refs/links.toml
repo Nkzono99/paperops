@@ -16,6 +16,17 @@ access = "read"
 mcp_provider = "runops"
 mcp_server = "runops"
 preferred_export_paper_id = "paper-my-topic"
+paper_request_queue = "research/paper_requests.toml"
+paper_request_note = "notes/research-requests.md"
+mcp_tools = [
+  "runops.publication.exports.list",
+  "runops.publication.export.inspect",
+  "runops.analysis.artifacts",
+  "runops.survey.summary",
+  "runops.analysis.plot_columns",
+  "runops.paper.requests.list",
+  "runops.paper.request.plan",
+]
 
 [[links]]
 id = "figure-sources"
