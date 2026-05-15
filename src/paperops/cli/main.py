@@ -637,6 +637,15 @@ def cmd_links(args: argparse.Namespace) -> int:
         paper_request_queue = str(row.get("paper_request_queue", "")).strip()
         if paper_request_queue:
             print(f"  paper requests: {paper_request_queue}")
+        tool_values = row.get("mcp_tools", [])
+        if isinstance(tool_values, list):
+            request_tools = [
+                str(tool).strip()
+                for tool in tool_values
+                if str(tool).strip().startswith("runops.paper.")
+            ]
+            if request_tools:
+                print(f"  paper request tools: {', '.join(request_tools)}")
         if args.resolve_local and row.get("local_path"):
             host = str(row.get("local_host", ""))
             host_text = f" [{host}]" if host else ""

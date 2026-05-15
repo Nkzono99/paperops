@@ -285,6 +285,7 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("figure-sources", out)
             self.assertIn("mcp: runops/runops", out)
             self.assertIn("paper requests: research/paper_requests.toml", out)
+            self.assertIn("runops.paper.request.draft", out)
 
             code, out, err = run_cli(["links", "check", str(target)])
 

@@ -109,4 +109,4 @@ uvx --from paper-harness-cli pops update-paperops --target latest --allow-major 
 
 paper draft が runops project や外部ディレクトリを参照する場合、共有可能な link intent は `refs/links.toml` に、個人環境の絶対パスは ignored な `refs/local/locations.toml` に分離する。`pops links check` は `refs/links.toml` と `refs/local/locations.example.toml` の対応を確認し、ローカルパスを共有ファイルへ混ぜずに運用できるかを検査する。
 
-`kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。paper draft 側で発生した追加解析・図表・追加実験要望は `notes/research-requests.md` に記録し、runops project 側の `research/paper_requests.toml` に handoff する。runops に request draft/validate MCP がある場合は、手動転記の前にそれを使って schema と id の衝突を確認する。
+`kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。paper draft 側で発生した追加解析・図表・追加実験要望は `notes/research-requests.md` に記録し、`runops.paper.request.draft` で schema と id の衝突を確認してから runops project 側の `research/paper_requests.toml` に handoff する。

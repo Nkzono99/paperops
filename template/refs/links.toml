@@ -24,6 +24,7 @@ mcp_tools = [
   "runops.analysis.artifacts",
   "runops.survey.summary",
   "runops.analysis.plot_columns",
+  "runops.paper.request.draft",
   "runops.paper.requests.list",
   "runops.paper.request.plan",
 ]
