@@ -25,6 +25,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 - このリポジトリは `.harnessops/project.toml` 上では `target-repository` で、HOPS overlay は `harness-lab/` を使う。
 - HarnessOps 管理ファイルは直接組み替えず、確認は `uvx --from harnessops hops doctor --check-overlay --check-records`、更新は `uvx --refresh-package harnessops --from harnessops hops update-harness` を使う。
+- GitHub Flow 作業を HOPS に委譲する場合は `.agents/skills/hops-github-flow/SKILL.md` と `uvx --from harnessops hops github-flow ...` を使う。
 - repo-local skill の更新や bridge 再展開が必要な場合は `.agents/skills/hops-update-harness/SKILL.md` の手順に従う。
 
 ## 変更ワークフロー
