@@ -33,8 +33,10 @@ uvx --from paper-harness-cli pops doctor
 2. Agent が `notes/project-brief.md`、`notes/claim-evidence-map.md`、`manuscript/venue.md` を整える。
 3. `uvx --from paper-harness-cli pops ...` が init / setup / doctor / update-paperops のような決定的操作を担う。
 4. 原稿は `manuscript/ja` を中心に進め、必要な block を `manuscript/en` へ同期する。
-5. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
-6. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
+5. 実験結果や外部ディレクトリが必要なら `refs/links.toml` と `refs/local/locations.toml` で link を解決し、runops project は MCP の read / inspect / plan tool から確認する。
+6. 追加解析・図表・実験要望は `notes/research-requests.md` に残し、runops 側の `research/paper_requests.toml` へ handoff する。
+7. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
+8. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
 
 CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
@@ -44,9 +46,16 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 - `src/paperops/` は `template/` を展開・診断・更新する薄い CLI。
 - `notes/` はセッション継続性、主張・証拠、読者モデル、AI 利用ログの共有 memory。
 - `manuscript/ja` と `manuscript/en` は block ID で対応するバイリンガル原稿。
-- `refs/` は raw PDF 置き場ではなく、キュレーション済みの参照知識層。
+- `refs/` は raw PDF 置き場ではなく、キュレーション済みの参照知識層と外部 project link 台帳。
+- `refs/links.toml` は共有可能な link intent を持ち、個人環境の絶対パスは ignored な `refs/local/locations.toml` に分離する。
 - `submission/<venue>/` は投稿先公式テンプレートと最終提出用 TeX の隔離スロット。
 - `pops update-paperops` はハーネス管理ファイルだけを扱い、下流固有の `manuscript/`、`notes/`、`refs/`、`submission/` を自動上書きしない。
+
+## runops / 外部 project link
+
+論文を書きながら実験結果、図表ソース、外部ノート、データセットを参照する場合、共有ファイルには絶対パスを書かず、`refs/links.toml` に link の意味だけを記録する。実パスは `refs/local/locations.toml` に置き、`pops links list --resolve-local` と `/resolve-local-paths` で解決する。
+
+`kind = "runops_project"` の link は runops MCP 連携の入口である。既存結果は `runops.analysis.artifacts`、`runops.survey.summary`、`runops.publication.exports.list` で確認し、追加要望は `notes/research-requests.md` に記録してから `runops.paper.request.draft` で検証し、人間確認後に runops project の `research/paper_requests.toml` へ渡す。詳細は [`docs/cli.md`](docs/cli.md) と [`docs/skill-catalog.md`](docs/skill-catalog.md) を参照する。
 
 ## リポジトリ構成
 
@@ -83,6 +92,8 @@ uvx --from paper-harness-cli pops setup
 uvx --from paper-harness-cli pops doctor
 uvx --from paper-harness-cli pops update-paperops --dry-run
 uvx --from paper-harness-cli pops update-paperops --plan
+uvx --from paper-harness-cli pops links list --resolve-local
+uvx --from paper-harness-cli pops links check
 uvx --from paper-harness-cli pops migrate --apply
 uvx --from paper-harness-cli pops feedback
 uvx --from paper-harness-cli pops version

@@ -1,23 +1,46 @@
-# Shared external link registry for this paper.
-# Keep machine-specific absolute paths in refs/local/locations.toml.
-schema_version = "0.1"
+# Shared logical links from this paper draft to external projects or directories.
+#
+# Keep machine-specific absolute paths in refs/local/locations.toml, which is
+# intentionally ignored. Each link here uses location_ref to point at one entry
+# in refs/local/locations.example.toml / refs/local/locations.toml.
+
+schema_version = 1
 
 [[links]]
-alias = "runops-main"
+id = "runops-main"
 kind = "runops_project"
-local_path_alias = "runops_main"
-title = "Main RunOps project"
-description = "Experiment project that produces analysis results or figures for this paper."
-expected_contents = "configs, run metadata, result tables, and figure inputs"
-share_status = "private-source"
-notes = "Replace this starter entry with the project actually used by the paper."
+location_ref = "runops_main"
+description = "Primary runops project that produces experiment outputs for this draft."
+paper_roles = ["results", "figures", "reproducibility"]
+access = "read"
+mcp_provider = "runops"
+mcp_server = "runops"
+preferred_export_paper_id = "paper-my-topic"
+paper_request_queue = "research/paper_requests.toml"
+paper_request_note = "notes/research-requests.md"
+mcp_tools = [
+  "runops.publication.exports.list",
+  "runops.publication.export.inspect",
+  "runops.analysis.artifacts",
+  "runops.survey.summary",
+  "runops.analysis.plot_columns",
+  "runops.paper.request.draft",
+  "runops.paper.requests.list",
+  "runops.paper.request.plan",
+]
 
 [[links]]
-alias = "external-data"
+id = "figure-sources"
 kind = "directory"
-local_path_alias = "external_data"
-title = "External analysis directory"
-description = "General directory outside this repository that contains supporting data or derived artifacts."
-expected_contents = "non-committed inputs or intermediate outputs referenced from notes"
-share_status = "local-only"
-notes = "Use refs/summaries or notes for shareable conclusions, not absolute paths."
+location_ref = "figure_sources"
+description = "Editable source files for paper figures that live outside this repository."
+paper_roles = ["figures"]
+access = "read_write"
+
+[[links]]
+id = "external-notes"
+kind = "directory"
+location_ref = "external_notes"
+description = "Prior notes, slide fragments, or local knowledge used during drafting."
+paper_roles = ["background", "discussion"]
+access = "read"

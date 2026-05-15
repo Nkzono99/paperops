@@ -1,23 +1,25 @@
-# External Link Registry
+# 外部 link 台帳
 
-`refs/links.toml` is the tracked registry for external projects and directories used by this paper. It stores portable metadata only. Machine-specific absolute paths stay in the untracked `refs/local/locations.toml`.
+`refs/links.toml` は、この paper draft が参照する外部 project / directory の共有台帳である。ここには portable な link の意味だけを置き、マシン固有の絶対パスは ignored な `refs/local/locations.toml` に分離する。
 
 ## Schema
 
-Each `[[links]]` entry should include:
+各 `[[links]]` entry は以下を持つ:
 
-- `alias`: stable name used from notes, skills, and manuscript planning.
-- `kind`: `runops_project` for a RunOps project, or `directory` for a general external directory.
-- `local_path_alias`: key under `[paths.<alias>]` in `refs/local/locations.toml`.
-- `title` and `description`: short human-readable context.
-- `expected_contents`: what the external location should contain.
-- `share_status`: whether the source is `local-only`, `private-source`, or otherwise safe to describe.
+- `id`: notes や skills から使う安定した link id。
+- `kind`: `runops_project`, `directory`, `dataset`, `figure_source`, `knowledge`, `simulation` のいずれか。
+- `location_ref`: `refs/local/locations.toml` の `[paths.<location_ref>]` に対応する key。
+- `description`: link の用途。
+- `paper_roles`: `results`, `figures`, `background`, `discussion`, `reproducibility` など、この paper での役割。
+- `access`: `read` または `read_write`。
 
-Do not put local absolute paths, private dataset names, secrets, or unpublished project-specific details in `refs/links.toml`. Put local paths in `refs/local/locations.toml`, and put shareable claims or literature knowledge in `refs/summaries/` or `notes/`.
+`kind = "runops_project"` の場合は、利用できるなら `mcp_provider`, `mcp_server`, `mcp_tools`, `paper_request_queue` も記録する。追加解析・図表・実験要望は `notes/research-requests.md` に paper 側の文脈を残し、`runops.paper.request.draft` で検証してから runops project の `research/paper_requests.toml` へ handoff する。
+
+ローカル絶対パス、秘密情報、未公開データの詳細は `refs/links.toml` に書かない。共有できる結論や文献知識は `refs/summaries/` または `notes/` に残す。
 
 ## Workflow
 
-1. Add or update a `[[links]]` entry in `refs/links.toml`.
-2. Add the matching `[paths.<local_path_alias>]` entry to your local `refs/local/locations.toml`.
-3. Use `/resolve-local-paths` to resolve an alias during a session.
-4. Run `uvx --from paper-harness-cli pops doctor` to catch malformed TOML or missing local aliases.
+1. `refs/links.toml` に `[[links]]` entry を追加または更新する。
+2. 自分の環境では `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーし、対応する `[paths.<location_ref>]` の `path` を記入する。
+3. セッション中は `/resolve-local-paths` で link を解決する。
+4. `uvx --from paper-harness-cli pops links check` または `make links-check` で link 台帳を検証する。

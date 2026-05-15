@@ -9,7 +9,6 @@ from pathlib import Path
 
 from paperops.cli.constants import PACKAGE_NAME, UPSTREAM_REPO
 from paperops.cli.doctor import (
-    check_link_registry,
     check_executable,
     check_path,
     check_project_venv_if_present,
@@ -17,6 +16,7 @@ from paperops.cli.doctor import (
     check_workflow_placeholders,
     print_manual_setup_hints,
 )
+from paperops.cli.links import iter_links, validate_link_registry
 from paperops.cli.manifest import (
     applied_scaffold_version,
     write_cli_metadata,
@@ -187,6 +187,33 @@ def build_parser() -> argparse.ArgumentParser:
     feedback_parser.add_argument("--repo", default=UPSTREAM_REPO)
     feedback_parser.set_defaults(func=cmd_feedback)
 
+    links_parser = subcommands.add_parser(
+        "links",
+        help="Inspect paper draft links to external projects and directories.",
+    )
+    links_parser.add_argument(
+        "action",
+        choices=("list", "check"),
+        help="List links or validate the link registry.",
+    )
+    links_parser.add_argument(
+        "path",
+        nargs="?",
+        type=Path,
+        help="Project directory, defaults to cwd.",
+    )
+    links_parser.add_argument(
+        "--resolve-local",
+        action="store_true",
+        help="Show local paths from refs/local/locations.toml when listing.",
+    )
+    links_parser.add_argument(
+        "--strict-local",
+        action="store_true",
+        help="Warn when refs/local/locations.toml is missing.",
+    )
+    links_parser.set_defaults(func=cmd_links)
+
     version_parser = subcommands.add_parser(
         "version",
         help="Print CLI and scaffold version information.",
@@ -334,7 +361,11 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     check_executable("git", warnings)
     check_executable("make", warnings)
     check_workflow_placeholders(root, warnings)
-    check_link_registry(root, errors, warnings)
+    for finding in validate_link_registry(root):
+        if finding.severity == "error":
+            errors.append(finding.message)
+        else:
+            warnings.append(finding.message)
 
     local_locations = root / "refs" / "local" / "locations.toml"
     if not local_locations.exists():
@@ -547,6 +578,78 @@ def cmd_feedback(args: argparse.Namespace) -> int:
         print(f"Wrote feedback draft: {args.output}")
     else:
         print(content)
+    return 0
+
+
+def cmd_links(args: argparse.Namespace) -> int:
+    root = find_project_root(args.path or Path.cwd())
+    if root is None:
+        print("error: this does not look like a paper harness project.", file=sys.stderr)
+        return 2
+
+    args.project_root = root
+    if args.action == "check":
+        findings = validate_link_registry(root, strict_local=args.strict_local)
+        errors = [finding for finding in findings if finding.severity == "error"]
+        warnings = [finding for finding in findings if finding.severity != "error"]
+        print(f"Project root: {root}")
+        for item in errors:
+            print(f"[error] {item.message}")
+        for item in warnings:
+            print(f"[warn] {item.message}")
+        if errors:
+            print("links: failed")
+            return 1
+        print("links: ok")
+        return 0
+
+    findings = validate_link_registry(root)
+    errors = [finding for finding in findings if finding.severity == "error"]
+    if errors:
+        print(f"Project root: {root}")
+        for item in errors:
+            print(f"[error] {item.message}")
+        print("links: failed")
+        return 1
+
+    rows = iter_links(root, resolve_local=args.resolve_local)
+    print(f"Project root: {root}")
+    if not rows:
+        print("No links registered.")
+        return 0
+    print("Paper links:")
+    for row in rows:
+        link_id = str(row.get("id", ""))
+        kind = str(row.get("kind", ""))
+        location_ref = str(row.get("location_ref", ""))
+        role_values = row.get("paper_roles", [])
+        roles = ", ".join(str(role) for role in role_values) if isinstance(role_values, list) else ""
+        description = str(row.get("description", ""))
+        suffix = f" roles=[{roles}]" if roles else ""
+        print(f"- {link_id} ({kind}) -> {location_ref}{suffix}")
+        if description:
+            print(f"  {description}")
+        mcp_provider = str(row.get("mcp_provider", "")).strip()
+        mcp_server = str(row.get("mcp_server", "")).strip()
+        if mcp_provider or mcp_server:
+            server_text = f"/{mcp_server}" if mcp_server else ""
+            print(f"  mcp: {mcp_provider}{server_text}")
+        paper_request_queue = str(row.get("paper_request_queue", "")).strip()
+        if paper_request_queue:
+            print(f"  paper requests: {paper_request_queue}")
+        tool_values = row.get("mcp_tools", [])
+        if isinstance(tool_values, list):
+            request_tools = [
+                str(tool).strip()
+                for tool in tool_values
+                if str(tool).strip().startswith("runops.paper.")
+            ]
+            if request_tools:
+                print(f"  paper request tools: {', '.join(request_tools)}")
+        if args.resolve_local and row.get("local_path"):
+            host = str(row.get("local_host", ""))
+            host_text = f" [{host}]" if host else ""
+            print(f"  local: {row['local_path']}{host_text}")
     return 0
 
 

@@ -76,7 +76,8 @@ class PopsCliTest(unittest.TestCase):
             code, out, _err = run_cli(["doctor", str(target)])
 
             self.assertEqual(code, 1)
-            self.assertIn("refs/links.toml is invalid TOML", out)
+            self.assertIn("refs/links.toml", out)
+            self.assertIn("TOML", out)
             self.assertIn("doctor: failed", out)
 
     def test_doctor_warns_when_link_alias_is_not_in_local_locations(self) -> None:
@@ -98,7 +99,8 @@ class PopsCliTest(unittest.TestCase):
             code, out, err = run_cli(["doctor", str(target)])
 
             self.assertEqual(code, 0, err)
-            self.assertIn("missing from refs/local/locations.toml: external_data", out)
+            self.assertIn("figure_sources", out)
+            self.assertIn("external_notes", out)
             self.assertIn("doctor: ok", out)
 
     def test_update_paperops_can_plan_single_file(self) -> None:
@@ -307,6 +309,45 @@ class PopsCliTest(unittest.TestCase):
 
             self.assertEqual(code, 0, err)
             self.assertIn("CLI feedback", output.read_text(encoding="utf-8"))
+
+    def test_links_commands_list_and_check_registry(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+
+            code, out, err = run_cli(["links", "list", str(target)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("runops-main", out)
+            self.assertIn("figure-sources", out)
+            self.assertIn("mcp: runops/runops", out)
+            self.assertIn("paper requests: research/paper_requests.toml", out)
+            self.assertIn("runops.paper.request.draft", out)
+
+            code, out, err = run_cli(["links", "check", str(target)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("links: ok", out)
+
+    def test_links_check_reports_invalid_kind(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            links_path = target / "refs" / "links.toml"
+            links_path.write_text(
+                links_path.read_text(encoding="utf-8").replace(
+                    'kind = "runops_project"',
+                    'kind = "mystery"',
+                    1,
+                ),
+                encoding="utf-8",
+            )
+
+            code, out, _err = run_cli(["links", "check", str(target)])
+
+            self.assertEqual(code, 1)
+            self.assertIn("[error]", out)
+            self.assertIn("mystery", out)
 
     def test_top_level_version_flag(self) -> None:
         code, out, err = run_cli(["--version"])

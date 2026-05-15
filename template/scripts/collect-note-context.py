@@ -11,6 +11,7 @@ SECTIONS = [
     ("引き継ぎ", "notes/handoff.md"),
     ("Todo", "notes/todo.md"),
     ("未解決の質問", "notes/open-questions.md"),
+    ("追加解析・図表・実験要望", "notes/research-requests.md"),
     ("再現性", "notes/reproducibility.md"),
 ]
 

@@ -77,6 +77,8 @@
 - `pops doctor`: 初期化後のハーネス状態を診断
 - `pops update-paperops`: 管理対象ハーネスファイルの更新計画を表示・適用
 - `pops update-paperops --plan`: versioned upgrade chain を表示
+- `pops links list/check`: paper draft の `refs/links.toml` と `refs/local` の対応を表示・検証
+- `resolve-local-paths`: `kind = "runops_project"` の link では runops MCP の export / artifact / survey / paper request tool を優先し、追加要望は `runops.paper.request.draft` で検証してから handoff
 - `pops feedback`: 上流へ戻す改善フィードバックの下書きを生成
 
 `pull-template-updates` は旧名の互換入口であり、新規の更新導線では `update-paperops` を使う。

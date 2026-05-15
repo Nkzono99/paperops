@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- paper draft から外部 project / directory を参照するため、tracked な `refs/links.toml` registry と docs を追加し、ローカル絶対パスは従来通り untracked な `refs/local/locations.toml` に分離する導線へ更新した。`/resolve-local-paths` と `pops doctor` は link registry と local alias の対応を扱う（#32）。既存下流リポジトリで取り込む場合は `refs/links.toml` / `refs/links.md` を追加し、必要な alias を `refs/local/locations.toml` に任意で追記する。
+- paper draft から runops project や一般ディレクトリを参照するための `refs/links.toml` link 台帳、`pops links list/check`、`make links-check`、追加解析・図表・実験要望ノートを追加した（#32）。既存下流リポジトリで取り込む場合は、必要に応じて `refs/links.toml` と `notes/research-requests.md` を手動追加し、個人環境の絶対パスは引き続き ignored な `refs/local/locations.toml` にだけ記録する。
+- `notes/research-requests.md` と `/resolve-local-paths` に runops `research/paper_requests.toml` への handoff 手順を追加し、paper 側の request status を runops contract と揃えた。runops 側の `runops.paper.request.draft` に対応し、duplicate id のまま転記しない注意を加えた（runops#75, runops#77）。
+- README と architecture / distribution docs に runops link の情報境界、MCP 優先の確認導線、既存下流への取り込み方針を整理した。
 - HarnessOps 0.1.10 の repo-local skill / bridge 更新を取り込み、`AGENTS.md` に `doctor` と `update-harness` の短い運用導線を追加した。
 - GitHub Flow を採用し、`main` への直接 push を禁止する運用へ移行した。PR では `Smoke / smoke` を必須チェックとして通し、release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。PyPI publish workflow も release tag が `origin/main` から到達可能な場合だけ公開するようにした。
 
