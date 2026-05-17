@@ -38,7 +38,7 @@ make mirror-freshness-check # 前回同期 ledger から ja/en block の更新�
 make public-terms-check # 公開原稿に内部語・禁止語が残っていないか検証
 make claim-evidence-check # supported claim に証拠と本文対応があるか検証
 make submission-drift-check # submission/<venue> と manuscript/en の同期注意点を検出
-make skill-mirror-check # .agents/skills と .claude/skills の対応を検証
+make skill-mirror-check # .agents source と .claude wrapper の対応を検証
 make links-check    # refs/links.toml と refs/local の link 対応を検証
 make ci             # lint-bib + citation-check + mirror-check + mirror-freshness-check + public-terms-check + claim-evidence-check + skill-mirror-check + links-check + build-ja + build-en
 make readiness-check # 公開メタデータ、再現性メモ、workflow 参照の未記入を検出
@@ -97,10 +97,21 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 
 ## 利用可能なスキル
 
-Codex では `.agents/skills/` の同名 skill を入口として使う。各 Codex skill は `.claude/skills/<skill>/SKILL.md` を source of truth として参照し、Claude 固有の `allowed-tools` や slash command 前提を Codex の tool とこの `AGENTS.md` のルールに読み替える。
+Codex では `.agents/skills/` の同名 skill を入口として使う。恒久的な手順変更は `.agents/skills/<skill>/SKILL.md` を source of truth として更新する。`.claude/skills/<skill>/SKILL.md` は Claude Code 固有の `allowed-tools` / `argument-hint` を保持する wrapper で、`@${CLAUDE_SKILL_DIR}/../../../.agents/skills/<skill>/SKILL.md` から共通手順を読み込む。
+
+迷ったときは、作業状況から入口を選ぶ:
+
+- 初回セットアップ・上流更新: `/setup`、`/update-paperops`
+- セッション再開・進捗記録: `/resume-session`、`/note-writing-session`
+- 執筆設計・本文調整: `/design-manuscript-claims`、`/calibrate-claims`、`/paragraph-surgery`
+- 日英同期・公開語彙: `/sync-ja-en`、`/public-terminology-pass`
+- 通読レビュー: `/start-manuscript-review` で開始し、終了後に `/collect-manuscript-review`
+- 公開前点検: `/review-public-manuscript`、`/figure-story-audit`、`/venue-fit-review`、`/ai-disclosure-check`
+- 外部 project link・上流改善: `/resolve-local-paths`、`/feedback-paper-harness`
 
 | スキル | 用途 |
 |-------|------|
+| `/setup` | 初回プロジェクトセットアップを一括実行 |
 | `/resume-session` | 現在の状態を要約し、次のステップを提案 |
 | `/note-writing-session` | セッション進捗を記録し、引き継ぎファイルを更新 |
 | `/sync-ja-en` | 日本語と英語のブロックを同期 |
@@ -137,8 +148,8 @@ notes/research-requests.md  paper draft から生じた追加解析・図表・�
 notes/               project-brief, contribution-claims, claim-evidence-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
 scripts/             ビルド、TeX 構造、lint、citation-check、skill 対応、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
-.claude/             settings.json（権限＋deny）、skills/、rules/、hooks/
-.agents/             Codex 用 skills/ 互換入口
+.claude/             settings.json（権限＋deny）、skills wrapper、rules/、hooks/
+.agents/             共通 source of truth となる project skills
 TROUBLESHOOTING.md   nested repo と safe.directory の注意
 ```
 

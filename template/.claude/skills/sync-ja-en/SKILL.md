@@ -7,26 +7,13 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 # sync-ja-en
 
-日本語と英語の原稿をブロックレベルで整合させるためにこのスキルを使用する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/sync-ja-en/SKILL.md` を source of truth として読む。
 
-## 最初に読むファイル
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/sync-ja-en/SKILL.md
 
-- `manuscript/mirror/map.toml`
-- `manuscript/mirror/terminology.yml`
-- `manuscript/mirror/status.md`
-- `manuscript/mirror/change-queue.md`
+## Claude Code 実行メモ
 
-## 責務
-
-1. `status.md` に別段の記載がない限り、日本語をソースオブトゥルースとして扱う。
-2. `% block: ...` 識別子を使用して、対応するファイルをブロック単位で比較する。
-3. リクエストされたブロックまたは明らかに古いブロックの英語テキストのみを更新する。
-4. 英語テキストが科学的意味を変更する場合、その変更を日本語に反映するか、`change-queue.md` に記録する。
-5. 意味のある同期作業の後に `status.md` を更新する。
-
-## 補助ツール
-
-- `templates/drift-report.md`
-- `scripts/sync_blocks.py`
-
-両言語を盲目的に上書きしないこと。ブロック ID と科学的意図を保持する。
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/sync-ja-en/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。

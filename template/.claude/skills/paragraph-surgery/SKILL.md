@@ -7,28 +7,13 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 # paragraph-surgery
 
-段落を読者期待に沿う流れへ整える。科学的意味を変える場合は先に確認する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/paragraph-surgery/SKILL.md` を source of truth として読む。
 
-## 観点
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/paragraph-surgery/SKILL.md
 
-- 1 paragraph 1 function: context / claim / evidence / warrant / limitation / transition
-- old-to-new flow: 既知情報から新情報へ進む
-- stress position: 文末と段落末に重要な新情報を置く
-- topic sentence: 段落の役割を冒頭で示す
-- local cohesion: 指示語、主語、用語が前後でつながる
+## Claude Code 実行メモ
 
-## 手順
-
-1. 対象 block の各段落に機能ラベルを付ける。
-2. 段落ごとに詰まり、重複、飛躍、文末の弱さを指摘する。
-3. 科学的意味を保った rewrite plan を出す。
-4. 明示依頼がある場合のみ `manuscript/ja/` を編集する。
-5. 必要に応じて EN mirror を `/sync-ja-en` で同期する。
-
-## 出力
-
-- Paragraph function map
-- Surgery plan
-- Edited files
-- 残る scientific question
-- 検証コマンド
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/paragraph-surgery/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。

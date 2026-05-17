@@ -6,19 +6,13 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 # improve-writing-harness
 
-リポジトリ構造、スクリプト、またはエージェントワークフローが論文執筆中に繰り返し摩擦を起こす場合にこのスキルを使用する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/improve-writing-harness/SKILL.md` を source of truth として読む。
 
-## 目的
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/improve-writing-harness/SKILL.md
 
-1. 摩擦を具体的に記述する。
-2. 修正をこのリポジトリ内に留めるべきか、上流テンプレートにエスカレートすべきかを判断する。
-3. プロジェクトローカルの修正の場合、ここで最小限の改善を実装する。
-4. 再利用可能な修正の場合、`feedback-paper-harness` のための素材を準備する。
+## Claude Code 実行メモ
 
-## 確認すべき入力
-
-- `notes/writing-log.md`
-- `notes/open-questions.md`
-- `.claude/skills/`
-- `scripts/`
-- `.github/workflows/`
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/improve-writing-harness/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。

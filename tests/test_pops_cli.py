@@ -66,6 +66,8 @@ class PopsCliTest(unittest.TestCase):
 
             self.assertEqual(code, 0, err)
             self.assertIn("doctor: ok", out)
+            self.assertIn("doctor scope: structure and local setup only", out)
+            self.assertIn("make readiness-check", out)
 
     def test_doctor_rejects_invalid_link_registry(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -115,6 +117,26 @@ class PopsCliTest(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertIn("Paperops update plan", out)
             self.assertIn("unchanged managed files: 1", out)
+
+    def test_update_paperops_explains_changed_managed_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            agents = target / "AGENTS.md"
+            agents.write_text(
+                agents.read_text(encoding="utf-8") + "\nlocal operator note\n",
+                encoding="utf-8",
+            )
+
+            code, out, err = run_cli(
+                ["update-paperops", "--dry-run", "--only", "AGENTS.md", str(target)]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("changed managed files: 1", out)
+            self.assertIn("meaning: target file differs from the scaffold source", out)
+            self.assertIn("! AGENTS.md [agent guidance]", out)
+            self.assertIn("--apply --force only when local edits may be replaced", out)
 
     def test_update_paperops_plans_versioned_upgrade_chain(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

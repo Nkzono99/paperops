@@ -6,31 +6,13 @@ allowed-tools: Read, Glob, Grep
 
 # resume-session
 
-執筆セッションの開始時にこのスキルを使用する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/resume-session/SKILL.md` を source of truth として読む。
 
-## 最初に読むファイル
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/resume-session/SKILL.md
 
-- `notes/handoff.md`
-- `notes/todo.md`
-- `notes/open-questions.md`
-- `notes/project-brief.md`
-- `notes/claim-evidence-map.md`
-- `notes/reviewer-model.md`
-- `manuscript/mirror/status.md`
+## Claude Code 実行メモ
 
-## 目的
-
-1. 現在の原稿状態を5項目以内で要約する。
-2. コンテンツ変更のアクティブなソースオブトゥルースを特定する。
-3. 中心主張、必須 evidence、想定読者の懸念を確認する。
-4. ミラーのドリフト、refs の未完了作業、未解決の質問を指摘する。
-5. 次の具体的な執筆ステップを提案する。
-
-## 出力構成
-
-- 現在のフォーカス
-- 直近の進捗
-- 直近の次のタスク
-- 注視すべきリスクやドリフト
-
-固定フォーマットが必要な場合は `templates/session-summary.md` のスタータープロンプトを使用する。
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/resume-session/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。

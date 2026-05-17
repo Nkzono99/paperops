@@ -7,33 +7,13 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 # calibrate-claims
 
-原稿の claim strength を evidence、scope、limitation に合わせて調整する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/calibrate-claims/SKILL.md` を source of truth として読む。
 
-## 最初に読むファイル
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/calibrate-claims/SKILL.md
 
-- `notes/claim-evidence-map.md`
-- `notes/reviewer-model.md`
-- `manuscript/mirror/status.md`
-- 対象の `manuscript/ja/**/*.tex` と必要な `manuscript/en/**/*.tex`
+## Claude Code 実行メモ
 
-## 手順
-
-1. 対象 block の claim、evidence、scope、remaining uncertainty を特定する。
-2. hedge を分類する:
-   - scope qualifier: 条件・対象範囲を限定する語
-   - evidence qualifier: 証拠強度を示す語
-   - mechanism qualifier: 因果機構の未確定性を示す語
-   - vague hedge: 主張責任を曖昧にするだけの語
-3. 証拠が十分な箇所は、`may`, `might`, `could`, `suggest` に逃げず、scope を明示して言い切る。
-4. 証拠が弱い箇所は、動詞を曖昧にするのではなく limitation / uncertainty を分離する。
-5. `notes/claim-evidence-map.md` の status、scope、limitation を必要に応じて更新する。
-
-## 出力
-
-- 調整した claim
-- 弱めすぎを直した箇所
-- 過剰主張を抑えた箇所
-- 更新した `claim-evidence-map` 項目
-- 検証コマンド
-
-本文を編集したら `make mirror-check` を実行し、EN mirror に影響がある場合は `/sync-ja-en` を使う。
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/calibrate-claims/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。
