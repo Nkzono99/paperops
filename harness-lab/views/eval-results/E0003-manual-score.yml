@@ -1,0 +1,17 @@
+schema_version: '0.1'
+record_type: manual_eval_result
+created_at: '2026-05-18T04:26:04+09:00'
+eval_case: E0003
+experiment:
+scores:
+  impact: 4
+  mechanism_clarity: 5
+  evaluability: 5
+  minimality: 3
+  regression_risk: 2
+  operator_burden: 2
+  anti_theater: 5
+  maintainability: 4
+  privacy_sanitization_risk: 0
+notes: 'Priority lane evidence from paperops target repo: template/notes/session-context.generated.md existed before the run; uv build --wheel --out-dir .codex-tmp/priority-20260518-040214-a71d3ef-wheel produced paper_harness_cli-0.2.0-py3-none-any.whl; zip contents included paperops/_data/scaffold/notes/session-context.generated.md, proving release artifact package-data drift is reproducible. Running uvx --from <wheel> pops init .codex-tmp/priority-20260518-040214-a71d3ef-init/paper-demo copied 141 files, excluded 2, and did not create notes/session-context.generated.md, so copy_scaffold currently protects downstream init. The proposed guard is evaluable and worthwhile, but adoption should wait for an implementation that either excludes generated artifacts from the wheel or enforces wheel/install boundary behavior in release smoke.'
+source_record: harness-lab/records/eval-cases/E0003-fb0006-built-wheel-scaffold-package-boundary-guard.md
