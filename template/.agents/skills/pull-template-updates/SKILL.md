@@ -1,13 +1,13 @@
 ---
 name: pull-template-updates
-description: Codex で上流 paperops scaffold の変更を下流論文リポジトリに取り込む。
+description: 旧名。上流 paperops scaffold の変更を取り込む場合は update-paperops を使う。
 ---
 
 # pull-template-updates
 
-旧名の互換入口。新規作業では `/update-paperops` を使う。
+このスキルは旧名の互換入口です。新規作業では `/update-paperops` を使う。
 
-この入口自体の source of truth は `.claude/skills/pull-template-updates/SKILL.md`。実際の更新手順はそこから `.claude/skills/update-paperops/SKILL.md` に委譲される。
+実際の手順は `.agents/skills/update-paperops/SKILL.md` を source of truth として読む。
 
 ## Codex 実行メモ
 

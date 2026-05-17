@@ -29,7 +29,7 @@
     "harness-lab/views/backlog.md": "sha256:0ed4436872ad24f9c73737b7f84290306dc4baaf36154b7e36be521e985b791c",
     "harness-lab/views/imported-feedback.md": "sha256:2f6a29a874f48420d415a8ad222512be98c22e0331c1faf009c0b76c6e095bd0",
     "harness-lab/views/improvements.md": "sha256:bd68dd2f68e35adda55ad5ec282424f7ac0d960c8656b0cd568cbf589395b2e2",
-    "harness-lab/views/research-scans.md": "sha256:95682e657276bd10cc8dd771cc7516c69232d73e71faa448b4291fb315339b4a",
+    "harness-lab/views/research-scans.md": "sha256:cc9ef7f2bd194c5f141bb7c35c753af68691905b3e24a6751234425646aee63d",
     "harness-lab/views/score-trajectory.md": "sha256:a3d2f445609e5e9da0269ece3b10aff2414f3830bd185ad257d32ae19026b616"
   },
   "migrations": [],

@@ -78,7 +78,7 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 - `make citation-check`: TeX 本文中の citation key と `.bib` の不整合を早期検出
 - `make public-terms-check` / `make claim-evidence-check`: 内部語の公開本文混入と supported claim の evidence 対応を早期検出
 - `make mirror-freshness-check` / `make submission-drift-check`: 日英 block の同期鮮度と投稿版への科学的変更戻し忘れを点検
-- `make skill-mirror-check`: `.agents/skills/` が `.claude/skills/` の同名 source of truth を参照しているかを点検
+- `make skill-mirror-check`: `.agents/skills/` の共通 skill 実体と `.claude/skills/` の Claude Code wrapper が対応しているかを点検
 - `scripts/build-ja.sh` / `scripts/build-en.sh`: `\input` / `\include` / `\includegraphics` / bibliography / style 参照の構造検証を行い、TeX 環境があれば PDF ビルドへ進む
 - 下流論文リポジトリ用の Issue フォーム: 原稿レビュー、エビデンス不足、ハーネス摩擦を分けて収集
 - テンプレート自体の再利用可能な保守ワークフロー

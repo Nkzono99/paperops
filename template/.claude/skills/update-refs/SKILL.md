@@ -6,18 +6,13 @@ allowed-tools: Read, Edit, Write, Glob, Grep
 
 # update-refs
 
-参考文献と参照知識を原稿と再同期させる必要がある場合にこのスキルを使用する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/update-refs/SKILL.md` を source of truth として読む。
 
-## タスク
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/update-refs/SKILL.md
 
-1. `manuscript/shared/bib/*.bib` と `refs/bib/curated/` をレビューする。
-2. 重要な引用論文のサマリーが `refs/summaries/` にあるか確認する。
-3. `make citation-check` を実行し、原稿内 citation key と `.bib` の不整合をフラグする。
-4. キュレーション済みメタデータや利用可能なサマリーが不足している原稿内引用をフラグする。
-5. 優先順位に従って次の参照キュレーションタスクを提案する。
+## Claude Code 実行メモ
 
-## 原則
-
-- 生の PDF の蓄積よりキュレーション済みサマリーを優先する。
-- 原稿に登場した引用キーは安定させる。
-- 執筆に影響する未解決の引用問題は `notes/open-questions.md` に記録する。
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/update-refs/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。

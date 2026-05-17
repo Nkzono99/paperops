@@ -6,26 +6,13 @@ allowed-tools: Read, Glob, Grep
 
 # feedback-paper-harness
 
-繰り返しの問題を上流のペーパーハーネスソースリポジトリで修正すべき場合にこのスキルを使用する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/feedback-paper-harness/SKILL.md` を source of truth として読む。
 
-## デフォルトの上流ターゲット
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/feedback-paper-harness/SKILL.md
 
-- ソースリポジトリ: `Nkzono99/paperops`
-- チームがハーネスをフォークし独自のソースリポジトリを管理している場合は、そのフォークを使用する。
-- GitHub template repository や配布専用リポジトリではなく、`pops` CLI と `template/` の source repository へ戻す。
+## Claude Code 実行メモ
 
-## 収集する情報
-
-- 観測されたペインポイント
-- このリポジトリでの再現方法
-- 修正が再利用可能である理由
-- 提案する実装先
-- マイグレーションまたは互換性の懸念事項
-
-## 出力
-
-`pops feedback` または `Nkzono99/paperops` の上流 `template-feedback` Issue フォームに貼り付け可能な形式でフィードバックを記述する。
-
-## スコープガード
-
-投稿先固有の表現、論文固有の科学的選択、個人的なローカルパス慣習はエスカレートしない。
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/feedback-paper-harness/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。

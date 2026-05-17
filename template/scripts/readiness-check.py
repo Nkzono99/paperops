@@ -194,6 +194,8 @@ def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeho
             if f"## {heading}" not in text:
                 add(findings, "error", f"`notes/reproducibility.md` に {label} セクションがありません")
 
+    require_file(root, "notes/decision-log.md", findings)
+
 
 def check_submission_slot(root: Path, findings: list[Finding], require_submission: bool) -> None:
     submission_dir = root / "submission"

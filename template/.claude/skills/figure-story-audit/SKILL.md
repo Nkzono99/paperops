@@ -7,27 +7,13 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 # figure-story-audit
 
-図表を結果の置き場ではなく、主張を支える証拠として監査する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/figure-story-audit/SKILL.md` を source of truth として読む。
 
-## 最初に読むファイル
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/figure-story-audit/SKILL.md
 
-- `notes/claim-evidence-map.md`
-- 対象の figure/table caption
-- caption を参照する本文 block
-- `notes/reproducibility.md`
+## Claude Code 実行メモ
 
-## 手順
-
-1. 各 figure/table について、figure claim、panel evidence、boundary、uncertainty を整理する。
-2. 本文参照が figure の takeaway と一致しているか確認する。
-3. caption に sample/condition/scope/statistics が不足していないか確認する。
-4. `notes/claim-evidence-map.md` の Figure/table 欄を更新する。
-5. 図表 provenance が必要なら `notes/reproducibility.md` に追記する。
-
-## 出力
-
-- Figure/table story map
-- Caption rewrite plan
-- Body reference fixes
-- Claim-evidence map updates
-- Reproducibility updates
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/figure-story-audit/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。

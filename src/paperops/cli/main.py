@@ -382,6 +382,10 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         print("doctor: failed")
         return 1
     print("doctor: ok")
+    print(
+        "doctor scope: structure and local setup only; run "
+        "make readiness-check before sharing or submission."
+    )
     return 0
 
 

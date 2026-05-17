@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `pops update-paperops` の plan 表示に管理対象ファイルの更新面ラベルと changed file の扱いを追加した。既存下流リポジトリで取り込む場合、`changed managed files` は通常の `--apply` では上書きされず、差分確認後に必要なものだけ `--apply --force` する判断材料として使える。
+- `pops doctor` の成功時に、検査範囲が構造とローカルセットアップであり、公開・投稿前品質は `make readiness-check` / `make pre-submit` で確認することを明示した。既存下流リポジトリ側のマイグレーションは不要。
+- `AGENTS.md` / `CLAUDE.md` と skill catalog に、状況別の skill 入口を追加した。既存下流リポジトリで取り込む場合は、管理対象の `AGENTS.md`、`CLAUDE.md` の案内を更新するだけで、既存 skill 名やファイル配置のマイグレーションは不要。
+- `readiness-check` が `notes/decision-log.md` の欠落を検出するようにした。既存下流リポジトリで取り込む場合、恒久的な判断の記録先として `notes/decision-log.md` を残すか、欠落している場合は作成する。
+- project skill の source of truth を `.agents/skills/` 側へ移し、`.claude/skills/` は `@${CLAUDE_SKILL_DIR}/../../../.agents/skills/<skill>/SKILL.md` で共通手順を読む Claude Code wrapper にした。既存下流リポジトリで取り込む場合は、`.agents/skills/` と `.claude/skills/` を同時に更新し、ローカルで変更した skill がある場合は `.agents/skills/<skill>/SKILL.md` 側へ手動マージする。
 - paper draft から runops project や一般ディレクトリを参照するための `refs/links.toml` link 台帳、`pops links list/check`、`make links-check`、追加解析・図表・実験要望ノートを追加した（#32）。既存下流リポジトリで取り込む場合は、必要に応じて `refs/links.toml` と `notes/research-requests.md` を手動追加し、個人環境の絶対パスは引き続き ignored な `refs/local/locations.toml` にだけ記録する。
 - `notes/research-requests.md` と `/resolve-local-paths` に runops `research/paper_requests.toml` への handoff 手順を追加し、paper 側の request status を runops contract と揃えた。runops 側の `runops.paper.request.draft` に対応し、duplicate id のまま転記しない注意を加えた（runops#75, runops#77）。
 - README と architecture / distribution docs に runops link の情報境界、MCP 優先の確認導線、既存下流への取り込み方針を整理した。

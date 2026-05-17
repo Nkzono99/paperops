@@ -17,7 +17,7 @@ def skill_names(root: Path, rel_dir: str) -> set[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description=".agents/skills が .claude/skills の互換入口として揃っているか検査する。"
+        description=".claude/skills が .agents/skills の Claude Code 互換入口として揃っているか検査する。"
     )
     parser.add_argument("--root", type=Path, default=Path("."))
     args = parser.parse_args()
@@ -29,21 +29,26 @@ def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
 
-    missing_agents = sorted(claude_skills - agent_skills)
-    extra_agents = sorted(agent_skills - claude_skills)
+    missing_claude = sorted(agent_skills - claude_skills)
+    extra_claude = sorted(claude_skills - agent_skills)
 
-    for name in missing_agents:
-        errors.append(f"`.agents/skills/{name}/SKILL.md` がありません")
-    for name in extra_agents:
-        warnings.append(f"`.agents/skills/{name}/SKILL.md` は `.claude/skills/` に対応 skill がありません")
+    for name in missing_claude:
+        errors.append(f"`.claude/skills/{name}/SKILL.md` がありません")
+    for name in extra_claude:
+        warnings.append(f"`.claude/skills/{name}/SKILL.md` は `.agents/skills/` に対応 skill がありません")
 
     for name in sorted(claude_skills & agent_skills):
-        skill_path = root / ".agents" / "skills" / name / "SKILL.md"
+        skill_path = root / ".claude" / "skills" / name / "SKILL.md"
         text = skill_path.read_text(encoding="utf-8")
-        expected = f".claude/skills/{name}/SKILL.md"
+        expected = f"@${{CLAUDE_SKILL_DIR}}/../../../.agents/skills/{name}/SKILL.md"
         if expected not in text:
             errors.append(
-                f"`.agents/skills/{name}/SKILL.md` が source of truth `{expected}` を参照していません"
+                f"`.claude/skills/{name}/SKILL.md` が source of truth `{expected}` を参照していません"
+            )
+        cwd_relative = f"@.agents/skills/{name}/SKILL.md"
+        if cwd_relative in text:
+            errors.append(
+                f"`.claude/skills/{name}/SKILL.md` が cwd 依存の参照 `{cwd_relative}` を使っています"
             )
 
     print("# skill-mirror-check")
@@ -59,7 +64,7 @@ def main() -> int:
             print(f"- {warning}")
         print("")
     if not errors and not warnings:
-        print(".agents と .claude の skill 対応に問題は見つかりませんでした。")
+        print(".agents source と .claude 互換入口の対応に問題は見つかりませんでした。")
 
     return 1 if errors else 0
 

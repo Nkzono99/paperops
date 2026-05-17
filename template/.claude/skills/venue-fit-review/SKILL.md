@@ -7,32 +7,13 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 # venue-fit-review
 
-投稿先・article type・読者モデルに対して原稿の fit を点検する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/venue-fit-review/SKILL.md` を source of truth として読む。
 
-## 最初に読むファイル
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/venue-fit-review/SKILL.md
 
-- `manuscript/venue.md`
-- `notes/reviewer-model.md`
-- `notes/claim-evidence-map.md`
-- title / abstract / introduction / conclusion
-- `submission/<venue>/README.md` があれば読む
+## Claude Code 実行メモ
 
-## 手順
-
-1. venue、article type、page budget、required sections を整理する。
-2. title / abstract / introduction が target reader に約束する contribution を確認する。
-3. Methods / Results / Discussion の重心が venue expectation に合うか確認する。
-4. 不足する required section、Data/Code availability、AI disclosure、supplement 方針を列挙する。
-5. `manuscript/venue.md` と `notes/reviewer-model.md` を更新する。
-
-## 注意
-
-投稿先ポリシーや最新の author guideline が必要な場合は、ユーザーに公式 URL/PDF を渡してもらうか、利用可能な環境で公式情報を確認する。推測で最新ルールを断定しない。
-
-## 出力
-
-- Venue fit summary
-- Required changes
-- Reader expectation gaps
-- Files updated
-- Open questions
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/venue-fit-review/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。

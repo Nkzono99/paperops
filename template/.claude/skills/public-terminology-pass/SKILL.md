@@ -7,26 +7,13 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 # public-terminology-pass
 
-repo や run folder を知らない読者に通じない語を公開語へ変換する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/public-terminology-pass/SKILL.md` を source of truth として読む。
 
-## 最初に読むファイル
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/public-terminology-pass/SKILL.md
 
-- `manuscript/mirror/terminology.yml`
-- 対象の公開原稿 TeX
-- 必要に応じて `notes/reviewer-model.md`
+## Claude Code 実行メモ
 
-## 手順
-
-1. local term、run label、script name、directory name、artifact name、未定義略語を抽出する。
-2. 各語を `public` / `needs_definition` / `internal_only` / `forbidden` に分類する。
-3. `en_public`、first-definition sentence、figure label replacement を提案する。
-4. `manuscript/mirror/terminology.yml` を更新する。
-5. 本文・figure caption・section heading に残る内部語を置換する。
-6. `make public-terms-check` を実行する。
-
-## 出力
-
-- 置換した用語表
-- 初出定義を追加した箇所
-- 残した内部語と理由
-- `make public-terms-check` の結果
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/public-terminology-pass/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。

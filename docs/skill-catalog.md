@@ -26,7 +26,7 @@
 
 ## スキャフォールドに含まれるプロジェクトローカルスキル
 
-下流スキャフォールドは `template/.claude/skills/` に実体となるスキルを提供し、Codex 用には `template/.agents/skills/` に同名の互換入口を提供する:
+下流スキャフォールドは `template/.agents/skills/` に共通の project skill 実体を提供し、Claude Code 用には `template/.claude/skills/` に同名の wrapper を提供する。Claude wrapper は `@${CLAUDE_SKILL_DIR}/../../../.agents/skills/<skill>/SKILL.md` で共通手順を読み込み、Claude 固有の `allowed-tools` / `argument-hint` だけを保持する:
 
 - `setup`
 - `resume-session`
@@ -50,6 +50,16 @@
 - `venue-fit-review`
 - `ai-disclosure-check`
 
+状況別の入口:
+
+- 初回セットアップ・上流更新: `setup`、`update-paperops`
+- セッション再開・進捗記録: `resume-session`、`note-writing-session`
+- 執筆設計・本文調整: `design-manuscript-claims`、`calibrate-claims`、`paragraph-surgery`
+- 日英同期・公開語彙: `sync-ja-en`、`public-terminology-pass`
+- 通読レビュー: `start-manuscript-review` で開始し、終了後に `collect-manuscript-review`
+- 公開前点検: `review-public-manuscript`、`figure-story-audit`、`venue-fit-review`、`ai-disclosure-check`
+- 外部 project link・上流改善: `resolve-local-paths`、`feedback-paper-harness`
+
 レビュー系スキルの使い分け:
 
 - `review-public-manuscript`: section / weekly / pre-submit の粒度で公開原稿だけを読み、外部読者・一般研究者視点で未定義語、ローカル語、暗黙前提、再現性ギャップを検出する。
@@ -67,7 +77,7 @@
 
 セットアップとセッション記録のスキルは、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md` も公開・投稿前状態として扱う。
 
-`.agents/skills/` は重複実装を避けるための薄い入口であり、恒久的な手順変更は `.claude/skills/<skill>/SKILL.md` 側を source of truth として更新する。`make skill-mirror-check` は同名 skill の存在と source-of-truth 参照を機械的に確認する。
+`.agents/skills/` は重複実装を避けるための source of truth であり、恒久的な手順変更は `.agents/skills/<skill>/SKILL.md` 側を更新する。`.claude/skills/` は cwd に依存しない `${CLAUDE_SKILL_DIR}` 参照を使う薄い互換入口に留める。`make skill-mirror-check` は同名 skill の存在と wrapper の source-of-truth 参照を機械的に確認する。
 
 ## CLI 配布
 

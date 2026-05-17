@@ -7,31 +7,13 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 
 # ai-disclosure-check
 
-AI 利用ログ、投稿先ポリシー、人間検証の証跡を点検する。
+Claude Code で使う互換入口。共通手順は `.agents/skills/ai-disclosure-check/SKILL.md` を source of truth として読む。
 
-## 最初に読むファイル
+@${CLAUDE_SKILL_DIR}/../../../.agents/skills/ai-disclosure-check/SKILL.md
 
-- `notes/ai-use.md`
-- `notes/reproducibility.md`
-- `manuscript/venue.md`
-- 投稿先の AI policy（ユーザーが渡した URL/PDF/テキストがあれば）
+## Claude Code 実行メモ
 
-## 手順
-
-1. AI の use type を language editing / translation / literature summary / code / figure / review に分類する。
-2. 引用、解析、コード、図表、画像に AI が関与した箇所の human verification を確認する。
-3. 投稿先 policy に応じて acknowledgement / methods / cover letter / none を切り分ける。
-4. `notes/ai-use.md` の disclosure draft を更新する。
-5. 必要なら `notes/reproducibility.md` に検証証跡を追加する。
-
-## 注意
-
-投稿先ポリシーは変わりうる。最新情報が必要な場合は公式資料を確認し、確認日を `notes/ai-use.md` に残す。
-
-## 出力
-
-- AI use summary
-- Missing verification
-- Disclosure placement
-- Draft disclosure text
-- Updated files
+- Claude Code 固有の `argument-hint` や `allowed-tools` は、この wrapper の frontmatter で保持する。
+- `@` 参照は cwd に依存しないよう `${CLAUDE_SKILL_DIR}` から解決する。
+- 読み込まれる `.agents` 側の `Codex 実行メモ` は Codex 向けの補足であり、Claude Code ではこの wrapper の frontmatter と通常の Claude Code tool semantics を優先する。
+- `.claude/skills/ai-disclosure-check/` 配下に helper files がある場合は、既存の相対パス互換のためにそのまま利用する。
