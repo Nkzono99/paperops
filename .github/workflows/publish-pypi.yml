@@ -47,6 +47,9 @@ jobs:
       - name: ビルドツールをインストール
         run: python -m pip install --upgrade build twine
 
+      - name: scaffold package boundary を検証
+        run: python scripts/check-scaffold-package-boundary.py
+
       - name: distribution をビルド
         run: python -m build
 

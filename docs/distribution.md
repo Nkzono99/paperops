@@ -64,7 +64,7 @@ chain runner は minor ごとの checkpoint release を exact version で呼び�
 
 workflow は build job と publish job を分ける:
 
-- build job: release / dispatch が `main` 由来であることを確認し、`python -m build` で distribution を作成し、`twine check` で検証する。
+- build job: release / dispatch が `main` 由来であることを確認し、`scripts/check-scaffold-package-boundary.py` で generated scaffold artifact が wheel 内の bundled scaffold と wheel-installed `pops init` の出力に混入しないことを検証したうえで、`python -m build` と `twine check` を実行する。
 - publish job: build artifact を取得し、PyPI Trusted Publishing で `pypa/gh-action-pypi-publish@release/v1` から公開する。
 
 PyPI 側では trusted publisher として以下を設定する:
