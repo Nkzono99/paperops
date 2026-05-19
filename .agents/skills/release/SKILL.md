@@ -26,6 +26,8 @@ paperops の root 層をリリースする。`template/` を直接変える場�
    - 空の `## Unreleased` を先頭に残す。
 5. 必要に応じて docs / README の version や導線の食い違いを直す。
 6. 検証する。
+   - `python scripts/check-release-version-truth.py --release-version <version> --github-repo Nkzono99/paperops`
+     - `pyproject.toml`、`src/paperops/__init__.py`、`CHANGELOG.md`、local tag、GitHub Release の version truth を release 前に揃える。
    - `make smoke`
    - パッケージ確認が必要なら `py -3 -m build` と `py -3 -m twine check dist/*`
 7. リリース準備コミットを作る。
