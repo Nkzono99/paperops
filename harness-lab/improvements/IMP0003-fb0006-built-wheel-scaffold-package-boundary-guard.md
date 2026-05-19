@@ -2,13 +2,13 @@
 id: IMP0003
 record_type: improvement_dossier
 created_at: '2026-05-18T04:24:19+09:00'
-updated_at: '2026-05-18T04:27:36+09:00'
-status: parked
+updated_at: '2026-05-19T04:22:52+09:00'
+status: adopted
 source_type: friction
 scope: paperops release packaging and scaffold generation
-maturity: investigated
+maturity: implemented
 relation: extends
-promotion_level: candidate
+promotion_level: adopted
 source_feedback: FB0006
 eval_cases:
 - E0003
@@ -16,18 +16,27 @@ hypotheses:
 - H0003
 decisions:
 - D0004
+- D0005
 research_scans: []
 classification:
   capability: scaffold package boundary hygiene
   failure_class: ignored generated template artifacts can cross release and source-of-truth boundaries
 guard:
-  status: not-defined
-  path:
+  status: implemented
+  path: scripts/check-scaffold-package-boundary.py
 investigation:
 - created_at: '2026-05-18T04:26:17+09:00'
   kind: codebase
   summary: RS0008 の一時 wheel 調査を実行した。template/notes/session-context.generated.md が存在する状態で uv build --wheel を実行すると built wheel の paperops/_data/scaffold/notes/session-context.generated.md に生成 context が含まれた。一方、同 wheel を uvx --from <wheel> pops init で使った下流 scaffold には notes/session-context.generated.md が作成されず、copy_scaffold の EXCLUDED_SCAFFOLD_PATTERNS は init 境界では効いている。未実装の guard は release artifact の package-data 境界と wheel-installed init/update 境界の両方を検査する必要がある。
   evidence_ref: harness-lab/records/research-scans/RS0008-generated-context-needs-a-package-boundary-acceptance-guard.md; harness-lab/views/eval-results/E0003-manual-score.yml
+- created_at: '2026-05-19T04:13:05+09:00'
+  kind: codebase
+  summary: open-meta-scan の raw ideas を統合した。配布物 scaffold と作業ツリー template の二重境界は、新規 record ではなく既存 IMP0003/RS0008 の source-of-truth labeling 問題として扱う。priority lane では pyproject force-include から generated artifact を安定除外できるかを先に確認し、難しい場合は release/prepublish smoke で wheel contents と wheel-installed pops init/update の両境界を検査する方針へ進む。RS0009 の route map は、この guard 方針が決まった後の docs/guard integration として扱い、upgrade-chain/privacy/readiness 案は再発 evidence まで park する。
+  evidence_ref: .harnessops/cache/steward-runs/20260519-040259-b95375b.json;harness-lab/records/research-scans/RS0008-generated-context-needs-a-package-boundary-acceptance-guard.md;harness-lab/records/research-scans/RS0009-agent-bridge-and-template-skill-mirrors-need-a-role-route-map.md;pyproject.toml;src/paperops/cli/constants.py;src/paperops/cli/scaffold.py
+- created_at: '2026-05-19T04:22:43+09:00'
+  kind: codebase
+  summary: priority lane で filtered scaffold build hook と package-boundary check を実装した。Hatch の force-include は exclude より強く生成物を含め続けたため、wheel build 時に EXCLUDED_SCAFFOLD_PATTERNS を適用した一時 scaffold を作成して paperops/_data/scaffold に同梱する方式へ切り替えた。scripts/check-scaffold-package-boundary.py は canary 生成物を置いた状態で wheel contents と wheel-installed pops init の両境界を検査する。
+  evidence_ref: hatch_build.py;scripts/check-scaffold-package-boundary.py;pyproject.toml;.github/workflows/publish-pypi.yml;docs/distribution.md;CHANGELOG.md
 links:
   issue_url:
 ---
@@ -36,14 +45,14 @@ links:
 
 ## Status
 
-- status: parked
-- maturity: investigated
+- status: adopted
+- maturity: implemented
 - source_type: friction
 - scope: paperops release packaging and scaffold generation
 - relation: extends
-- promotion_level: candidate
+- promotion_level: adopted
 - source_feedback: `FB0006`
-- linked_records: `FB0006`, `E0003`, `H0003`, `D0004`
+- linked_records: `FB0006`, `E0003`, `H0003`, `D0004`, `D0005`
 
 ## Source Observation
 
@@ -71,6 +80,8 @@ wheel 内 scaffold package data と pops init/update の展開結果を検証し
 ## Investigation
 
 - 2026-05-18T04:26:17+09:00 [codebase] RS0008 の一時 wheel 調査を実行した。template/notes/session-context.generated.md が存在する状態で uv build --wheel を実行すると built wheel の paperops/_data/scaffold/notes/session-context.generated.md に生成 context が含まれた。一方、同 wheel を uvx --from <wheel> pops init で使った下流 scaffold には notes/session-context.generated.md が作成されず、copy_scaffold の EXCLUDED_SCAFFOLD_PATTERNS は init 境界では効いている。未実装の guard は release artifact の package-data 境界と wheel-installed init/update 境界の両方を検査する必要がある。 (evidence: harness-lab/records/research-scans/RS0008-generated-context-needs-a-package-boundary-acceptance-guard.md; harness-lab/views/eval-results/E0003-manual-score.yml)
+- 2026-05-19T04:13:05+09:00 [codebase] open-meta-scan の raw ideas を統合した。配布物 scaffold と作業ツリー template の二重境界は、新規 record ではなく既存 IMP0003/RS0008 の source-of-truth labeling 問題として扱う。priority lane では pyproject force-include から generated artifact を安定除外できるかを先に確認し、難しい場合は release/prepublish smoke で wheel contents と wheel-installed pops init/update の両境界を検査する方針へ進む。RS0009 の route map は、この guard 方針が決まった後の docs/guard integration として扱い、upgrade-chain/privacy/readiness 案は再発 evidence まで park する。 (evidence: .harnessops/cache/steward-runs/20260519-040259-b95375b.json;harness-lab/records/research-scans/RS0008-generated-context-needs-a-package-boundary-acceptance-guard.md;harness-lab/records/research-scans/RS0009-agent-bridge-and-template-skill-mirrors-need-a-role-route-map.md;pyproject.toml;src/paperops/cli/constants.py;src/paperops/cli/scaffold.py)
+- 2026-05-19T04:22:43+09:00 [codebase] priority lane で filtered scaffold build hook と package-boundary check を実装した。Hatch の force-include は exclude より強く生成物を含め続けたため、wheel build 時に EXCLUDED_SCAFFOLD_PATTERNS を適用した一時 scaffold を作成して paperops/_data/scaffold に同梱する方式へ切り替えた。scripts/check-scaffold-package-boundary.py は canary 生成物を置いた状態で wheel contents と wheel-installed pops init の両境界を検査する。 (evidence: hatch_build.py;scripts/check-scaffold-package-boundary.py;pyproject.toml;.github/workflows/publish-pypi.yml;docs/distribution.md;CHANGELOG.md)
 
 ## Research Scans
 
@@ -143,8 +154,8 @@ hatchling/package config で force-included template から generated artifact �
 
 ## Guard
 
-- status: not-defined
-- path: None
+- status: implemented
+- path: scripts/check-scaffold-package-boundary.py
 
 ## Links
 
@@ -187,3 +198,35 @@ Medium: package exclude を誤ると scaffold files を欠落させる可能性�
 ## 回帰ガード
 
 ガードパスは指定されていません。非採用判断では省略できますが、採用済み判断では必須です。
+
+### D0005: D0005: adopted H0003
+
+
+Source: `harness-lab/records/decisions/D0005-adopted-h0003.md`
+
+
+# D0005: adopted H0003
+
+## 判断
+
+adopted
+
+## 理由
+
+package exclude だけでは force-included template directory に効かなかったため、filtered scaffold build hook と release/prepublish guard を採用した。
+
+## 証拠
+
+uv run python scripts/check-scaffold-package-boundary.py --out-dir .codex-tmp\\scaffold-boundary-check: ok; wheel contents and wheel-installed pops init excluded generated scaffold artifacts.
+
+## 回帰リスク
+
+Medium: build hook が scaffold packaging 経路に入るため、EXCLUDED_SCAFFOLD_PATTERNS との同期と publish workflow の継続実行が必要。
+
+## フォローアップ
+
+finalize lane で make smoke と HOPS doctor/migrate を再実行し、publish workflow diff を PR で確認する。
+
+## 回帰ガード
+
+scripts/check-scaffold-package-boundary.py

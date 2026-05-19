@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `paper-harness-cli` の release 前検証に scaffold package boundary guard を追加した。ignored/generated scaffold artifact は wheel 内の bundled scaffold と wheel-installed `pops init` の出力に混入しないことを `scripts/check-scaffold-package-boundary.py` と PyPI publish workflow で検査する。
 - `pops update-paperops` の plan 表示に管理対象ファイルの更新面ラベルと changed file の扱いを追加した。既存下流リポジトリで取り込む場合、`changed managed files` は通常の `--apply` では上書きされず、差分確認後に必要なものだけ `--apply --force` する判断材料として使える。
 - `pops doctor` の成功時に、検査範囲が構造とローカルセットアップであり、公開・投稿前品質は `make readiness-check` / `make pre-submit` で確認することを明示した。既存下流リポジトリ側のマイグレーションは不要。
 - `AGENTS.md` / `CLAUDE.md` と skill catalog に、状況別の skill 入口を追加した。既存下流リポジトリで取り込む場合は、管理対象の `AGENTS.md`、`CLAUDE.md` の案内を更新するだけで、既存 skill 名やファイル配置のマイグレーションは不要。
