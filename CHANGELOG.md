@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- release 前の version truth preflight として `scripts/check-release-version-truth.py` を追加し、release skill から `pyproject.toml` / `src/paperops/__init__.py` / `CHANGELOG.md` / tag / GitHub Release の不整合を検出できるようにした。旧 template 時代の履歴見出しは package release 見出しと区別できる archive 表記へ整理した。
 - `paper-harness-cli` の release 前検証に scaffold package boundary guard を追加した。ignored/generated scaffold artifact は wheel 内の bundled scaffold と wheel-installed `pops init` の出力に混入しないことを `scripts/check-scaffold-package-boundary.py` と PyPI publish workflow で検査する。
 - `pops update-paperops` の plan 表示に管理対象ファイルの更新面ラベルと changed file の扱いを追加した。既存下流リポジトリで取り込む場合、`changed managed files` は通常の `--apply` では上書きされず、差分確認後に必要なものだけ `--apply --force` する判断材料として使える。
 - `pops doctor` の成功時に、検査範囲が構造とローカルセットアップであり、公開・投稿前品質は `make readiness-check` / `make pre-submit` で確認することを明示した。既存下流リポジトリ側のマイグレーションは不要。
@@ -40,7 +41,7 @@
 - 作業報告型の原稿を主張中心の論文構造へ再設計する `/design-manuscript-claims` skill を追加。主張、証拠、補助解析、対照、限界を分け、必要時のみ block ID 単位の rewrite plan に進む（#13）。
 - `/review-public-manuscript` に一般研究者視点の `reader-assumptions` / `local-terminology` / `public-reproducibility` チェックを追加。公開原稿だけでローカル語、実装語、図表ラベル、件数内訳、Data availability の暗黙前提を検出できるようにした（#14）。
 
-## 0.3.0 - 2026-04-14
+## Template archive 0.3.0 - 2026-04-14
 
 - `tex-env.example.toml` と `scripts/tex-env.sh` を追加: ユーザー空間 TeX Live や Docker ビルドに対応するための TeX 環境抽象化層（#6）
 - ビルドスクリプト（`build-ja.sh`、`build-en.sh`）を `tex-env.sh` に統合し、Docker モードと改善されたフォールバックメッセージを追加（#6）
@@ -48,7 +49,7 @@
 - `journal.cls` がスターター用であることを明記するコメントを追加（#6）
 - `/setup` スキルを追加: 初回プロジェクトセットアップ（venv 作成、設定ファイル生成、ワークフロー設定、メタデータ記入）を一括実行（#6）
 
-## 0.2.0 - 2026-04-14
+## Template archive 0.2.0 - 2026-04-14
 
 - 全ドキュメント・スキル・ルール・スクリプトのユーザー向けテキストを日本語化
 - protect-files フックを廃止し、settings.json の deny パターン + rules/ による保護に移行
