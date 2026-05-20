@@ -41,7 +41,7 @@
       ".claude/skills/hops-update-harness/SKILL.md": "sha256:20b28985e5b3463eac61f00e90dc3cd47060d4d8639aa0d309467b0426ec3748"
     }
   },
-  "harnessops_version": "0.1.14",
+  "harnessops_version": "0.1.15",
   "layout_version": "0.1",
   "managed_files": {
     "harness-lab/README.md": "sha256:795d3e87ce80e3391ec930f263648bd5e667007c771706c50e2dada0311d4526",
