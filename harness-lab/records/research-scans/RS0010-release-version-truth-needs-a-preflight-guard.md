@@ -2,7 +2,7 @@
 id: RS0010
 record_type: research_scan
 created_at: '2026-05-20T04:18:18+09:00'
-status: captured
+status: archived
 scope: paperops release preparation and PyPI publish governance
 existing_dossier:
 classification:
@@ -37,6 +37,11 @@ candidates:
   recommendation: RS0003 already covered plan explainability and there is no new downstream friction proving agent-readable JSON is needed
   next_command: none
 recommendation: record selected release-preflight guard for priority lane; fold smoke side-effect into IMP0003 and park lower-evidence ideas
+retirement:
+- created_at: '2026-05-22T04:26:30+09:00'
+  status: archived
+  reason: D0006 adopted RS0010 and the release version truth guard is implemented and passing; keep future release-intent ideas tied to RS0010/D0006 only when a new release-prep failure appears.
+  evidence_ref: harness-lab/records/decisions/D0006-adopted-rs0010.md;scripts/check-release-version-truth.py
 ---
 
 # RS0010: Release version truth needs a preflight guard
