@@ -25,7 +25,7 @@ jobs:
 
       - name: main 由来の release だけを許可
         run: |
-          git fetch origin main --tags
+          git fetch --no-tags origin main:refs/remotes/origin/main
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             if [ "${GITHUB_REF_NAME}" != "main" ]; then
               echo "::error::Manual PyPI publish must run from main."
