@@ -26,7 +26,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 - このリポジトリは `.harnessops/project.toml` 上では `target-repository` で、HOPS overlay は `storage = "local"` の `harness-lab/` を使う。正本は `local_id = "paper-harness-template"` で解決される `~/.harnessops/projects/paper-harness-template/` 側に置く。
 - 下流 project repo に HOPS をリンクする場合も、`uvx --from harnessops hops project link --profile paper-harness-project` を使い、`harness-feedback/` を repo 外の local state に置く。
 - HarnessOps 管理ファイルは直接組み替えず、確認は `uvx --from harnessops hops doctor --check-overlay --check-records`、local state 更新は `uvx --refresh-package harnessops --from harnessops hops update-harness` を使う。
-- GitHub Flow 作業を HOPS に委譲する場合は `.agents/skills/hops-github-flow/SKILL.md` と `uvx --from harnessops hops github-flow ...` を使う。
+- GitHub Flow は既定運用にしない。必要な場合だけ `.agents/skills/hops-github-flow/SKILL.md` と `uvx --from harnessops hops github-flow ...` を使う。
 - repo-local skill の更新や bridge 再展開が必要な場合は `uvx --from harnessops hops agent bridge --codex --force` を使う。
 
 ## 変更ワークフロー
@@ -40,14 +40,12 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 変更を反映する前に `docs/change-policy.md` と `docs/triage-rules.md` を確認すること。
 
-## GitHub Flow
+## Git 運用
 
-- `main` への直接 push は禁止。すべての変更は `codex/<topic>` などの topic branch から Pull Request 経由で取り込む。
-- ユーザーが「mergeして」「pushして」と依頼した場合も、明示的に `main` 直 push を求めていない限り、topic branch を push して Pull Request を作成し、GitHub 上で merge する。
-- ローカル `main` に誤って commit や merge を作った場合も、`origin/main` へ直接 push せず、その commit を topic branch から Pull Request に出し、merge 後にローカル `main` を `origin/main` へ fast-forward する。
-- Pull Request では `Smoke / smoke` を必須チェックとして通す。
+- 一人開発のため、通常の変更は `main` で直接進めてよい。必要に応じて `codex/<topic>` などの短命 branch を使う。
+- ユーザーが「mergeして」「pushして」と依頼した場合は、特に指定がなければ現在の作業を `main` に取り込んで push する。
+- PR と `Smoke / smoke` は必須 gate ではなく、リスクの高い変更や公開前確認で必要な場合に使う。
 - release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。PyPI publish workflow も tag commit が `origin/main` から到達可能な場合だけ公開する。
-- 緊急修正でも `main` 直 push は避け、短命 branch と PR を使う。
 
 ## ルール
 
@@ -62,7 +60,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 - 意味のある作業単位ごとにコミットする。大量の変更を一つのコミットにまとめない。
 - コミットメッセージは日本語で、変更の「なぜ」を記述する。
-- `git push` はユーザーの明示的な指示なしに実行しない。明示された場合も `main` ではなく topic branch を push する。
+- `git push` はユーザーの明示的な指示なしに実行しない。明示された場合は、必要に応じて `main` へ直接 push してよい。
 
 ## リポジトリマップ
 

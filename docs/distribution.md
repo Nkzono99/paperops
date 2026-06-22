@@ -76,8 +76,8 @@ PyPI 側では trusted publisher として以下を設定する:
 
 ## 運用ルール
 
-- `main` への直接 push は禁止し、変更は Pull Request 経由で取り込む。
-- PR では `Smoke / smoke` を必須チェックとして通す。
+- 一人開発では `main` へ直接取り込んでよい。必要な場合だけ Pull Request を使う。
+- `Smoke / smoke` は必須 gate ではなく、リスクの高い変更や公開前確認で必要に応じて通す。
 - `template/` の変更はまずこのリポジトリで行う。
 - 配布専用リポジトリを編集・同期対象にしない。
 - ユーザーに影響する CLI / scaffold 変更は `CHANGELOG.md` に記録する。
