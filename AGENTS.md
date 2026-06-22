@@ -23,10 +23,11 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 ## HarnessOps
 
-- このリポジトリは `.harnessops/project.toml` 上では `target-repository` で、HOPS overlay は `harness-lab/` を使う。
-- HarnessOps 管理ファイルは直接組み替えず、確認は `uvx --from harnessops hops doctor --check-overlay --check-records`、更新は `uvx --refresh-package harnessops --from harnessops hops update-harness` を使う。
+- このリポジトリは `.harnessops/project.toml` 上では `target-repository` で、HOPS overlay は `storage = "local"` の `harness-lab/` を使う。正本は `local_id = "paper-harness-template"` で解決される `~/.harnessops/projects/paper-harness-template/` 側に置く。
+- 下流 project repo に HOPS をリンクする場合も、`uvx --from harnessops hops project link --profile paper-harness-project` を使い、`harness-feedback/` を repo 外の local state に置く。
+- HarnessOps 管理ファイルは直接組み替えず、確認は `uvx --from harnessops hops doctor --check-overlay --check-records`、local state 更新は `uvx --refresh-package harnessops --from harnessops hops update-harness` を使う。
 - GitHub Flow 作業を HOPS に委譲する場合は `.agents/skills/hops-github-flow/SKILL.md` と `uvx --from harnessops hops github-flow ...` を使う。
-- repo-local skill の更新や bridge 再展開が必要な場合は `.agents/skills/hops-update-harness/SKILL.md` の手順に従う。
+- repo-local skill の更新や bridge 再展開が必要な場合は `uvx --from harnessops hops agent bridge --codex --force` を使う。
 
 ## 変更ワークフロー
 

@@ -22,7 +22,11 @@ template/**/*.pdf
 !template/manuscript/shared/figures/**/*.pdf
 
 # BEGIN harnessops
+.harnessops/lock.json
 .harnessops/cache/*
 !.harnessops/cache/.gitkeep
 .harnessops/tmp/
+.harnessops/migrations/
+harness-lab/
+harness-feedback/
 # END harnessops

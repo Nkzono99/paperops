@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- HarnessOps 0.1.16 の local storage 導線へ移行し、target 側の `harness-lab/` 正本を repo 外の `~/.harnessops/projects/paper-harness-template/` に置くようにした。repo には `.harnessops/project.toml` のリンク情報だけを残し、`harness-lab/`、`harness-feedback/`、`.harnessops/lock.json` は version 管理対象から外した。下流 project repo で HOPS を使う場合も、`uvx --from harnessops hops project link --profile paper-harness-project` で `harness-feedback/` を local state に展開する。
 - paper draft から runops project や一般ディレクトリを参照するための `refs/links.toml` link 台帳、`pops links list/check`、`make links-check`、追加解析・図表・実験要望ノートを追加した（#32）。既存下流リポジトリで取り込む場合は、必要に応じて `refs/links.toml` と `notes/research-requests.md` を手動追加し、個人環境の絶対パスは引き続き ignored な `refs/local/locations.toml` にだけ記録する。
 - `notes/research-requests.md` と `/resolve-local-paths` に runops `research/paper_requests.toml` への handoff 手順を追加し、paper 側の request status を runops contract と揃えた。runops 側の `runops.paper.request.draft` に対応し、duplicate id のまま転記しない注意を加えた（runops#75, runops#77）。
 - README と architecture / distribution docs に runops link の情報境界、MCP 優先の確認導線、既存下流への取り込み方針を整理した。
