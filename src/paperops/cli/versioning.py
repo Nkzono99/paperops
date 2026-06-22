@@ -10,11 +10,11 @@ from paperops.cli.constants import PACKAGE_NAME
 
 def package_version() -> str:
     try:
-        return importlib.metadata.version(PACKAGE_NAME)
-    except importlib.metadata.PackageNotFoundError:
         from paperops import __version__
 
         return __version__
+    except ImportError:
+        return importlib.metadata.version(PACKAGE_NAME)
 
 
 def is_newer_version(latest: str, current: str) -> bool:

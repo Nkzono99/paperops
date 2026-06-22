@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.3.0 - 2026-06-22
+
 - release 前の version truth preflight として `scripts/check-release-version-truth.py` を追加し、release skill から `pyproject.toml` / `src/paperops/__init__.py` / `CHANGELOG.md` / tag / GitHub Release の不整合を検出できるようにした。旧 template 時代の履歴見出しは package release 見出しと区別できる archive 表記へ整理した。
 - `paper-harness-cli` の release 前検証に scaffold package boundary guard を追加した。ignored/generated scaffold artifact は wheel 内の bundled scaffold と wheel-installed `pops init` の出力に混入しないことを `scripts/check-scaffold-package-boundary.py` と PyPI publish workflow で検査する。
 - `pops update-paperops` の plan 表示に管理対象ファイルの更新面ラベルと changed file の扱いを追加した。既存下流リポジトリで取り込む場合、`changed managed files` は通常の `--apply` では上書きされず、差分確認後に必要なものだけ `--apply --force` する判断材料として使える。
