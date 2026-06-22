@@ -26,6 +26,9 @@ default_visibility = "private-until-sanitized"
 codex = true
 claude = true
 
+[github_flow]
+enabled = false
+
 [target_harness]
 provider = "paper-harness"
 manifest = ".harness/manifest.toml"

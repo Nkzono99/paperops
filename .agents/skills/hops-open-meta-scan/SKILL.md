@@ -33,7 +33,7 @@ Use `uvx --from harnessops hops <command>` for CLI invocations in target/project
 - 一番新しい摩擦だけに寄らない。設計思想、誘因、責務分離、評価不能性、管理過多を見る。
 - 管理のためのチェックリストは gate として使い、generator にしない。
 - 「良さそう」だけで実装しない。実装や lab 化は後段で evidence、evaluation、guard を持たせる。
-- privacy と external sharing は守る。未サニタイズ情報を web 検索語、Issue、PR へ出さない。
+- privacy と external sharing は守る。未サニタイズ情報を web 検索語、Issue、公開共有文へ出さない。
 - project repo で `harness-lab/` を作らない。target/meta lab repo で project 固有の非公開文脈を正本 lab に混ぜない。
 
 ## 次の橋渡し

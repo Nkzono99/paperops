@@ -78,7 +78,7 @@ hops feedback export --target <target> --sanitize
 
 - 調査を長文化しない。回答に載せる候補は通常5件程度に絞るが、daily steward 用の queue では実行数だけを risk budget で制御する。
 - web 由来の知見は必ず URL または出典名を残す。
-- 未サニタイズ情報を外部検索語、Issue本文、PR本文へ出さない。
+- 未サニタイズ情報を外部検索語、Issue本文、公開共有文へ出さない。
 - リモート Issue 作成や外部共有は人間の明示なしに行わない。
 - 採用済み改善への反例や拡張は、孤立レコードにせず `relation=contradicts` または `relation=extends` で既存 dossier に接続する。
 - project repo で `harness-lab/` を作らない。target/meta lab repo で project 固有の非公開文脈を正本 lab に混ぜない。

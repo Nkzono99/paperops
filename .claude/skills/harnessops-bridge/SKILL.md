@@ -25,10 +25,3 @@ description: プロジェクト失敗の記録、上流フィードバックの�
 - `uvx --from harnessops hops migrate --check`
 
 外部共有前にサニタイズ済みバンドルを確認し、ローカルパス、非公開語、未公開研究の文脈を残さないでください。
-
-GitHub Flow が有効な target/meta repo では、push、PR、merge の反復作業を HOPS に委譲できます。
-
-- `uvx --from harnessops hops github-flow preflight`
-- `uvx --from harnessops hops github-flow publish`
-- `uvx --from harnessops hops github-flow pr`
-- `uvx --from harnessops hops github-flow merge`

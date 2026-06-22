@@ -14,7 +14,7 @@ paperops の root 層をリリースする。`template/` を直接変える場�
    - `git fetch --tags origin`
    - `git status -sb`
    - `git log --oneline <last-tag>..HEAD`
-   - release 準備は `main` 直コミットではなく `codex/release-v<version>` などの topic branch で行う。
+   - release 準備は通常 `main` で直接行う。
 2. リリース種別を判断する。
    - patch: バグ修正、ドキュメント、内部整理。
    - minor: CLI / scaffold のユーザー向け機能追加や標準導線変更。
@@ -32,21 +32,16 @@ paperops の root 層をリリースする。`template/` を直接変える場�
    - パッケージ確認が必要なら `py -3 -m build` と `py -3 -m twine check dist/*`
 7. リリース準備コミットを作る。
    - コミットメッセージ例: `<version> リリース準備`
-8. topic branch を push して Pull Request を作る。
-   - `git push origin HEAD`
-   - `gh pr create --base main --head <branch> --title "<version> リリース準備" --body <body>`
-   - `Smoke / smoke` が通ったことを確認する。
-9. Pull Request を merge し、`main` を最新化する。
-   - `gh pr merge --squash --delete-branch` など repo policy に合う方法を使う。
-   - `git switch main`
-   - `git pull --ff-only origin main`
-10. tag は `origin/main` から到達可能な merge 済み commit にだけ作る。
+8. `main` を push する。
+   - `git push origin main`
+   - push 前に `git status -sb` と `git log --oneline origin/main..HEAD` で送る commit を確認する。
+9. tag は `origin/main` から到達可能な commit にだけ作る。
    - `git tag -a v<version> -m "v<version>"`
    - `git push origin v<version>`
-11. GitHub Release を公開する。
+10. GitHub Release を公開する。
     - `gh release create v<version> --title "v<version>" --notes-file <release-notes-file>`
     - notes file は一時ファイルでよい。`CHANGELOG.md` の該当セクションを元にする。
-12. PyPI workflow を確認する。
+11. PyPI workflow を確認する。
     - release publish で `.github/workflows/publish-pypi.yml` が走る。
     - workflow は tag commit が `origin/main` から到達可能な場合だけ publish する。
     - `gh run list --workflow publish-pypi.yml --limit 5`
@@ -56,6 +51,5 @@ paperops の root 層をリリースする。`template/` を直接変える場�
 
 - `dist/`、一時 release notes file、実行時 cache はコミットしない。
 - 既存の未コミット変更がある場合は、今回のリリースに含めるかユーザー変更として残すかを明確にする。
-- `main` への直接 push はしない。緊急修正でも topic branch と Pull Request を使う。
 - `git push` と GitHub Release はリモート書き込みなので、ユーザーがリリースを明示した場合だけ実行する。
 - PyPI への直接アップロードはしない。Trusted Publishing workflow に委譲する。

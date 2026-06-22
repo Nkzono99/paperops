@@ -1,12 +1,12 @@
 ---
 name: hops-daily-steward
-description: Run one unattended HarnessOps daily automation as a thin supervisor. Use when Codex should pull/preflight a clean repo, then sequentially delegate maintenance, issue execution, open meta scan, invention/lab organization, priority improvement execution, and PR/merge finalization to lane-specific HOPS skills without doing lane work directly.
+description: Run one unattended HarnessOps daily automation as a thin supervisor. Use when Codex should pull/preflight a clean repo, then sequentially delegate maintenance, issue execution, open meta scan, invention/lab organization, priority improvement execution, and final validation/publish to lane-specific HOPS skills without doing lane work directly.
 ---
 Use `uvx --from harnessops hops <command>` in target/project repos unless repo-local docs prove `hops` is available.
 
 # Mission
 
-Supervise one daily run. Keep this skill small: the supervisor owns order, gates, delegation, and final synthesis. It must not perform maintenance, issue work, open meta scanning, invention, implementation, lab evaluation, PR creation, merge, or release directly.
+Supervise one daily run. Keep this skill small: the supervisor owns order, gates, delegation, and final synthesis. It must not perform maintenance, issue work, open meta scanning, invention, implementation, lab evaluation, publish, or release directly.
 
 Read `.harnessops/project.toml` before delegation. State changes must go through `hops`; do not directly reorganize `.harnessops/`, `harness-feedback/`, or `harness-lab/`.
 
@@ -18,7 +18,7 @@ Read `.harnessops/project.toml` before delegation. State changes must go through
 
 If preflight output is unavailable, run `hops doctor --check-overlay --check-records` and `hops migrate --check` before delegation.
 
-Never stash, reset, rebase, force-push, force-pull, or direct-push a protected base branch unless explicitly authorized.
+Never stash, reset, rebase, force-push, or force-pull unless explicitly authorized.
 
 # Supervisor Contract
 
@@ -41,4 +41,4 @@ If a lane reports `blocked`, decide whether the blocker is fatal. Nonfatal block
 
 # Output
 
-Report mode, repo role, branch/sync result, lane results, validation, commits/PRs/merges/issue actions/release actions, blockers, remaining queue, and human decisions.
+Report mode, repo role, branch/sync result, lane results, validation, commits/pushes/issue actions/release actions, blockers, remaining queue, and human decisions.

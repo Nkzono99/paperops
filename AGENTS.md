@@ -26,7 +26,6 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 - このリポジトリは `.harnessops/project.toml` 上では `target-repository` で、HOPS overlay は `storage = "local"` の `harness-lab/` を使う。正本は `local_id = "paper-harness-template"` で解決される `~/.harnessops/projects/paper-harness-template/` 側に置く。
 - 下流 project repo に HOPS をリンクする場合も、`uvx --from harnessops hops project link --profile paper-harness-project` を使い、`harness-feedback/` を repo 外の local state に置く。
 - HarnessOps 管理ファイルは直接組み替えず、確認は `uvx --from harnessops hops doctor --check-overlay --check-records`、local state 更新は `uvx --refresh-package harnessops --from harnessops hops update-harness` を使う。
-- GitHub Flow は既定運用にしない。必要な場合だけ `.agents/skills/hops-github-flow/SKILL.md` と `uvx --from harnessops hops github-flow ...` を使う。
 - repo-local skill の更新や bridge 再展開が必要な場合は `uvx --from harnessops hops agent bridge --codex --force` を使う。
 
 ## 変更ワークフロー
@@ -42,9 +41,9 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 ## Git 運用
 
-- 一人開発のため、通常の変更は `main` で直接進めてよい。必要に応じて `codex/<topic>` などの短命 branch を使う。
+- 一人開発のため、通常の変更は `main` で直接進めてよい。
 - ユーザーが「mergeして」「pushして」と依頼した場合は、特に指定がなければ現在の作業を `main` に取り込んで push する。
-- PR と `Smoke / smoke` は必須 gate ではなく、リスクの高い変更や公開前確認で必要な場合に使う。
+- `make smoke` は必須 gate ではない。リスクの高い変更や公開前確認で必要な場合に使う。
 - release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。PyPI publish workflow も tag commit が `origin/main` から到達可能な場合だけ公開する。
 
 ## ルール

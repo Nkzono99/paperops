@@ -70,8 +70,8 @@ hops lab propose --from E0001
 
 ## 完了時の issue close 作法
 
-- 実装 commit / PR で閉じる場合は、権限がある時だけ commit message または PR body に `Closes #N` を入れる。
-- 手動 close comment では、対応内容、証拠、validation、関連 commit/PR を短く書く。
+- 実装 commit で閉じる場合は、権限がある時だけ commit message に `Closes #N` を入れる。
+- 手動 close comment では、対応内容、証拠、validation、関連 commit を短く書く。
 - wontfix / scope 外で閉じる場合は、理由、代替案、再オープン条件を短く書く。
 - remote action 権限がない場合は、実行せず、コメント案と close 推奨理由を報告する。
 
