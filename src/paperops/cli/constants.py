@@ -16,6 +16,7 @@ EXCLUDED_SCAFFOLD_PATTERNS = (
     "dist",
     "dist/*",
     ".claude/settings.local.json",
+    "_handoff/*",
     "notes/session-context.generated.md",
     "manuscript/mirror/reports/latest.md",
     "manuscript/mirror/reports/smoke-check.md",
@@ -24,6 +25,15 @@ EXCLUDED_SCAFFOLD_PATTERNS = (
     "manuscript/shared/build/ja",
     "manuscript/shared/build/ja/*",
     "refs/local/locations.toml",
+    "refs/source-reach/**/raw",
+    "refs/source-reach/**/raw/**",
+    "refs/source-reach/**/doctor.generated.*",
+    "refs/source-reach/**/capture.generated.*",
+)
+
+SCAFFOLD_INCLUDE_EXCEPTIONS = (
+    "_handoff/.gitkeep",
+    "_handoff/README.md",
 )
 
 MANAGED_UPDATE_PATTERNS = (

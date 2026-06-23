@@ -89,5 +89,5 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 
 - ユーザーが明示しない限り、本文を書き換えない。
 - `refs/` と `notes/` の作業用ドキュメントは日本語で書く。
-- 外部 repository、投稿先 policy、現在の論文 metadata は必要なら web で確認し、出典リンクを残す。
+- 既存 source の DOI、metadata、投稿日、投稿先 policy、外部 repository の軽い確認は必要なら web で行い、出典リンクを残す。新規 source channel、credential、raw capture、SNS / 動画 / platform-specific source が絡む場合は先に `/source-reach-scan` へ戻す。
 - `assumption-blocked` を文章上の hedge だけで処理しない。承認または scope 変更へ戻す。

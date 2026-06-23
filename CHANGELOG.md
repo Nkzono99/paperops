@@ -2,17 +2,18 @@
 
 ## Unreleased
 
-- Academic Research Skills Codex の integrity gate / claim package / experiment provenance / reviewer pipeline の発想、Humanizer-zh の AI 文章パターン検出、Agent Reach の channel / backend / doctor の発想を、paperops-native な `/scientific-gate`、`/polish-ai-draft`、`/source-reach-scan` と既存の peer review skills 強化として追加した。ARS 由来部分は CC BY-NC 4.0 の文面やテンプレートをコピーせず、`notes/scientific-gate.md` と既存の result/claim/reproducibility/peer-review 台帳へ接続する再設計として取り込む。既存下流リポジトリで取り込む場合は、新規 skill wrapper、`notes/scientific-gate.md`、`notes/source-reach.md`、`notes/ai-draft-polish.md`、`refs/source-reach/`、README/AGENTS/CLAUDE/docs の案内を手動追加する。
-- `pops init` で人間から AI へ未整理ファイルを渡す `_handoff/` 受け取り箱を作成し、内容は Git 管理から除外するようにした。
-- `refs/` と `notes/` の作業用ドキュメントを日本語で書く方針を明示し、スターターノートと参照テンプレートの見出しを日本語化した。
-- 公開原稿へ内部 provenance 語が混入しないよう、公開語彙チェックの starter terminology と関連 writing skills の guard を強化した。
-- `mirror-freshness-check --strict` と `make mirror-strict-check` を追加し、`make pre-submit` で freshness warning を失敗扱いにするようにした。
-- 公開原稿の既定 bibliography を `references` のみにし、`mypapers` は作業 draft 用の opt-in 枠として readiness warning の対象にした。
-- AI 初稿が条件数列挙や防御的 caveat に寄る問題を診断する `/audit-ai-draft`、`/contextualize-conditions`、`notes/argument-map.md`、`notes/condition-context-map.md`、`make argument-focus-check` を追加した。
-- 改善指示が局所修正へ固着する前に、原稿・読者体験・執筆ハーネスを俯瞰して発散的な違和感と改善案を出す `/open-paper-scan` を追加した。既存下流リポジトリで取り込む場合は `.agents/skills/open-paper-scan/` と `.claude/skills/open-paper-scan/`、AGENTS/CLAUDE/README の案内を更新する。
-- simulation results、figure data、analysis artifact を本文や claim に直接流し込む前の中間層として、`notes/result-pattern-map.md` と `/map-result-patterns` を追加した。`make argument-focus-check` は result pattern map の starter 構造も確認する。既存下流リポジトリで取り込む場合は新規 note、skill wrapper、AGENTS/CLAUDE/README/docs の案内を更新する。
-- Deep-Research-skills の outline / field framework / deep research / report の型を参考に、関連研究を集めて議論へ変換する `/research-related-work`、`notes/related-work-map.md`、`refs/research/` を追加した。raw findings は既定で Git 管理せず、採用文献だけ `refs/summaries/` と `.bib` へ昇格する。
-- AI peer review 系ツールの multi-reviewer / meta-review / concerns table と response letter template の型を参考に、投稿前の模擬査読 `/peer-review-manuscript`、実査読返答 `/respond-to-peer-review`、`notes/peer-review.md` を追加した。raw editor / reviewer correspondence は confidential な場合があるため、tracked notes には要約・comment ID・revision route を中心に残す。
+## 0.4.0 - 2026-06-23
+
+- 論文を書く前の中間層を拡張した。`/map-result-patterns` と `notes/result-pattern-map.md` で simulation results、figure data、analysis artifact を result pattern / evidence packet に束ね、`/scientific-gate` と `notes/scientific-gate.md` で中心主張、Abstract、Conclusion、主要図表の claim readiness、人間承認、再現性、仮定の blocker を確認できるようにした。
+- AI 初稿をそのまま磨かず、論旨設計へ戻す導線を追加した。`/audit-ai-draft`、`/contextualize-conditions`、`/polish-ai-draft`、`notes/argument-map.md`、`notes/condition-context-map.md`、`notes/ai-draft-polish.md`、`make argument-focus-check` により、条件数列挙、防御的 caveat、内部 provenance 語、AI 文章の定型臭を分けて扱う。
+- 関連研究、外部 source、査読導線を強化した。`/source-reach-scan`、`/research-related-work`、`/peer-review-manuscript`、`/respond-to-peer-review`、`notes/source-reach.md`、`notes/related-work-map.md`、`notes/peer-review.md`、`refs/research/`、`refs/source-reach/` を追加し、raw findings や confidential reviewer correspondence は Git 管理しない一時領域に留め、確認済みの要約・comment ID・revision route だけを tracked notes / refs へ昇格する。
+- 執筆ハーネスを俯瞰する `/open-paper-scan` を追加し、改善指示が局所修正へ固着する前に、原稿・読者体験・skill design・評価不能性・管理過多を発散的に眺められるようにした。出た idea はその場で採用せず、必要になったものだけ後段の gate / research / writing skills へ渡す。
+- `pops init` で `_handoff/` 受け取り箱を作成し、人間から AI へ渡す未整理ファイルを Git 管理しない一時領域へ置けるようにした。`refs/` と `notes/` の作業用ドキュメントは日本語で書く方針を明示し、スターターノートと参照テンプレートの見出しを日本語化した。
+- 公開原稿ガードを強化した。公開原稿へ内部 provenance 語が混入しないよう starter terminology と writing skills を見直し、公開原稿の既定 bibliography は `references` のみにし、`mypapers` は作業 draft 用の opt-in 枠として readiness warning の対象にした。`mirror-freshness-check --strict` と `make mirror-strict-check` を追加し、`make pre-submit` で freshness warning を失敗扱いにするようにした。
+- scaffold 配布の安全性を強化した。Git では ignore される `_handoff/` の未整理 payload、`refs/source-reach/**/raw/**`、source reach の generated doctor / capture artifact が wheel 内の bundled scaffold や wheel-installed `pops init` 出力へ混入しないよう、package boundary guard と CLI tests を更新した。
+- PyPI 公開 workflow の安定性を修正した。Trusted Publishing workflow で `uv` を用意し、tag fetch 時の衝突を避けるようにした。
+- 外部発想源として Academic Research Skills Codex、Deep-Research-skills、Humanizer-zh、Agent Reach、AI peer review 系ツールの型を参考にした。ただし CC BY-NC 4.0 の Academic Research Skills Codex 由来部分は文面やテンプレートをコピーせず、paperops-native な notes / refs / skill workflow として再設計した。
+- 既存下流リポジトリで取り込む場合は、`pops update-paperops --apply` で管理対象 skill / script を更新したうえで、新規 notes / refs、`_handoff/README.md`、`_handoff/.gitkeep`、`.gitignore` の `_handoff/*` と `refs/source-reach/**/raw/**` などの ignore block を必要に応じて手動追加する。
 
 ## 0.3.0 - 2026-06-22
 

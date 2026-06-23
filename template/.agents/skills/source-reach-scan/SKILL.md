@@ -90,6 +90,8 @@ agent-reach doctor --json
 - `Verification status`
 - `Privacy / credential risks`
 - `Next routes`
+- `Files updated`: 更新した `notes/source-reach.md`、`refs/source-reach/`、関連 notes / refs
+- `Checks run`: 実行した link / citation / metadata checks
 
 ## Codex 実行メモ
 

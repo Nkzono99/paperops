@@ -10,6 +10,7 @@ description: Use when editor decision letter、査読コメント、major/minor 
 ## 最初に確認すること
 
 - reviewer letter や editor correspondence は confidential な場合がある。外部検索語にそのまま使わず、tracked notes へ丸写ししない。
+- 実査読コメントを AI に処理させてよいか、投稿先・出版社ポリシーとユーザーの明示許可を先に確認する。許可が未確認または不可の場合は、本文や raw comment を読まず、人間が使う response matrix / checklist の雛形だけを出す。
 - raw letter は `_handoff/` やユーザーが渡したローカルファイルに置き、`notes/peer-review.md` には要約、comment ID、対応方針、変更先だけを残す。
 - response draft では、実施していない変更、未確認の line/page number、存在しない追加解析を主張しない。
 

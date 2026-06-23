@@ -12,7 +12,10 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "src"))
 
-from paperops.cli.constants import EXCLUDED_SCAFFOLD_PATTERNS  # noqa: E402
+from paperops.cli.constants import (  # noqa: E402
+    EXCLUDED_SCAFFOLD_PATTERNS,
+    SCAFFOLD_INCLUDE_EXCEPTIONS,
+)
 
 
 class CustomBuildHook(BuildHookInterface):
@@ -50,4 +53,6 @@ def copy_filtered_scaffold(source: Path, target: Path) -> None:
 
 
 def is_excluded(rel: str) -> bool:
+    if any(fnmatch.fnmatch(rel, pattern) for pattern in SCAFFOLD_INCLUDE_EXCEPTIONS):
+        return False
     return any(fnmatch.fnmatch(rel, pattern) for pattern in EXCLUDED_SCAFFOLD_PATTERNS)

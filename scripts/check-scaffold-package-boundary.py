@@ -14,11 +14,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from paperops.cli.constants import EXCLUDED_SCAFFOLD_PATTERNS  # noqa: E402
+from paperops.cli.constants import (  # noqa: E402
+    EXCLUDED_SCAFFOLD_PATTERNS,
+    SCAFFOLD_INCLUDE_EXCEPTIONS,
+)
 
 
 PACKAGE_SCAFFOLD_PREFIX = "paperops/_data/scaffold/"
-CANARY_REL = "notes/session-context.generated.md"
+CANARY_RELS = (
+    "notes/session-context.generated.md",
+    "_handoff/secret.txt",
+    "refs/source-reach/canary/raw/cookie.txt",
+    "refs/source-reach/canary/doctor.generated.json",
+    "refs/source-reach/canary/capture.generated.json",
+)
 
 
 def main() -> int:
@@ -37,23 +46,25 @@ def main() -> int:
     dist_dir = tmp_root / "dist"
     init_dir = tmp_root / "init" / "paper-demo"
 
-    canary = ROOT / "template" / CANARY_REL
-    previous = canary.read_bytes() if canary.exists() else None
+    canaries = [ROOT / "template" / rel for rel in CANARY_RELS]
+    previous = {path: path.read_bytes() for path in canaries if path.exists()}
     try:
-        canary.parent.mkdir(parents=True, exist_ok=True)
-        canary.write_text(
-            "generated canary for scaffold package boundary check\n",
-            encoding="utf-8",
-        )
+        for canary in canaries:
+            canary.parent.mkdir(parents=True, exist_ok=True)
+            canary.write_text(
+                "generated canary for scaffold package boundary check\n",
+                encoding="utf-8",
+            )
         wheel = build_wheel(dist_dir)
         check_wheel_contents(wheel)
         run_from_wheel(wheel, init_dir)
         check_init_contents(init_dir)
     finally:
-        if previous is None:
-            canary.unlink(missing_ok=True)
-        else:
-            canary.write_bytes(previous)
+        for canary in canaries:
+            if canary in previous:
+                canary.write_bytes(previous[canary])
+            else:
+                canary.unlink(missing_ok=True)
         if args.out_dir is None:
             shutil.rmtree(tmp_root, ignore_errors=True)
 
@@ -127,6 +138,8 @@ def is_excluded_package_scaffold_path(name: str) -> bool:
 
 
 def is_excluded_scaffold_path(rel: str) -> bool:
+    if any(fnmatch.fnmatch(rel, pattern) for pattern in SCAFFOLD_INCLUDE_EXCEPTIONS):
+        return False
     return any(fnmatch.fnmatch(rel, pattern) for pattern in EXCLUDED_SCAFFOLD_PATTERNS)
 
 

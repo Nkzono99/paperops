@@ -9,7 +9,11 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
-from paperops.cli.constants import EXCLUDED_SCAFFOLD_PATTERNS, MANAGED_UPDATE_PATTERNS
+from paperops.cli.constants import (
+    EXCLUDED_SCAFFOLD_PATTERNS,
+    MANAGED_UPDATE_PATTERNS,
+    SCAFFOLD_INCLUDE_EXCEPTIONS,
+)
 from paperops.cli.manifest import write_manifest
 from paperops.cli.models import CopyPlan
 
@@ -125,6 +129,8 @@ def normalize_rel(path: Path) -> str:
 
 
 def is_excluded(rel: str) -> bool:
+    if any(fnmatch.fnmatch(rel, pattern) for pattern in SCAFFOLD_INCLUDE_EXCEPTIONS):
+        return False
     return any(fnmatch.fnmatch(rel, pattern) for pattern in EXCLUDED_SCAFFOLD_PATTERNS)
 
 

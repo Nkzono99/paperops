@@ -22,6 +22,8 @@ description: テンプレートから作成した新しい論文リポジトリ�
 - `.venv/` が存在するか
 - `refs/local/locations.toml` が存在するか
 - `tex-env.toml` が存在するか
+- `_handoff/` と `_handoff/README.md` が存在するか
+- `.gitignore` が `_handoff/*` と `refs/source-reach/**/raw/**` を保護しているか
 - `.github/workflows/*.yml` に `YOUR_ORG/paperops` が残っているか
 - `manuscript/publication-metadata.toml` にプレースホルダーが残っているか
 - `notes/project-brief.md` にプレースホルダーが残っているか
@@ -89,6 +91,19 @@ Copy-Item refs/local/locations.example.toml refs/local/locations.toml
 - パスをプロジェクトのシミュレーション出力や図のソースに合わせて編集すること
 - このファイルは `.gitignore` 対象なので個人パスを含めてよいこと
 - `.claude/settings.json` では `refs/local/locations.toml` の AI 編集を deny しているため、値の記入はユーザーが行うこと
+
+#### _handoff/ と ignored raw output
+
+`_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱として使う。存在しない場合は、`_handoff/README.md` と `_handoff/.gitkeep` を追加する。`.gitignore` に以下がない場合は追記し、秘密情報や未整理 raw output が tracked file に混入しないようにする:
+
+```gitignore
+_handoff/*
+!_handoff/.gitkeep
+!_handoff/README.md
+refs/source-reach/**/raw/**
+refs/source-reach/**/doctor.generated.*
+refs/source-reach/**/capture.generated.*
+```
 
 #### tex-env.toml（任意）
 

@@ -120,13 +120,15 @@ raw findings は `refs/research/<topic-slug>/results/` に一時保存してよ�
 - `Promotion list`: `refs/summaries/` と `.bib` に昇格する文献
 - `Do not use`: 使わない文献と理由
 - `Next actions`: 読む、要約する、引用する、保留する、捨てる
+- `Files updated`: 更新した notes / refs / bib
+- `Checks run`: 実行した lint / citation / link checks
 
 ## 注意
 
 - raw search result は文献レビューではない。
 - 直接引用は必要最小限にし、長い抜粋を tracked ファイルに残さない。
 - 関連研究の議論は日本語で書く。citation key、DOI、title、field name は英語のままでよい。
-- 現在情報、論文 metadata、投稿先 policy、外部 repository の内容は必要に応じて web で確認し、出典リンクを残す。
+- 既存 source の DOI、metadata、投稿日、投稿先 policy、外部 repository の軽い確認は必要に応じて web で行い、出典リンクを残す。新規 source channel、credential、raw capture、SNS / 動画 / platform-specific source が絡む場合は先に `/source-reach-scan` へ戻す。
 - 採用判断がまだなら `notes/related-work-map.md` に留め、`claim-evidence-map.md` の supported claim へ昇格しない。
 - 外部 source channel の到達経路や raw capture 方針は `notes/source-reach.md` に残し、採用した finding だけを `refs/summaries/` や `.bib` へ昇格する。
 

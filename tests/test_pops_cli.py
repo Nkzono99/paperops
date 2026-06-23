@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from paperops import __version__  # noqa: E402
 from paperops.cli.main import main, write_manifest  # noqa: E402
+from paperops.cli.scaffold import copy_scaffold  # noqa: E402
 
 
 def run_cli(args: list[str]) -> tuple[int, str, str]:
@@ -51,10 +52,48 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "_handoff" / "README.md").is_file())
             self.assertTrue((target / "manuscript").is_dir())
             self.assertTrue((target / "refs" / "links.toml").is_file())
+            self.assertTrue((target / "refs" / "source-reach" / "README.md").is_file())
+            self.assertTrue((target / "notes" / "source-reach.md").is_file())
+            self.assertTrue((target / "notes" / "scientific-gate.md").is_file())
+            self.assertTrue((target / "notes" / "ai-draft-polish.md").is_file())
             self.assertTrue((target / ".pops" / "manifest.toml").is_file())
             self.assertFalse((target / "refs" / "local" / "locations.toml").exists())
             gitignore = (target / ".gitignore").read_text(encoding="utf-8")
             self.assertIn("_handoff/*", gitignore)
+            self.assertIn("refs/source-reach/**/raw/**", gitignore)
+
+    def test_copy_scaffold_excludes_ignored_source_reach_and_handoff_payloads(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "source"
+            target = Path(tmp) / "target"
+            (source / "_handoff").mkdir(parents=True)
+            (source / "_handoff" / ".gitkeep").write_text("\n", encoding="utf-8")
+            (source / "_handoff" / "README.md").write_text("ok\n", encoding="utf-8")
+            (source / "_handoff" / "secret.txt").write_text("no\n", encoding="utf-8")
+            source_reach = source / "refs" / "source-reach" / "topic"
+            (source_reach / "raw").mkdir(parents=True)
+            (source_reach / "raw" / "cookie.txt").write_text("no\n", encoding="utf-8")
+            (source_reach / "doctor.generated.json").write_text("no\n", encoding="utf-8")
+            (source_reach / "capture.generated.json").write_text("no\n", encoding="utf-8")
+            (source / "notes").mkdir()
+            (source / "notes" / "source-reach.md").write_text("ok\n", encoding="utf-8")
+
+            plan = copy_scaffold(source, target, overwrite=False)
+
+            self.assertTrue((target / "_handoff" / ".gitkeep").is_file())
+            self.assertTrue((target / "_handoff" / "README.md").is_file())
+            self.assertTrue((target / "notes" / "source-reach.md").is_file())
+            self.assertFalse((target / "_handoff" / "secret.txt").exists())
+            self.assertFalse((target / "refs" / "source-reach" / "topic" / "raw").exists())
+            self.assertFalse(
+                (target / "refs" / "source-reach" / "topic" / "doctor.generated.json").exists()
+            )
+            self.assertFalse(
+                (target / "refs" / "source-reach" / "topic" / "capture.generated.json").exists()
+            )
+            self.assertIn("_handoff/secret.txt", plan.excluded)
+            self.assertIn("refs/source-reach/topic/raw", plan.excluded)
+            self.assertIn("refs/source-reach/topic/raw/cookie.txt", plan.excluded)
 
     def test_init_uses_uvx_flow_without_project_local_cli(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

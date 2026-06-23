@@ -16,6 +16,7 @@ SECTIONS = [
     ("読者モデル", "notes/reviewer-model.md"),
     ("査読・返答", "notes/peer-review.md"),
     ("AI 初稿 polish", "notes/ai-draft-polish.md"),
+    ("AI 利用", "notes/ai-use.md"),
     ("引き継ぎ", "notes/handoff.md"),
     ("Todo", "notes/todo.md"),
     ("未解決の質問", "notes/open-questions.md"),
