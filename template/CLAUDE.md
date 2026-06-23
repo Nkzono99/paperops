@@ -67,7 +67,8 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、field name、投稿先指定、外部ツール名などの識別子だけは英語のままでよい。
 - `_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱である。内容は Git 管理されない。残す情報は `refs/` や `notes/` の適切な台帳へ整理し、秘密情報や個人環境の絶対パスを tracked ファイルへ移さない。
 - 俯瞰的な違和感や改善案を広げるだけなら `/open-paper-scan` を使い、ユーザーが求めるまで本文編集、notes 記録、Issue 化、上流 feedback 化へ進まない。
-- AI 初稿が条件数の列挙、run inventory、防御的 caveat に寄ったら、本文を直接磨く前に `/audit-ai-draft` と `/contextualize-conditions` で `notes/argument-map.md` と `notes/condition-context-map.md` を更新する。
+- simulation results、figure data、analysis artifact を本文に入れる前に、必要なら `/map-result-patterns` で `notes/result-pattern-map.md` に result pattern / evidence packet として束ねる。
+- AI 初稿が条件数の列挙、run inventory、防御的 caveat に寄ったら、本文を直接磨く前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新する。
 - 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
 - 公開・投稿前には `manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`notes/ai-use.md` を更新し、`make pre-submit` を実行する。
 - 新しい主張は `notes/claim-evidence-map.md` に evidence、scope、limitation とともに記録する。
@@ -112,7 +113,7 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 - セッション再開・進捗記録: `/resume-session`、`/note-writing-session`
 - 俯瞰・発散: `/open-paper-scan`
 - 執筆設計・本文調整: `/design-manuscript-claims`、`/calibrate-claims`、`/paragraph-surgery`
-- AI 初稿の診断・条件文脈化: `/audit-ai-draft`、`/contextualize-conditions`
+- 結果パターン・AI 初稿の診断・条件文脈化: `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`
 - 日英同期・公開語彙: `/sync-ja-en`、`/public-terminology-pass`
 - 通読レビュー: `/start-manuscript-review` で開始し、終了後に `/collect-manuscript-review`
 - 公開前点検: `/review-public-manuscript`、`/figure-story-audit`、`/venue-fit-review`、`/ai-disclosure-check`
@@ -132,6 +133,7 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 | `/pull-template-updates` | 旧名。新規作業では `/update-paperops` を使う |
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
 | `/open-paper-scan` | 原稿・プロジェクト・ハーネスを俯瞰し、まだ記録や実装に固定しない発散的な違和感と改善案を出す |
+| `/map-result-patterns` | raw result、figure data、analysis artifact を result pattern / evidence packet へ抽象化し、claim へ昇格する前の中間層を作る |
 | `/review-public-manuscript` | section / weekly / pre-submit の粒度で、公開原稿だけを入力に外部読者視点の未定義語・ローカル語・暗黙前提をレビュー |
 | `/start-manuscript-review` | TeX 直編集レビュー用 branch を用意し、人間向けの通読ガイドを表示 |
 | `/collect-manuscript-review` | TeX diff と inline comment からレビュー台帳を生成し、必要に応じて原稿へ反映 |
@@ -158,7 +160,7 @@ submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: links.toml, summaries, local（papers, bib, excerpts はスキルが必要時に作成）
 _handoff/            人間から AI への未整理ファイル受け取り箱（内容は Git 管理しない）
 notes/research-requests.md  paper draft から生じた追加解析・図表・実験要望
-notes/               project-brief, contribution-claims, claim-evidence-map, argument-map, condition-context-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
+notes/               project-brief, contribution-claims, result-pattern-map, claim-evidence-map, argument-map, condition-context-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
 scripts/             ビルド、TeX 構造、lint、citation-check、skill 対応、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills wrapper、rules/、hooks/

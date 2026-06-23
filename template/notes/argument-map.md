@@ -1,7 +1,7 @@
 # 論旨設計メモ
 
 AI 初稿や大きな改稿のあと、本文を節ごとの作業報告ではなく、読者が持ち帰る主張の流れへ戻すためのメモ。
-条件数、case count、run inventory の翻訳は `notes/condition-context-map.md` に分けて記録し、このファイルでは論文全体の主張・証拠階層・防御的記述の配置を扱う。
+raw result や figure data から見える観察単位は先に `notes/result-pattern-map.md` へ束ね、条件数、case count、run inventory の翻訳は `notes/condition-context-map.md` に分けて記録する。このファイルでは論文全体の主張・証拠階層・防御的記述の配置を扱う。
 
 ## 一文の中心主張
 
@@ -29,6 +29,12 @@ AI 初稿や大きな改稿のあと、本文を節ごとの作業報告では�
 | --- | --- | --- | --- |
 | 例: 12 条件中 2 条件 | 成立範囲が狭い / 特定配置だけで成立 | 局所保持と配置に依存する境界条件 | `notes/reproducibility.md` または supplement |
 | 例: 8 条件中 0 条件 | 否定的対照 / 破れる条件 | 広域緩和では release-work bracket が消える | 図表または caveat matrix |
+
+## Result pattern から主張への昇格
+
+| pattern ID | evidence packet | 昇格先の主張ID | 昇格理由 | 本文での扱い | 昇格しない理由 |
+| --- | --- | --- | --- | --- | --- |
+| RP-0001 | EP-0001 | C1 / 未定 | 未記入 | core result / mechanism / boundary / robustness / supplement | 未記入 |
 
 ## Defense budget
 

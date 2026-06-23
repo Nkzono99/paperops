@@ -16,6 +16,14 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | C1 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | draft |
 
+## Result pattern 由来の evidence
+
+`notes/result-pattern-map.md` で整理した result pattern / evidence packet のうち、主張を支える証拠として採用するものだけをここへ移す。
+
+| 主張ID | pattern ID | packet ID | evidence role | warrant | scope / limitation | 本文ブロック |
+| --- | --- | --- | --- | --- | --- | --- |
+| C1 | RP-0001 | EP-0001 | core evidence / mechanism / boundary / robustness / negative control | 未記入 | 未記入 | 未記入 |
+
 ## 主張しないこと
 
 - 本論文では主張しないことを記録する。

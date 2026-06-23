@@ -119,4 +119,4 @@ paper draft が runops project や外部ディレクトリを参照する場合�
 
 改善指示が局所的な修正や新しい check 追加に固着しそうな場合は、先に `/open-paper-scan` で原稿・読者体験・ハーネスを俯瞰する。`/open-paper-scan` は発想専用で、ユーザーが求めるまで本文編集、notes 記録、Issue 化、上流 feedback 化をしない。
 
-AI 初稿や大規模な自動生成稿は、本文を直接磨く前に `/audit-ai-draft` と `/contextualize-conditions` で `notes/argument-map.md` と `notes/condition-context-map.md` を更新する。`make argument-focus-check` は、条件数列挙、防御的 caveat、内部 provenance 語が本文に残っていないかを advisory に確認する。
+simulation results、figure data、analysis artifact は、本文や claim に直接入れる前に `/map-result-patterns` で `notes/result-pattern-map.md` の result pattern / evidence packet へ束ねる。AI 初稿や大規模な自動生成稿は、本文を直接磨く前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新する。`make argument-focus-check` は、必要な中間層の starter note と、条件数列挙、防御的 caveat、内部 provenance 語が本文に残っていないかを advisory に確認する。

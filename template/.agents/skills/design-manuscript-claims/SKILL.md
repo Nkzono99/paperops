@@ -14,6 +14,7 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 - `manuscript/mirror/status.md`
 - `notes/project-brief.md`
 - `notes/contribution-claims.md`
+- `notes/result-pattern-map.md`
 - `notes/claim-evidence-map.md`
 - `notes/reviewer-model.md`
 - `manuscript/ja/sections/*.tex`（原則として source of truth）
@@ -42,9 +43,10 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 4. section headings
 5. figure captions
 6. `notes/contribution-claims.md`
-7. `notes/claim-evidence-map.md`
-8. `notes/reviewer-model.md`
-9. `manuscript/mirror/status.md`
+7. `notes/result-pattern-map.md`
+8. `notes/claim-evidence-map.md`
+9. `notes/reviewer-model.md`
+10. `manuscript/mirror/status.md`
 
 この段階で、原稿が読者に約束している主張を仮説として書き出す。
 
@@ -62,6 +64,8 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 
 ### 3. 主張と証拠を棚卸しする
 
+`notes/result-pattern-map.md` に result pattern / evidence packet がある場合は、まず observed contrast、effect direction、negative/null cases、candidate interpretation を確認する。raw result、run inventory、case count を直接 claim に昇格しない。
+
 各候補主張について、以下の表を作る:
 
 | Claim | Essential evidence | Supporting evidence | Controls | Limits | Current blocks |
@@ -75,6 +79,7 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 `12 条件中 2 条件`、`8 条件中 0 条件`、保存時刻数、run 数、screening 条件は、そのまま `Essential results` に入れない。まず `/contextualize-conditions` の方針で、各結果を `mechanism`、`contrast`、`boundary`、`robustness`、`exception`、`provenance-only` のどれかへ分類する。
 
 - 条件数は claim ではなく evidence metadata として扱う。
+- result pattern は claim ではなく観察単位として扱い、claim に昇格するものだけ `claim-evidence-map` へ移す。
 - 0 条件は「失敗」ではなく、negative evidence、boundary、insufficient coverage のどれかへ分類する。
 - `notes/condition-context-map.md` に denominator の意味、公開条件名、本文での言い方を残す。
 - `notes/claim-evidence-map.md` には `condition role` と `public scope` を反映する。

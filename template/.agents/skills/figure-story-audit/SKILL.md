@@ -9,6 +9,7 @@ description: figure/table が claim, evidence, boundary を支えているか、
 
 ## 最初に読むファイル
 
+- `notes/result-pattern-map.md`
 - `notes/claim-evidence-map.md`
 - 対象の figure/table caption
 - caption を参照する本文 block
@@ -16,17 +17,18 @@ description: figure/table が claim, evidence, boundary を支えているか、
 
 ## 手順
 
-1. 各 figure/table について、figure claim、panel evidence、boundary、uncertainty を整理する。
+1. 各 figure/table について、対応する result pattern / evidence packet、figure claim、panel evidence、boundary、uncertainty を整理する。
 2. condition axis、public denominator、panel role を整理する。
 3. 本文参照が figure の takeaway と一致しているか確認する。
 4. caption が run/case list ではなく、図が支える contrast、mechanism、boundary を先に言っているか確認する。
 5. caption に sample/condition/scope/statistics が不足していないか確認する。
-6. `notes/claim-evidence-map.md` の Figure/table 欄と、必要なら `notes/condition-context-map.md` を更新する。
+6. `notes/result-pattern-map.md` の packet、`notes/claim-evidence-map.md` の Figure/table 欄、必要なら `notes/condition-context-map.md` を更新する。
 7. 図表 provenance が必要なら `notes/reproducibility.md` に追記する。
 
 ## 出力
 
 - Figure/table story map
+- Result pattern / evidence packet map
 - Condition axis / public denominator map
 - Caption rewrite plan
 - Body reference fixes

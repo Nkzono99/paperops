@@ -42,6 +42,7 @@ class ArgumentFocusCheckTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("ローカル条件数の列挙", result.stdout)
         self.assertIn("防御的・限定的な表現", result.stdout)
+        self.assertIn("/map-result-patterns", result.stdout)
         self.assertIn("/contextualize-conditions", result.stdout)
 
     def test_missing_condition_context_map_is_error(self) -> None:
@@ -64,6 +65,27 @@ class ArgumentFocusCheckTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("`notes/condition-context-map.md` が見つかりません", result.stdout)
+
+    def test_missing_result_pattern_map_is_error(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            shutil.copytree(ROOT / "template", target)
+            (target / "notes" / "result-pattern-map.md").unlink()
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--root",
+                    str(target),
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("`notes/result-pattern-map.md` が見つかりません", result.stdout)
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ AI 初稿や Results / Discussion に出てくる `12 条件中 2 条件`、`8 �
 
 ## 最初に読むファイル
 
+- `notes/result-pattern-map.md`
 - `notes/condition-context-map.md`
 - `notes/argument-map.md`
 - `notes/claim-evidence-map.md`
@@ -26,12 +27,12 @@ AI 初稿や Results / Discussion に出てくる `12 条件中 2 条件`、`8 �
 
 ## 手順
 
-1. 対象本文から local condition、case count、run inventory、condition label を抜き出す。
+1. `notes/result-pattern-map.md` があれば、先に pattern ID と observed contrast を確認する。対象本文から直接抜く場合も、local condition、case count、run inventory、condition label を claim ではなく result pattern の一部として扱う。
 2. 各 count の denominator が何を意味するか確認する。読者に意味がない denominator は本文の主張から外す。
 3. 各 condition group を claim role に分類する。
 4. 本文で使う公開条件名と、notes / supplement に退避する provenance を分ける。
 5. `notes/condition-context-map.md` の対応表を更新する。
-6. 必要に応じて `notes/claim-evidence-map.md` の scope / limitation と `notes/reproducibility.md` の条件集合・選別フローを更新する。
+6. 必要に応じて `notes/result-pattern-map.md` の pattern / packet、`notes/claim-evidence-map.md` の scope / limitation、`notes/reproducibility.md` の条件集合・選別フローを更新する。
 7. 本文を編集する場合は、条件数ではなく、物理条件、対照、境界条件、機構を主語にする。
 
 ## 変換例

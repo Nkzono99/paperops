@@ -1,6 +1,7 @@
 # 条件文脈マップ
 
 simulation condition、case count、run inventory を、そのまま本文の主張にせず、論文上の意味へ翻訳するための台帳。
+raw result や figure data から見える観察単位は先に `notes/result-pattern-map.md` へ束ね、ここでは条件軸、公開条件名、denominator、claim role への翻訳を扱う。
 
 ## 条件軸の公開名
 
@@ -13,6 +14,12 @@ simulation condition、case count、run inventory を、そのまま本文の主
 | local ID / count | 公開条件名 | 条件軸 | claim role | denominator の意味 | 本文での言い方 | 図表 | notes-only provenance |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 未記入 | 未記入 | 未記入 | core evidence / mechanism / boundary / robustness / negative control / exploratory / provenance-only | 未記入 | 未記入 | 未記入 | 未記入 |
+
+## Result pattern との対応
+
+| pattern ID | local condition / count | public condition name | condition role | denominator policy | result-pattern へ戻す情報 |
+| --- | --- | --- | --- | --- | --- |
+| RP-0001 | 未記入 | 未記入 | mechanism / boundary / robustness / negative control / exploratory | 本文 / 図注 / Methods / supplement / notes-only | 未記入 |
 
 ## 条件の役割
 

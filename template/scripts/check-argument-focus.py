@@ -73,6 +73,19 @@ def check_condition_context_map(root: Path, findings: list[Finding]) -> None:
             findings.append(Finding("error", f"`{rel_path}` に `{heading}` セクションがありません"))
 
 
+def check_result_pattern_map(root: Path, findings: list[Finding]) -> None:
+    rel_path = "notes/result-pattern-map.md"
+    path = root / rel_path
+    if not path.exists():
+        findings.append(Finding("error", f"`{rel_path}` が見つかりません"))
+        return
+    text = read_text(path)
+    required = ["結果パターン inventory", "観察から解釈への変換", "Evidence packet 化する場合", "Claim に昇格する前の確認"]
+    for heading in required:
+        if f"## {heading}" not in text:
+            findings.append(Finding("error", f"`{rel_path}` に `{heading}` セクションがありません"))
+
+
 def manuscript_files(root: Path) -> list[Path]:
     manuscript = root / "manuscript"
     if not manuscript.exists():
@@ -128,6 +141,7 @@ def main() -> int:
     root = args.root.resolve()
     findings: list[Finding] = []
     check_argument_map(root, findings)
+    check_result_pattern_map(root, findings)
     check_condition_context_map(root, findings)
     check_manuscript_smells(root, findings)
 
@@ -146,7 +160,7 @@ def main() -> int:
         for finding in warnings:
             print(f"- {finding.message}")
         print("")
-        print("AI 初稿を改稿する前に `/audit-ai-draft` と `/contextualize-conditions` で `notes/argument-map.md` と `notes/condition-context-map.md` を更新してください。")
+        print("AI 初稿を改稿する前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新してください。")
         print("")
     if not findings:
         print("論旨設計メモと本文の argument focus に明らかな問題は見つかりませんでした。")

@@ -27,6 +27,14 @@
 | --- | --- | --- | --- | --- | --- |
 | 未記入 | 未記入 | 未記入 | 未記入 | core evidence / boundary / screening / provenance-only | 未記入 |
 
+## Result pattern と図表 provenance
+
+showyourwork! や Quarto manuscripts のような完全な実行 DAG は必須にしない。ただし、本文が参照する図表について、どの result pattern / evidence packet / 外部成果物から来たかを軽く追跡する。
+
+| figure/table ID | pattern / packet ID | source script / notebook / export | input data / refs | output path | manuscript block | last checked |
+| --- | --- | --- | --- | --- | --- | --- |
+| Figure 1 | RP-0001 / EP-0001 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 |
+
 ## 図表 provenance
 
 | 図表 | 生成元 | 入力データ | 再生成コマンド | 手動編集 |

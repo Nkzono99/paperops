@@ -87,6 +87,7 @@ description: 論文プロジェクト、原稿、執筆ハーネスを俯瞰し�
 候補:
 
 - `/audit-ai-draft`: AI 初稿を論旨設計へ戻す
+- `/map-result-patterns`: raw result や figure data を result pattern / evidence packet へ束ねる
 - `/contextualize-conditions`: 条件数や case count を論文上の役割へ翻訳する
 - `/design-manuscript-claims`: 原稿全体を主張中心に再設計する
 - `/review-public-manuscript`: 公開原稿だけで外部読者視点の詰まりを検出する

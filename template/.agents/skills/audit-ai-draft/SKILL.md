@@ -13,6 +13,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 
 - PDF、TeX、または対象 section / block ID
 - `notes/project-brief.md`
+- `notes/result-pattern-map.md`
 - `notes/claim-evidence-map.md`
 - `notes/argument-map.md`
 - `notes/reviewer-model.md`
@@ -52,6 +53,8 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 
 ### 3. Local-to-claim abstraction を作る
 
+本文に散らばる結果列挙は、claim に直接変換せず、先に `notes/result-pattern-map.md` の result pattern / evidence packet へ戻す。観察された contrast、effect direction / magnitude、negative or null cases、uncertainty / failure mode、candidate interpretation を整理してから、claim role を判断する。
+
 ローカルな数え上げを、以下のいずれかへ分類する:
 
 - **Core evidence**: 中心主張を直接支える。本文で強く扱う。
@@ -60,7 +63,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - **Screening / provenance**: 本文では圧縮し、`notes/reproducibility.md`、supplement、figure-data package へ退避する。
 - **Discard / future work**: 今の主張に寄与しない。
 
-`notes/argument-map.md` の「ローカル条件から公開主張への抽象化」を埋める。
+`notes/result-pattern-map.md` と `notes/argument-map.md` の「ローカル条件から公開主張への抽象化」を埋める。
 
 ### 4. Defense budget を決める
 
