@@ -25,7 +25,7 @@
 - `ja/` と `en/` に分割された原稿ソース
 - `manuscript/mirror/` 配下のミラー制御層と block freshness ledger
 - `refs/` 配下の参照知識、関連研究の調査設計、外部 link 台帳。raw PDF は `refs/papers/` でローカル保持しても既定では ignore し、共有知識は `refs/summaries/`、関連研究の raw exploration は `refs/research/`、外部 project / directory の共有意図は `refs/links.toml` に集約する。作業用ドキュメントは日本語で書く
-- `notes/` 配下のセッション継続性ノート、関連研究マップ、result pattern / evidence packet の中間層、主張・証拠台帳、読者モデル、AI 利用ログ、追加解析・図表・実験要望。作業用ドキュメントは日本語で書く
+- `notes/` 配下のセッション継続性ノート、関連研究マップ、result pattern / evidence packet の中間層、主張・証拠台帳、読者モデル、査読・返答台帳、AI 利用ログ、追加解析・図表・実験要望。作業用ドキュメントは日本語で書く
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md` による公開メタデータ・AI 利用ログ・再現性メモ
 - `submission/<venue>/` 配下の投稿先公式テンプレートと最終提出用 TeX
 - 下流論文リポジトリ用の GitHub Issue フォーム
@@ -40,6 +40,7 @@
 - paper draft から runops project や一般ディレクトリを参照する場合、共有 link metadata と個人環境の絶対パスを分離する。
 - runops project link ではローカルパス直読みより MCP の read / inspect / plan tool を優先し、追加要望は `runops.paper.request.draft` で検証してから handoff する。
 - 関連研究の探索は、調査対象と field framework を先に固定し、raw search findings を `refs/research/` に留め、採用する文献だけ `refs/summaries/`、`.bib`、`notes/related-work-map.md` に昇格する。
+- 査読シミュレーションと実査読返答は、raw correspondence と対応台帳を分離し、tracked な `notes/peer-review.md` には要約、comment ID、revision route を中心に残す。
 - simulation results や figure data は本文へ直接流し込まず、まず result pattern / evidence packet として観察単位、条件文脈、claim role へ抽象化する。
 - 共有・投稿時に、公開メタデータ、再現性、図表 provenance、workflow 設定の未記入を検出する。
 - 再利用可能な自動化は各論文リポジトリではなくテンプレートリポジトリに集約する。

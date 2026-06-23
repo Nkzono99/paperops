@@ -30,15 +30,16 @@ uvx --from paper-harness-cli pops doctor
 日常運用の主役は、CLI そのものではなく Agent との会話である。
 
 1. 人間が論文トピック、制約、投稿先候補、判断を伝える。
-2. Agent が `notes/project-brief.md`、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`manuscript/venue.md` を整える。
+2. Agent が `notes/project-brief.md`、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/peer-review.md`、`manuscript/venue.md` を整える。
 3. `uvx --from paper-harness-cli pops ...` が init / setup / doctor / update-paperops のような決定的操作を担う。
 4. 原稿は `manuscript/ja` を中心に進め、必要な block を `manuscript/en` へ同期する。
 5. 関連研究を集める場合は `/research-related-work` で調査対象と field framework を作り、raw findings を `refs/research/`、採用文献を `refs/summaries/` と `.bib`、議論を `notes/related-work-map.md` へ分ける。
-6. 実験結果や外部ディレクトリが必要なら `refs/links.toml` と `refs/local/locations.toml` で link を解決し、runops project は MCP の read / inspect / plan tool から確認する。
-7. 追加解析・図表・実験要望は `notes/research-requests.md` に残し、runops 側の `research/paper_requests.toml` へ handoff する。
-8. 構成やハーネスの違和感をまだ修正に固定したくない場合は `/open-paper-scan` で俯瞰し、採用する idea だけ後段の skill へ渡す。
-9. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
-10. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
+6. 投稿前の模擬査読は `/peer-review-manuscript`、実査読コメントへの返答は `/respond-to-peer-review` で `notes/peer-review.md` へ整理する。
+7. 実験結果や外部ディレクトリが必要なら `refs/links.toml` と `refs/local/locations.toml` で link を解決し、runops project は MCP の read / inspect / plan tool から確認する。
+8. 追加解析・図表・実験要望は `notes/research-requests.md` に残し、runops 側の `research/paper_requests.toml` へ handoff する。
+9. 構成やハーネスの違和感をまだ修正に固定したくない場合は `/open-paper-scan` で俯瞰し、採用する idea だけ後段の skill へ渡す。
+10. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
+11. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
 
 CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
@@ -46,7 +47,7 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
 - `template/` は個別論文リポジトリに展開される scaffold の source of truth。
 - `src/paperops/` は `template/` を展開・診断・更新する薄い CLI。
-- `notes/` はセッション継続性、関連研究、主張・証拠、読者モデル、AI 利用ログの共有 memory。作業用ドキュメントは日本語で書く。
+- `notes/` はセッション継続性、関連研究、主張・証拠、読者モデル、査読・返答、AI 利用ログの共有 memory。作業用ドキュメントは日本語で書く。
 - `notes/result-pattern-map.md` は raw result、figure data、analysis artifact を result pattern / evidence packet へ束ね、claim に昇格する前の中間層として扱う。
 - `manuscript/ja` と `manuscript/en` は block ID で対応するバイリンガル原稿。
 - `refs/` は raw PDF 置き場ではなく、キュレーション済みの参照知識層、関連研究の調査設計、外部 project link 台帳。作業用ドキュメントは日本語で書く。
@@ -74,7 +75,8 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
 - `refs/`: 生の PDF 置き場ではなく共有知識層として活用
 - `refs/research/` と `/research-related-work`: 関連研究の outline / field framework / raw findings / 議論を分け、採用する文献だけ `refs/summaries/` と `.bib` へ昇格
-- `notes/`: セッション引き継ぎ、result pattern、主張・証拠、読者モデル、AI 利用ログ、継続性の状態管理
+- `/peer-review-manuscript` と `/respond-to-peer-review`: 模擬査読、major/minor comment、response matrix、revision plan を `notes/peer-review.md` に整理
+- `notes/`: セッション引き継ぎ、result pattern、主張・証拠、読者モデル、査読・返答、AI 利用ログ、継続性の状態管理
 - 日本語・英語の原稿をブロックレベルのミラーとして追跡
 - `submission/<venue>/`: 投稿先公式テンプレートと最終提出用 TeX の分離
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md`: 公開メタデータ、AI 利用開示、計算環境、図表 provenance の投稿前確認

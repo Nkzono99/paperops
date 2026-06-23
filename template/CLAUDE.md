@@ -74,6 +74,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - 公開・投稿前には `manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`notes/ai-use.md` を更新し、`make pre-submit` を実行する。
 - 新しい主張は `notes/claim-evidence-map.md` に evidence、scope、limitation とともに記録する。
 - 想定読者や投稿先制約が変わったら `notes/reviewer-model.md` と `manuscript/venue.md` を更新する。
+- 投稿前に査読者として厳しく読む場合は `/peer-review-manuscript` を使い、実際の査読コメントへ返答する場合は `/respond-to-peer-review` を使う。raw の editor / reviewer correspondence は confidential な場合があるため、tracked notes には要約と comment ID を中心に残す。
 - 内部 run label、script name、directory name、artifact name を本文の公開語として使わず、必要な置換を `manuscript/mirror/terminology.yml` に記録する。
 - 1 節を書いた直後や週次の節目では `/review-public-manuscript` を `section` / `weekly` として使い、repo 内部文脈なしで公開語彙・暗黙前提・figure story を確認する。
 - ミラー同期には `/sync-ja-en` を使用する。両言語を盲目的に上書きしない。
@@ -118,6 +119,7 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 - 結果パターン・AI 初稿の診断・条件文脈化: `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`
 - 日英同期・公開語彙: `/sync-ja-en`、`/public-terminology-pass`
 - 通読レビュー: `/start-manuscript-review` で開始し、終了後に `/collect-manuscript-review`
+- 査読シミュレーション・返答: `/peer-review-manuscript`、`/respond-to-peer-review`
 - 公開前点検: `/review-public-manuscript`、`/figure-story-audit`、`/venue-fit-review`、`/ai-disclosure-check`
 - 外部 project link・上流改善: `/resolve-local-paths`、`/feedback-paper-harness`
 
@@ -138,6 +140,8 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 | `/open-paper-scan` | 原稿・プロジェクト・ハーネスを俯瞰し、まだ記録や実装に固定しない発散的な違和感と改善案を出す |
 | `/map-result-patterns` | raw result、figure data、analysis artifact を result pattern / evidence packet へ抽象化し、claim へ昇格する前の中間層を作る |
 | `/review-public-manuscript` | section / weekly / pre-submit の粒度で、公開原稿だけを入力に外部読者視点の未定義語・ローカル語・暗黙前提をレビュー |
+| `/peer-review-manuscript` | 投稿前原稿を査読者パネルと meta-review 形式で評価し、major/minor comment と revision priority を作る |
+| `/respond-to-peer-review` | editor / reviewer comments を response matrix、revision plan、response letter 草案へ整理 |
 | `/start-manuscript-review` | TeX 直編集レビュー用 branch を用意し、人間向けの通読ガイドを表示 |
 | `/collect-manuscript-review` | TeX diff と inline comment からレビュー台帳を生成し、必要に応じて原稿へ反映 |
 | `/design-manuscript-claims` | 作業報告型の原稿を主張中心の構造へ再設計 |
@@ -163,7 +167,7 @@ submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: links.toml, summaries, research, local（papers, bib, excerpts はスキルが必要時に作成）
 _handoff/            人間から AI への未整理ファイル受け取り箱（内容は Git 管理しない）
 notes/research-requests.md  paper draft から生じた追加解析・図表・実験要望
-notes/               project-brief, contribution-claims, related-work-map, result-pattern-map, claim-evidence-map, argument-map, condition-context-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
+notes/               project-brief, contribution-claims, related-work-map, result-pattern-map, claim-evidence-map, argument-map, condition-context-map, reviewer-model, peer-review, ai-use, reproducibility, handoff, todo, decision-log
 scripts/             ビルド、TeX 構造、lint、citation-check、skill 対応、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills wrapper、rules/、hooks/

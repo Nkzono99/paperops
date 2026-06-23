@@ -11,12 +11,13 @@ AI 利用ログ、投稿先ポリシー、人間検証の証跡を点検する�
 
 - `notes/ai-use.md`
 - `notes/reproducibility.md`
+- `notes/peer-review.md`
 - `manuscript/venue.md`
 - 投稿先の AI policy（ユーザーが渡した URL/PDF/テキストがあれば）
 
 ## 手順
 
-1. AI の use type を language editing / translation / literature summary / code / figure / review に分類する。
+1. AI の use type を language editing / translation / literature summary / code / figure / review / peer-review / response-drafting に分類する。
 2. 引用、解析、コード、図表、画像に AI が関与した箇所の human verification を確認する。
 3. 投稿先 policy に応じて acknowledgement / methods / cover letter / none を切り分ける。
 4. `notes/ai-use.md` の disclosure draft を更新する。
@@ -36,6 +37,6 @@ AI 利用ログ、投稿先ポリシー、人間検証の証跡を点検する�
 
 ## Codex 実行メモ
 
-- `notes/ai-use.md`、`notes/reproducibility.md`、`manuscript/venue.md` を読む。
+- `notes/ai-use.md`、`notes/reproducibility.md`、`notes/peer-review.md`、`manuscript/venue.md` を読む。
 - 投稿先ポリシーは最新確認が必要な場合に公式資料へ当たる。
 - disclosure draft と human verification の不足を整理する。

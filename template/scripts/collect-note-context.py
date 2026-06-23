@@ -12,6 +12,7 @@ SECTIONS = [
     ("関連研究", "notes/related-work-map.md"),
     ("条件文脈", "notes/condition-context-map.md"),
     ("読者モデル", "notes/reviewer-model.md"),
+    ("査読・返答", "notes/peer-review.md"),
     ("引き継ぎ", "notes/handoff.md"),
     ("Todo", "notes/todo.md"),
     ("未解決の質問", "notes/open-questions.md"),

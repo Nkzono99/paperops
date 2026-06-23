@@ -9,6 +9,8 @@ description: 節単位・週次・投稿前の公開原稿を外部読者・一�
 
 通常の scientific review に加えて、一般研究者・隣接分野査読者・再現性重視の読者として、ローカル語、実装語、暗黙前提が公開原稿だけで理解できるかを検査する。
 
+ユーザーが reviewer 2、major/minor comments、accept/reject recommendation、meta-review のような査読票形式を求めている場合は `/peer-review-manuscript` を使う。実際に返ってきた査読コメントへの返答案や revision plan が目的なら `/respond-to-peer-review` を使う。
+
 ## 入力
 
 - `<pdf-or-public-manuscript-path>`: 投稿前 PDF、または公開原稿として読者に見える TeX/Markdown/テキスト。

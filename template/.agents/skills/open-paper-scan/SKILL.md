@@ -92,9 +92,11 @@ description: 論文プロジェクト、原稿、執筆ハーネスを俯瞰し�
 - `/contextualize-conditions`: 条件数や case count を論文上の役割へ翻訳する
 - `/design-manuscript-claims`: 原稿全体を主張中心に再設計する
 - `/review-public-manuscript`: 公開原稿だけで外部読者視点の詰まりを検出する
+- `/peer-review-manuscript`: 投稿前に査読者パネルと meta-review 形式で厳しく読む
+- `/respond-to-peer-review`: 実査読コメントを response matrix と revision plan へ整理する
 - `/improve-writing-harness`: project-local の摩擦を実装で直す
 - `/feedback-paper-harness`: 再利用可能な改善を上流へ戻す
-- `notes/related-work-map.md`、`notes/claim-evidence-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md`、`notes/reviewer-model.md`: 記録が必要になった後の置き場所
+- `notes/related-work-map.md`、`notes/claim-evidence-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`: 記録が必要になった後の置き場所
 
 ## 出力形式
 

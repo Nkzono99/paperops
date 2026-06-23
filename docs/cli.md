@@ -117,6 +117,8 @@ paper draft が runops project や外部ディレクトリを参照する場合�
 
 関連研究、研究動向、比較対象、反論文献を広く集める場合は、採用済み citation の整合確認へ進む前に `/research-related-work` を使う。調査対象と field framework は `refs/research/`、議論は `notes/related-work-map.md`、採用する文献だけ `refs/summaries/` と `.bib` に昇格する。
 
+投稿前に査読者視点の major/minor comment や meta-review が必要な場合は `/peer-review-manuscript` を使う。実際の editor / reviewer comments への返答は `/respond-to-peer-review` で comment ID、response matrix、revision plan に分ける。raw correspondence は confidential な場合があるため、tracked notes には要約と対応 ID を中心に残す。
+
 日英ミラーの確認済み同期後は `python scripts/mirror-freshness-check.py --root manuscript --update` で ledger を更新する。日常の `make ci` は freshness warning を許容するが、投稿前の `make pre-submit` は `make mirror-strict-check` により warning を失敗扱いにする。
 
 改善指示が局所的な修正や新しい check 追加に固着しそうな場合は、先に `/open-paper-scan` で原稿・読者体験・ハーネスを俯瞰する。`/open-paper-scan` は発想専用で、ユーザーが求めるまで本文編集、notes 記録、Issue 化、上流 feedback 化をしない。
