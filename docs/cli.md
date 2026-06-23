@@ -1,97 +1,41 @@
 # pops CLI
 
-`pops` は、`paperops` の `template/` を論文リポジトリとして初期化し、最低限の保守操作を安定したコマンド面に寄せるための CLI である。
+`pops` は、`paperops` の scaffold を初期化・診断・更新する薄い CLI である。研究判断や原稿編集は Agent / skill が担当し、`pops` は決定的なファイル操作を担当する。
 
-この CLI は将来の標準化前の薄い実行カーネルとして扱う。Agent やスキルは研究判断、原稿編集、手順選択を担当し、`pops` はファイル生成、診断、管理対象ハーネス更新のような決定的操作を担当する。
+## 実行方法
 
-## インストールと実行
-
-開発中は以下で実行できる:
-
-```sh
-python scripts/cli-smoke.py
-```
-
-root の smoke には CLI 検査も含める:
-
-```sh
-make cli-smoke
-make smoke
-```
-
-パッケージ化後は `uvx` から console script を実行する:
+標準実行は常に `uvx` 経由にする。
 
 ```sh
 uvx --from paper-harness-cli pops version
-```
-
-新規プロジェクトでも日常運用でも、`pops` は同じ `uvx` 経由で実行する:
-
-```sh
 uvx --from paper-harness-cli pops init paper-my-topic
 cd paper-my-topic
 uvx --from paper-harness-cli pops doctor
 ```
 
-`pops init` / `pops setup` は `.pops/manifest.toml` を作成・採用するが、CLI 用の project-local `.venv` や `pops` は作成しない。
-`.venv` は論文プロジェクト側の Python 実行環境が必要な場合に `make venv` で作成する。
+`pops init` / `pops setup` は `.pops/manifest.toml` を作成するが、CLI 用の project-local `.venv` は作らない。`.venv` は論文プロジェクト用の Python 環境が必要な場合に `make venv` で作る。
 
-以後のコマンド例で `pops ...` と書く場合も、標準動線では `uvx --from paper-harness-cli pops ...` として実行する。
+## コマンド一覧
 
-## コマンド
-
-- `pops init [path]`: bundled scaffold から新規論文リポジトリを作成し、`.pops/manifest.toml` を追加する。
-- `pops setup [path]`: 既存論文リポジトリに `.pops/manifest.toml` を追加する。
-- `pops setup <git-url> --path <dir>`: 既存 Git リポジトリを clone してから setup する。
-- `pops doctor [path]`: 必須ディレクトリ、`.pops` 管理情報、Git / make、workflow placeholder、link registry、ローカル設定ファイルの状態を確認する。対象は構造とローカルセットアップであり、公開・投稿前品質は `make readiness-check` / `make pre-submit` で確認する。
-- `pops update-paperops`: bundled scaffold または `--source` で指定した scaffold から、管理対象ハーネスファイルの更新計画を表示する。
-- `pops update-paperops --apply`: 不足している管理対象ファイルだけを追加する。
-- `pops update-paperops --apply --force`: 差分がある管理対象ファイルも上書きする。実行前に plan を確認すること。
-- `pops update-paperops --only AGENTS.md,.claude/skills`: 対象 prefix を絞り込む。
-- `pops update-paperops --template-ref <ref>`: 適用した scaffold の commit/ref を `.pops/manifest.toml` に記録する。`--source` が Git worktree 内なら、`--apply` 時に可能な限り自動検出する。
-- `pops update-paperops --adopt`: 現在のプロジェクトを CLI 管理対象として採用し、`.pops/manifest.toml` を更新する。既存 manifest の未知 key や `template_ref` は保持する。
+- `pops init [path]`: bundled scaffold から新規論文リポジトリを作る。
+- `pops setup [path]`: 既存リポジトリを `.pops` 管理に採用する。
+- `pops setup <git-url> --path <dir>`: clone してから setup する。
+- `pops doctor [path]`: 構造、`.pops`、Git / make、workflow placeholder、link registry を確認する。
+- `pops update-paperops`: 管理対象ハーネスファイルの更新計画を表示する。
+- `pops update-paperops --apply`: 不足している管理対象ファイルだけ追加する。
+- `pops update-paperops --apply --force`: 差分がある管理対象ファイルも上書きする。
+- `pops update-paperops --plan`: versioned upgrade chain を表示する。
+- `pops update-paperops --apply-chain`: checkpoint release ごとの `pops` を順に呼び替えて更新する。
 - `pops update-harness`: `update-paperops` の互換 alias。
-- `pops migrate [path]`: 旧 scaffold 由来のプロジェクトに `.pops` 管理情報を追加する計画を表示する。
-- `pops migrate --apply`: `.pops/manifest.toml` を作成する。
-- `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出力する。
-- `pops links list [path]`: `refs/links.toml` に登録された外部 project / directory link を表示する。`--resolve-local` を付けた場合だけ `refs/local/locations.toml` の実パスも表示する。
-- `pops links check [path]`: `refs/links.toml` の schema、link id、kind、`location_ref` と `refs/local` の対応を検証する。
-- `pops version`: CLI と上流情報を表示する。
-- `pops --version`: `pops version` と同じ情報を表示する。
-
-## 更新通知
-
-TTY 上で通常コマンドが成功した場合、`pops` は1日1回を上限に PyPI の `paper-harness-cli` 最新版を確認する。新しい版がある場合や、`.pops/manifest.toml` に記録された適用済み scaffold version が実行中の `pops` より古い場合は、`uvx --from paper-harness-cli pops update-paperops --plan` と `/update-paperops` スキルで upgrade chain を確認するよう通知する。
-
-この確認は非阻害で、ネットワーク取得に失敗してもコマンド結果には影響しない。無効化する場合は `POPS_DISABLE_VERSION_CHECK=1` を設定する。
-
-## Versioned upgrade chain
-
-後方互換性を最新 `pops` に積み続けないため、`update-paperops` は versioned upgrade chain を持つ。
-まず plan を確認する:
-
-```sh
-uvx --from paper-harness-cli pops update-paperops --plan
-```
-
-必要に応じて checkpoint ごとの `pops` を exact version で呼び替える:
-
-```sh
-uvx --from paper-harness-cli pops update-paperops --apply-chain
-uvx --from paper-harness-cli pops update-paperops --target 0.3 --apply-chain
-```
-
-major version を跨ぐ chain は既定では停止する。計画を確認したうえで明示的に許可する:
-
-```sh
-uvx --from paper-harness-cli pops update-paperops --target latest --allow-major --apply-chain
-```
-
-詳しい保持方針は [`docs/upgrade-policy.md`](upgrade-policy.md) を参照する。
+- `pops migrate [path]`: 旧 scaffold に `.pops` 管理情報を追加する計画を表示する。
+- `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出す。
+- `pops links list [path]`: `refs/links.toml` の外部 link を表示する。
+- `pops links check [path]`: link registry と local location の対応を検証する。
+- `pops version`, `pops --version`: CLI と上流情報を表示する。
 
 ## 更新対象
 
-`update-paperops` が扱うのは、下流プロジェクトのユーザー向けハーネス面に限定する:
+`update-paperops` が扱うのは、下流プロジェクトのハーネス管理面に限る。
 
 - `AGENTS.md`
 - `CLAUDE.md`
@@ -103,24 +47,31 @@ uvx --from paper-harness-cli pops update-paperops --target latest --allow-major 
 - `.github/ISSUE_TEMPLATE/`
 - `.github/PULL_REQUEST_TEMPLATE.md`
 
-`README.md`、`notes/`、`evidence/`、`claims/`、`review/`、`requests/`、`manuscript/`、`refs/`、`submission/` はプロジェクト固有内容として自動更新対象にしない。
+`README.md`、`manuscript/`、`notes/`、`evidence/`、`claims/`、`review/`、`requests/`、`refs/`、`submission/` はプロジェクト固有内容として自動更新しない。
 
-update plan では、管理対象ファイルに `agent guidance`、`Codex skill entry`、`validation/build script` などの更新面ラベルを付ける。`changed managed files` は下流側のファイルが bundled scaffold と異なるという意味で、通常の `--apply` では上書きされない。差分を確認し、ローカル追記を置換してよい場合だけ `--apply --force` を使う。
+## Upgrade Chain
 
-## Link registry
+後方互換性を最新 `pops` に積み続けないため、scaffold 更新は checkpoint release を跨いで行える。
 
-paper draft が runops project や外部ディレクトリを参照する場合、共有可能な link intent は `refs/links.toml` に、個人環境の絶対パスは ignored な `refs/local/locations.toml` に分離する。`pops links check` は `refs/links.toml` と `refs/local/locations.example.toml` の対応を確認し、ローカルパスを共有ファイルへ混ぜずに運用できるかを検査する。
+```sh
+uvx --from paper-harness-cli pops update-paperops --plan
+uvx --from paper-harness-cli pops update-paperops --apply-chain
+uvx --from paper-harness-cli pops update-paperops --target latest --allow-major --apply-chain
+```
 
-`kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。paper draft 側で発生した追加解析・図表・追加実験要望は `requests/analysis/` に記録し、`notes/views/research-requests.md` で俯瞰する。`runops.paper.request.draft` で schema と id の衝突を確認してから runops project 側の `research/paper_requests.toml` に handoff する。
+詳しい保持方針は [upgrade-policy.md](upgrade-policy.md) を参照する。
 
-`refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名のような識別子は英語のままでよい。
+## Link Registry
 
-関連研究、研究動向、比較対象、反論文献を広く集める場合は、採用済み citation の整合確認へ進む前に `/research-related-work` を使う。調査対象と field framework は `refs/research/`、議論は `notes/related-work-map.md`、採用する文献だけ `refs/summaries/` と `.bib` に昇格する。Web、GitHub、動画、RSS、SNS、議論サイトなど source channel 自体の到達経路が未整理な場合は、先に `/source-reach-scan` で `notes/source-reach.md` と `refs/source-reach/` に route と raw capture 方針を分ける。
+共有可能な link intent は `refs/links.toml` に置き、個人環境の絶対パスは ignored な `refs/local/locations.toml` に置く。
 
-投稿前に査読者視点の major/minor comment や meta-review が必要な場合は `/peer-review-manuscript` を使う。実際の editor / reviewer comments への返答は `/respond-to-peer-review` で comment ID、response matrix、revision plan に分ける。raw correspondence は confidential な場合があるため、tracked notes には要約と対応 ID を中心に残す。
+```sh
+uvx --from paper-harness-cli pops links list --resolve-local
+uvx --from paper-harness-cli pops links check
+```
 
-日英ミラーの確認済み同期後は `python scripts/mirror-freshness-check.py --root manuscript --update` で ledger を更新する。日常の `make ci` は freshness warning を許容するが、投稿前の `make pre-submit` は `make mirror-strict-check` により warning を失敗扱いにする。
+`kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。追加解析や図表要望は `requests/analysis/` に切り出してから runops 側へ渡す。
 
-改善指示が局所的な修正や新しい check 追加に固着しそうな場合は、先に `/open-paper-scan` で原稿・読者体験・ハーネスを俯瞰する。`/open-paper-scan` は発想専用で、ユーザーが求めるまで本文編集、notes 記録、Issue 化、上流 feedback 化をしない。
+## 更新通知
 
-simulation results、figure data、analysis artifact は、本文や claim に直接入れる前に `/map-result-patterns` で `evidence/results/` と `evidence/figures/` の card へ束ねる。中心主張、Abstract、Conclusion、main figure caption に入れる前には、必要に応じて `/scientific-gate` で `claims/gates/` の gate card と `notes/views/scientific-gate.md` の claim readiness と assumption approval を確認する。AI 初稿や大規模な自動生成稿は、本文を直接磨く前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `evidence/`、`claims/`、`notes/views/` を更新する。claim lock 後に機械的な文体だけを直す場合は `/polish-ai-draft` を使う。人間レビューやプロンプト指示を反映する場合は `/integrate-writing-feedback` で `review/feedback/` の feedback card から上流へ遡る。`make argument-focus-check` は、必要な中間層の starter note と、条件数列挙、防御的 caveat、内部 provenance 語が本文に残っていないかを advisory に確認する。
+TTY 上で通常コマンドが成功した場合、`pops` は低頻度で PyPI の最新版と `.pops/manifest.toml` の scaffold version を確認する。通知は非阻害で、無効化する場合は `POPS_DISABLE_VERSION_CHECK=1` を設定する。

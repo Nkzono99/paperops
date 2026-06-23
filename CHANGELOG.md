@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- README、下流 README、AGENTS / CLAUDE、主要 docs を短縮し、重複していた運用説明や長いスキル解説を必要最低限の入口・境界ルール中心に整理した。
+
 ## 0.5.0 - 2026-06-23
 
 - 論文執筆の中間層をカード正本へ整理した。`evidence/`、`claims/`、`review/`、`requests/` を追加し、result / figure / source、claim / scientific gate / argument、feedback / response、analysis / writing request を小さな Markdown card + front matter で管理できるようにした。旧 `notes/*.md` は互換ビューへ降格し、俯瞰用の `notes/views/` を追加した。
