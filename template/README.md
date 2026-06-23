@@ -38,6 +38,8 @@
 
 `refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、投稿先指定、外部ツール名などの識別子は英語のままでよい。AI 初稿が条件数の列挙や防御的な caveat に寄りすぎた場合は `/audit-ai-draft` と `/contextualize-conditions` で `notes/argument-map.md` と `notes/condition-context-map.md` を更新してから本文を直す。
 
+構成、読者体験、執筆ハーネスの違和感をまだ修正や記録に固定せず広げたい場合は `/open-paper-scan` を使う。出た idea はその場では採用せず、必要になったものだけ後で `/audit-ai-draft`、`/design-manuscript-claims`、`/improve-writing-harness`、`/feedback-paper-harness` へ渡す。
+
 `tex-env.toml` では TeX Live / Docker だけでなく、JA / EN ごとの `latexmk` mode と engine も設定できる。日本語ドラフトで `uplatex + dvipdfmx` が必要な場合は、`tex-env.example.toml` の `[latex.ja]` 例をコピーする。
 
 Windows / PowerShell で PDF を確認したい場合は、TeX Live の代わりに pinned Tectonic を `.tools/` に取得してビルドできる:

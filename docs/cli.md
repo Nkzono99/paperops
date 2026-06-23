@@ -117,4 +117,6 @@ paper draft が runops project や外部ディレクトリを参照する場合�
 
 日英ミラーの確認済み同期後は `python scripts/mirror-freshness-check.py --root manuscript --update` で ledger を更新する。日常の `make ci` は freshness warning を許容するが、投稿前の `make pre-submit` は `make mirror-strict-check` により warning を失敗扱いにする。
 
+改善指示が局所的な修正や新しい check 追加に固着しそうな場合は、先に `/open-paper-scan` で原稿・読者体験・ハーネスを俯瞰する。`/open-paper-scan` は発想専用で、ユーザーが求めるまで本文編集、notes 記録、Issue 化、上流 feedback 化をしない。
+
 AI 初稿や大規模な自動生成稿は、本文を直接磨く前に `/audit-ai-draft` と `/contextualize-conditions` で `notes/argument-map.md` と `notes/condition-context-map.md` を更新する。`make argument-focus-check` は、条件数列挙、防御的 caveat、内部 provenance 語が本文に残っていないかを advisory に確認する。

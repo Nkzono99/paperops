@@ -35,8 +35,9 @@ uvx --from paper-harness-cli pops doctor
 4. 原稿は `manuscript/ja` を中心に進め、必要な block を `manuscript/en` へ同期する。
 5. 実験結果や外部ディレクトリが必要なら `refs/links.toml` と `refs/local/locations.toml` で link を解決し、runops project は MCP の read / inspect / plan tool から確認する。
 6. 追加解析・図表・実験要望は `notes/research-requests.md` に残し、runops 側の `research/paper_requests.toml` へ handoff する。
-7. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
-8. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
+7. 構成やハーネスの違和感をまだ修正に固定したくない場合は `/open-paper-scan` で俯瞰し、採用する idea だけ後段の skill へ渡す。
+8. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
+9. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
 
 CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
@@ -76,6 +77,7 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md`: 公開メタデータ、AI 利用開示、計算環境、図表 provenance の投稿前確認
 - `make pre-submit`: `make ci` に加えて引用サマリー、strict mirror freshness、submission slot、スタータープレースホルダー、workflow 参照、公開メタデータ不足を検出
 - `make argument-focus-check`: AI 初稿が条件数列挙、防御的 caveat、ローカル実行ログに寄りすぎていないかを advisory に検出
+- `/open-paper-scan`: 改善指示を局所修正へ閉じる前に、原稿・読者体験・執筆ハーネスを発散的に眺める
 - `make citation-check`: TeX 本文中の citation key と `.bib` の不整合を早期検出
 - `make public-terms-check` / `make claim-evidence-check`: 内部語の公開本文混入と supported claim の evidence 対応を早期検出
 - `make mirror-freshness-check` / `make mirror-strict-check` / `make submission-drift-check`: 日英 block の同期鮮度と投稿版への科学的変更戻し忘れを点検

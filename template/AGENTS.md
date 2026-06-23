@@ -70,6 +70,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `refs/links.toml` は外部 project / directory への共有 link 台帳である。tracked ファイルには絶対パスを書かず、`location_ref` を `refs/local/locations.toml` の個人設定で解決する。
 - `refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、field name、投稿先指定、外部ツール名などの識別子だけは英語のままでよい。
 - `_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱である。内容は Git 管理されない。残す情報は `refs/` や `notes/` の適切な台帳へ整理し、秘密情報や個人環境の絶対パスを tracked ファイルへ移さない。
+- 俯瞰的な違和感や改善案を広げるだけなら `/open-paper-scan` を使い、ユーザーが求めるまで本文編集、notes 記録、Issue 化、上流 feedback 化へ進まない。
 - AI 初稿が条件数の列挙、run inventory、防御的 caveat に寄ったら、本文を直接磨く前に `/audit-ai-draft` と `/contextualize-conditions` で `notes/argument-map.md` と `notes/condition-context-map.md` を更新する。
 - 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
 - 公開・投稿前には `manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`notes/ai-use.md` を更新し、`make pre-submit` を実行する。
@@ -109,6 +110,7 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。恒久
 
 - 初回セットアップ・上流更新: `/setup`、`/update-paperops`
 - セッション再開・進捗記録: `/resume-session`、`/note-writing-session`
+- 俯瞰・発散: `/open-paper-scan`
 - 執筆設計・本文調整: `/design-manuscript-claims`、`/calibrate-claims`、`/paragraph-surgery`
 - AI 初稿の診断・条件文脈化: `/audit-ai-draft`、`/contextualize-conditions`
 - 日英同期・公開語彙: `/sync-ja-en`、`/public-terminology-pass`
@@ -129,6 +131,7 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。恒久
 | `/update-paperops` | pops 更新通知や上流 paperops scaffold の変更を安全に取り込む |
 | `/pull-template-updates` | 旧名。新規作業では `/update-paperops` を使う |
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
+| `/open-paper-scan` | 原稿・プロジェクト・ハーネスを俯瞰し、まだ記録や実装に固定しない発散的な違和感と改善案を出す |
 | `/review-public-manuscript` | section / weekly / pre-submit の粒度で、公開原稿だけを入力に外部読者視点の未定義語・ローカル語・暗黙前提をレビュー |
 | `/start-manuscript-review` | TeX 直編集レビュー用 branch を用意し、人間向けの通読ガイドを表示 |
 | `/collect-manuscript-review` | TeX diff と inline comment からレビュー台帳を生成し、必要に応じて原稿へ反映 |

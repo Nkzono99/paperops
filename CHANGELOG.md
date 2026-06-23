@@ -8,6 +8,7 @@
 - `mirror-freshness-check --strict` と `make mirror-strict-check` を追加し、`make pre-submit` で freshness warning を失敗扱いにするようにした。
 - 公開原稿の既定 bibliography を `references` のみにし、`mypapers` は作業 draft 用の opt-in 枠として readiness warning の対象にした。
 - AI 初稿が条件数列挙や防御的 caveat に寄る問題を診断する `/audit-ai-draft`、`/contextualize-conditions`、`notes/argument-map.md`、`notes/condition-context-map.md`、`make argument-focus-check` を追加した。
+- 改善指示が局所修正へ固着する前に、原稿・読者体験・執筆ハーネスを俯瞰して発散的な違和感と改善案を出す `/open-paper-scan` を追加した。既存下流リポジトリで取り込む場合は `.agents/skills/open-paper-scan/` と `.claude/skills/open-paper-scan/`、AGENTS/CLAUDE/README の案内を更新する。
 
 ## 0.3.0 - 2026-06-22
 

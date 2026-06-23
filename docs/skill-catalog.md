@@ -39,10 +39,13 @@
 - `update-paperops`
 - `pull-template-updates`
 - `import-manuscript`
+- `open-paper-scan`
 - `review-public-manuscript`
 - `start-manuscript-review`
 - `collect-manuscript-review`
 - `design-manuscript-claims`
+- `audit-ai-draft`
+- `contextualize-conditions`
 - `calibrate-claims`
 - `public-terminology-pass`
 - `paragraph-surgery`
@@ -54,7 +57,9 @@
 
 - 初回セットアップ・上流更新: `setup`、`update-paperops`
 - セッション再開・進捗記録: `resume-session`、`note-writing-session`
+- 俯瞰・発散: `open-paper-scan`
 - 執筆設計・本文調整: `design-manuscript-claims`、`calibrate-claims`、`paragraph-surgery`
+- AI 初稿の診断・条件文脈化: `audit-ai-draft`、`contextualize-conditions`
 - 日英同期・公開語彙: `sync-ja-en`、`public-terminology-pass`
 - 通読レビュー: `start-manuscript-review` で開始し、終了後に `collect-manuscript-review`
 - 公開前点検: `review-public-manuscript`、`figure-story-audit`、`venue-fit-review`、`ai-disclosure-check`
@@ -62,10 +67,13 @@
 
 レビュー系スキルの使い分け:
 
+- `open-paper-scan`: 原稿、論文プロジェクト、執筆ハーネスを俯瞰し、まだ記録・実装・Issue 化に固定しない違和感、改善案、逆張り仮説を出す。
 - `review-public-manuscript`: section / weekly / pre-submit の粒度で公開原稿だけを読み、外部読者・一般研究者視点で未定義語、ローカル語、暗黙前提、再現性ギャップを検出する。
 - `start-manuscript-review`: 人間が TeX/PDF を通読して直接編集するための review branch と inline comment ルールを準備する。
 - `collect-manuscript-review`: TeX の直接編集 diff と `% REVIEW:` などの inline comment から `notes/reviews/review-YYYY-MM-DD.md` を生成し、必要に応じて source-of-truth 原稿と EN mirror に反映する。
 - `design-manuscript-claims`: repo 内の brief / contribution claims / mirror status も読み、作業報告型の原稿を主張中心の構造へ再設計する。
+- `audit-ai-draft`: AI 初稿を公開読者視点と repo 文脈の両方から診断し、論旨設計と改稿計画を作る。
+- `contextualize-conditions`: 条件数、case count、run inventory を claim role と公開条件名へ翻訳する。
 - `calibrate-claims`: evidence strength に合わせて防御的文体と過剰主張を調整する。
 - `public-terminology-pass`: ローカル語・内部語・未定義略語を public terminology gate に沿って公開語へ置換する。
 - `paragraph-surgery`: 段落単位で old-to-new flow、topic sentence、stress position を整える。
