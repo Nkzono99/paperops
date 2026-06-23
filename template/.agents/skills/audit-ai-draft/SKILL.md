@@ -13,11 +13,13 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 
 - PDF、TeX、または対象 section / block ID
 - `notes/project-brief.md`
+- `notes/scientific-gate.md`
 - `notes/related-work-map.md`
 - `notes/result-pattern-map.md`
 - `notes/claim-evidence-map.md`
 - `notes/argument-map.md`
 - `notes/reviewer-model.md`
+- `notes/ai-draft-polish.md`
 - `notes/reproducibility.md`
 - `manuscript/mirror/terminology.yml`
 - 必要に応じて `refs/links.toml` と `refs/summaries/`
@@ -30,6 +32,8 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - 内部 provenance 語、local run label、directory name、artifact name を公開語へ置換する。
 - `notes/argument-map.md` と `notes/claim-evidence-map.md` を更新する改稿計画を出す。
 - 関連研究の位置づけが未整理な場合は、本文を磨く前に `notes/related-work-map.md` または `/research-related-work` へ戻す。
+- 中心主張や Abstract / Conclusion に入る claim が `scientific-gate` で未承認なら、文体修正ではなく `/scientific-gate` へ戻す。
+- AI らしい定型文だけが問題で claim / evidence / gate は固定済みの場合は、本文診断後に `/polish-ai-draft` へ渡す。
 
 ## 手順
 
@@ -84,6 +88,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - block ID 単位の rewrite plan
 - `notes/claim-evidence-map.md` と `notes/argument-map.md` の更新案
 - 関連研究・反論文献の整理が必要なら `notes/related-work-map.md` の更新案
+- scientific gate で止めるべき claim と、polish だけで直してよい段落
 
 ## チェック
 
@@ -110,3 +115,4 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - サブエージェントを使える場合は、public-only reviewer と repo-aware harness designer を分ける。
 - `refs/` と `notes/` の作業用ドキュメントは日本語で書く。
 - 本文に戻す文言は、ローカル条件数ではなく、物理的意味、機構、境界条件、読者の持ち帰りを主語にする。
+- AI 初稿の定型臭だけを直す場合も、`notes/ai-use.md` の AI 利用開示を消さない。

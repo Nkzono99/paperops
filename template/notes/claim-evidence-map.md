@@ -16,6 +16,8 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | C1 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | draft |
 
+`supported` に昇格する前に、中心主張は `notes/scientific-gate.md` の claim readiness table でも `ready-to-write` になっているか確認する。`analysis-needed` や `assumption-blocked` の主張は Abstract / Conclusion / main figure caption に使わない。
+
 ## Result pattern 由来の evidence
 
 `notes/result-pattern-map.md` で整理した result pattern / evidence packet のうち、主張を支える証拠として採用するものだけをここへ移す。
@@ -41,3 +43,9 @@
 - `supported`: evidence と warrant が揃い、本文で明確に主張してよい。
 - `overclaim risk`: evidence より強く見えるため、scope または limitation の調整が必要。
 - `defer`: 本文の中心主張には入れず、将来課題または補足に回す。
+
+## Scientific gate との対応
+
+| 主張ID | gate status | block reason | approved writing scope | next route |
+| --- | --- | --- | --- | --- |
+| C1 | ready-to-write / analysis-needed / assumption-blocked / supplement-only / defer | 未記入 | 未記入 | `/scientific-gate` / `/map-result-patterns` / `/research-related-work` |

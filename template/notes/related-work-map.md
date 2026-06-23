@@ -4,6 +4,8 @@ Deep research の結果を、そのまま文献レビュー本文へ流し込ま
 
 広い探索や web search の raw output は `refs/research/` に一時保持し、採用する文献だけ `refs/summaries/`、`manuscript/shared/bib/references.bib`、`notes/claim-evidence-map.md` へ昇格する。
 
+Web、GitHub、動画、RSS、SNS、議論サイトなど複数の外部 source channel を使う場合は、先に `notes/source-reach.md` と `/source-reach-scan` で到達経路、credential need、raw capture policy、refs への昇格先を決める。
+
 ## 調査スコープ
 
 - 調査トピック: 未記入
@@ -49,6 +51,12 @@ Deep research の結果を、そのまま文献レビュー本文へ流し込ま
 | citation key | 採用理由 | summary path | claim / section | verification status |
 | --- | --- | --- | --- | --- |
 | 未記入 | 未記入 | `refs/summaries/...` | 未記入 | unchecked / metadata-checked / read / cited |
+
+## Source reach 由来の finding
+
+| finding ID | source channel | 要約 | 関連する debate / claim | 昇格判断 |
+| --- | --- | --- | --- | --- |
+| SF-0001 | paper-metadata / github / web-page / video-transcript / rss-news / social-discussion | 未記入 | 未記入 | promote / hold / reject |
 
 ## 使わない文献
 

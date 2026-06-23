@@ -115,7 +115,7 @@ paper draft が runops project や外部ディレクトリを参照する場合�
 
 `refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名のような識別子は英語のままでよい。
 
-関連研究、研究動向、比較対象、反論文献を広く集める場合は、採用済み citation の整合確認へ進む前に `/research-related-work` を使う。調査対象と field framework は `refs/research/`、議論は `notes/related-work-map.md`、採用する文献だけ `refs/summaries/` と `.bib` に昇格する。
+関連研究、研究動向、比較対象、反論文献を広く集める場合は、採用済み citation の整合確認へ進む前に `/research-related-work` を使う。調査対象と field framework は `refs/research/`、議論は `notes/related-work-map.md`、採用する文献だけ `refs/summaries/` と `.bib` に昇格する。Web、GitHub、動画、RSS、SNS、議論サイトなど source channel 自体の到達経路が未整理な場合は、先に `/source-reach-scan` で `notes/source-reach.md` と `refs/source-reach/` に route と raw capture 方針を分ける。
 
 投稿前に査読者視点の major/minor comment や meta-review が必要な場合は `/peer-review-manuscript` を使う。実際の editor / reviewer comments への返答は `/respond-to-peer-review` で comment ID、response matrix、revision plan に分ける。raw correspondence は confidential な場合があるため、tracked notes には要約と対応 ID を中心に残す。
 
@@ -123,4 +123,4 @@ paper draft が runops project や外部ディレクトリを参照する場合�
 
 改善指示が局所的な修正や新しい check 追加に固着しそうな場合は、先に `/open-paper-scan` で原稿・読者体験・ハーネスを俯瞰する。`/open-paper-scan` は発想専用で、ユーザーが求めるまで本文編集、notes 記録、Issue 化、上流 feedback 化をしない。
 
-simulation results、figure data、analysis artifact は、本文や claim に直接入れる前に `/map-result-patterns` で `notes/result-pattern-map.md` の result pattern / evidence packet へ束ねる。AI 初稿や大規模な自動生成稿は、本文を直接磨く前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新する。`make argument-focus-check` は、必要な中間層の starter note と、条件数列挙、防御的 caveat、内部 provenance 語が本文に残っていないかを advisory に確認する。
+simulation results、figure data、analysis artifact は、本文や claim に直接入れる前に `/map-result-patterns` で `notes/result-pattern-map.md` の result pattern / evidence packet へ束ねる。中心主張、Abstract、Conclusion、main figure caption に入れる前には、必要に応じて `/scientific-gate` で `notes/scientific-gate.md` の claim readiness と assumption approval を確認する。AI 初稿や大規模な自動生成稿は、本文を直接磨く前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新する。claim lock 後に機械的な文体だけを直す場合は `/polish-ai-draft` を使う。`make argument-focus-check` は、必要な中間層の starter note と、条件数列挙、防御的 caveat、内部 provenance 語が本文に残っていないかを advisory に確認する。

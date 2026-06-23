@@ -40,8 +40,10 @@
 - `pull-template-updates`
 - `import-manuscript`
 - `open-paper-scan`
+- `source-reach-scan`
 - `research-related-work`
 - `map-result-patterns`
+- `scientific-gate`
 - `review-public-manuscript`
 - `peer-review-manuscript`
 - `respond-to-peer-review`
@@ -51,6 +53,7 @@
 - `audit-ai-draft`
 - `contextualize-conditions`
 - `calibrate-claims`
+- `polish-ai-draft`
 - `public-terminology-pass`
 - `paragraph-surgery`
 - `figure-story-audit`
@@ -62,8 +65,8 @@
 - 初回セットアップ・上流更新: `setup`、`update-paperops`
 - セッション再開・進捗記録: `resume-session`、`note-writing-session`
 - 俯瞰・発散: `open-paper-scan`
-- 関連研究・文献議論: `research-related-work`、`update-refs`
-- 執筆設計・本文調整: `design-manuscript-claims`、`calibrate-claims`、`paragraph-surgery`
+- 関連研究・文献議論: `source-reach-scan`、`research-related-work`、`update-refs`
+- 執筆設計・本文調整: `scientific-gate`、`design-manuscript-claims`、`calibrate-claims`、`paragraph-surgery`、`polish-ai-draft`
 - 結果パターン・AI 初稿の診断・条件文脈化: `map-result-patterns`、`audit-ai-draft`、`contextualize-conditions`
 - 日英同期・公開語彙: `sync-ja-en`、`public-terminology-pass`
 - 通読レビュー: `start-manuscript-review` で開始し、終了後に `collect-manuscript-review`
@@ -74,8 +77,10 @@
 レビュー系スキルの使い分け:
 
 - `open-paper-scan`: 原稿、論文プロジェクト、執筆ハーネスを俯瞰し、まだ記録・実装・Issue 化に固定しない違和感、改善案、逆張り仮説を出す。
+- `source-reach-scan`: 外部 Web、GitHub、動画、RSS、SNS、議論サイトなどの source channel、到達経路、credential need、raw capture policy、refs への昇格先を整理する。
 - `research-related-work`: 関連研究を広く集める前に調査対象と field framework を作り、raw findings を `refs/research/`、採用文献を `refs/summaries/` と `.bib`、文献議論を `notes/related-work-map.md` へ分ける。
 - `map-result-patterns`: raw result、figure data、analysis artifact を result pattern / evidence packet へ抽象化し、claim に昇格する前の中間層を作る。
+- `scientific-gate`: 中心主張、Abstract、Conclusion、主要図表へ進む前に、claim package、証拠、仮定、再現性、人間承認の readiness を判定する。
 - `review-public-manuscript`: section / weekly / pre-submit の粒度で公開原稿だけを読み、外部読者・一般研究者視点で未定義語、ローカル語、暗黙前提、再現性ギャップを検出する。
 - `peer-review-manuscript`: 投稿前原稿を査読者パネルとして読み、major/minor comments、required checks、recommendation、meta-review、concern matrix を作る。
 - `respond-to-peer-review`: editor / reviewer comments を comment ID、response matrix、revision plan、response letter draft に分解し、本文修正と返答案を混ぜない。
@@ -85,6 +90,7 @@
 - `audit-ai-draft`: AI 初稿を公開読者視点と repo 文脈の両方から診断し、論旨設計と改稿計画を作る。
 - `contextualize-conditions`: 条件数、case count、run inventory を claim role と公開条件名へ翻訳する。
 - `calibrate-claims`: evidence strength に合わせて防御的文体と過剰主張を調整する。
+- `polish-ai-draft`: AI 初稿の定型臭、曖昧な出典、機械的なつなぎを、claim lock と AI 利用開示を守って論文向けに整える。
 - `public-terminology-pass`: ローカル語・内部語・未定義略語を public terminology gate に沿って公開語へ置換する。
 - `paragraph-surgery`: 段落単位で old-to-new flow、topic sentence、stress position を整える。
 - `figure-story-audit`: figure/table が claim, evidence, boundary を支えているか監査する。
@@ -93,7 +99,7 @@
 
 `resolve-local-paths` は `refs/links.toml` を共有可能な external link registry、`refs/local/locations.toml` を untracked なローカル解決先として扱う。
 
-セットアップとセッション記録のスキルは、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`、`notes/ai-use.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md` も公開・投稿前状態として扱う。
+セットアップとセッション記録のスキルは、`notes/source-reach.md`、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/scientific-gate.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`、`notes/ai-draft-polish.md`、`notes/ai-use.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md` も公開・投稿前状態として扱う。
 
 `.agents/skills/` は重複実装を避けるための source of truth であり、恒久的な手順変更は `.agents/skills/<skill>/SKILL.md` 側を更新する。`.claude/skills/` は cwd に依存しない `${CLAUDE_SKILL_DIR}` 参照を使う薄い互換入口に留める。`make skill-mirror-check` は同名 skill の存在と wrapper の source-of-truth 参照を機械的に確認する。
 

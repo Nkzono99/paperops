@@ -32,6 +32,7 @@ simulation results、figure data、analysis artifact、run output を、本文�
 - candidate interpretation は、データより強く言いすぎていないか。
 - 条件名、case count、denominator は `notes/condition-context-map.md` で公開文脈へ翻訳されているか。
 - claim に昇格する場合、`notes/claim-evidence-map.md` に evidence、warrant、scope、limitation を移せるか。
+- Abstract、Conclusion、main figure caption に入れる場合は、`notes/scientific-gate.md` で `ready-to-write` になっているか。
 
 ## 本文へ入れない provenance
 

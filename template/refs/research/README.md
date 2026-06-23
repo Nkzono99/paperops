@@ -2,7 +2,7 @@
 
 関連研究を広く集めるための一時調査領域。
 
-このディレクトリは、Deep-Research-skills の outline -> deep research -> report という発想を paperops 用に薄く取り込むために使う。raw web findings や item ごとの JSON / Markdown は、論文の正本ではない。採用する文献だけを `refs/summaries/`、`manuscript/shared/bib/references.bib`、`notes/related-work-map.md` へ昇格する。
+このディレクトリは、Deep-Research-skills の outline -> deep research -> report という発想を paperops 用に薄く取り込むために使う。raw web findings や item ごとの JSON / Markdown は、論文の正本ではない。採用する文献だけを `refs/summaries/`、`manuscript/shared/bib/references.bib`、`notes/related-work-map.md` へ昇格する。外部プラットフォームごとの到達経路や credential 判断は、必要に応じて `/source-reach-scan` と `refs/source-reach/` へ分ける。
 
 ## 推奨構造
 

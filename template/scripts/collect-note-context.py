@@ -6,13 +6,16 @@ from pathlib import Path
 
 SECTIONS = [
     ("プロジェクト概要", "notes/project-brief.md"),
+    ("科学的ゲート", "notes/scientific-gate.md"),
     ("結果パターン", "notes/result-pattern-map.md"),
     ("主張と証拠", "notes/claim-evidence-map.md"),
     ("論旨設計", "notes/argument-map.md"),
     ("関連研究", "notes/related-work-map.md"),
+    ("外部ソース到達", "notes/source-reach.md"),
     ("条件文脈", "notes/condition-context-map.md"),
     ("読者モデル", "notes/reviewer-model.md"),
     ("査読・返答", "notes/peer-review.md"),
+    ("AI 初稿 polish", "notes/ai-draft-polish.md"),
     ("引き継ぎ", "notes/handoff.md"),
     ("Todo", "notes/todo.md"),
     ("未解決の質問", "notes/open-questions.md"),

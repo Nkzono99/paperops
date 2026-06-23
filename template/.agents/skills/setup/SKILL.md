@@ -26,9 +26,12 @@ description: テンプレートから作成した新しい論文リポジトリ�
 - `manuscript/publication-metadata.toml` にプレースホルダーが残っているか
 - `notes/project-brief.md` にプレースホルダーが残っているか
 - `notes/related-work-map.md` が未記入か
+- `notes/source-reach.md` が未記入か
+- `notes/scientific-gate.md` が未記入か
 - `notes/claim-evidence-map.md` が未記入か
 - `notes/reviewer-model.md` が未記入か
 - `notes/peer-review.md` が未記入か
+- `notes/ai-draft-polish.md` が未記入か
 - `notes/ai-use.md` が未記入か
 - `manuscript/venue.md` が未記入か
 - `notes/contribution-claims.md` がプレースホルダーのままか
@@ -138,10 +141,25 @@ Copy-Item refs/local/locations.example.toml refs/local/locations.toml
 - 関連研究の初期スコープ、source cluster 候補、比較・反論の観点を TODO として置く
 - 広い文献収集が必要な場合は、本文執筆の前に `/research-related-work` を使うよう案内する
 
+#### notes/source-reach.md
+
+- 外部 Web、GitHub、動画、RSS、SNS、議論サイトを使う予定があれば channel と raw capture 方針を TODO として置く
+- platform-specific source を使う場合は `/source-reach-scan` で credential need と Git 管理しない raw output を分けるよう案内する
+
+#### notes/scientific-gate.md
+
+- 中心主張を Abstract / Conclusion / main figure caption に出す前の gate status を TODO として置く
+- evidence が未確定の場合は `analysis-needed` または `assumption-blocked` のまま残し、AI に強い結論を書かせない
+
 #### notes/claim-evidence-map.md
 
 - Core claim、essential results、Not claiming の初期案を提案する
 - evidence が未確定の場合は `draft` のまま残し、過剰主張しない
+
+#### notes/ai-draft-polish.md
+
+- AI 初稿を使う予定がある場合、claim lock と polish log を後で記録できるようにする
+- AI 利用開示を隠すための文体修正ではなく、主張・証拠を保つ文体修正として扱う
 
 #### notes/reviewer-model.md
 
@@ -191,7 +209,7 @@ make ci
 ## Codex 実行メモ
 
 - Claude 固有の `allowed-tools` は Codex の利用可能な shell / file editing tool に読み替える。
-- 編集前に `README.md`、`AGENTS.md`、`notes/project-brief.md`、`notes/related-work-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`、`notes/ai-use.md`、`manuscript/venue.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`refs/local/locations.example.toml` を確認する。
+- 編集前に `README.md`、`AGENTS.md`、`notes/project-brief.md`、`notes/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`、`notes/ai-draft-polish.md`、`notes/ai-use.md`、`manuscript/venue.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`refs/local/locations.example.toml` を確認する。
 - `refs/local/locations.toml` はローカル絶対パスを含みうるため、Codex は自動作成・自動編集せず、ユーザーに copy command と編集方針を提示する。
 - Core claim、reader model、AI use log は `notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md` の starter を埋めるか、未定 TODO として残す。
 - 初回セットアップ後、可能なら `make ci`、外部共有に近い状態なら `make pre-submit` も実行する。難しい場合は `make lint-bib`、`make citation-check`、`make mirror-check` を個別に実行する。

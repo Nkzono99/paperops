@@ -160,7 +160,7 @@ def main() -> int:
         for finding in warnings:
             print(f"- {finding.message}")
         print("")
-        print("AI 初稿を改稿する前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新してください。")
+        print("AI 初稿を改稿する前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`、必要なら `/scientific-gate` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md`、`notes/scientific-gate.md` を更新してください。claim lock 後の文体 polish だけなら `/polish-ai-draft` を使ってください。")
         print("")
     if not findings:
         print("論旨設計メモと本文の argument focus に明らかな問題は見つかりませんでした。")

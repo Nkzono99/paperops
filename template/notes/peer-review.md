@@ -18,6 +18,13 @@ raw の editor letter や reviewer comment は confidential な場合がある�
 | --- | --- | --- | --- | --- | --- | --- |
 | PR-YYYYMMDD-01 | 未記入 | 未記入 | public-only / repo-aware | R1,R2,R3 | accept / minor / major / reject / unclear | 未記入 |
 
+## 査読プロファイル
+
+- 分野・投稿先: 未記入
+- review stage: internal / pre-submission / revise-and-resubmit / re-review / 未記入
+- rubric: correctness / novelty / evidence strength / clarity / reproducibility / ethics-AI-use-confidentiality
+- score の有無: なし / 0-100 / 投稿先形式 / 未記入
+
 ## Concern matrix
 
 | concern ID | 内容 | severity | raised by | manuscript evidence | route | status |

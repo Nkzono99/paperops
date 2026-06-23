@@ -13,10 +13,12 @@ Deep-Research-skills の outline -> field framework -> item deep research -> rep
 
 - `notes/project-brief.md`
 - `notes/contribution-claims.md`
+- `notes/source-reach.md`
 - `notes/related-work-map.md`
 - `notes/claim-evidence-map.md`
 - `notes/argument-map.md`
 - `refs/index.md`
+- `refs/source-reach/README.md`
 - `refs/summaries/`
 - `manuscript/venue.md`
 
@@ -83,6 +85,8 @@ field は増やしすぎない。文献レビュー本文、claim scope、反論
 
 web 検索が必要な場合、未公開原稿や private note の文面をそのまま検索語にしない。検索には公開可能な概念語だけを使う。
 
+GitHub、動画、RSS、SNS、議論サイト、platform-specific source を複数使う場合は、先に `/source-reach-scan` で channel、preferred route、fallback、credential need、raw capture policy を決める。raw output を直接文献レビューに入れず、`notes/source-reach.md` または `refs/source-reach/` で到達経路と確認状態を分ける。
+
 raw findings は `refs/research/<topic-slug>/results/` に一時保存してよいが、既定では Git 管理しない。
 
 ### 5. 議論へ統合する
@@ -124,6 +128,7 @@ raw findings は `refs/research/<topic-slug>/results/` に一時保存してよ�
 - 関連研究の議論は日本語で書く。citation key、DOI、title、field name は英語のままでよい。
 - 現在情報、論文 metadata、投稿先 policy、外部 repository の内容は必要に応じて web で確認し、出典リンクを残す。
 - 採用判断がまだなら `notes/related-work-map.md` に留め、`claim-evidence-map.md` の supported claim へ昇格しない。
+- 外部 source channel の到達経路や raw capture 方針は `notes/source-reach.md` に残し、採用した finding だけを `refs/summaries/` や `.bib` へ昇格する。
 
 ## Codex 実行メモ
 

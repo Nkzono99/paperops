@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Academic Research Skills Codex の integrity gate / claim package / experiment provenance / reviewer pipeline の発想、Humanizer-zh の AI 文章パターン検出、Agent Reach の channel / backend / doctor の発想を、paperops-native な `/scientific-gate`、`/polish-ai-draft`、`/source-reach-scan` と既存の peer review skills 強化として追加した。ARS 由来部分は CC BY-NC 4.0 の文面やテンプレートをコピーせず、`notes/scientific-gate.md` と既存の result/claim/reproducibility/peer-review 台帳へ接続する再設計として取り込む。既存下流リポジトリで取り込む場合は、新規 skill wrapper、`notes/scientific-gate.md`、`notes/source-reach.md`、`notes/ai-draft-polish.md`、`refs/source-reach/`、README/AGENTS/CLAUDE/docs の案内を手動追加する。
 - `pops init` で人間から AI へ未整理ファイルを渡す `_handoff/` 受け取り箱を作成し、内容は Git 管理から除外するようにした。
 - `refs/` と `notes/` の作業用ドキュメントを日本語で書く方針を明示し、スターターノートと参照テンプレートの見出しを日本語化した。
 - 公開原稿へ内部 provenance 語が混入しないよう、公開語彙チェックの starter terminology と関連 writing skills の guard を強化した。

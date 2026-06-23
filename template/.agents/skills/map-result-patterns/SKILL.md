@@ -12,6 +12,7 @@ Quarto manuscripts、showyourwork!、research compendium のような外部ハ�
 ## 最初に読むファイル
 
 - `notes/result-pattern-map.md`
+- `notes/scientific-gate.md`
 - `notes/condition-context-map.md`
 - `notes/claim-evidence-map.md`
 - `notes/argument-map.md`
@@ -26,6 +27,7 @@ Quarto manuscripts、showyourwork!、research compendium のような外部ハ�
 - まだ claim ではない観察単位を `result pattern` として保持する。
 - 本文に入れる result story は `evidence packet` として、claim、figure/table、metric、scope、limitation、provenance link に接続する。
 - 条件名や denominator は `/contextualize-conditions` の方針で公開文脈へ翻訳する。
+- claim、Abstract、Conclusion、main figure caption へ昇格する前に `/scientific-gate` で `ready-to-write` か確認する。
 
 ## 手順
 
@@ -86,6 +88,7 @@ claim ID が未定なら `C1 / 未定` のように仮置きし、claim とし�
 各 pattern を以下に分類する:
 
 - `promote to claim`: `claim-evidence-map` に移す
+- `scientific gate`: `notes/scientific-gate.md` で claim package と readiness を確認する
 - `figure story`: `figure-story-audit` で caption / 本文参照へ接続する
 - `condition context`: `condition-context-map` で公開条件名と scope を整理する
 - `supplement`: Methods、supplement、Data availability に退避する
@@ -113,3 +116,4 @@ claim ID が未定なら `C1 / 未定` のように仮置きし、claim とし�
 - ユーザーが本文編集を明示しない限り、`manuscript/` は編集しない。
 - result pattern を作った後に claim へ昇格する場合は、`notes/claim-evidence-map.md` の主張台帳も更新する。
 - 図表 caption まで進む場合は `/figure-story-audit`、条件数や denominator の翻訳へ進む場合は `/contextualize-conditions` を使う。
+- Abstract / Conclusion / central claim に入れる場合は、`/scientific-gate` で gate status を更新する。

@@ -15,16 +15,18 @@ description: 段落単位で old-to-new flow、topic sentence、stress position�
 - topic sentence: 段落の役割を冒頭で示す
 - local cohesion: 指示語、主語、用語が前後でつながる
 - public terminology: run label、directory name、script name、artifact name を本文の説明語にせず、読者に通じる物理条件・選別基準・診断量へ置き換える
+- AI 初稿の定型臭: 空疎な意義付け、機械的な三点列挙、曖昧な出典、防御的 caveat の分散は `/polish-ai-draft` と同じ claim lock を使って直す
 
 ## 手順
 
 1. 対象 block の各段落に機能ラベルを付ける。
-2. 段落ごとに詰まり、重複、飛躍、文末の弱さを指摘する。
-3. 内部 provenance 語が本文に残っていないか確認し、必要なら `manuscript/mirror/terminology.yml` に置換方針を追加する。
-4. 条件番号・条件数で始まる topic sentence を探し、`grouping -> contrast -> exception -> warrant` へ組み替える。
-5. 科学的意味を保った rewrite plan を出す。
-6. 明示依頼がある場合のみ `manuscript/ja/` を編集する。
-7. 必要に応じて EN mirror を `/sync-ja-en` で同期する。
+2. AI 初稿由来の文体修正なら、先に `notes/claim-evidence-map.md` と `notes/scientific-gate.md` で claim lock を確認する。
+3. 段落ごとに詰まり、重複、飛躍、文末の弱さを指摘する。
+4. 内部 provenance 語が本文に残っていないか確認し、必要なら `manuscript/mirror/terminology.yml` に置換方針を追加する。
+5. 条件番号・条件数で始まる topic sentence を探し、`grouping -> contrast -> exception -> warrant` へ組み替える。
+6. 科学的意味を保った rewrite plan を出す。
+7. 明示依頼がある場合のみ `manuscript/ja/` を編集する。
+8. 必要に応じて EN mirror を `/sync-ja-en` で同期する。
 
 ## 出力
 

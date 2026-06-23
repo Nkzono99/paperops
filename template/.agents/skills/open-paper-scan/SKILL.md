@@ -12,7 +12,7 @@ description: 論文プロジェクト、原稿、執筆ハーネスを俯瞰し�
 ## 入力
 
 - ユーザーが指定した PDF、TeX、section、README、notes、または scope
-- scope が未指定なら、`README.md`、`AGENTS.md`、`CLAUDE.md`、`notes/project-brief.md`、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/ja/sections/`、`manuscript/en/sections/`、`.agents/skills/` を薄く横断する
+- scope が未指定なら、`README.md`、`AGENTS.md`、`CLAUDE.md`、`notes/project-brief.md`、`notes/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/ja/sections/`、`manuscript/en/sections/`、`.agents/skills/` を薄く横断する
 - 公開読者視点を保つ必要がある場合は、最初は公開原稿と図表 caption だけを読む
 
 ## 目的
@@ -87,6 +87,9 @@ description: 論文プロジェクト、原稿、執筆ハーネスを俯瞰し�
 候補:
 
 - `/audit-ai-draft`: AI 初稿を論旨設計へ戻す
+- `/scientific-gate`: 中心主張、Abstract、Conclusion、主要図表を gate する
+- `/source-reach-scan`: 外部 source channel と raw capture 方針を決める
+- `/polish-ai-draft`: claim lock 後に AI 初稿の定型臭だけを文体修正する
 - `/research-related-work`: 関連研究、研究動向、比較対象、反論文献を広く集めて議論へ整理する
 - `/map-result-patterns`: raw result や figure data を result pattern / evidence packet へ束ねる
 - `/contextualize-conditions`: 条件数や case count を論文上の役割へ翻訳する
@@ -96,7 +99,7 @@ description: 論文プロジェクト、原稿、執筆ハーネスを俯瞰し�
 - `/respond-to-peer-review`: 実査読コメントを response matrix と revision plan へ整理する
 - `/improve-writing-harness`: project-local の摩擦を実装で直す
 - `/feedback-paper-harness`: 再利用可能な改善を上流へ戻す
-- `notes/related-work-map.md`、`notes/claim-evidence-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`: 記録が必要になった後の置き場所
+- `notes/scientific-gate.md`、`notes/source-reach.md`、`notes/ai-draft-polish.md`、`notes/related-work-map.md`、`notes/claim-evidence-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`: 記録が必要になった後の置き場所
 
 ## 出力形式
 

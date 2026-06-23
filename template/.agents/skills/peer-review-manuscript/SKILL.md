@@ -18,6 +18,7 @@ description: Use when 投稿前原稿を peer review、査読者、reviewer 2、
 - PDF、投稿用 TeX、公開原稿、図表、補足資料。
 - `manuscript/mirror/status.md` は source-of-truth 言語確認に限って読んでよい。
 - repo-aware routing に進む場合だけ、`manuscript/venue.md`、`notes/reviewer-model.md`、`notes/claim-evidence-map.md`、`notes/related-work-map.md`、`notes/reproducibility.md`、`notes/peer-review.md` を読む。
+- claim readiness を判定する必要がある場合は `notes/scientific-gate.md`、追加の外部 source が必要な場合は `notes/source-reach.md` も読む。
 
 ## 手順
 
@@ -33,7 +34,22 @@ description: Use when 投稿前原稿を peer review、査読者、reviewer 2、
 - 主結果と figure story
 - limitation と not claiming
 
-### 2. 査読者パネルを分ける
+### 2. 査読プロファイルと rubric を決める
+
+投稿先や分野が指定されている場合は、その期待に合わせて読む。未指定なら一般的な研究論文として扱い、必要なら `unclear` と明記する。
+
+最低限、次の rubric を使う:
+
+- `Correctness`: 方法、数値、論理、証拠の扱いが正しいか
+- `Novelty`: 既存研究との差分が査読者に伝わるか
+- `Evidence strength`: claim と evidence の強さが釣り合うか
+- `Clarity`: reader が research question、figure story、limitation を追えるか
+- `Reproducibility`: data / code / parameter / environment / reference が確認できるか
+- `Ethics / AI-use / confidentiality`: AI 利用、第三者原稿、査読依頼、非公開情報の扱いが適切か
+
+ユーザーが点数を求めた場合だけ、0-100 などの score を併記する。点数は診断の補助であり、コメントの根拠を置き換えない。
+
+### 3. 査読者パネルを分ける
 
 既定では 3 名分を独立した観点として出す。
 
@@ -57,7 +73,7 @@ description: Use when 投稿前原稿を peer review、査読者、reviewer 2、
 
 文献や先行研究を挙げる場合は、実在確認できたものだけを書く。未確認の prior-art gap は `/research-related-work` に渡す。
 
-### 3. Meta-review を作る
+### 4. Meta-review を作る
 
 個別 reviewer の後に統合する。
 
@@ -73,13 +89,14 @@ Concern matrix を作る:
 | --- | --- | --- | --- | --- | --- |
 | PR-001 | 未記入 | blocking / major / minor | R1,R2 | section / figure | manuscript / figure / analysis / refs / response-only |
 
-### 4. Repo-aware routing
+### 5. Repo-aware routing
 
 ユーザーが記録や修正を求めた場合だけ、repo 内部文脈を読んで対応先を決める。
 
 - claim / evidence の問題: `notes/claim-evidence-map.md`
+- claim readiness / assumption の問題: `notes/scientific-gate.md`
 - result や figure data の問題: `notes/result-pattern-map.md`、`notes/research-requests.md`
-- 関連研究・比較対象: `notes/related-work-map.md`、`refs/summaries/`
+- 関連研究・比較対象: `notes/related-work-map.md`、`notes/source-reach.md`、`refs/summaries/`
 - 読者・投稿先 fit: `notes/reviewer-model.md`、`manuscript/venue.md`
 - 再現性: `notes/reproducibility.md`
 - 模擬査読の台帳: `notes/peer-review.md`
@@ -89,6 +106,7 @@ Concern matrix を作る:
 ## 出力
 
 - `Review scope`: 読んだアーティファクト、public-only / repo-aware の別
+- `Review profile`: 分野、投稿先、review stage、rubric、score の有無
 - `Reviewer reports`: R1 / R2 / R3 の summary, major, minor, required checks, recommendation
 - `Meta-review`: consensus、共通懸念、固有懸念、採否リスク
 - `Concern matrix`: concern ID、severity、raised by、route

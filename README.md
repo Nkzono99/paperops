@@ -30,10 +30,10 @@ uvx --from paper-harness-cli pops doctor
 日常運用の主役は、CLI そのものではなく Agent との会話である。
 
 1. 人間が論文トピック、制約、投稿先候補、判断を伝える。
-2. Agent が `notes/project-brief.md`、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/peer-review.md`、`manuscript/venue.md` を整える。
+2. Agent が `notes/project-brief.md`、`notes/source-reach.md`、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/scientific-gate.md`、`notes/claim-evidence-map.md`、`notes/peer-review.md`、`manuscript/venue.md` を整える。
 3. `uvx --from paper-harness-cli pops ...` が init / setup / doctor / update-paperops のような決定的操作を担う。
 4. 原稿は `manuscript/ja` を中心に進め、必要な block を `manuscript/en` へ同期する。
-5. 関連研究を集める場合は `/research-related-work` で調査対象と field framework を作り、raw findings を `refs/research/`、採用文献を `refs/summaries/` と `.bib`、議論を `notes/related-work-map.md` へ分ける。
+5. 関連研究や外部情報源を集める場合は `/source-reach-scan` で source channel と raw capture 方針を決め、`/research-related-work` で調査対象と field framework を作り、raw findings を `refs/research/`、採用文献を `refs/summaries/` と `.bib`、議論を `notes/related-work-map.md` へ分ける。
 6. 投稿前の模擬査読は `/peer-review-manuscript`、実査読コメントへの返答は `/respond-to-peer-review` で `notes/peer-review.md` へ整理する。
 7. 実験結果や外部ディレクトリが必要なら `refs/links.toml` と `refs/local/locations.toml` で link を解決し、runops project は MCP の read / inspect / plan tool から確認する。
 8. 追加解析・図表・実験要望は `notes/research-requests.md` に残し、runops 側の `research/paper_requests.toml` へ handoff する。
@@ -47,10 +47,10 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
 - `template/` は個別論文リポジトリに展開される scaffold の source of truth。
 - `src/paperops/` は `template/` を展開・診断・更新する薄い CLI。
-- `notes/` はセッション継続性、関連研究、主張・証拠、読者モデル、査読・返答、AI 利用ログの共有 memory。作業用ドキュメントは日本語で書く。
+- `notes/` はセッション継続性、外部ソース到達、関連研究、科学的ゲート、主張・証拠、読者モデル、査読・返答、AI 初稿 polish、AI 利用ログの共有 memory。作業用ドキュメントは日本語で書く。
 - `notes/result-pattern-map.md` は raw result、figure data、analysis artifact を result pattern / evidence packet へ束ね、claim に昇格する前の中間層として扱う。
 - `manuscript/ja` と `manuscript/en` は block ID で対応するバイリンガル原稿。
-- `refs/` は raw PDF 置き場ではなく、キュレーション済みの参照知識層、関連研究の調査設計、外部 project link 台帳。作業用ドキュメントは日本語で書く。
+- `refs/` は raw PDF 置き場ではなく、キュレーション済みの参照知識層、関連研究の調査設計、source reach の一時領域、外部 project link 台帳。作業用ドキュメントは日本語で書く。
 - `refs/links.toml` は共有可能な link intent を持ち、個人環境の絶対パスは ignored な `refs/local/locations.toml` に分離する。
 - `submission/<venue>/` は投稿先公式テンプレートと最終提出用 TeX の隔離スロット。
 - `pops update-paperops` はハーネス管理ファイルだけを扱い、下流固有の `manuscript/`、`notes/`、`refs/`、`submission/` を自動上書きしない。
@@ -74,6 +74,7 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 ## スキャフォールドが最適化するもの
 
 - `refs/`: 生の PDF 置き場ではなく共有知識層として活用
+- `refs/source-reach/` と `/source-reach-scan`: 外部 Web、GitHub、動画、RSS、SNS などの source channel、到達経路、raw capture、credential risk を分ける
 - `refs/research/` と `/research-related-work`: 関連研究の outline / field framework / raw findings / 議論を分け、採用する文献だけ `refs/summaries/` と `.bib` へ昇格
 - `/peer-review-manuscript` と `/respond-to-peer-review`: 模擬査読、major/minor comment、response matrix、revision plan を `notes/peer-review.md` に整理
 - `notes/`: セッション引き継ぎ、result pattern、主張・証拠、読者モデル、査読・返答、AI 利用ログ、継続性の状態管理
@@ -83,6 +84,8 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 - `make pre-submit`: `make ci` に加えて引用サマリー、strict mirror freshness、submission slot、スタータープレースホルダー、workflow 参照、公開メタデータ不足を検出
 - `make argument-focus-check`: AI 初稿が条件数列挙、防御的 caveat、ローカル実行ログに寄りすぎていないかを advisory に検出
 - `/map-result-patterns`: simulation results や figure data を本文の主張へ直接流し込む前に、result pattern / evidence packet として中間層へ束ねる
+- `/scientific-gate`: 中心主張、Abstract、Conclusion、主要図表の claim readiness と人間承認を確認
+- `/polish-ai-draft`: AI 初稿の定型臭を、主張・証拠・AI 利用開示を保ったまま整える
 - `/open-paper-scan`: 改善指示を局所修正へ閉じる前に、原稿・読者体験・執筆ハーネスを発散的に眺める
 - `make citation-check`: TeX 本文中の citation key と `.bib` の不整合を早期検出
 - `make public-terms-check` / `make claim-evidence-check`: 内部語の公開本文混入と supported claim の evidence 対応を早期検出

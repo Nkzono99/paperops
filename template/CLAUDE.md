@@ -64,12 +64,15 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（settings.json の deny パターンが強制する）。
 - `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。raw PDF は既定で ignore される `refs/papers/` に留め、引用キーは安定させる。
 - 関連研究を広く集める場合は `/research-related-work` を使い、調査設計は `refs/research/`、議論は `notes/related-work-map.md`、採用文献は `refs/summaries/` と `.bib` へ分ける。raw search result や未検証 report を文献レビュー本文へ直接入れない。
+- Web、GitHub、動画、RSS、SNS、議論サイトなど外部 source channel を使う場合は `/source-reach-scan` を使い、到達経路、credential need、raw capture policy、refs への昇格先を `notes/source-reach.md` と `refs/source-reach/` で分ける。
 - `refs/links.toml` は外部 project / directory への共有 link 台帳である。tracked ファイルには絶対パスを書かず、`location_ref` を `refs/local/locations.toml` の個人設定で解決する。
 - `refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、field name、投稿先指定、外部ツール名などの識別子だけは英語のままでよい。
 - `_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱である。内容は Git 管理されない。残す情報は `refs/` や `notes/` の適切な台帳へ整理し、秘密情報や個人環境の絶対パスを tracked ファイルへ移さない。
 - 俯瞰的な違和感や改善案を広げるだけなら `/open-paper-scan` を使い、ユーザーが求めるまで本文編集、notes 記録、Issue 化、上流 feedback 化へ進まない。
 - simulation results、figure data、analysis artifact を本文に入れる前に、必要なら `/map-result-patterns` で `notes/result-pattern-map.md` に result pattern / evidence packet として束ねる。
+- 中心主張、Abstract、Conclusion、main figure caption を書く前に、必要なら `/scientific-gate` で `notes/scientific-gate.md` の claim readiness を確認する。`analysis-needed` や `assumption-blocked` の主張を文体だけで本文に通さない。
 - AI 初稿が条件数の列挙、run inventory、防御的 caveat に寄ったら、本文を直接磨く前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新する。
+- AI 初稿の機械的な文体だけを直す場合は `/polish-ai-draft` を使う。ただし、claim lock と AI 利用開示を守り、AI 検出回避を目的にしない。
 - 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
 - 公開・投稿前には `manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`notes/ai-use.md` を更新し、`make pre-submit` を実行する。
 - 新しい主張は `notes/claim-evidence-map.md` に evidence、scope、limitation とともに記録する。
@@ -114,8 +117,8 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 - 初回セットアップ・上流更新: `/setup`、`/update-paperops`
 - セッション再開・進捗記録: `/resume-session`、`/note-writing-session`
 - 俯瞰・発散: `/open-paper-scan`
-- 関連研究・文献議論: `/research-related-work`、`/update-refs`
-- 執筆設計・本文調整: `/design-manuscript-claims`、`/calibrate-claims`、`/paragraph-surgery`
+- 関連研究・文献議論: `/source-reach-scan`、`/research-related-work`、`/update-refs`
+- 執筆設計・本文調整: `/scientific-gate`、`/design-manuscript-claims`、`/calibrate-claims`、`/paragraph-surgery`、`/polish-ai-draft`
 - 結果パターン・AI 初稿の診断・条件文脈化: `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`
 - 日英同期・公開語彙: `/sync-ja-en`、`/public-terminology-pass`
 - 通読レビュー: `/start-manuscript-review` で開始し、終了後に `/collect-manuscript-review`
@@ -130,6 +133,7 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 | `/note-writing-session` | セッション進捗を記録し、引き継ぎファイルを更新 |
 | `/sync-ja-en` | 日本語と英語のブロックを同期 |
 | `/update-refs` | 参考文献と参照知識の整合性を検証 |
+| `/source-reach-scan` | 外部 Web、GitHub、動画、RSS、SNS などの到達経路と raw capture 方針を整理 |
 | `/research-related-work` | 関連研究を調査設計、深掘り、議論、refs 昇格へ整理 |
 | `/improve-writing-harness` | プロジェクトローカルの摩擦を特定・修正 |
 | `/feedback-paper-harness` | 再利用可能な改善を上流ハーネスにフィードバック |
@@ -139,6 +143,7 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 | `/import-manuscript` | 既存 LaTeX 原稿をハーネスにインポート |
 | `/open-paper-scan` | 原稿・プロジェクト・ハーネスを俯瞰し、まだ記録や実装に固定しない発散的な違和感と改善案を出す |
 | `/map-result-patterns` | raw result、figure data、analysis artifact を result pattern / evidence packet へ抽象化し、claim へ昇格する前の中間層を作る |
+| `/scientific-gate` | 中心主張、Abstract、Conclusion、主要図表の claim readiness と人間承認を確認 |
 | `/review-public-manuscript` | section / weekly / pre-submit の粒度で、公開原稿だけを入力に外部読者視点の未定義語・ローカル語・暗黙前提をレビュー |
 | `/peer-review-manuscript` | 投稿前原稿を査読者パネルと meta-review 形式で評価し、major/minor comment と revision priority を作る |
 | `/respond-to-peer-review` | editor / reviewer comments を response matrix、revision plan、response letter 草案へ整理 |
@@ -148,6 +153,7 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 | `/audit-ai-draft` | AI 初稿を公開読者視点と repo 文脈の両方から診断し、論旨設計と改稿計画を作る |
 | `/contextualize-conditions` | 条件数、case count、run inventory を claim role と公開条件名へ翻訳 |
 | `/calibrate-claims` | evidence strength に合わせて防御的文体と過剰主張を調整 |
+| `/polish-ai-draft` | AI 初稿の定型臭を、主張・証拠・開示を保ったまま論文向けに整える |
 | `/public-terminology-pass` | ローカル語・内部語・未定義略語を公開語へ置換 |
 | `/paragraph-surgery` | 段落単位の flow、topic sentence、stress position を整える |
 | `/figure-story-audit` | figure/table の claim, evidence, boundary と本文参照を監査 |
@@ -164,10 +170,10 @@ manuscript/mirror/   map.toml, block-ledger.yml, terminology.yml, status.md, cha
 manuscript/venue.md  投稿先情報
 manuscript/publication-metadata.toml  公開タイトル、著者、ライセンス、build provenance
 submission/          投稿先公式テンプレート、最終提出用 TeX
-refs/                知識層: links.toml, summaries, research, local（papers, bib, excerpts はスキルが必要時に作成）
+refs/                知識層: links.toml, summaries, research, source-reach, local（papers, bib, excerpts はスキルが必要時に作成）
 _handoff/            人間から AI への未整理ファイル受け取り箱（内容は Git 管理しない）
 notes/research-requests.md  paper draft から生じた追加解析・図表・実験要望
-notes/               project-brief, contribution-claims, related-work-map, result-pattern-map, claim-evidence-map, argument-map, condition-context-map, reviewer-model, peer-review, ai-use, reproducibility, handoff, todo, decision-log
+notes/               project-brief, contribution-claims, scientific-gate, source-reach, related-work-map, result-pattern-map, claim-evidence-map, argument-map, condition-context-map, reviewer-model, peer-review, ai-draft-polish, ai-use, reproducibility, handoff, todo, decision-log
 scripts/             ビルド、TeX 構造、lint、citation-check、skill 対応、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills wrapper、rules/、hooks/

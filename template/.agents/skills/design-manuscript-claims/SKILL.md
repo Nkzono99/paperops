@@ -14,6 +14,7 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 - `manuscript/mirror/status.md`
 - `notes/project-brief.md`
 - `notes/contribution-claims.md`
+- `notes/scientific-gate.md`
 - `notes/related-work-map.md`
 - `notes/result-pattern-map.md`
 - `notes/claim-evidence-map.md`
@@ -47,8 +48,9 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 7. `notes/related-work-map.md`
 8. `notes/result-pattern-map.md`
 9. `notes/claim-evidence-map.md`
-10. `notes/reviewer-model.md`
-11. `manuscript/mirror/status.md`
+10. `notes/scientific-gate.md`
+11. `notes/reviewer-model.md`
+12. `manuscript/mirror/status.md`
 
 この段階で、原稿が読者に約束している主張を仮説として書き出す。
 
@@ -67,6 +69,8 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 ### 3. 主張と証拠を棚卸しする
 
 `notes/result-pattern-map.md` に result pattern / evidence packet がある場合は、まず observed contrast、effect direction、negative/null cases、candidate interpretation を確認する。raw result、run inventory、case count を直接 claim に昇格しない。
+
+Abstract、Conclusion、主要図表、中心 claim に入れる候補は、`notes/scientific-gate.md` の gate status を確認する。`analysis-needed`、`assumption-blocked`、`supplement-only`、`defer` の claim は、claim hierarchy では前面化せず、必要な route を示す。
 
 `notes/related-work-map.md` に source cluster や debate matrix がある場合は、各 claim が先行研究との差分、比較対象、反論文献、読者が期待する文献文脈のどれに接続しているかも確認する。関連研究が未整理なら、claim の射程を広げる前に `/research-related-work` へ戻す候補として扱う。
 
@@ -143,10 +147,11 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 - 内部 provenance 語は公開本文へ持ち込まない。作業履歴として必要な場合は `refs/` と `notes/` に日本語で記録する。
 - 科学的判断を template に固定しない。分野固有の判断はユーザーに確認する。
 - ミラー整合性を壊さない。JA source of truth と block ID を尊重する。
+- `scientific-gate` で止まっている主張を、outline 上の見栄えのために中心主張へ昇格しない。
 
 ## Codex 実行メモ
 
-- `review-public-manuscript` とは分けて使う。この skill は `notes/project-brief.md`、`notes/contribution-claims.md`、`notes/related-work-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/mirror/status.md`、JA source of truth を読んで、主張と証拠の階層を設計する。
+- `review-public-manuscript` とは分けて使う。この skill は `notes/project-brief.md`、`notes/contribution-claims.md`、`notes/scientific-gate.md`、`notes/related-work-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/mirror/status.md`、JA source of truth を読んで、主張と証拠の階層を設計する。
 - 設計した claim / evidence / scope / limitation は、ユーザーが了承した範囲で `notes/claim-evidence-map.md` に反映する。
 - 先に abstract、introduction、conclusion、section headings、figure captions を読み、Core claim と Essential results を圧縮する。
 - 作業報告 smell、keep/compress/move/cut、over-claiming risk、block ID 単位の rewrite plan を出す。

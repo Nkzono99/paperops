@@ -9,6 +9,7 @@
 - `links.toml`: paper draft から外部 project / directory への共有 link 台帳。絶対パスは書かず、`location_ref` で `local/` の個人設定へ接続する
 - `summaries/`: 再利用に最適化された構造化サマリー（スキルが初回使用時にサブディレクトリを作成）
 - `research/`: 関連研究を広く集めるための調査設計、field framework、議論前の一時成果物の置き場
+- `source-reach/`: 外部 Web、GitHub、動画、RSS、SNS などの到達経路と raw capture の一時領域
 - `links.toml`: 外部 project / directory の共有可能な metadata registry。絶対パスは含めず、`refs/local/locations.toml` の alias を参照する
 - `links.md`: link registry の schema と運用メモ
 - `local/`: ignored なマシン固有パスエイリアス
@@ -25,6 +26,10 @@ runops project へ追加解析・図表・追加実験の要望を戻す場合�
 ## 関連研究の探索
 
 関連研究、研究動向、比較対象、反論文献を広く集める場合は `/research-related-work` を使う。調査対象と field framework は `refs/research/<topic-slug>/` に置き、raw findings は既定で Git 管理しない。採用する文献だけを `refs/summaries/`、`manuscript/shared/bib/references.bib`、`notes/related-work-map.md` へ昇格する。
+
+## 外部ソース到達
+
+Web、GitHub、動画、RSS、SNS、議論サイトなどを調べる場合は `/source-reach-scan` で source channel、preferred route、fallback、credential need、raw capture policy を決める。raw capture は `refs/source-reach/**/raw/` に置いても既定では Git 管理しない。論文で使う確認済み finding だけを `notes/source-reach.md`、`notes/related-work-map.md`、`refs/summaries/`、`notes/reproducibility.md` へ昇格する。
 
 ## サマリー形式
 

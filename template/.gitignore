@@ -20,5 +20,8 @@ refs/papers/**
 refs/research/**/results/**
 refs/research/**/report.generated.md
 refs/research/**/raw-findings.*
+refs/source-reach/**/raw/**
+refs/source-reach/**/doctor.generated.*
+refs/source-reach/**/capture.generated.*
 *.pdf
 !manuscript/shared/figures/**/*.pdf
