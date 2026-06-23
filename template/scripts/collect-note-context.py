@@ -6,30 +6,36 @@ from pathlib import Path
 
 SECTIONS = [
     ("プロジェクト概要", "notes/project-brief.md"),
-    ("科学的ゲート", "notes/scientific-gate.md"),
-    ("結果パターン", "notes/result-pattern-map.md"),
-    ("主張と証拠", "notes/claim-evidence-map.md"),
-    ("論旨設計", "notes/argument-map.md"),
+    ("証拠カード層", "evidence/README.md"),
+    ("主張カード層", "claims/README.md"),
+    ("レビューカード層", "review/README.md"),
+    ("依頼カード層", "requests/README.md"),
+    ("科学的ゲート", ["notes/views/scientific-gate.md", "notes/scientific-gate.md"]),
+    ("結果パターン", ["notes/views/result-pattern-map.md", "notes/result-pattern-map.md"]),
+    ("主張と証拠", ["notes/views/claim-evidence-map.md", "notes/claim-evidence-map.md"]),
+    ("論旨設計", ["notes/views/argument-map.md", "notes/argument-map.md"]),
     ("関連研究", "notes/related-work-map.md"),
     ("外部ソース到達", "notes/source-reach.md"),
-    ("条件文脈", "notes/condition-context-map.md"),
+    ("条件文脈", ["notes/views/condition-context-map.md", "notes/condition-context-map.md"]),
     ("読者モデル", "notes/reviewer-model.md"),
-    ("査読・返答", "notes/peer-review.md"),
+    ("査読・返答", ["notes/views/peer-review.md", "notes/peer-review.md"]),
     ("AI 初稿 polish", "notes/ai-draft-polish.md"),
     ("AI 利用", "notes/ai-use.md"),
     ("引き継ぎ", "notes/handoff.md"),
     ("Todo", "notes/todo.md"),
     ("未解決の質問", "notes/open-questions.md"),
-    ("追加解析・図表・実験要望", "notes/research-requests.md"),
+    ("追加解析・図表・実験要望", ["notes/views/research-requests.md", "notes/research-requests.md"]),
     ("再現性", "notes/reproducibility.md"),
 ]
 
 
 def read_section(root, rel_path):
-    path = root / rel_path
-    if not path.exists():
-        return "_不存在_"
-    return path.read_text(encoding="utf-8").strip()
+    rel_paths = rel_path if isinstance(rel_path, list) else [rel_path]
+    for candidate in rel_paths:
+        path = root / candidate
+        if path.exists():
+            return path.read_text(encoding="utf-8").strip()
+    return "_不存在_"
 
 
 def render_context(root):

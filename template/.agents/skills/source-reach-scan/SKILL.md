@@ -13,13 +13,13 @@ Agent Reach の channel / backend / doctor の発想を paperops の refs 層へ
 
 - `notes/source-reach.md`
 - `notes/related-work-map.md`
-- `notes/research-requests.md`
+- `notes/views/research-requests.md`
 - `notes/reproducibility.md`
 - `refs/research/README.md`
 - `refs/source-reach/README.md`
 - `refs/links.toml`
 - `refs/local/locations.example.toml`
-- 必要に応じて `manuscript/venue.md`、`notes/scientific-gate.md`
+- 必要に応じて `manuscript/venue.md`、`notes/views/scientific-gate.md`
 
 ## Source channels
 

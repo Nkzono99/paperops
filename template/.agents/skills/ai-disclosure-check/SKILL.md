@@ -11,7 +11,7 @@ AI 利用ログ、投稿先ポリシー、人間検証の証跡を点検する�
 
 - `notes/ai-use.md`
 - `notes/reproducibility.md`
-- `notes/peer-review.md`
+- `notes/views/peer-review.md`
 - `manuscript/venue.md`
 - 投稿先の AI policy（ユーザーが渡した URL/PDF/テキストがあれば）
 
@@ -37,6 +37,6 @@ AI 利用ログ、投稿先ポリシー、人間検証の証跡を点検する�
 
 ## Codex 実行メモ
 
-- `notes/ai-use.md`、`notes/reproducibility.md`、`notes/peer-review.md`、`manuscript/venue.md` を読む。
+- `notes/ai-use.md`、`notes/reproducibility.md`、`notes/views/peer-review.md`、`manuscript/venue.md` を読む。
 - 投稿先ポリシーは最新確認が必要な場合に公式資料へ当たる。
 - disclosure draft と human verification の不足を整理する。

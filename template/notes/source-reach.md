@@ -13,7 +13,7 @@
 
 | source ID | channel | source / query | preferred route | fallback route | credential need | raw capture policy | promotion target | verification status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| SR-0001 | paper-metadata / github / web-page / video-transcript / rss-news / social-discussion / local-link | 未記入 | 未記入 | 未記入 | none / local-cookie / token / human-only | no-raw / ignored-raw / curated-only | `notes/related-work-map.md` / `refs/summaries/` / `notes/reproducibility.md` / `notes/scientific-gate.md` | unsearched / found-unread / metadata-checked / read / cross-checked / not-usable |
+| SR-0001 | paper-metadata / github / web-page / video-transcript / rss-news / social-discussion / local-link | 未記入 | 未記入 | 未記入 | none / local-cookie / token / human-only | no-raw / ignored-raw / curated-only | `notes/related-work-map.md` / `refs/summaries/` / `evidence/sources/` / `notes/reproducibility.md` / `notes/views/scientific-gate.md` | unsearched / found-unread / metadata-checked / read / cross-checked / not-usable |
 
 ## Doctor / availability result
 
@@ -33,7 +33,7 @@ raw output ではなく、人間または AI が確認して論文へ使える�
 
 | finding ID | 昇格先 | 必要な確認 | status |
 | --- | --- | --- | --- |
-| SF-0001 | `refs/summaries/` / `.bib` / `notes/related-work-map.md` / `notes/scientific-gate.md` | 未記入 | open |
+| SF-0001 | `refs/summaries/` / `.bib` / `evidence/sources/` / `notes/related-work-map.md` / `notes/views/scientific-gate.md` | 未記入 | open |
 
 ## Privacy / credential risks
 

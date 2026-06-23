@@ -12,7 +12,7 @@ description: 論文プロジェクト、原稿、執筆ハーネスを俯瞰し�
 ## 入力
 
 - ユーザーが指定した PDF、TeX、section、README、notes、または scope
-- scope が未指定なら、`README.md`、`AGENTS.md`、`CLAUDE.md`、`notes/project-brief.md`、`notes/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/ja/sections/`、`manuscript/en/sections/`、`.agents/skills/` を薄く横断する
+- scope が未指定なら、`README.md`、`AGENTS.md`、`CLAUDE.md`、`notes/project-brief.md`、`notes/views/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/views/result-pattern-map.md`、`notes/views/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/ja/sections/`、`manuscript/en/sections/`、`.agents/skills/` を薄く横断する
 - 公開読者視点を保つ必要がある場合は、最初は公開原稿と図表 caption だけを読む
 
 ## 目的
@@ -99,7 +99,7 @@ description: 論文プロジェクト、原稿、執筆ハーネスを俯瞰し�
 - `/respond-to-peer-review`: 実査読コメントを response matrix と revision plan へ整理する
 - `/improve-writing-harness`: project-local の摩擦を実装で直す
 - `/feedback-paper-harness`: 再利用可能な改善を上流へ戻す
-- `notes/scientific-gate.md`、`notes/source-reach.md`、`notes/ai-draft-polish.md`、`notes/related-work-map.md`、`notes/claim-evidence-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`: 記録が必要になった後の置き場所
+- `notes/views/scientific-gate.md`、`notes/source-reach.md`、`notes/ai-draft-polish.md`、`notes/related-work-map.md`、`notes/views/claim-evidence-map.md`、`notes/views/argument-map.md`、`notes/views/condition-context-map.md`、`notes/reviewer-model.md`、`notes/views/peer-review.md`: 記録が必要になった後の置き場所
 
 ## 出力形式
 

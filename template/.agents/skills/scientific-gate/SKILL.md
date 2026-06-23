@@ -7,17 +7,21 @@ description: 中心主張、Abstract、Conclusion、主要図表、claim package
 
 本文を書く前に、書いてよい主張とまだ止めるべき主張を分ける。AI に原稿を生成させる前の claim package 監査として使う。
 
-Academic Research Skills の pipeline / integrity gate / material provenance の発想を参考にするが、paperops では `notes/` と `refs/` にある既存台帳へ接続する。外部スキルのテンプレートや文面をコピーしない。
+Academic Research Skills の pipeline / integrity gate / material provenance の発想を参考にするが、paperops では `claims/`、`evidence/`、`notes/views/`、`refs/` にあるカードとビューへ接続する。外部スキルのテンプレートや文面をコピーしない。
 
 ## 最初に読むファイル
 
-- `notes/scientific-gate.md`
-- `notes/result-pattern-map.md`
-- `notes/claim-evidence-map.md`
+- `claims/README.md`
+- `claims/claims/`
+- `claims/gates/`
+- `evidence/`
+- `notes/views/scientific-gate.md`
+- `notes/views/result-pattern-map.md`
+- `notes/views/claim-evidence-map.md`
 - `notes/related-work-map.md`
 - `notes/reviewer-model.md`
 - `notes/reproducibility.md`
-- `notes/research-requests.md`
+- `notes/views/research-requests.md`
 - `notes/source-reach.md`
 - `refs/links.toml`
 - `refs/summaries/`
@@ -38,7 +42,7 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 
 ## Claim package
 
-各 claim について、`notes/scientific-gate.md` の claim package 表を埋める。
+各 claim について、`claims/gates/` に gate card を作成または更新し、`notes/views/scientific-gate.md` の claim package 表を俯瞰用に更新する。
 
 - claim ID と claim text
 - result pattern / evidence packet ID
@@ -56,13 +60,13 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 ## 手順
 
 1. 対象範囲を決める。Abstract / Conclusion / central claim / figure story / section claim のどれを gate するか明記する。
-2. `notes/result-pattern-map.md` から claim に昇格しようとしている evidence packet を確認する。raw result を直接 claim にしない。
-3. `notes/claim-evidence-map.md` の status と矛盾していないか確認する。
+2. `evidence/` と `notes/views/result-pattern-map.md` から claim に昇格しようとしている evidence packet を確認する。raw result を直接 claim にしない。
+3. `claims/claims/` と `notes/views/claim-evidence-map.md` の status と矛盾していないか確認する。
 4. `notes/reproducibility.md`、`refs/links.toml`、`notes/source-reach.md` から provenance と再現可能性を確認する。
 5. `notes/related-work-map.md` と `refs/summaries/` から関連研究、反論、引用可能な support を確認する。
-6. 各 claim を gate status へ分類し、block reason と次の route を書く。
+6. 各 claim を gate status へ分類し、gate card に block reason と次の route を書く。
 7. `ready-to-write` の claim だけ、本文や caption で使える scope statement を作る。
-8. 人間承認が必要な assumption は、AI が勝手に受容せず `notes/scientific-gate.md` の approval log に残す。
+8. 人間承認が必要な assumption は、AI が勝手に受容せず gate card と `notes/views/scientific-gate.md` の approval log に残す。
 
 ## Role pass
 
@@ -81,7 +85,7 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 - `Blocking issues`
 - `Approved writing scope`
 - `Assumption approvals needed`
-- `Routes`: `/map-result-patterns`、`/research-related-work`、`/source-reach-scan`、`/calibrate-claims`、`/figure-story-audit`、`/peer-review-manuscript`、`notes/research-requests.md`
+- `Routes`: `/map-result-patterns`、`/research-related-work`、`/source-reach-scan`、`/calibrate-claims`、`/figure-story-audit`、`/peer-review-manuscript`、`requests/analysis/`
 - `Files updated`
 - `Checks run`
 

@@ -23,16 +23,17 @@ description: テンプレートから作成した新しい論文リポジトリ�
 - `refs/local/locations.toml` が存在するか
 - `tex-env.toml` が存在するか
 - `_handoff/` と `_handoff/README.md` が存在するか
+- `evidence/`、`claims/`、`review/`、`requests/` と `notes/views/` が存在するか
 - `.gitignore` が `_handoff/*` と `refs/source-reach/**/raw/**` を保護しているか
 - `.github/workflows/*.yml` に `YOUR_ORG/paperops` が残っているか
 - `manuscript/publication-metadata.toml` にプレースホルダーが残っているか
 - `notes/project-brief.md` にプレースホルダーが残っているか
 - `notes/related-work-map.md` が未記入か
 - `notes/source-reach.md` が未記入か
-- `notes/scientific-gate.md` が未記入か
-- `notes/claim-evidence-map.md` が未記入か
+- `notes/views/scientific-gate.md` が未記入か
+- `notes/views/claim-evidence-map.md` が未記入か
 - `notes/reviewer-model.md` が未記入か
-- `notes/peer-review.md` が未記入か
+- `notes/views/peer-review.md` が未記入か
 - `notes/ai-draft-polish.md` が未記入か
 - `notes/ai-use.md` が未記入か
 - `manuscript/venue.md` が未記入か
@@ -161,12 +162,18 @@ refs/source-reach/**/capture.generated.*
 - 外部 Web、GitHub、動画、RSS、SNS、議論サイトを使う予定があれば channel と raw capture 方針を TODO として置く
 - platform-specific source を使う場合は `/source-reach-scan` で credential need と Git 管理しない raw output を分けるよう案内する
 
-#### notes/scientific-gate.md
+#### card layers
+
+- `evidence/README.md`、`claims/README.md`、`review/README.md`、`requests/README.md` を確認する。
+- 新しい result、claim、feedback、request はカード層を正本にし、`notes/views/` は俯瞰ビューとして扱う。
+- 人間の原稿レビューやプロンプト指示は `/integrate-writing-feedback` に渡すよう案内する。
+
+#### notes/views/scientific-gate.md
 
 - 中心主張を Abstract / Conclusion / main figure caption に出す前の gate status を TODO として置く
 - evidence が未確定の場合は `analysis-needed` または `assumption-blocked` のまま残し、AI に強い結論を書かせない
 
-#### notes/claim-evidence-map.md
+#### notes/views/claim-evidence-map.md
 
 - Core claim、essential results、Not claiming の初期案を提案する
 - evidence が未確定の場合は `draft` のまま残し、過剰主張しない
@@ -181,7 +188,7 @@ refs/source-reach/**/capture.generated.*
 - 投稿先候補、article type、primary reader、likely skepticism を初期案として記入する
 - 未定項目は TODO として残す
 
-#### notes/peer-review.md
+#### notes/views/peer-review.md
 
 - 初期状態では未実施のままにし、AI review / confidentiality 欄だけ TODO として確認対象にする
 - 投稿前の模擬査読は `/peer-review-manuscript`、実査読返答は `/respond-to-peer-review` を使うよう案内する
@@ -224,7 +231,7 @@ make ci
 ## Codex 実行メモ
 
 - Claude 固有の `allowed-tools` は Codex の利用可能な shell / file editing tool に読み替える。
-- 編集前に `README.md`、`AGENTS.md`、`notes/project-brief.md`、`notes/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`、`notes/ai-draft-polish.md`、`notes/ai-use.md`、`manuscript/venue.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`refs/local/locations.example.toml` を確認する。
+- 編集前に `README.md`、`AGENTS.md`、`evidence/README.md`、`claims/README.md`、`review/README.md`、`requests/README.md`、`notes/project-brief.md`、`notes/views/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/views/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/views/peer-review.md`、`notes/ai-draft-polish.md`、`notes/ai-use.md`、`manuscript/venue.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`refs/local/locations.example.toml` を確認する。
 - `refs/local/locations.toml` はローカル絶対パスを含みうるため、Codex は自動作成・自動編集せず、ユーザーに copy command と編集方針を提示する。
-- Core claim、reader model、AI use log は `notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md` の starter を埋めるか、未定 TODO として残す。
+- Core claim、reader model、AI use log は `notes/views/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md` の starter を埋めるか、未定 TODO として残す。
 - 初回セットアップ後、可能なら `make ci`、外部共有に近い状態なら `make pre-submit` も実行する。難しい場合は `make lint-bib`、`make citation-check`、`make mirror-check` を個別に実行する。

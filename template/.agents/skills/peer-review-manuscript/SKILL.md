@@ -17,8 +17,8 @@ description: Use when 投稿前原稿を peer review、査読者、reviewer 2、
 
 - PDF、投稿用 TeX、公開原稿、図表、補足資料。
 - `manuscript/mirror/status.md` は source-of-truth 言語確認に限って読んでよい。
-- repo-aware routing に進む場合だけ、`manuscript/venue.md`、`notes/reviewer-model.md`、`notes/claim-evidence-map.md`、`notes/related-work-map.md`、`notes/reproducibility.md`、`notes/peer-review.md` を読む。
-- claim readiness を判定する必要がある場合は `notes/scientific-gate.md`、追加の外部 source が必要な場合は `notes/source-reach.md` も読む。
+- repo-aware routing に進む場合だけ、`manuscript/venue.md`、`notes/reviewer-model.md`、`claims/`、`evidence/`、`review/`、`notes/views/claim-evidence-map.md`、`notes/related-work-map.md`、`notes/reproducibility.md`、`notes/views/peer-review.md` を読む。
+- claim readiness を判定する必要がある場合は `notes/views/scientific-gate.md`、追加の外部 source が必要な場合は `notes/source-reach.md` も読む。
 
 ## 手順
 
@@ -93,13 +93,13 @@ Concern matrix を作る:
 
 ユーザーが記録や修正を求めた場合だけ、repo 内部文脈を読んで対応先を決める。
 
-- claim / evidence の問題: `notes/claim-evidence-map.md`
-- claim readiness / assumption の問題: `notes/scientific-gate.md`
-- result や figure data の問題: `notes/result-pattern-map.md`、`notes/research-requests.md`
+- claim / evidence の問題: `claims/claims/`、`evidence/`、`notes/views/claim-evidence-map.md`
+- claim readiness / assumption の問題: `claims/gates/`、`notes/views/scientific-gate.md`
+- result や figure data の問題: `evidence/results/`、`evidence/figures/`、`requests/analysis/`
 - 関連研究・比較対象: `notes/related-work-map.md`、`notes/source-reach.md`、`refs/summaries/`
 - 読者・投稿先 fit: `notes/reviewer-model.md`、`manuscript/venue.md`
 - 再現性: `notes/reproducibility.md`
-- 模擬査読の台帳: `notes/peer-review.md`
+- 模擬査読の台帳: `review/feedback/`、`review/rounds/`、`notes/views/peer-review.md`
 
 本文はユーザーが明示的に改稿を求めた場合だけ編集する。改稿する場合は `manuscript/ja/` の source-of-truth と `% block: ...` ID を尊重し、EN mirror は `/sync-ja-en` の方針に従う。
 
@@ -127,4 +127,4 @@ Concern matrix を作る:
 - PDF が入力された場合はテキスト抽出し、抽出不能なら停止してユーザーへ知らせる。
 - public-only review と repo-aware routing を混ぜない。
 - 独立 reviewer の指摘を平均化しすぎず、少数意見でも blocking concern なら残す。
-- `notes/peer-review.md` へ記録する場合は、公開可能な要約と対応 ID を中心にし、raw confidential text は `_handoff/` かローカル入力に留める。
+- repo-aware に記録する場合は、まず `review/feedback/` の feedback card に公開可能な要約と対応 ID を残す。反映まで進む場合は `/integrate-writing-feedback` に渡す。raw confidential text は `_handoff/` かローカル入力に留める。

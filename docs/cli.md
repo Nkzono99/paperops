@@ -103,7 +103,7 @@ uvx --from paper-harness-cli pops update-paperops --target latest --allow-major 
 - `.github/ISSUE_TEMPLATE/`
 - `.github/PULL_REQUEST_TEMPLATE.md`
 
-`README.md`、`notes/`、`manuscript/`、`refs/`、`submission/` はプロジェクト固有内容として自動更新対象にしない。
+`README.md`、`notes/`、`evidence/`、`claims/`、`review/`、`requests/`、`manuscript/`、`refs/`、`submission/` はプロジェクト固有内容として自動更新対象にしない。
 
 update plan では、管理対象ファイルに `agent guidance`、`Codex skill entry`、`validation/build script` などの更新面ラベルを付ける。`changed managed files` は下流側のファイルが bundled scaffold と異なるという意味で、通常の `--apply` では上書きされない。差分を確認し、ローカル追記を置換してよい場合だけ `--apply --force` を使う。
 
@@ -111,7 +111,7 @@ update plan では、管理対象ファイルに `agent guidance`、`Codex skill
 
 paper draft が runops project や外部ディレクトリを参照する場合、共有可能な link intent は `refs/links.toml` に、個人環境の絶対パスは ignored な `refs/local/locations.toml` に分離する。`pops links check` は `refs/links.toml` と `refs/local/locations.example.toml` の対応を確認し、ローカルパスを共有ファイルへ混ぜずに運用できるかを検査する。
 
-`kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。paper draft 側で発生した追加解析・図表・追加実験要望は `notes/research-requests.md` に記録し、`runops.paper.request.draft` で schema と id の衝突を確認してから runops project 側の `research/paper_requests.toml` に handoff する。
+`kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。paper draft 側で発生した追加解析・図表・追加実験要望は `requests/analysis/` に記録し、`notes/views/research-requests.md` で俯瞰する。`runops.paper.request.draft` で schema と id の衝突を確認してから runops project 側の `research/paper_requests.toml` に handoff する。
 
 `refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名のような識別子は英語のままでよい。
 
@@ -123,4 +123,4 @@ paper draft が runops project や外部ディレクトリを参照する場合�
 
 改善指示が局所的な修正や新しい check 追加に固着しそうな場合は、先に `/open-paper-scan` で原稿・読者体験・ハーネスを俯瞰する。`/open-paper-scan` は発想専用で、ユーザーが求めるまで本文編集、notes 記録、Issue 化、上流 feedback 化をしない。
 
-simulation results、figure data、analysis artifact は、本文や claim に直接入れる前に `/map-result-patterns` で `notes/result-pattern-map.md` の result pattern / evidence packet へ束ねる。中心主張、Abstract、Conclusion、main figure caption に入れる前には、必要に応じて `/scientific-gate` で `notes/scientific-gate.md` の claim readiness と assumption approval を確認する。AI 初稿や大規模な自動生成稿は、本文を直接磨く前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新する。claim lock 後に機械的な文体だけを直す場合は `/polish-ai-draft` を使う。`make argument-focus-check` は、必要な中間層の starter note と、条件数列挙、防御的 caveat、内部 provenance 語が本文に残っていないかを advisory に確認する。
+simulation results、figure data、analysis artifact は、本文や claim に直接入れる前に `/map-result-patterns` で `evidence/results/` と `evidence/figures/` の card へ束ねる。中心主張、Abstract、Conclusion、main figure caption に入れる前には、必要に応じて `/scientific-gate` で `claims/gates/` の gate card と `notes/views/scientific-gate.md` の claim readiness と assumption approval を確認する。AI 初稿や大規模な自動生成稿は、本文を直接磨く前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `evidence/`、`claims/`、`notes/views/` を更新する。claim lock 後に機械的な文体だけを直す場合は `/polish-ai-draft` を使う。人間レビューやプロンプト指示を反映する場合は `/integrate-writing-feedback` で `review/feedback/` の feedback card から上流へ遡る。`make argument-focus-check` は、必要な中間層の starter note と、条件数列挙、防御的 caveat、内部 provenance 語が本文に残っていないかを advisory に確認する。

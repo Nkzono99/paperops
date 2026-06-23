@@ -45,27 +45,41 @@ def section_body(text: str, heading: str) -> str:
     return text[match.end() : end].strip()
 
 
+def resolve_view_path(root: Path, preferred: str, legacy: str, findings: list[Finding]) -> tuple[str, Path] | None:
+    preferred_path = root / preferred
+    if preferred_path.exists():
+        return preferred, preferred_path
+    legacy_path = root / legacy
+    if legacy_path.exists():
+        return legacy, legacy_path
+    findings.append(Finding("error", f"`{preferred}` が見つかりません（旧互換: `{legacy}`）"))
+    return None
+
+
 def check_argument_map(root: Path, findings: list[Finding]) -> None:
-    rel_path = "notes/argument-map.md"
-    path = root / rel_path
-    if not path.exists():
-        findings.append(Finding("error", f"`{rel_path}` が見つかりません"))
+    resolved = resolve_view_path(root, "notes/views/argument-map.md", "notes/argument-map.md", findings)
+    if resolved is None:
         return
+    rel_path, path = resolved
     text = read_text(path)
     required = ["一文の中心主張", "証拠の階層", "ローカル条件から公開主張への抽象化", "Defense budget"]
     for heading in required:
         if f"## {heading}" not in text:
             findings.append(Finding("error", f"`{rel_path}` に `{heading}` セクションがありません"))
     if is_blank(section_body(text, "一文の中心主張")):
-        findings.append(Finding("warning", "`notes/argument-map.md` の一文の中心主張が未記入です"))
+        findings.append(Finding("warning", f"`{rel_path}` の一文の中心主張が未記入です"))
 
 
 def check_condition_context_map(root: Path, findings: list[Finding]) -> None:
-    rel_path = "notes/condition-context-map.md"
-    path = root / rel_path
-    if not path.exists():
-        findings.append(Finding("error", f"`{rel_path}` が見つかりません"))
+    resolved = resolve_view_path(
+        root,
+        "notes/views/condition-context-map.md",
+        "notes/condition-context-map.md",
+        findings,
+    )
+    if resolved is None:
         return
+    rel_path, path = resolved
     text = read_text(path)
     required = ["条件軸の公開名", "Local condition から paper context への対応", "条件の役割", "本文で言ってよい形"]
     for heading in required:
@@ -74,11 +88,15 @@ def check_condition_context_map(root: Path, findings: list[Finding]) -> None:
 
 
 def check_result_pattern_map(root: Path, findings: list[Finding]) -> None:
-    rel_path = "notes/result-pattern-map.md"
-    path = root / rel_path
-    if not path.exists():
-        findings.append(Finding("error", f"`{rel_path}` が見つかりません"))
+    resolved = resolve_view_path(
+        root,
+        "notes/views/result-pattern-map.md",
+        "notes/result-pattern-map.md",
+        findings,
+    )
+    if resolved is None:
         return
+    rel_path, path = resolved
     text = read_text(path)
     required = ["結果パターン inventory", "観察から解釈への変換", "Evidence packet 化する場合", "Claim に昇格する前の確認"]
     for heading in required:
@@ -160,7 +178,7 @@ def main() -> int:
         for finding in warnings:
             print(f"- {finding.message}")
         print("")
-        print("AI 初稿を改稿する前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`、必要なら `/scientific-gate` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md`、`notes/scientific-gate.md` を更新してください。claim lock 後の文体 polish だけなら `/polish-ai-draft` を使ってください。")
+        print("AI 初稿を改稿する前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`、必要なら `/scientific-gate` で `evidence/`、`claims/`、`notes/views/` のカードとビューを更新してください。claim lock 後の文体 polish だけなら `/polish-ai-draft` を使ってください。")
         print("")
     if not findings:
         print("論旨設計メモと本文の argument focus に明らかな問題は見つかりませんでした。")

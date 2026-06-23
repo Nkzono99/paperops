@@ -7,15 +7,18 @@ description: simulation results、figure data、analysis artifact、run output �
 
 raw result、figure data、analysis artifact、run output を、本文や claim に直接入れる前の result pattern へ束ねるために使う。
 
-Quarto manuscripts、showyourwork!、research compendium のような外部ハーネスは、計算・図表・原稿・環境の関係を明示する。paperops ではそれを全面的な DAG や別 authoring system にせず、執筆判断用の薄い中間層として `notes/result-pattern-map.md` に置く。
+Quarto manuscripts、showyourwork!、research compendium のような外部ハーネスは、計算・図表・原稿・環境の関係を明示する。paperops ではそれを全面的な DAG や別 authoring system にせず、`evidence/results/` と `evidence/figures/` のカードを正本、`notes/views/result-pattern-map.md` を俯瞰ビューとして扱う。
 
 ## 最初に読むファイル
 
-- `notes/result-pattern-map.md`
-- `notes/scientific-gate.md`
-- `notes/condition-context-map.md`
-- `notes/claim-evidence-map.md`
-- `notes/argument-map.md`
+- `evidence/README.md`
+- `evidence/results/`
+- `evidence/figures/`
+- `notes/views/result-pattern-map.md`
+- `notes/views/scientific-gate.md`
+- `notes/views/condition-context-map.md`
+- `notes/views/claim-evidence-map.md`
+- `notes/views/argument-map.md`
 - `notes/reproducibility.md`
 - `refs/links.toml`
 - 対象の figure/table、Results section、analysis summary、runops export summary
@@ -45,7 +48,7 @@ Quarto manuscripts、showyourwork!、research compendium のような外部ハ�
 
 ### 2. Result pattern にする
 
-各 unit について、`notes/result-pattern-map.md` の `結果パターン inventory` を埋める:
+各 unit について、まず `evidence/results/` に result card を作る。図表に関わる unit は `evidence/figures/` に figure card も作る。そのうえで `notes/views/result-pattern-map.md` の `結果パターン inventory` を更新する:
 
 - `observed contrast`
 - `effect direction / magnitude`
@@ -60,7 +63,7 @@ run label、directory、script name、internal export name は raw reference ま
 
 ### 3. 条件文脈へ接続する
 
-pattern が条件数、case count、denominator に依存する場合は、`notes/condition-context-map.md` へ渡す:
+pattern が条件数、case count、denominator に依存する場合は、`notes/views/condition-context-map.md` へ渡す:
 
 - local condition ではなく public condition name を付ける
 - denominator が読者に意味を持つか確認する
@@ -69,7 +72,7 @@ pattern が条件数、case count、denominator に依存する場合は、`note
 
 ### 4. Evidence packet にする
 
-本文や図表に入れる pattern だけ、`Evidence packet 化する場合` を埋める。
+本文や図表に入れる pattern だけ、result card の claim links / manuscript blocks と、`notes/views/result-pattern-map.md` の `Evidence packet 化する場合` を埋める。
 
 packet は 1 つの result story として扱い、最低限以下を持つ:
 
@@ -81,14 +84,14 @@ packet は 1 つの result story として扱い、最低限以下を持つ:
 - `manuscript block`
 - `reproduce / provenance link`
 
-claim ID が未定なら `C1 / 未定` のように仮置きし、claim として採用する段階で `notes/claim-evidence-map.md` に移す。
+claim ID が未定なら `CLM-0001 / 未定` のように仮置きし、claim として採用する段階で `claims/claims/` の claim card と `notes/views/claim-evidence-map.md` に接続する。
 
 ### 5. Manuscript routing を決める
 
 各 pattern を以下に分類する:
 
-- `promote to claim`: `claim-evidence-map` に移す
-- `scientific gate`: `notes/scientific-gate.md` で claim package と readiness を確認する
+- `promote to claim`: `claims/claims/` の claim card に接続する
+- `scientific gate`: `notes/views/scientific-gate.md` で claim package と readiness を確認する
 - `figure story`: `figure-story-audit` で caption / 本文参照へ接続する
 - `condition context`: `condition-context-map` で公開条件名と scope を整理する
 - `supplement`: Methods、supplement、Data availability に退避する
@@ -100,7 +103,7 @@ claim ID が未定なら `C1 / 未定` のように仮置きし、claim とし�
 - `Result pattern map`: pattern ID、observed contrast、effect direction、null cases、candidate interpretation
 - `Evidence packets`: 本文や図表に入れる result story
 - `Condition context handoff`: `/contextualize-conditions` へ渡す条件・denominator
-- `Claim promotion candidates`: `claim-evidence-map` へ昇格できる候補
+- `Claim promotion candidates`: `claims/claims/` へ昇格できる候補
 - `Move to supplement / notes`: 本文から退避する材料
 - `Risks`: overclaim、coverage 不足、公開語不足、provenance 不足
 
@@ -114,6 +117,6 @@ claim ID が未定なら `C1 / 未定` のように仮置きし、claim とし�
 ## Codex 実行メモ
 
 - ユーザーが本文編集を明示しない限り、`manuscript/` は編集しない。
-- result pattern を作った後に claim へ昇格する場合は、`notes/claim-evidence-map.md` の主張台帳も更新する。
+- result pattern を作った後に claim へ昇格する場合は、`claims/claims/` の claim card と `notes/views/claim-evidence-map.md` の主張台帳も更新する。
 - 図表 caption まで進む場合は `/figure-story-audit`、条件数や denominator の翻訳へ進む場合は `/contextualize-conditions` を使う。
 - Abstract / Conclusion / central claim に入れる場合は、`/scientific-gate` で gate status を更新する。

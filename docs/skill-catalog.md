@@ -47,6 +47,7 @@
 - `review-public-manuscript`
 - `peer-review-manuscript`
 - `respond-to-peer-review`
+- `integrate-writing-feedback`
 - `start-manuscript-review`
 - `collect-manuscript-review`
 - `design-manuscript-claims`
@@ -69,7 +70,7 @@
 - 執筆設計・本文調整: `scientific-gate`、`design-manuscript-claims`、`calibrate-claims`、`paragraph-surgery`、`polish-ai-draft`
 - 結果パターン・AI 初稿の診断・条件文脈化: `map-result-patterns`、`audit-ai-draft`、`contextualize-conditions`
 - 日英同期・公開語彙: `sync-ja-en`、`public-terminology-pass`
-- 通読レビュー: `start-manuscript-review` で開始し、終了後に `collect-manuscript-review`
+- 通読レビュー: `start-manuscript-review` で開始し、終了後に `collect-manuscript-review`、反映時は `integrate-writing-feedback`
 - 査読シミュレーション・返答: `peer-review-manuscript`、`respond-to-peer-review`
 - 公開前点検: `review-public-manuscript`、`figure-story-audit`、`venue-fit-review`、`ai-disclosure-check`
 - 外部 project link・上流改善: `resolve-local-paths`、`feedback-paper-harness`
@@ -84,6 +85,7 @@
 - `review-public-manuscript`: section / weekly / pre-submit の粒度で公開原稿だけを読み、外部読者・一般研究者視点で未定義語、ローカル語、暗黙前提、再現性ギャップを検出する。
 - `peer-review-manuscript`: 投稿前原稿を査読者パネルとして読み、major/minor comments、required checks、recommendation、meta-review、concern matrix を作る。
 - `respond-to-peer-review`: editor / reviewer comments を comment ID、response matrix、revision plan、response letter draft に分解し、本文修正と返答案を混ぜない。
+- `integrate-writing-feedback`: 人間の原稿レビュー、プロンプト指示、査読コメントを `review/feedback/` の feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
 - `start-manuscript-review`: 人間が TeX/PDF を通読して直接編集するための review branch と inline comment ルールを準備する。
 - `collect-manuscript-review`: TeX の直接編集 diff と `% REVIEW:` などの inline comment から `notes/reviews/review-YYYY-MM-DD.md` を生成し、必要に応じて source-of-truth 原稿と EN mirror に反映する。
 - `design-manuscript-claims`: repo 内の brief / contribution claims / mirror status も読み、作業報告型の原稿を主張中心の構造へ再設計する。
@@ -99,7 +101,9 @@
 
 `resolve-local-paths` は `refs/links.toml` を共有可能な external link registry、`refs/local/locations.toml` を untracked なローカル解決先として扱う。
 
-セットアップとセッション記録のスキルは、`notes/source-reach.md`、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/scientific-gate.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`、`notes/ai-draft-polish.md`、`notes/ai-use.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md` も公開・投稿前状態として扱う。
+カード層の正本は `evidence/`、`claims/`、`review/`、`requests/` である。`notes/views/` は人間が俯瞰するビュー、旧 `notes/*.md` は互換ビューとして扱う。
+
+セットアップとセッション記録のスキルは、`evidence/README.md`、`claims/README.md`、`review/README.md`、`requests/README.md`、`notes/source-reach.md`、`notes/related-work-map.md`、`notes/views/result-pattern-map.md`、`notes/views/scientific-gate.md`、`notes/views/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/views/peer-review.md`、`notes/ai-draft-polish.md`、`notes/ai-use.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md` も公開・投稿前状態として扱う。
 
 `.agents/skills/` は重複実装を避けるための source of truth であり、恒久的な手順変更は `.agents/skills/<skill>/SKILL.md` 側を更新する。`.claude/skills/` は cwd に依存しない `${CLAUDE_SKILL_DIR}` 参照を使う薄い互換入口に留める。`make skill-mirror-check` は同名 skill の存在と wrapper の source-of-truth 参照を機械的に確認する。
 

@@ -39,10 +39,11 @@ make mirror-strict-check # mirror freshness warning を失敗扱いで検出
 make public-terms-check # 公開原稿に内部語・禁止語が残っていないか検証
 make argument-focus-check # AI 初稿の列挙・防御過多・ローカル条件依存を検出
 make claim-evidence-check # supported claim に証拠と本文対応があるか検証
+make paper-layer-card-check # evidence/claims/review/requests のカード層と互換ビューを検証
 make submission-drift-check # submission/<venue> と manuscript/en の同期注意点を検出
 make skill-mirror-check # .agents source と .claude wrapper の対応を検証
 make links-check    # refs/links.toml と refs/local の link 対応を検証
-make ci             # lint-bib + citation-check + mirror-check + mirror-freshness-check + public-terms-check + claim-evidence-check + skill-mirror-check + links-check + build-ja + build-en
+make ci             # lint-bib + citation-check + mirror-check + mirror-freshness-check + public-terms-check + claim-evidence-check + paper-layer-card-check + skill-mirror-check + links-check + build-ja + build-en
 make readiness-check # 公開メタデータ、再現性メモ、workflow 参照の未記入を検出
 make pre-submit     # ci + lint-bib-pre-submit + submission 必須 readiness + submission-drift-check
 make export-arxiv   # 英語原稿を arXiv 投稿用にバンドル
@@ -68,16 +69,18 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `refs/links.toml` は外部 project / directory への共有 link 台帳である。tracked ファイルには絶対パスを書かず、`location_ref` を `refs/local/locations.toml` の個人設定で解決する。
 - `refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、field name、投稿先指定、外部ツール名などの識別子だけは英語のままでよい。
 - `_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱である。内容は Git 管理されない。残す情報は `refs/` や `notes/` の適切な台帳へ整理し、秘密情報や個人環境の絶対パスを tracked ファイルへ移さない。
+- `evidence/`、`claims/`、`review/`、`requests/` はカード正本である。`notes/views/` は人間が俯瞰するビュー、旧 `notes/*.md` は互換ビューとして扱う。
+- 人間の原稿レビューやプロンプト指示は `/integrate-writing-feedback` で feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
 - 俯瞰的な違和感や改善案を広げるだけなら `/open-paper-scan` を使い、ユーザーが求めるまで本文編集、notes 記録、Issue 化、上流 feedback 化へ進まない。
-- simulation results、figure data、analysis artifact を本文に入れる前に、必要なら `/map-result-patterns` で `notes/result-pattern-map.md` に result pattern / evidence packet として束ねる。
-- 中心主張、Abstract、Conclusion、main figure caption を書く前に、必要なら `/scientific-gate` で `notes/scientific-gate.md` の claim readiness を確認する。`analysis-needed` や `assumption-blocked` の主張を文体だけで本文に通さない。
-- AI 初稿が条件数の列挙、run inventory、防御的 caveat に寄ったら、本文を直接磨く前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新する。
+- simulation results、figure data、analysis artifact を本文に入れる前に、必要なら `/map-result-patterns` で `evidence/results/` と `evidence/figures/` のカードに result pattern / evidence packet として束ねる。
+- 中心主張、Abstract、Conclusion、main figure caption を書く前に、必要なら `/scientific-gate` で `claims/gates/` の gate card と `notes/views/scientific-gate.md` の claim readiness を確認する。`analysis-needed` や `assumption-blocked` の主張を文体だけで本文に通さない。
+- AI 初稿が条件数の列挙、run inventory、防御的 caveat に寄ったら、本文を直接磨く前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `evidence/`、`claims/`、`notes/views/` を更新する。
 - AI 初稿の機械的な文体だけを直す場合は `/polish-ai-draft` を使う。ただし、claim lock と AI 利用開示を守り、AI 検出回避を目的にしない。
 - 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
 - 公開・投稿前には `manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`notes/ai-use.md` を更新し、`make pre-submit` を実行する。
-- 新しい主張は `notes/claim-evidence-map.md` に evidence、scope、limitation とともに記録する。
+- 新しい主張は `claims/claims/` の claim card に evidence、scope、limitation とともに記録し、`notes/views/claim-evidence-map.md` を俯瞰用に更新する。
 - 想定読者や投稿先制約が変わったら `notes/reviewer-model.md` と `manuscript/venue.md` を更新する。
-- 投稿前に査読者として厳しく読む場合は `/peer-review-manuscript` を使い、実際の査読コメントへ返答する場合は `/respond-to-peer-review` を使う。raw の editor / reviewer correspondence は confidential な場合があるため、tracked notes には要約と comment ID を中心に残す。
+- 投稿前に査読者として厳しく読む場合は `/peer-review-manuscript` を使い、実際の査読コメントへ返答する場合は `/respond-to-peer-review` を使う。raw の editor / reviewer correspondence は confidential な場合があるため、tracked な `review/` カードには要約と comment ID を中心に残す。
 - 内部 run label、script name、directory name、artifact name を本文の公開語として使わず、必要な置換を `manuscript/mirror/terminology.yml` に記録する。
 - 1 節を書いた直後や週次の節目では `/review-public-manuscript` を `section` / `weekly` として使い、repo 内部文脈なしで公開語彙・暗黙前提・figure story を確認する。
 - ミラー同期には `/sync-ja-en` を使用する。両言語を盲目的に上書きしない。
@@ -121,7 +124,7 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 - 執筆設計・本文調整: `/scientific-gate`、`/design-manuscript-claims`、`/calibrate-claims`、`/paragraph-surgery`、`/polish-ai-draft`
 - 結果パターン・AI 初稿の診断・条件文脈化: `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`
 - 日英同期・公開語彙: `/sync-ja-en`、`/public-terminology-pass`
-- 通読レビュー: `/start-manuscript-review` で開始し、終了後に `/collect-manuscript-review`
+- 通読レビュー: `/start-manuscript-review` で開始し、終了後に `/collect-manuscript-review`、反映時は `/integrate-writing-feedback`
 - 査読シミュレーション・返答: `/peer-review-manuscript`、`/respond-to-peer-review`
 - 公開前点検: `/review-public-manuscript`、`/figure-story-audit`、`/venue-fit-review`、`/ai-disclosure-check`
 - 外部 project link・上流改善: `/resolve-local-paths`、`/feedback-paper-harness`
@@ -147,6 +150,7 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 | `/review-public-manuscript` | section / weekly / pre-submit の粒度で、公開原稿だけを入力に外部読者視点の未定義語・ローカル語・暗黙前提をレビュー |
 | `/peer-review-manuscript` | 投稿前原稿を査読者パネルと meta-review 形式で評価し、major/minor comment と revision priority を作る |
 | `/respond-to-peer-review` | editor / reviewer comments を response matrix、revision plan、response letter 草案へ整理 |
+| `/integrate-writing-feedback` | 人間レビューや自然文指示を feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映 |
 | `/start-manuscript-review` | TeX 直編集レビュー用 branch を用意し、人間向けの通読ガイドを表示 |
 | `/collect-manuscript-review` | TeX diff と inline comment からレビュー台帳を生成し、必要に応じて原稿へ反映 |
 | `/design-manuscript-claims` | 作業報告型の原稿を主張中心の構造へ再設計 |
@@ -172,8 +176,12 @@ manuscript/publication-metadata.toml  公開タイトル、著者、ライセン
 submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: links.toml, summaries, research, source-reach, local（papers, bib, excerpts はスキルが必要時に作成）
 _handoff/            人間から AI への未整理ファイル受け取り箱（内容は Git 管理しない）
-notes/research-requests.md  paper draft から生じた追加解析・図表・実験要望
-notes/               project-brief, contribution-claims, scientific-gate, source-reach, related-work-map, result-pattern-map, claim-evidence-map, argument-map, condition-context-map, reviewer-model, peer-review, ai-draft-polish, ai-use, reproducibility, handoff, todo, decision-log
+evidence/            result / figure / source card の正本
+claims/              claim / scientific gate / argument card の正本
+review/              feedback / review round / response card の正本
+requests/            analysis / writing request card の正本
+notes/views/         card 正本を人間が俯瞰するビュー
+notes/               project-brief, contribution-claims, source-reach, related-work-map, reviewer-model, ai-draft-polish, ai-use, reproducibility, handoff, todo, decision-log, 旧互換ビュー
 scripts/             ビルド、TeX 構造、lint、citation-check、skill 対応、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills wrapper、rules/、hooks/

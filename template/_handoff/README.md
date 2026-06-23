@@ -8,7 +8,7 @@ AI はこのディレクトリを見たら、必要に応じて以下へ整理�
 
 - 文献や参照知識: `refs/summaries/`、`refs/links.toml`
 - ローカルパスや外部ディレクトリ: `refs/local/locations.toml`
-- 追加解析・図表・実験要望: `notes/research-requests.md`
+- 追加解析・図表・実験要望: `requests/analysis/`、`requests/writing/`、俯瞰は `notes/views/research-requests.md`
 - セッション引き継ぎや作業メモ: `notes/handoff.md`、`notes/todo.md`
 - 再現性や公開可能な provenance: `notes/reproducibility.md`
 

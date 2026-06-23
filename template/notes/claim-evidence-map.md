@@ -1,51 +1,5 @@
-# 主張と証拠の対応表
+# 主張と証拠の互換ビュー
 
-## 中心主張
+このファイルは旧パス互換のために残している互換ビューである。新しい claim の正本は `claims/claims/` の claim card、証拠の正本は `evidence/` の各カード、俯瞰ビューは `notes/views/claim-evidence-map.md` に置く。
 
-未記入。読者に持ち帰ってほしい中心主張を 1 文で書く。可能なら title candidate と同じ方向の主張にする。
-
-## 主要結果
-
-1. 未記入 - 中心主張を支える - 図表:
-2. 未記入 - 中心主張を支える - 図表:
-3. 未記入 - 代替説明を退ける - 図表:
-
-## 主張台帳
-
-| 主張ID | 主張 | 証拠 | 論拠・推論 | 適用範囲 | 限界 | 本文ブロック | 図表 | 状態 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| C1 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | draft |
-
-`supported` に昇格する前に、中心主張は `notes/scientific-gate.md` の claim readiness table でも `ready-to-write` になっているか確認する。`analysis-needed` や `assumption-blocked` の主張は Abstract / Conclusion / main figure caption に使わない。
-
-## Result pattern 由来の evidence
-
-`notes/result-pattern-map.md` で整理した result pattern / evidence packet のうち、主張を支える証拠として採用するものだけをここへ移す。
-
-| 主張ID | pattern ID | packet ID | evidence role | warrant | scope / limitation | 本文ブロック |
-| --- | --- | --- | --- | --- | --- | --- |
-| C1 | RP-0001 | EP-0001 | core evidence / mechanism / boundary / robustness / negative control | 未記入 | 未記入 | 未記入 |
-
-## 主張しないこと
-
-- 本論文では主張しないことを記録する。
-- 将来課題、補足、別論文へ送ることを記録する。
-
-## 条件・ケースの論文上の役割
-
-| 条件グループ | ローカル証拠 | 論文上の文脈 | claim role | scope statement | 条件数を書く場所 |
-| --- | --- | --- | --- | --- | --- |
-| 未記入 | 未記入 | 未記入 | core evidence / mechanism / boundary / robustness / negative control / exploratory | 未記入 | 本文 / 図注 / Methods / supplement / notes |
-
-## 主張強度の調整
-
-- `draft`: まだ仮説または作業中の主張。
-- `supported`: evidence と warrant が揃い、本文で明確に主張してよい。
-- `overclaim risk`: evidence より強く見えるため、scope または limitation の調整が必要。
-- `defer`: 本文の中心主張には入れず、将来課題または補足に回す。
-
-## Scientific gate との対応
-
-| 主張ID | gate status | block reason | approved writing scope | next route |
-| --- | --- | --- | --- | --- |
-| C1 | ready-to-write / analysis-needed / assumption-blocked / supplement-only / defer | 未記入 | 未記入 | `/scientific-gate` / `/map-result-patterns` / `/research-related-work` |
+新しい主張や scope / limitation は claim card に記録し、必要に応じて `notes/views/claim-evidence-map.md` を更新する。

@@ -7,7 +7,7 @@ description: 関連研究、先行研究、文献レビュー、研究動向、�
 
 関連研究を「検索結果の山」ではなく、論文の問い、主張、反論、位置づけへ変換するために使う。
 
-Deep-Research-skills の outline -> field framework -> item deep research -> report という型を参考にするが、paperops では raw findings を正本にしない。正本は `refs/summaries/`、`.bib`、`notes/related-work-map.md`、必要なら `notes/claim-evidence-map.md` である。
+Deep-Research-skills の outline -> field framework -> item deep research -> report という型を参考にするが、paperops では raw findings を正本にしない。正本は `refs/summaries/`、`.bib`、`notes/related-work-map.md`、必要なら `notes/views/claim-evidence-map.md` である。
 
 ## 最初に読むファイル
 
@@ -15,8 +15,8 @@ Deep-Research-skills の outline -> field framework -> item deep research -> rep
 - `notes/contribution-claims.md`
 - `notes/source-reach.md`
 - `notes/related-work-map.md`
-- `notes/claim-evidence-map.md`
-- `notes/argument-map.md`
+- `notes/views/claim-evidence-map.md`
+- `notes/views/argument-map.md`
 - `refs/index.md`
 - `refs/source-reach/README.md`
 - `refs/summaries/`
@@ -107,7 +107,7 @@ raw findings は `refs/research/<topic-slug>/results/` に一時保存してよ�
 - `manuscript/shared/bib/references.bib`
 - `refs/summaries/<citation-key>.md`
 - 必要なら `refs/index.md`
-- claim を支える場合は `notes/claim-evidence-map.md`
+- claim を支える場合は `notes/views/claim-evidence-map.md`
 
 文献の存在、年、著者、DOI、主張内容を確認できない場合は `unchecked` または `unverified` と明示し、supported claim の証拠にしない。
 

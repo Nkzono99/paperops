@@ -39,6 +39,15 @@ def require_file(root: Path, rel_path: str, findings: list[Finding]) -> Path | N
     return path
 
 
+def require_any_file(root: Path, rel_paths: list[str], findings: list[Finding]) -> tuple[str, Path] | None:
+    for rel_path in rel_paths:
+        path = root / rel_path
+        if path.exists():
+            return rel_path, path
+    add(findings, "error", f"`{rel_paths[0]}` が見つかりません（旧互換: `{rel_paths[-1]}`）")
+    return None
+
+
 def check_placeholders(
     root: Path,
     rel_paths: Iterable[str],
@@ -166,9 +175,15 @@ def has_filled_section(text: str, heading: str | list[str]) -> bool:
 def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeholders: bool) -> None:
     severity = "warning" if allow_placeholders else "error"
 
-    claim_path = require_file(root, "notes/claim-evidence-map.md", findings)
-    if claim_path is not None and not has_filled_section(read_text(claim_path), ["中心主張", "Core claim"]):
-        add(findings, severity, "`notes/claim-evidence-map.md` の中心主張が未記入です")
+    claim_resolved = require_any_file(
+        root,
+        ["notes/views/claim-evidence-map.md", "notes/claim-evidence-map.md"],
+        findings,
+    )
+    if claim_resolved is not None:
+        claim_rel_path, claim_path = claim_resolved
+        if not has_filled_section(read_text(claim_path), ["中心主張", "Core claim"]):
+            add(findings, severity, f"`{claim_rel_path}` の中心主張が未記入です")
 
     ai_use_path = require_file(root, "notes/ai-use.md", findings)
     if ai_use_path is not None:
@@ -260,7 +275,7 @@ def main() -> int:
             "README.md",
             "notes/project-brief.md",
             "notes/contribution-claims.md",
-            "notes/claim-evidence-map.md",
+            "notes/views/claim-evidence-map.md",
             "notes/reviewer-model.md",
             "notes/ai-use.md",
             "notes/reproducibility.md",

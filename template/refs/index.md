@@ -21,7 +21,7 @@
 
 個人環境の絶対パスは `refs/local/locations.toml` にだけ書く。原稿、notes、tracked な refs にはローカル絶対パスを混ぜず、必要な provenance は export manifest、artifact index、または `notes/reproducibility.md` に公開可能な形で記録する。
 
-runops project へ追加解析・図表・追加実験の要望を戻す場合は、まず `notes/research-requests.md` に paper 側の文脈を残し、runops MCP の `runops.paper.request.draft` で候補 request を検証する。人間が確認した snippet だけを runops 側の `research/paper_requests.toml` に転記し、転記後は `runops.paper.requests.list` と `runops.paper.request.plan` で queue と routing を確認する。
+runops project へ追加解析・図表・追加実験の要望を戻す場合は、まず `requests/analysis/` に paper 側の文脈を残し、`notes/views/research-requests.md` で俯瞰する。runops MCP の `runops.paper.request.draft` で候補 request を検証する。人間が確認した snippet だけを runops 側の `research/paper_requests.toml` に転記し、転記後は `runops.paper.requests.list` と `runops.paper.request.plan` で queue と routing を確認する。
 
 ## 関連研究の探索
 

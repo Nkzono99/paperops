@@ -30,16 +30,17 @@ uvx --from paper-harness-cli pops doctor
 日常運用の主役は、CLI そのものではなく Agent との会話である。
 
 1. 人間が論文トピック、制約、投稿先候補、判断を伝える。
-2. Agent が `notes/project-brief.md`、`notes/source-reach.md`、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/scientific-gate.md`、`notes/claim-evidence-map.md`、`notes/peer-review.md`、`manuscript/venue.md` を整える。
+2. Agent が `evidence/`、`claims/`、`review/`、`requests/` のカードを正本として整え、`notes/views/` で俯瞰できるようにする。
 3. `uvx --from paper-harness-cli pops ...` が init / setup / doctor / update-paperops のような決定的操作を担う。
 4. 原稿は `manuscript/ja` を中心に進め、必要な block を `manuscript/en` へ同期する。
 5. 関連研究や外部情報源を集める場合は `/source-reach-scan` で source channel と raw capture 方針を決め、`/research-related-work` で調査対象と field framework を作り、raw findings を `refs/research/`、採用文献を `refs/summaries/` と `.bib`、議論を `notes/related-work-map.md` へ分ける。
-6. 投稿前の模擬査読は `/peer-review-manuscript`、実査読コメントへの返答は `/respond-to-peer-review` で `notes/peer-review.md` へ整理する。
+6. 投稿前の模擬査読は `/peer-review-manuscript`、実査読コメントへの返答は `/respond-to-peer-review` で `review/` のカードと `notes/views/peer-review.md` へ整理する。
 7. 実験結果や外部ディレクトリが必要なら `refs/links.toml` と `refs/local/locations.toml` で link を解決し、runops project は MCP の read / inspect / plan tool から確認する。
-8. 追加解析・図表・実験要望は `notes/research-requests.md` に残し、runops 側の `research/paper_requests.toml` へ handoff する。
-9. 構成やハーネスの違和感をまだ修正に固定したくない場合は `/open-paper-scan` で俯瞰し、採用する idea だけ後段の skill へ渡す。
-10. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
-11. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
+8. 追加解析・図表・実験要望は `requests/analysis/` に残し、`notes/views/research-requests.md` で俯瞰してから runops 側の `research/paper_requests.toml` へ handoff する。
+9. 人間が原稿レビューやプロンプト指示を出した場合は `/integrate-writing-feedback` で feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
+10. 構成やハーネスの違和感をまだ修正に固定したくない場合は `/open-paper-scan` で俯瞰し、採用する idea だけ後段の skill へ渡す。
+11. 共有前に `make ci`、投稿前に `make pre-submit` でハーネスのゲートを通す。
+12. 再利用可能な摩擦は `/feedback-paper-harness` で上流 `paperops` に戻す。
 
 CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
@@ -47,8 +48,10 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
 - `template/` は個別論文リポジトリに展開される scaffold の source of truth。
 - `src/paperops/` は `template/` を展開・診断・更新する薄い CLI。
-- `notes/` はセッション継続性、外部ソース到達、関連研究、科学的ゲート、主張・証拠、読者モデル、査読・返答、AI 初稿 polish、AI 利用ログの共有 memory。作業用ドキュメントは日本語で書く。
-- `notes/result-pattern-map.md` は raw result、figure data、analysis artifact を result pattern / evidence packet へ束ね、claim に昇格する前の中間層として扱う。
+- `evidence/` は result / figure / source card の正本。raw result、figure data、analysis artifact を claim に昇格する前の証拠単位へ束ねる。
+- `claims/` は claim / scientific gate / argument card の正本。Abstract、Conclusion、主要図表へ出してよい主張だけを明示する。
+- `review/` と `requests/` は、人間レビュー、査読コメント、追加解析、改稿依頼をカード化し、原稿への指摘を上流へ遡らせるための層。
+- `notes/` はセッション継続性、外部ソース到達、関連研究、読者モデル、AI 初稿 polish、AI 利用ログ、`notes/views/` の俯瞰ビューを持つ共有 memory。作業用ドキュメントは日本語で書く。
 - `manuscript/ja` と `manuscript/en` は block ID で対応するバイリンガル原稿。
 - `refs/` は raw PDF 置き場ではなく、キュレーション済みの参照知識層、関連研究の調査設計、source reach の一時領域、外部 project link 台帳。作業用ドキュメントは日本語で書く。
 - `refs/links.toml` は共有可能な link intent を持ち、個人環境の絶対パスは ignored な `refs/local/locations.toml` に分離する。
@@ -59,7 +62,7 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
 論文を書きながら実験結果、図表ソース、外部ノート、データセットを参照する場合、共有ファイルには絶対パスを書かず、`refs/links.toml` に link の意味だけを記録する。実パスは `refs/local/locations.toml` に置き、`pops links list --resolve-local` と `/resolve-local-paths` で解決する。
 
-`kind = "runops_project"` の link は runops MCP 連携の入口である。既存結果は `runops.analysis.artifacts`、`runops.survey.summary`、`runops.publication.exports.list` で確認し、追加要望は `notes/research-requests.md` に記録してから `runops.paper.request.draft` で検証し、人間確認後に runops project の `research/paper_requests.toml` へ渡す。詳細は [`docs/cli.md`](docs/cli.md) と [`docs/skill-catalog.md`](docs/skill-catalog.md) を参照する。
+`kind = "runops_project"` の link は runops MCP 連携の入口である。既存結果は `runops.analysis.artifacts`、`runops.survey.summary`、`runops.publication.exports.list` で確認し、追加要望は `requests/analysis/` に記録してから `runops.paper.request.draft` で検証し、人間確認後に runops project の `research/paper_requests.toml` へ渡す。詳細は [`docs/cli.md`](docs/cli.md) と [`docs/skill-catalog.md`](docs/skill-catalog.md) を参照する。
 
 ## リポジトリ構成
 
@@ -76,8 +79,9 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 - `refs/`: 生の PDF 置き場ではなく共有知識層として活用
 - `refs/source-reach/` と `/source-reach-scan`: 外部 Web、GitHub、動画、RSS、SNS などの source channel、到達経路、raw capture、credential risk を分ける
 - `refs/research/` と `/research-related-work`: 関連研究の outline / field framework / raw findings / 議論を分け、採用する文献だけ `refs/summaries/` と `.bib` へ昇格
-- `/peer-review-manuscript` と `/respond-to-peer-review`: 模擬査読、major/minor comment、response matrix、revision plan を `notes/peer-review.md` に整理
-- `notes/`: セッション引き継ぎ、result pattern、主張・証拠、読者モデル、査読・返答、AI 利用ログ、継続性の状態管理
+- `/peer-review-manuscript` と `/respond-to-peer-review`: 模擬査読、major/minor comment、response matrix、revision plan を `review/` のカードへ整理
+- `/integrate-writing-feedback`: 人間の原稿レビューや自然文指示を feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映
+- `notes/views/`: カード正本から見た result pattern、claim-evidence、scientific gate、peer-review、request の俯瞰ビュー
 - 日本語・英語の原稿をブロックレベルのミラーとして追跡
 - `submission/<venue>/`: 投稿先公式テンプレートと最終提出用 TeX の分離
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md`: 公開メタデータ、AI 利用開示、計算環境、図表 provenance の投稿前確認

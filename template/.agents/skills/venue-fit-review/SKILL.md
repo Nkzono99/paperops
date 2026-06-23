@@ -11,7 +11,7 @@ description: manuscript/venue.md と投稿先・読者モデルに照らして�
 
 - `manuscript/venue.md`
 - `notes/reviewer-model.md`
-- `notes/claim-evidence-map.md`
+- `notes/views/claim-evidence-map.md`
 - title / abstract / introduction / conclusion
 - `submission/<venue>/README.md` があれば読む
 
@@ -37,6 +37,6 @@ description: manuscript/venue.md と投稿先・読者モデルに照らして�
 
 ## Codex 実行メモ
 
-- `manuscript/venue.md`、`notes/reviewer-model.md`、`notes/claim-evidence-map.md` を読む。
+- `manuscript/venue.md`、`notes/reviewer-model.md`、`notes/views/claim-evidence-map.md` を読む。
 - 最新投稿規定は推測せず、公式 URL/PDF が必要なら確認する。
 - 必要なら `manuscript/venue.md` と `notes/reviewer-model.md` を更新する。

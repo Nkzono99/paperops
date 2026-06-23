@@ -11,16 +11,18 @@ description: Use when editor decision letter、査読コメント、major/minor 
 
 - reviewer letter や editor correspondence は confidential な場合がある。外部検索語にそのまま使わず、tracked notes へ丸写ししない。
 - 実査読コメントを AI に処理させてよいか、投稿先・出版社ポリシーとユーザーの明示許可を先に確認する。許可が未確認または不可の場合は、本文や raw comment を読まず、人間が使う response matrix / checklist の雛形だけを出す。
-- raw letter は `_handoff/` やユーザーが渡したローカルファイルに置き、`notes/peer-review.md` には要約、comment ID、対応方針、変更先だけを残す。
+- raw letter は `_handoff/` やユーザーが渡したローカルファイルに置き、`review/feedback/` と `notes/views/peer-review.md` には要約、comment ID、対応方針、変更先だけを残す。
 - response draft では、実施していない変更、未確認の line/page number、存在しない追加解析を主張しない。
 
 ## 最初に読むファイル
 
 - editor / reviewer comments（ユーザー指定ファイルまたは貼り付け）
-- `notes/peer-review.md`
-- `notes/scientific-gate.md`
-- `notes/claim-evidence-map.md`
-- `notes/result-pattern-map.md`
+- `notes/views/peer-review.md`
+- `review/feedback/`
+- `review/responses/`
+- `notes/views/scientific-gate.md`
+- `notes/views/claim-evidence-map.md`
+- `notes/views/result-pattern-map.md`
 - `notes/related-work-map.md`
 - `notes/source-reach.md`
 - `notes/reviewer-model.md`
@@ -56,7 +58,7 @@ reviewer の文脈を壊さず、扱いやすい単位へ分割する。
 
 ### 3. Response matrix を作る
 
-`notes/peer-review.md` に反映する場合は、raw comment ではなく要約で残す。
+`review/feedback/` と `notes/views/peer-review.md` に反映する場合は、raw comment ではなく要約で残す。
 
 | comment ID | issue | response stance | manuscript change | evidence / source | owner | status |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -69,10 +71,11 @@ reviewer の文脈を壊さず、扱いやすい単位へ分割する。
 - `manuscript/ja/` の本文 block
 - figure / caption / table
 - `manuscript/shared/bib/` と `refs/summaries/`
-- `notes/scientific-gate.md`
-- `notes/claim-evidence-map.md`
-- `notes/result-pattern-map.md`
-- `notes/research-requests.md`
+- `claims/gates/`
+- `claims/claims/`
+- `evidence/results/`
+- `evidence/figures/`
+- `requests/analysis/`
 - `notes/reproducibility.md`
 - response letter only
 
@@ -111,9 +114,9 @@ line/page number は最終レイアウト確定後に入れる。未確定なら
 ## Codex 実行メモ
 
 - `manuscript/mirror/status.md` で source-of-truth を確認する。
-- `notes/peer-review.md` を更新する場合は raw quote ではなく要約と comment ID を中心にする。
+- `review/feedback/` や `notes/views/peer-review.md` を更新する場合は raw quote ではなく要約と comment ID を中心にする。
 - 追加文献が必要なら `/research-related-work` または `/update-refs` へ渡す。
 - 外部 source channel の到達経路が未整理なら `/source-reach-scan` へ渡す。
 - reviewer comment が中心主張の assumption を突いている場合は `/scientific-gate` へ戻す。
-- 追加解析が必要なら `notes/research-requests.md` に切り出す。
+- 追加解析が必要なら `requests/analysis/` に切り出す。
 - 原稿や refs を編集したら `make mirror-check`、`make citation-check`、必要に応じて `make ci` を実行する。

@@ -12,9 +12,9 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 ## 最初に読むファイル
 
 - 対象の本文、段落、caption、response draft
-- `notes/scientific-gate.md`
-- `notes/claim-evidence-map.md`
-- `notes/argument-map.md`
+- `notes/views/scientific-gate.md`
+- `notes/views/claim-evidence-map.md`
+- `notes/views/argument-map.md`
 - `notes/reviewer-model.md`
 - `notes/ai-draft-polish.md`
 - `notes/ai-use.md`
@@ -46,7 +46,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 
 ### 1. Claim lock
 
-まず対象段落の claim、evidence、scope、limitation を `notes/claim-evidence-map.md` と `notes/scientific-gate.md` で固定する。未登録の主張がある場合は、文体修正ではなく `/scientific-gate` または `/calibrate-claims` へ戻す。
+まず対象段落の claim、evidence、scope、limitation を `notes/views/claim-evidence-map.md` と `notes/views/scientific-gate.md` で固定する。未登録の主張がある場合は、文体修正ではなく `/scientific-gate` または `/calibrate-claims` へ戻す。
 
 ### 2. Smell annotation
 

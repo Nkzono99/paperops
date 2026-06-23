@@ -33,7 +33,7 @@ description: refs/links.toml と refs/local/ からシミュレーション出�
 - 論文向け export: `runops.publication.exports.list`, `runops.publication.export.inspect`
 - 追加解析・図表・実験要望: `runops.paper.request.draft`, `runops.paper.requests.list`, `runops.paper.request.plan`
 
-追加作業が必要な場合は、まず `notes/research-requests.md` に paper 側の文脈を残す。runops 側へ渡す前に `runops.paper.request.draft` で候補 request を検証し、`data.valid = true` かつ `existing_queue.duplicate_id = false` の場合だけ `toml_snippet` を採用する。duplicate id warning がある場合は、snippet が返っていても追記せず、別の id で draft し直す。
+追加作業が必要な場合は、まず `requests/analysis/` に paper 側の文脈を残し、`notes/views/research-requests.md` で俯瞰する。runops 側へ渡す前に `runops.paper.request.draft` で候補 request を検証し、`data.valid = true` かつ `existing_queue.duplicate_id = false` の場合だけ `toml_snippet` を採用する。duplicate id warning がある場合は、snippet が返っていても追記せず、別の id で draft し直す。
 
 このスキルは runops の run creation、survey expansion、job submit は行わない。必要な場合は runops project 側の明示操作として提案する。
 
@@ -41,8 +41,8 @@ description: refs/links.toml と refs/local/ からシミュレーション出�
 
 - 共有 link の意味: `refs/links.toml`
 - 個人環境の絶対パス: `refs/local/locations.toml`
-- 追加解析・図表・実験要望: `notes/research-requests.md`
-- 論文本文に使う証拠: `notes/claim-evidence-map.md` と `notes/reproducibility.md`
+- 追加解析・図表・実験要望: `requests/analysis/` と `notes/views/research-requests.md`
+- 論文本文に使う証拠: `evidence/`、`claims/claims/`、`notes/views/claim-evidence-map.md`、`notes/reproducibility.md`
 
 ## Codex 実行メモ
 

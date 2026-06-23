@@ -19,6 +19,18 @@ def read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def resolve_view_path(root: Path) -> tuple[str, Path] | None:
+    candidates = [
+        "notes/views/claim-evidence-map.md",
+        "notes/claim-evidence-map.md",
+    ]
+    for rel_path in candidates:
+        path = root / rel_path
+        if path.exists():
+            return rel_path, path
+    return None
+
+
 def is_blank(value: str | None) -> bool:
     return value is None or not value.strip() or PLACEHOLDER_RE.search(value) is not None
 
@@ -88,11 +100,11 @@ def read_public_edge_text(root: Path) -> str:
     return "\n".join(chunks)
 
 
-def check_claims(root: Path, text: str) -> list[Finding]:
+def check_claims(root: Path, text: str, rel_path: str) -> list[Finding]:
     findings: list[Finding] = []
     rows = extract_claim_rows(text)
     if not rows:
-        return [Finding("warning", "`notes/claim-evidence-map.md` に主張台帳が見つかりません")]
+        return [Finding("warning", f"`{rel_path}` に主張台帳が見つかりません")]
 
     for row in rows:
         claim_id = row.get("claim_id", "unknown")
@@ -120,14 +132,14 @@ def main() -> int:
     args = parser.parse_args()
 
     root = args.root.resolve()
-    rel_path = "notes/claim-evidence-map.md"
-    path = root / rel_path
-    if not path.exists():
+    resolved = resolve_view_path(root)
+    if resolved is None:
         print("claim-evidence-check に失敗しました")
-        print(f"- `{rel_path}` が見つかりません")
+        print("- `notes/views/claim-evidence-map.md` が見つかりません（旧互換: `notes/claim-evidence-map.md`）")
         return 1
+    rel_path, path = resolved
 
-    findings = check_claims(root, read_text(path))
+    findings = check_claims(root, read_text(path), rel_path)
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]
 

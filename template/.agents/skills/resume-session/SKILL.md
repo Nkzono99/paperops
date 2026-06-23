@@ -13,12 +13,16 @@ description: 執筆セッション開始時に原稿の状態を要約し、ミ�
 - `notes/todo.md`
 - `notes/open-questions.md`
 - `notes/project-brief.md`
-- `notes/scientific-gate.md`
+- `evidence/README.md`
+- `claims/README.md`
+- `review/README.md`
+- `requests/README.md`
+- `notes/views/scientific-gate.md`
 - `notes/related-work-map.md`
 - `notes/source-reach.md`
-- `notes/claim-evidence-map.md`
+- `notes/views/claim-evidence-map.md`
 - `notes/reviewer-model.md`
-- `notes/peer-review.md`
+- `notes/views/peer-review.md`
 - `notes/ai-draft-polish.md`
 - `notes/ai-use.md`
 - `manuscript/mirror/status.md`
@@ -43,6 +47,6 @@ description: 執筆セッション開始時に原稿の状態を要約し、ミ�
 
 ## Codex 実行メモ
 
-- `notes/handoff.md`、`notes/todo.md`、`notes/open-questions.md`、`notes/project-brief.md`、`notes/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/peer-review.md`、`notes/ai-draft-polish.md`、`notes/ai-use.md`、`manuscript/mirror/status.md` を優先して読む。
+- `notes/handoff.md`、`notes/todo.md`、`notes/open-questions.md`、`notes/project-brief.md`、`evidence/README.md`、`claims/README.md`、`review/README.md`、`requests/README.md`、`notes/views/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/views/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/views/peer-review.md`、`notes/ai-draft-polish.md`、`notes/ai-use.md`、`manuscript/mirror/status.md` を優先して読む。
 - 原稿編集前に ja/en のミラー状態を確認し、必要なら `make mirror-check` を実行する。
 - ユーザーには、現在状態、中心主張、次に安全に進める作業、未解決リスクを短く返す。

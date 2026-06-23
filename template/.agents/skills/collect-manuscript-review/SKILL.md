@@ -39,7 +39,7 @@ description: TeX 直編集 diff と inline review comment を回収し、レビ�
    - 人間の表現修正から推定できる好み
    - 科学的意味が変わる可能性のある変更
    - open question
-5. 本文を直す前に、反映方針を提示する。ユーザーが明示的に「反映して」「修正して」「apply」などを依頼している場合は、方針を短く示したうえで実装に進む。
+5. 本文を直す前に、反映方針を提示する。科学的意味、主張、証拠、図表、追加解析に関わる指摘は `/integrate-writing-feedback` に渡し、`review/feedback/` の feedback card から上流へ遡らせる。ユーザーが明示的に「反映して」「修正して」「apply」などを依頼している場合も、本文だけで済む修正か feedback card 化が必要な修正かを分ける。
 
 ## Apply フェーズ
 
@@ -49,8 +49,9 @@ description: TeX 直編集 diff と inline review comment を回収し、レビ�
 2. `% block: ...` を保持する。削除、改名、番号振り直しはしない。
 3. 解決済み inline comment は削除する。未解決のものは台帳、`notes/todo.md`、または原稿内 comment のいずれに残すか明記する。
 4. 人間の直接編集 diff は尊重し、意図が曖昧な箇所だけ open question に戻す。
-5. JA の科学的意味を変えた場合は、対応する `manuscript/en` block を更新するか、`manuscript/mirror/change-queue.md` に残す。
-6. `submission/<venue>/` を source of truth として編集しない。
+5. claim / evidence / gate に影響する変更は、`/integrate-writing-feedback` で feedback card と上流 card を更新してから本文へ反映する。
+6. JA の科学的意味を変えた場合は、対応する `manuscript/en` block を更新するか、`manuscript/mirror/change-queue.md` に残す。
+7. `submission/<venue>/` を source of truth として編集しない。
 
 ## 検証
 

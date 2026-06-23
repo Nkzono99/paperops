@@ -20,7 +20,7 @@ description: 段落単位で old-to-new flow、topic sentence、stress position�
 ## 手順
 
 1. 対象 block の各段落に機能ラベルを付ける。
-2. AI 初稿由来の文体修正なら、先に `notes/claim-evidence-map.md` と `notes/scientific-gate.md` で claim lock を確認する。
+2. AI 初稿由来の文体修正なら、先に `notes/views/claim-evidence-map.md` と `notes/views/scientific-gate.md` で claim lock を確認する。
 3. 段落ごとに詰まり、重複、飛躍、文末の弱さを指摘する。
 4. 内部 provenance 語が本文に残っていないか確認し、必要なら `manuscript/mirror/terminology.yml` に置換方針を追加する。
 5. 条件番号・条件数で始まる topic sentence を探し、`grouping -> contrast -> exception -> warrant` へ組み替える。

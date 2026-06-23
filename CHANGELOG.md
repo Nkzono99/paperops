@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- 論文執筆の中間層をカード正本へ整理した。`evidence/`、`claims/`、`review/`、`requests/` を追加し、result / figure / source、claim / scientific gate / argument、feedback / response、analysis / writing request を小さな Markdown card + front matter で管理できるようにした。旧 `notes/*.md` は互換ビューへ降格し、俯瞰用の `notes/views/` を追加した。
+- 人間の原稿レビューやプロンプト指示を本文だけの局所修正に閉じないため、`/integrate-writing-feedback` を追加した。指摘を `review/feedback/` の feedback card にし、`upstream_routes` に従って claim scope、scientific gate、evidence card、analysis / writing request、最後に manuscript block へ反映する導線を明文化した。
+- `make paper-layer-card-check` を追加し、`evidence/`、`claims/`、`review/`、`requests/`、`notes/views/`、旧互換ビューの外形を検査するようにした。`make smoke` と下流 `make ci` にこの検査を組み込んだ。
+- 既存下流リポジトリで取り込む場合は、管理対象の `AGENTS.md`、`CLAUDE.md`、`Makefile`、`scripts/`、`.agents/skills/`、`.claude/skills/` を更新したうえで、プロジェクト固有内容として `evidence/`、`claims/`、`review/`、`requests/`、`notes/views/` を手動追加する。既存の `notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/scientific-gate.md` などは削除せず互換ビューとして残してよい。
 - `pops init` の scaffold copy から `harness-feedback/`、`harness-lab/`、`.harness/`、`.harnessops/` を明示的に除外し、HarnessOps の local state が下流論文プロジェクトへ混入しないようにした。
 
 ## 0.4.0 - 2026-06-23

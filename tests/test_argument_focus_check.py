@@ -49,6 +49,7 @@ class ArgumentFocusCheckTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             shutil.copytree(ROOT / "template", target)
+            (target / "notes" / "views" / "condition-context-map.md").unlink()
             (target / "notes" / "condition-context-map.md").unlink()
 
             result = subprocess.run(
@@ -64,12 +65,13 @@ class ArgumentFocusCheckTest(unittest.TestCase):
             )
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("`notes/condition-context-map.md` が見つかりません", result.stdout)
+        self.assertIn("`notes/views/condition-context-map.md` が見つかりません", result.stdout)
 
     def test_missing_result_pattern_map_is_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             shutil.copytree(ROOT / "template", target)
+            (target / "notes" / "views" / "result-pattern-map.md").unlink()
             (target / "notes" / "result-pattern-map.md").unlink()
 
             result = subprocess.run(
@@ -85,7 +87,7 @@ class ArgumentFocusCheckTest(unittest.TestCase):
             )
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("`notes/result-pattern-map.md` が見つかりません", result.stdout)
+        self.assertIn("`notes/views/result-pattern-map.md` が見つかりません", result.stdout)
 
 
 if __name__ == "__main__":

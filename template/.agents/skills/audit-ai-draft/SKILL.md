@@ -13,11 +13,11 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 
 - PDF、TeX、または対象 section / block ID
 - `notes/project-brief.md`
-- `notes/scientific-gate.md`
+- `notes/views/scientific-gate.md`
 - `notes/related-work-map.md`
-- `notes/result-pattern-map.md`
-- `notes/claim-evidence-map.md`
-- `notes/argument-map.md`
+- `notes/views/result-pattern-map.md`
+- `notes/views/claim-evidence-map.md`
+- `notes/views/argument-map.md`
 - `notes/reviewer-model.md`
 - `notes/ai-draft-polish.md`
 - `notes/reproducibility.md`
@@ -30,7 +30,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - `12 条件中 2 条件`、`8 条件中 0 条件`、保存時刻数、run 数のようなローカル結果を、そのまま本文の主張にせず、論文内での意味へ抽象化する。
 - `これは直接証明ではない`、`主張しない`、`screening である` のような防御的記述を、必要な場所へ集約する。
 - 内部 provenance 語、local run label、directory name、artifact name を公開語へ置換する。
-- `notes/argument-map.md` と `notes/claim-evidence-map.md` を更新する改稿計画を出す。
+- `notes/views/argument-map.md` と `notes/views/claim-evidence-map.md` を更新する改稿計画を出す。
 - 関連研究の位置づけが未整理な場合は、本文を磨く前に `notes/related-work-map.md` または `/research-related-work` へ戻す。
 - 中心主張や Abstract / Conclusion に入る claim が `scientific-gate` で未承認なら、文体修正ではなく `/scientific-gate` へ戻す。
 - AI らしい定型文だけが問題で claim / evidence / gate は固定済みの場合は、本文診断後に `/polish-ai-draft` へ渡す。
@@ -59,7 +59,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 
 ### 3. Local-to-claim abstraction を作る
 
-本文に散らばる結果列挙は、claim に直接変換せず、先に `notes/result-pattern-map.md` の result pattern / evidence packet へ戻す。観察された contrast、effect direction / magnitude、negative or null cases、uncertainty / failure mode、candidate interpretation を整理してから、claim role を判断する。
+本文に散らばる結果列挙は、claim に直接変換せず、先に `notes/views/result-pattern-map.md` の result pattern / evidence packet へ戻す。観察された contrast、effect direction / magnitude、negative or null cases、uncertainty / failure mode、candidate interpretation を整理してから、claim role を判断する。
 
 ローカルな数え上げを、以下のいずれかへ分類する:
 
@@ -69,13 +69,13 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - **Screening / provenance**: 本文では圧縮し、`notes/reproducibility.md`、supplement、figure-data package へ退避する。
 - **Discard / future work**: 今の主張に寄与しない。
 
-`notes/result-pattern-map.md` と `notes/argument-map.md` の「ローカル条件から公開主張への抽象化」を埋める。
+`notes/views/result-pattern-map.md` と `notes/views/argument-map.md` の「ローカル条件から公開主張への抽象化」を埋める。
 
 ### 4. Defense budget を決める
 
 同じ caveat を何度も繰り返さない。重要な caveat は、Abstract / Methods / Discussion / Data Availability のどこか一箇所で強く明示し、Results では主張と証拠を前に出す。
 
-`notes/argument-map.md` の「Defense budget」を埋める。
+`notes/views/argument-map.md` の「Defense budget」を埋める。
 
 ### 5. 改稿計画を作る
 
@@ -86,7 +86,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - Figure story
 - Keep / compress / move / cut
 - block ID 単位の rewrite plan
-- `notes/claim-evidence-map.md` と `notes/argument-map.md` の更新案
+- `notes/views/claim-evidence-map.md` と `notes/views/argument-map.md` の更新案
 - 関連研究・反論文献の整理が必要なら `notes/related-work-map.md` の更新案
 - scientific gate で止めるべき claim と、polish だけで直してよい段落
 
