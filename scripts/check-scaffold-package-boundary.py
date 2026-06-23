@@ -24,6 +24,10 @@ PACKAGE_SCAFFOLD_PREFIX = "paperops/_data/scaffold/"
 CANARY_RELS = (
     "notes/session-context.generated.md",
     "_handoff/secret.txt",
+    ".harness/state.json",
+    ".harnessops/project.toml",
+    "harness-feedback/records/feedback.md",
+    "harness-lab/records/lab.md",
     "refs/source-reach/canary/raw/cookie.txt",
     "refs/source-reach/canary/doctor.generated.json",
     "refs/source-reach/canary/capture.generated.json",

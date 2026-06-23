@@ -75,6 +75,20 @@ class PopsCliTest(unittest.TestCase):
             (source_reach / "raw" / "cookie.txt").write_text("no\n", encoding="utf-8")
             (source_reach / "doctor.generated.json").write_text("no\n", encoding="utf-8")
             (source_reach / "capture.generated.json").write_text("no\n", encoding="utf-8")
+            (source / "harness-feedback" / "records").mkdir(parents=True)
+            (source / "harness-feedback" / "records" / "feedback.md").write_text(
+                "no\n",
+                encoding="utf-8",
+            )
+            (source / "harness-lab" / "records").mkdir(parents=True)
+            (source / "harness-lab" / "records" / "lab.md").write_text(
+                "no\n",
+                encoding="utf-8",
+            )
+            (source / ".harness").mkdir()
+            (source / ".harness" / "state.json").write_text("no\n", encoding="utf-8")
+            (source / ".harnessops").mkdir()
+            (source / ".harnessops" / "lock.json").write_text("no\n", encoding="utf-8")
             (source / "notes").mkdir()
             (source / "notes" / "source-reach.md").write_text("ok\n", encoding="utf-8")
 
@@ -91,9 +105,18 @@ class PopsCliTest(unittest.TestCase):
             self.assertFalse(
                 (target / "refs" / "source-reach" / "topic" / "capture.generated.json").exists()
             )
+            self.assertFalse((target / "harness-feedback").exists())
+            self.assertFalse((target / "harness-lab").exists())
+            self.assertFalse((target / ".harness").exists())
+            self.assertFalse((target / ".harnessops" / "lock.json").exists())
             self.assertIn("_handoff/secret.txt", plan.excluded)
             self.assertIn("refs/source-reach/topic/raw", plan.excluded)
             self.assertIn("refs/source-reach/topic/raw/cookie.txt", plan.excluded)
+            self.assertIn("harness-feedback", plan.excluded)
+            self.assertIn("harness-feedback/records/feedback.md", plan.excluded)
+            self.assertIn("harness-lab", plan.excluded)
+            self.assertIn(".harness/state.json", plan.excluded)
+            self.assertIn(".harnessops/lock.json", plan.excluded)
 
     def test_init_uses_uvx_flow_without_project_local_cli(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `pops init` の scaffold copy から `harness-feedback/`、`harness-lab/`、`.harness/`、`.harnessops/` を明示的に除外し、HarnessOps の local state が下流論文プロジェクトへ混入しないようにした。
+
 ## 0.4.0 - 2026-06-23
 
 - 論文を書く前の中間層を拡張した。`/map-result-patterns` と `notes/result-pattern-map.md` で simulation results、figure data、analysis artifact を result pattern / evidence packet に束ね、`/scientific-gate` と `notes/scientific-gate.md` で中心主張、Abstract、Conclusion、主要図表の claim readiness、人間承認、再現性、仮定の blocker を確認できるようにした。
