@@ -1,37 +1,37 @@
-# Reviewer / Reader Model
+# 査読者・読者モデル
 
-## Target venue and article type
+## 投稿先と論文種別
 
-- Venue: 未記入
-- Article type: 未記入
-- Page budget: 未記入
-- Required sections: 未記入
+- 投稿先: 未記入
+- 論文種別: 未記入
+- ページ制限: 未記入
+- 必須セクション: 未記入
 
-## Primary reader
+## 主な読者
 
-- Knows: 未記入
-- Does not know: 未記入
-- Cares about: 未記入
-- Likely skepticism: 未記入
+- 知っていること: 未記入
+- 知らないこと: 未記入
+- 関心を持つこと: 未記入
+- 想定される懐疑: 未記入
 
-## Secondary reader
+## 副次的な読者
 
-- Knows: 未記入
-- Does not know: 未記入
-- Needs definitions for: 未記入
+- 知っていること: 未記入
+- 知らないこと: 未記入
+- 定義が必要な語: 未記入
 
-## Reviewer questions to pre-answer
+## 先回りして答える査読者質問
 
-1. Is the central claim new?
-2. Is the evidence sufficient?
-3. Are alternative explanations ruled out?
-4. Is the method reproducible?
-5. Are limitations scoped rather than hidden?
+1. 中心主張は新しいか。
+2. 証拠は十分か。
+3. 代替説明を退けているか。
+4. 方法は再現可能か。
+5. 限界を隠さず、適切な範囲に収めているか。
 
-## Venue fit notes
+## 投稿先適合メモ
 
-- Introduction should promise: 未記入
-- Methods should include: 未記入
-- Results should emphasize: 未記入
-- Discussion should resolve: 未記入
-- Supplement / appendix should carry: 未記入
+- Introduction で約束すること: 未記入
+- Methods に含めること: 未記入
+- Results で強調すること: 未記入
+- Discussion で回収すること: 未記入
+- Supplement / appendix に回すこと: 未記入

@@ -112,3 +112,7 @@ update plan では、管理対象ファイルに `agent guidance`、`Codex skill
 paper draft が runops project や外部ディレクトリを参照する場合、共有可能な link intent は `refs/links.toml` に、個人環境の絶対パスは ignored な `refs/local/locations.toml` に分離する。`pops links check` は `refs/links.toml` と `refs/local/locations.example.toml` の対応を確認し、ローカルパスを共有ファイルへ混ぜずに運用できるかを検査する。
 
 `kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。paper draft 側で発生した追加解析・図表・追加実験要望は `notes/research-requests.md` に記録し、`runops.paper.request.draft` で schema と id の衝突を確認してから runops project 側の `research/paper_requests.toml` に handoff する。
+
+`refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名のような識別子は英語のままでよい。
+
+日英ミラーの確認済み同期後は `python scripts/mirror-freshness-check.py --root manuscript --update` で ledger を更新する。日常の `make ci` は freshness warning を許容するが、投稿前の `make pre-submit` は `make mirror-strict-check` により warning を失敗扱いにする。

@@ -2,6 +2,9 @@
 .venv/
 .tools/
 .claude/settings.local.json
+_handoff/*
+!_handoff/.gitkeep
+!_handoff/README.md
 **/__pycache__/
 *.pyc
 dist/

@@ -118,7 +118,9 @@ def iter_manuscript_files(root: Path):
 
 def term_values(term: dict) -> list[str]:
     values: list[str] = []
-    for key in ["ja", "en_public"]:
+    status = str(term.get("status", "public")).strip()
+    keys = ["ja"] if status in {"internal_only", "forbidden"} else ["ja", "en_public"]
+    for key in keys:
         value = term.get(key)
         if isinstance(value, str) and not is_placeholder(value):
             values.append(value)

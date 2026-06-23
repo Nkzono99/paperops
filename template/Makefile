@@ -1,4 +1,4 @@
-.PHONY: venv build-ja build-en lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check public-terms-check claim-evidence-check submission-drift-check skill-mirror-check links-check collect-context readiness-check export-arxiv ci pre-submit
+.PHONY: venv build-ja build-en lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check claim-evidence-check submission-drift-check skill-mirror-check links-check collect-context readiness-check export-arxiv ci pre-submit
 
 PYTHON_FALLBACK := $(shell command -v python3.11 2>/dev/null || command -v python3 2>/dev/null || command -v python 2>/dev/null)
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(PYTHON_FALLBACK)))
@@ -29,6 +29,9 @@ mirror-check:
 mirror-freshness-check:
 	$(PYTHON) scripts/mirror-freshness-check.py --root manuscript
 
+mirror-strict-check:
+	$(PYTHON) scripts/mirror-freshness-check.py --root manuscript --strict
+
 public-terms-check:
 	$(PYTHON) scripts/check-public-terms.py --root .
 
@@ -55,6 +58,6 @@ export-arxiv:
 
 ci: lint-bib citation-check mirror-check mirror-freshness-check public-terms-check claim-evidence-check skill-mirror-check links-check build-ja build-en
 
-pre-submit: ci lint-bib-pre-submit
+pre-submit: ci lint-bib-pre-submit mirror-strict-check
 	$(PYTHON) scripts/readiness-check.py --root . --require-submission
 	$(PYTHON) scripts/check-submission-drift.py --root .

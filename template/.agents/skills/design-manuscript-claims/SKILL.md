@@ -27,6 +27,7 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 - Essential results を 3-5 項目に絞る。
 - 主張、必須証拠、補助証拠、対照、限界、将来課題を分ける。
 - 本文に残すもの、Supplement/Appendix に逃がすもの、notes に provenance だけ残すもの、削るものを判断する。
+- run label、export 名、directory 名、script 名、artifact 名などの内部 provenance 語を本文の主張材料にせず、必要な場合は `notes/` や `refs/` に残す。
 - ユーザーが明示した場合だけ、JA source of truth の rewrite に進む。
 
 ## 手順
@@ -80,6 +81,7 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 - Cut: 重複または主張に寄与しない
 
 詳細を本文から削る場合も、必要なら `notes/decision-log.md` や supplement 候補として provenance を残す提案をする。
+本文に残す必要がある解析由来の情報は、runops project、publication export bundle、raw run directory、run label のような内部語ではなく、analysis workflow、analysis dataset、figure-data package、simulation condition、selection criterion など公開読者に通じる語へ置き換える。新しい置換ルールは `manuscript/mirror/terminology.yml` に追加する。
 
 ### 5. claim-centered outline を提案する
 
@@ -113,12 +115,14 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 - `Keep / compress / move / cut`: 本文配置の判断
 - `Proposed section structure`: 新しい章立て
 - `Risks of over-claiming`: 強く言いすぎる危険
+- `Public terminology guard`: 本文から除外または置換した内部 provenance 語
 - `Rewrite plan by block ID`: rewrite する場合の単位と順序
 
 ## 注意事項
 
 - 主張を増やすのではなく、主張の数を減らして階層を見えるようにする。
 - 補助解析や対照実験は、主張を支える役割として配置する。
+- 内部 provenance 語は公開本文へ持ち込まない。作業履歴として必要な場合は `refs/` と `notes/` に日本語で記録する。
 - 科学的判断を template に固定しない。分野固有の判断はユーザーに確認する。
 - ミラー整合性を壊さない。JA source of truth と block ID を尊重する。
 
@@ -128,4 +132,5 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 - 設計した claim / evidence / scope / limitation は、ユーザーが了承した範囲で `notes/claim-evidence-map.md` に反映する。
 - 先に abstract、introduction、conclusion、section headings、figure captions を読み、Core claim と Essential results を圧縮する。
 - 作業報告 smell、keep/compress/move/cut、over-claiming risk、block ID 単位の rewrite plan を出す。
+- run label、export 名、directory 名、script 名、artifact 名が本文に残る場合は、公開語へ置換するか `notes/` / `refs/` 側の provenance に退避する。
 - ユーザーが rewrite を明示した場合だけ `manuscript/ja/` を編集する。`% block: ...` ID を保持し、EN mirror は `sync-ja-en` の方針で同期する。

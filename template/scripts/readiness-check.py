@@ -143,17 +143,22 @@ def check_issue_templates(root: Path, findings: list[Finding]) -> None:
         require_file(root, rel_path, findings)
 
 
-def section_body(text: str, heading: str) -> str:
-    pattern = re.compile(rf"^##\s+{re.escape(heading)}\s*$", re.MULTILINE)
-    match = pattern.search(text)
-    if not match:
+def section_body(text: str, heading: str | list[str]) -> str:
+    headings = [heading] if isinstance(heading, str) else heading
+    match = None
+    for candidate in headings:
+        pattern = re.compile(rf"^##\s+{re.escape(candidate)}\s*$", re.MULTILINE)
+        match = pattern.search(text)
+        if match:
+            break
+    if match is None:
         return ""
     next_heading = re.search(r"^##\s+", text[match.end() :], re.MULTILINE)
     end = match.end() + next_heading.start() if next_heading else len(text)
     return text[match.end() : end].strip()
 
 
-def has_filled_section(text: str, heading: str) -> bool:
+def has_filled_section(text: str, heading: str | list[str]) -> bool:
     body = section_body(text, heading)
     return bool(body) and PLACEHOLDER_RE.search(body) is None
 
@@ -162,16 +167,17 @@ def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeho
     severity = "warning" if allow_placeholders else "error"
 
     claim_path = require_file(root, "notes/claim-evidence-map.md", findings)
-    if claim_path is not None and not has_filled_section(read_text(claim_path), "Core claim"):
-        add(findings, severity, "`notes/claim-evidence-map.md` の Core claim が未記入です")
+    if claim_path is not None and not has_filled_section(read_text(claim_path), ["中心主張", "Core claim"]):
+        add(findings, severity, "`notes/claim-evidence-map.md` の中心主張が未記入です")
 
     ai_use_path = require_file(root, "notes/ai-use.md", findings)
     if ai_use_path is not None:
         text = read_text(ai_use_path)
-        if "## Submission disclosure draft" not in text:
-            add(findings, "error", "`notes/ai-use.md` に Submission disclosure draft セクションがありません")
-        if not has_filled_section(text, "Submission disclosure draft"):
-            add(findings, severity, "`notes/ai-use.md` の Submission disclosure draft が未記入です")
+        disclosure_headings = ["投稿時の開示文案", "Submission disclosure draft"]
+        if not any(f"## {heading}" in text for heading in disclosure_headings):
+            add(findings, "error", "`notes/ai-use.md` に投稿時の開示文案セクションがありません")
+        if not has_filled_section(text, disclosure_headings):
+            add(findings, severity, "`notes/ai-use.md` の投稿時の開示文案が未記入です")
 
     venue_path = require_file(root, "manuscript/venue.md", findings)
     if venue_path is not None:
@@ -216,6 +222,20 @@ def check_submission_slot(root: Path, findings: list[Finding], require_submissio
             add(findings, severity, f"`{rel_path}` に `README.md` または `main.tex` がありません")
 
 
+def check_public_bibliography(root: Path, findings: list[Finding]) -> None:
+    for rel_path in ["manuscript/ja/main.tex", "manuscript/en/main.tex"]:
+        path = require_file(root, rel_path, findings)
+        if path is None:
+            continue
+        for number, line in enumerate(read_text(path).splitlines(), start=1):
+            if re.search(r"\\bibliography\{[^}]*\bmypapers\b", line):
+                add(
+                    findings,
+                    "warning",
+                    f"`{rel_path}:{number}` の bibliography に `mypapers` が含まれています。公開・投稿前は `references` に整理してください",
+                )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="共有・投稿前の論文ハーネス readiness を確認する。")
     parser.add_argument("--root", type=Path, default=Path("."))
@@ -255,6 +275,7 @@ def main() -> int:
     check_issue_templates(root, findings)
     check_paper_quality_notes(root, findings, args.allow_placeholders)
     check_submission_slot(root, findings, args.require_submission)
+    check_public_bibliography(root, findings)
 
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]

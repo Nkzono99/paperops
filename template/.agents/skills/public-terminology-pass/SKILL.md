@@ -6,6 +6,7 @@ description: ローカル語・内部語・未定義略語を公開語へ置換�
 # public-terminology-pass
 
 repo や run folder を知らない読者に通じない語を公開語へ変換する。
+runops project、publication export bundle、raw run directory、run label、campaign、case、production run、smoke/feasibility check、script name、artifact name は本文では内部 provenance 語として扱う。
 
 ## 最初に読むファイル
 
@@ -17,7 +18,7 @@ repo や run folder を知らない読者に通じない語を公開語へ変換
 
 1. local term、run label、script name、directory name、artifact name、未定義略語を抽出する。
 2. 各語を `public` / `needs_definition` / `internal_only` / `forbidden` に分類する。
-3. `en_public`、first-definition sentence、figure label replacement を提案する。
+3. `en_public`、first-definition sentence、figure label replacement を提案する。内部 provenance 語は analysis workflow、analysis dataset、figure-data package、regeneration manifest、exploratory check、simulation condition、localized physical region などへ置換する。
 4. `manuscript/mirror/terminology.yml` を更新する。
 5. 本文・figure caption・section heading に残る内部語を置換する。
 6. `make public-terms-check` を実行する。
@@ -33,4 +34,5 @@ repo や run folder を知らない読者に通じない語を公開語へ変換
 
 - `manuscript/mirror/terminology.yml` を gate として使う。
 - 本文、figure caption、section heading の local term を public term に置換する。
+- `refs/links.toml`、`refs/local/locations.toml`、export 名、run label、path は本文へ直書きしない。必要な provenance は `notes/reproducibility.md` や `refs/` の日本語作業メモに分離する。
 - 最後に `make public-terms-check` を実行する。

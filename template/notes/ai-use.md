@@ -1,28 +1,28 @@
-# AI Use Log
+# AI 利用ログ
 
-## Policy stance
+## 方針
 
-- AI may be used for drafting, editing, translation, review, and workflow support.
-- Human authors remain responsible for accuracy, originality, citations, analysis, figures, and final wording.
-- AI-generated citations, factual claims, code, analysis, and figure changes require human verification before they enter the manuscript.
+- AI は草稿、編集、翻訳、レビュー、作業支援に使ってよい。
+- 正確性、独自性、引用、解析、図表、最終文言の責任は人間の著者が持つ。
+- AI が生成した引用、事実主張、コード、解析、図表変更は、本文へ入れる前に人間が確認する。
 
-## Uses by manuscript component
+## 原稿要素ごとの利用記録
 
-| Date | Tool/model | Use type | Files/sections | Output accepted? | Human verification | Disclosure section |
+| 日付 | ツール・モデル | 利用種別 | ファイル・節 | 出力を採用したか | 人間による確認 | 開示箇所 |
 | --- | --- | --- | --- | --- | --- | --- |
-| 未記入 | 未記入 | language editing / translation / literature summary / code / figure / review | 未記入 | yes / no / partial | 未記入 | acknowledgement / methods / none |
+| 未記入 | 未記入 | 言語編集 / 翻訳 / 文献要約 / コード / 図表 / レビュー | 未記入 | はい / いいえ / 一部 | 未記入 | 謝辞 / 方法 / なし |
 
-## Submission disclosure draft
+## 投稿時の開示文案
 
-### Acknowledgement draft
+### 謝辞案
 
 未記入
 
-### Methods disclosure draft
+### 方法欄の開示案
 
 AI が data、analysis、code、figures に関与した場合は、投稿先ポリシーに合わせてここに方法開示案を書く。
 
-## Verification checklist
+## 確認チェックリスト
 
 - [ ] AI が提案した引用の実在性、DOI、引用意図を人間が確認した。
 - [ ] AI が生成または変更した解析コードを人間が実行・レビューした。

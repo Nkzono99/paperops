@@ -4,7 +4,7 @@
 
 ## 要望一覧
 
-| id | link | kind | priority | status | runops_id | request | target |
+| ID | link | 種別 | 優先度 | 状態 | runops ID | 要望 | 転記先 |
 |----|------|------|----------|--------|-----------|---------|--------|
 | RR-0001 | runops-main | analysis_request | medium | open | PAPER-REQ-0001 | 結果セクションで必要な比較指標を確認する | `research/paper_requests.toml` |
 
@@ -30,10 +30,10 @@
 [[requests]]
 id = "PAPER-REQ-0001"
 type = "analysis_request"
-title = "Add comparison metric for the Results section"
+title = "Results section の比較指標を追加する"
 paper_id = "paper-my-topic"
 paper_context = "Results / Figure 2"
-desired_artifact = "table or figure comparing the key metric across the linked survey"
+desired_artifact = "linked survey を横断して主要指標を比較する table または figure"
 source_link = "refs/links.toml#runops-main"
 related_runs = []
 related_surveys = []

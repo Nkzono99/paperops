@@ -164,9 +164,11 @@ def main() -> int:
     parser.add_argument("--root", type=Path, default=Path("manuscript"))
     parser.add_argument("--ledger", type=Path, default=None)
     parser.add_argument("--update", action="store_true", help="現在の block hash で ledger を更新する。")
+    parser.add_argument("--strict", action="store_true", help="warning がある場合も non-zero exit を返す。")
     args = parser.parse_args()
 
     manuscript_root = resolve_manuscript_root(args.root.resolve())
+    update_root = args.root.as_posix()
     ledger_path = args.ledger or manuscript_root / "mirror" / "block-ledger.yml"
 
     if args.update:
@@ -179,7 +181,10 @@ def main() -> int:
     if not ledger_path.exists():
         print("## Warnings")
         print(f"- `{ledger_path}` がありません。`--update` で初期化してください。")
-        return 0
+        print("")
+        print("確認済み同期として受け入れる場合は、次を実行してください:")
+        print(f"`python scripts/mirror-freshness-check.py --root {update_root} --update`")
+        return 1 if args.strict else 0
 
     errors, warnings = check_freshness(manuscript_root, ledger_path)
     if errors:
@@ -192,9 +197,12 @@ def main() -> int:
         for item in warnings:
             print(f"- {item}")
         print("")
+        print("確認済み同期として受け入れる場合は、次を実行してください:")
+        print(f"`python scripts/mirror-freshness-check.py --root {update_root} --update`")
+        print("")
     if not errors and not warnings:
         print("block freshness ledger と現在の ja/en block は一致しています。")
-    return 1 if errors else 0
+    return 1 if errors or (args.strict and warnings) else 0
 
 
 if __name__ == "__main__":

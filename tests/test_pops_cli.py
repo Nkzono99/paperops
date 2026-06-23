@@ -47,10 +47,14 @@ class PopsCliTest(unittest.TestCase):
 
             self.assertEqual(code, 0, err)
             self.assertTrue((target / "AGENTS.md").is_file())
+            self.assertTrue((target / "_handoff").is_dir())
+            self.assertTrue((target / "_handoff" / "README.md").is_file())
             self.assertTrue((target / "manuscript").is_dir())
             self.assertTrue((target / "refs" / "links.toml").is_file())
             self.assertTrue((target / ".pops" / "manifest.toml").is_file())
             self.assertFalse((target / "refs" / "local" / "locations.toml").exists())
+            gitignore = (target / ".gitignore").read_text(encoding="utf-8")
+            self.assertIn("_handoff/*", gitignore)
 
     def test_init_uses_uvx_flow_without_project_local_cli(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

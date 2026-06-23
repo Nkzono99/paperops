@@ -24,7 +24,19 @@ def is_blank(value: str | None) -> bool:
 
 
 def normalize_header(value: str) -> str:
-    return value.strip().lower().replace(" ", "_")
+    aliases = {
+        "主張id": "claim_id",
+        "主張": "claim",
+        "証拠": "evidence",
+        "論拠・推論": "warrant_/_reasoning",
+        "適用範囲": "scope",
+        "限界": "limitation",
+        "本文ブロック": "manuscript_blocks",
+        "図表": "figure/table",
+        "状態": "status",
+    }
+    normalized = value.strip().lower().replace(" ", "_")
+    return aliases.get(value.strip().lower(), normalized)
 
 
 def extract_claim_rows(text: str) -> list[dict[str, str]]:
@@ -39,7 +51,7 @@ def extract_claim_rows(text: str) -> list[dict[str, str]]:
             continue
         if all(set(cell.replace(" ", "")) <= {"-", ":"} for cell in cells):
             continue
-        if "Claim ID" in cells:
+        if "Claim ID" in cells or "主張ID" in cells:
             headers = [normalize_header(cell) for cell in cells]
             continue
         if headers and len(cells) == len(headers):
@@ -52,7 +64,7 @@ def extract_not_claiming_items(text: str) -> list[str]:
     in_section = False
     for line in text.splitlines():
         if line.startswith("## "):
-            in_section = line.strip() == "## Not claiming"
+            in_section = line.strip() in {"## Not claiming", "## 主張しないこと"}
             continue
         if in_section and line.strip().startswith("- "):
             item = line.strip()[2:].strip()
@@ -80,7 +92,7 @@ def check_claims(root: Path, text: str) -> list[Finding]:
     findings: list[Finding] = []
     rows = extract_claim_rows(text)
     if not rows:
-        return [Finding("warning", "`notes/claim-evidence-map.md` に Claim ledger が見つかりません")]
+        return [Finding("warning", "`notes/claim-evidence-map.md` に主張台帳が見つかりません")]
 
     for row in rows:
         claim_id = row.get("claim_id", "unknown")
@@ -95,10 +107,10 @@ def check_claims(root: Path, text: str) -> list[Finding]:
     public_edge_text = read_public_edge_text(root)
     for item in extract_not_claiming_items(text):
         if item in public_edge_text:
-            findings.append(Finding("warning", f"`Not claiming` の `{item}` が Abstract/Conclusion に出現しています"))
+            findings.append(Finding("warning", f"`主張しないこと` の `{item}` が Abstract/Conclusion に出現しています"))
 
     if all(row.get("status", "").strip().lower() == "draft" for row in rows):
-        findings.append(Finding("warning", "Claim ledger は draft のみです。投稿前には supported / overclaim risk / defer を整理してください"))
+        findings.append(Finding("warning", "主張台帳は draft のみです。投稿前には supported / overclaim risk / defer を整理してください"))
     return findings
 
 

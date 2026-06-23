@@ -1,27 +1,27 @@
-# Claim-Evidence Map
+# 主張と証拠の対応表
 
-## Core claim
+## 中心主張
 
 未記入。読者に持ち帰ってほしい中心主張を 1 文で書く。可能なら title candidate と同じ方向の主張にする。
 
-## Essential results
+## 主要結果
 
-1. 未記入 - supports core claim - Figure/Table:
-2. 未記入 - supports core claim - Figure/Table:
-3. 未記入 - rules out alternative explanation - Figure/Table:
+1. 未記入 - 中心主張を支える - 図表:
+2. 未記入 - 中心主張を支える - 図表:
+3. 未記入 - 代替説明を退ける - 図表:
 
-## Claim ledger
+## 主張台帳
 
-| Claim ID | Claim | Evidence | Warrant / reasoning | Scope | Limitation | Manuscript blocks | Figure/table | Status |
+| 主張ID | 主張 | 証拠 | 論拠・推論 | 適用範囲 | 限界 | 本文ブロック | 図表 | 状態 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | C1 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | draft |
 
-## Not claiming
+## 主張しないこと
 
 - 本論文では主張しないことを記録する。
 - 将来課題、補足、別論文へ送ることを記録する。
 
-## Claim strength calibration
+## 主張強度の調整
 
 - `draft`: まだ仮説または作業中の主張。
 - `supported`: evidence と warrant が揃い、本文で明確に主張してよい。

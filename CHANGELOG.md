@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- `pops init` で人間から AI へ未整理ファイルを渡す `_handoff/` 受け取り箱を作成し、内容は Git 管理から除外するようにした。
+- `refs/` と `notes/` の作業用ドキュメントを日本語で書く方針を明示し、スターターノートと参照テンプレートの見出しを日本語化した。
+- 公開原稿へ内部 provenance 語が混入しないよう、公開語彙チェックの starter terminology と関連 writing skills の guard を強化した。
+- `mirror-freshness-check --strict` と `make mirror-strict-check` を追加し、`make pre-submit` で freshness warning を失敗扱いにするようにした。
+- 公開原稿の既定 bibliography を `references` のみにし、`mypapers` は作業 draft 用の opt-in 枠として readiness warning の対象にした。
+
 ## 0.3.0 - 2026-06-22
 
 - release 前の version truth preflight として `scripts/check-release-version-truth.py` を追加し、release skill から `pyproject.toml` / `src/paperops/__init__.py` / `CHANGELOG.md` / tag / GitHub Release の不整合を検出できるようにした。旧 template 時代の履歴見出しは package release 見出しと区別できる archive 表記へ整理した。

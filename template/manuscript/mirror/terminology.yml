@@ -17,3 +17,43 @@ terms:
     figure_label_rule: "axis、legend、caption では en_public または定義済み略語を使う。"
     owner: ""
     last_reviewed: ""
+  - id: INTERNAL-RUNOPS
+    ja: "runops project"
+    en_public: "analysis workflow"
+    status: "internal_only"
+    first_definition_required: false
+    first_definition_location: ""
+    avoid:
+      - "publication export bundle"
+      - "raw run directory"
+      - "run label"
+      - "production run"
+      - "smoke/feasibility check"
+      - "campaign"
+      - "case"
+    allowed_context:
+      - "notes"
+      - "refs"
+    replacement_rule: "本文では外部 project 名や run label を出さず、analysis workflow、analysis dataset、figure-data package、exploratory check、simulation condition など読者向け語彙へ落とす。"
+    figure_label_rule: "図表では run label や export 名ではなく、物理条件、選別基準、診断量、データ種別を書く。"
+    owner: ""
+    last_reviewed: ""
+  - id: INTERNAL-PATHS
+    ja: "local directory"
+    en_public: "source data location"
+    status: "forbidden"
+    first_definition_required: false
+    first_definition_location: ""
+    avoid:
+      - "directory name"
+      - "script name"
+      - "artifact name"
+      - "filesystem path"
+      - "HDF5 artifact"
+    allowed_context:
+      - "notes"
+      - "refs"
+    replacement_rule: "本文では path、script、artifact 名を直接書かず、再現性に必要な情報だけを公開可能な data product、processing step、regeneration manifest として説明する。"
+    figure_label_rule: "axis、legend、caption に path や artifact 名を出さない。"
+    owner: ""
+    last_reviewed: ""

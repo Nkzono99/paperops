@@ -9,9 +9,10 @@
 1. リポジトリ名を変更し、この README を更新する。
 2. `uvx --from paper-harness-cli pops setup` / `doctor` で `.pops/manifest.toml` とハーネス状態を確認する。
 3. `refs/links.toml` で外部 project / directory への共有 link を調整し、`refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーして実パスをユーザー自身で記入する。
-4. `tex-env.example.toml` を `tex-env.toml` にコピーし、TeX 環境を設定する（任意）。
-5. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paperops` リポジトリパスに置き換える。
-6. `manuscript/publication-metadata.toml`、`notes/project-brief.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/venue.md`、`notes/contribution-claims.md`、`notes/reproducibility.md` を記入する。
+4. 人間から AI に渡す未整理ファイルがある場合は `_handoff/` に置き、必要なものを `refs/` や `notes/` に整理する。
+5. `tex-env.example.toml` を `tex-env.toml` にコピーし、TeX 環境を設定する（任意）。
+6. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paperops` リポジトリパスに置き換える。
+7. `manuscript/publication-metadata.toml`、`notes/project-brief.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/venue.md`、`notes/contribution-claims.md`、`notes/reproducibility.md` を記入する。
 
 ## 基本ワークフロー
 
@@ -19,7 +20,7 @@
 2. `notes/claim-evidence-map.md` と `notes/reviewer-model.md` で、今日の block が支える claim と読者の懸念を確認する。
 3. `manuscript/ja/` で執筆または改訂する。
 4. 新しい公開用語や内部語の置換が必要なら `manuscript/mirror/terminology.yml` に記録する。
-5. 必要なブロックを `manuscript/en/` にミラーし、確認済み同期後に `python scripts/mirror-freshness-check.py --root manuscript --update` で ledger を更新する。
+5. 必要なブロックを `manuscript/en/` にミラーし、確認済み同期後に `python scripts/mirror-freshness-check.py --root manuscript --update` で ledger を更新する。投稿前は `make mirror-strict-check` または `make pre-submit` で freshness warning を残さない。
 6. 通読レビューでは `/start-manuscript-review` で review branch と inline comment ルールを確認し、終了後に `/collect-manuscript-review` で TeX diff と comment を台帳化する。
 7. 1 節を書いた直後や週次レビューでは `/review-public-manuscript` を `section` / `weekly` として使い、公開原稿だけで読者が詰まる語彙・前提・figure story を確認する。
 8. 投稿先公式テンプレートへ展開する段階では `submission/<venue>/` を使い、`manuscript/` と混ぜない。
@@ -32,6 +33,10 @@
 `pops` は `uvx --from paper-harness-cli pops ...` で実行する。複数 version を跨ぐ更新は `uvx --from paper-harness-cli pops update-paperops --plan` で chain を確認する。ローカルワークフローは Python 3.11 以上の `.venv/bin/python` / `.venv/Scripts/python.exe` を優先し、`.venv` が無い場合は Makefile とビルドヘルパーが利用可能な Python 3.11 以上の interpreter を探索する。
 
 外部 project やローカルディレクトリを論文に紐づける場合は `refs/links.toml` を共有台帳として使う。実パスは ignored な `refs/local/locations.toml` に分離し、確認には `uvx --from paper-harness-cli pops links check` または `make links-check` を使う。`kind = "runops_project"` の link は runops MCP / publication export manifest から結果や図表候補を調べる入口として扱う。追加解析・図表・追加実験が必要になったら `notes/research-requests.md` に記録し、`runops.paper.request.draft` で検証してから runops project の `research/paper_requests.toml` へ handoff する。
+
+`_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱である。内容は既定で Git 管理されない。AI は、残す価値のある情報を `refs/summaries/`、`refs/links.toml`、`notes/research-requests.md`、`notes/handoff.md`、`notes/reproducibility.md` などへ整理し、秘密情報や個人環境の絶対パスを tracked ファイルへ移さない。
+
+`refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、投稿先指定、外部ツール名などの識別子は英語のままでよい。
 
 `tex-env.toml` では TeX Live / Docker だけでなく、JA / EN ごとの `latexmk` mode と engine も設定できる。日本語ドラフトで `uplatex + dvipdfmx` が必要な場合は、`tex-env.example.toml` の `[latex.ja]` 例をコピーする。
 
@@ -58,6 +63,7 @@ nested private repo 運用や Windows の dubious ownership で git 操作が止
 - `manuscript/publication-metadata.toml`: 公開タイトル、著者、ライセンス、最後に共有した build provenance
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX の分離スロット
 - `refs/`: 参照知識、サマリー、外部 link 台帳、ローカルパスエイリアス（raw PDF は `refs/papers/` に置いても既定で ignore し、共有時は `refs/summaries/` を優先）
+- `_handoff/`: 人間から AI へ渡す未整理ファイルの一時受け取り箱（内容は Git 管理しない）
 - `notes/`: プロジェクト概要、貢献主張、claim-evidence map、追加解析・実験要望、読者モデル、AI 利用ログ、再現性メモ、引き継ぎ、意思決定の追跡
 - `.github/ISSUE_TEMPLATE/`: 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 - `.claude/`: プロジェクトローカルの設定、スキル、ルール、フック

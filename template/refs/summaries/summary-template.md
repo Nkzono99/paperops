@@ -1,35 +1,35 @@
 # <citation_key>
 
-## Bibliographic identity
+## 文献情報
 
 - Citation key:
 - DOI / URL:
-- Venue / year:
+- 掲載先 / 年:
 
-## Why this paper matters to our manuscript
+## この論文が本稿に重要な理由
 
 未記入
 
-## Claims we may cite this for
+## この文献を根拠として引用してよい主張
 
-- Claim:
-- Exact support:
-- Where used in our manuscript:
+- 主張:
+- 具体的な根拠:
+- 本稿で使う箇所:
 
-## Claims we must not cite this for
+## この文献では支えられない主張
 
 - 未記入
 
-## Method / data details relevant to our paper
+## 本稿に関係する方法・データの詳細
 
 未記入
 
-## Short quotation or paraphrase with page/section
+## ページ・節つきの短い引用または要約
 
 未記入
 
-## Verification status
+## 確認状態
 
-- Read by human: yes / no
-- DOI checked: yes / no
-- Citation key stable: yes / no
+- 人間が読んだ: はい / いいえ
+- DOI を確認した: はい / いいえ
+- Citation key は安定している: はい / いいえ

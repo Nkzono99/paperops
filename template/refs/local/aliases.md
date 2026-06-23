@@ -1,9 +1,9 @@
-# Local Path Aliases
+# ローカルパス別名
 
-- `sim_run_main`: primary simulation outputs for the paper
-- `runops_main`: primary runops project linked from `refs/links.toml`
-- `knowledge_topic`: topic-specific notes and prior fragments
-- `external_data`: general external directory linked from `refs/links.toml`
-- `fig_src`: editable figure sources outside the repository
-- `figure_sources`: editable figure source directory linked from `refs/links.toml`
-- `external_notes`: external notes directory linked from `refs/links.toml`
+- `sim_run_main`: 本稿の主なシミュレーション出力
+- `runops_main`: `refs/links.toml` から参照する主な runops project
+- `knowledge_topic`: トピック固有のメモや過去断片
+- `external_data`: `refs/links.toml` から参照する一般的な外部データディレクトリ
+- `fig_src`: リポジトリ外にある編集可能な図表ソース
+- `figure_sources`: `refs/links.toml` から参照する編集可能な図表ソースディレクトリ
+- `external_notes`: `refs/links.toml` から参照する外部ノートディレクトリ

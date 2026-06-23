@@ -2,7 +2,7 @@
 
 `refs/links.toml` は、この paper draft が参照する外部 project / directory の共有台帳である。ここには portable な link の意味だけを置き、マシン固有の絶対パスは ignored な `refs/local/locations.toml` に分離する。
 
-## Schema
+## スキーマ
 
 各 `[[links]]` entry は以下を持つ:
 
@@ -17,7 +17,7 @@
 
 ローカル絶対パス、秘密情報、未公開データの詳細は `refs/links.toml` に書かない。共有できる結論や文献知識は `refs/summaries/` または `notes/` に残す。
 
-## Workflow
+## 作業手順
 
 1. `refs/links.toml` に `[[links]]` entry を追加または更新する。
 2. 自分の環境では `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーし、対応する `[paths.<location_ref>]` の `path` を記入する。

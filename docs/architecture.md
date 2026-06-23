@@ -24,8 +24,8 @@
 
 - `ja/` と `en/` に分割された原稿ソース
 - `manuscript/mirror/` 配下のミラー制御層と block freshness ledger
-- `refs/` 配下の参照知識と外部 link 台帳。raw PDF は `refs/papers/` でローカル保持しても既定では ignore し、共有知識は `refs/summaries/`、外部 project / directory の共有意図は `refs/links.toml` に集約する
-- `notes/` 配下のセッション継続性ノート、主張・証拠台帳、読者モデル、AI 利用ログ、追加解析・図表・実験要望
+- `refs/` 配下の参照知識と外部 link 台帳。raw PDF は `refs/papers/` でローカル保持しても既定では ignore し、共有知識は `refs/summaries/`、外部 project / directory の共有意図は `refs/links.toml` に集約する。作業用ドキュメントは日本語で書く
+- `notes/` 配下のセッション継続性ノート、主張・証拠台帳、読者モデル、AI 利用ログ、追加解析・図表・実験要望。作業用ドキュメントは日本語で書く
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md` による公開メタデータ・AI 利用ログ・再現性メモ
 - `submission/<venue>/` 配下の投稿先公式テンプレートと最終提出用 TeX
 - 下流論文リポジトリ用の GitHub Issue フォーム

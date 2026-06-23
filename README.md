@@ -44,9 +44,9 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 
 - `template/` は個別論文リポジトリに展開される scaffold の source of truth。
 - `src/paperops/` は `template/` を展開・診断・更新する薄い CLI。
-- `notes/` はセッション継続性、主張・証拠、読者モデル、AI 利用ログの共有 memory。
+- `notes/` はセッション継続性、主張・証拠、読者モデル、AI 利用ログの共有 memory。作業用ドキュメントは日本語で書く。
 - `manuscript/ja` と `manuscript/en` は block ID で対応するバイリンガル原稿。
-- `refs/` は raw PDF 置き場ではなく、キュレーション済みの参照知識層と外部 project link 台帳。
+- `refs/` は raw PDF 置き場ではなく、キュレーション済みの参照知識層と外部 project link 台帳。作業用ドキュメントは日本語で書く。
 - `refs/links.toml` は共有可能な link intent を持ち、個人環境の絶対パスは ignored な `refs/local/locations.toml` に分離する。
 - `submission/<venue>/` は投稿先公式テンプレートと最終提出用 TeX の隔離スロット。
 - `pops update-paperops` はハーネス管理ファイルだけを扱い、下流固有の `manuscript/`、`notes/`、`refs/`、`submission/` を自動上書きしない。
@@ -74,10 +74,10 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 - 日本語・英語の原稿をブロックレベルのミラーとして追跡
 - `submission/<venue>/`: 投稿先公式テンプレートと最終提出用 TeX の分離
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md`: 公開メタデータ、AI 利用開示、計算環境、図表 provenance の投稿前確認
-- `make pre-submit`: `make ci` に加えて引用サマリー、submission slot、スタータープレースホルダー、workflow 参照、公開メタデータ不足を検出
+- `make pre-submit`: `make ci` に加えて引用サマリー、strict mirror freshness、submission slot、スタータープレースホルダー、workflow 参照、公開メタデータ不足を検出
 - `make citation-check`: TeX 本文中の citation key と `.bib` の不整合を早期検出
 - `make public-terms-check` / `make claim-evidence-check`: 内部語の公開本文混入と supported claim の evidence 対応を早期検出
-- `make mirror-freshness-check` / `make submission-drift-check`: 日英 block の同期鮮度と投稿版への科学的変更戻し忘れを点検
+- `make mirror-freshness-check` / `make mirror-strict-check` / `make submission-drift-check`: 日英 block の同期鮮度と投稿版への科学的変更戻し忘れを点検
 - `make skill-mirror-check`: `.agents/skills/` の共通 skill 実体と `.claude/skills/` の Claude Code wrapper が対応しているかを点検
 - `scripts/build-ja.sh` / `scripts/build-en.sh`: `\input` / `\include` / `\includegraphics` / bibliography / style 参照の構造検証を行い、TeX 環境があれば PDF ビルドへ進む
 - 下流論文リポジトリ用の Issue フォーム: 原稿レビュー、エビデンス不足、ハーネス摩擦を分けて収集

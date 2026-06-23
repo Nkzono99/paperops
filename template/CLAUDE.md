@@ -35,6 +35,7 @@ make lint-bib-pre-submit # 引用済み key に refs/summaries の検証サマ�
 make citation-check # TeX の citation key が .bib に存在するか検証
 make mirror-check   # ja/ と en/ のブロックレベルのドリフトを検出
 make mirror-freshness-check # 前回同期 ledger から ja/en block の更新を検出
+make mirror-strict-check # mirror freshness warning を失敗扱いで検出
 make public-terms-check # 公開原稿に内部語・禁止語が残っていないか検証
 make claim-evidence-check # supported claim に証拠と本文対応があるか検証
 make submission-drift-check # submission/<venue> と manuscript/en の同期注意点を検出
@@ -62,6 +63,8 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（settings.json の deny パターンが強制する）。
 - `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。raw PDF は既定で ignore される `refs/papers/` に留め、引用キーは安定させる。
 - `refs/links.toml` は外部 project / directory への共有 link 台帳である。tracked ファイルには絶対パスを書かず、`location_ref` を `refs/local/locations.toml` の個人設定で解決する。
+- `refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、field name、投稿先指定、外部ツール名などの識別子だけは英語のままでよい。
+- `_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱である。内容は Git 管理されない。残す情報は `refs/` や `notes/` の適切な台帳へ整理し、秘密情報や個人環境の絶対パスを tracked ファイルへ移さない。
 - 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
 - 公開・投稿前には `manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`notes/ai-use.md` を更新し、`make pre-submit` を実行する。
 - 新しい主張は `notes/claim-evidence-map.md` に evidence、scope、limitation とともに記録する。
@@ -69,6 +72,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - 内部 run label、script name、directory name、artifact name を本文の公開語として使わず、必要な置換を `manuscript/mirror/terminology.yml` に記録する。
 - 1 節を書いた直後や週次の節目では `/review-public-manuscript` を `section` / `weekly` として使い、repo 内部文脈なしで公開語彙・暗黙前提・figure story を確認する。
 - ミラー同期には `/sync-ja-en` を使用する。両言語を盲目的に上書きしない。
+- JA/EN の確認済み同期後は `python scripts/mirror-freshness-check.py --root manuscript --update` で ledger を更新する。投稿前は `make mirror-strict-check` または `make pre-submit` で warning を残さない。
 - 各セッションの終了時に `notes/handoff.md` と `notes/todo.md` を更新する。
 - 恒久的な決定は `notes/decision-log.md` に記録する。
 
@@ -144,6 +148,7 @@ manuscript/venue.md  投稿先情報
 manuscript/publication-metadata.toml  公開タイトル、著者、ライセンス、build provenance
 submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: links.toml, summaries, local（papers, bib, excerpts はスキルが必要時に作成）
+_handoff/            人間から AI への未整理ファイル受け取り箱（内容は Git 管理しない）
 notes/research-requests.md  paper draft から生じた追加解析・図表・実験要望
 notes/               project-brief, contribution-claims, claim-evidence-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
 scripts/             ビルド、TeX 構造、lint、citation-check、skill 対応、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集

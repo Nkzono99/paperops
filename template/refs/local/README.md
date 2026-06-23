@@ -1,7 +1,6 @@
-# Local Paths
+# ローカルパス
 
-Copy `locations.example.toml` to `locations.toml` for machine-specific paths.
-Keep `locations.toml` untracked.
+マシン固有のパスを使う場合は、`locations.example.toml` を `locations.toml` にコピーして編集する。
+`locations.toml` は Git 管理しない。
 
-Shared link intent belongs in `refs/links.toml`.  This directory only stores
-machine-specific path bindings for each `location_ref`.
+共有できる link の意図は `refs/links.toml` に書く。このディレクトリには、各 `location_ref` に対応するマシン固有のパスだけを置く。
