@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.0 - 2026-06-23
+
 - 論文執筆の中間層をカード正本へ整理した。`evidence/`、`claims/`、`review/`、`requests/` を追加し、result / figure / source、claim / scientific gate / argument、feedback / response、analysis / writing request を小さな Markdown card + front matter で管理できるようにした。旧 `notes/*.md` は互換ビューへ降格し、俯瞰用の `notes/views/` を追加した。
 - 人間の原稿レビューやプロンプト指示を本文だけの局所修正に閉じないため、`/integrate-writing-feedback` を追加した。指摘を `review/feedback/` の feedback card にし、`upstream_routes` に従って claim scope、scientific gate、evidence card、analysis / writing request、最後に manuscript block へ反映する導線を明文化した。
 - `make paper-layer-card-check` を追加し、`evidence/`、`claims/`、`review/`、`requests/`、`notes/views/`、旧互換ビューの外形を検査するようにした。`make smoke` と下流 `make ci` にこの検査を組み込んだ。
