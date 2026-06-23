@@ -67,6 +67,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `% block: ...` 識別子を保持する。削除や番号の振り直しは行わない。
 - 保護されたファイルを直接編集しない: `manuscript/shared/figures/generated/**`、`refs/local/locations.toml`、`manuscript/shared/style/journal.cls`（settings.json の deny パターンが強制する）。
 - `refs/` は**知識層**である。生の PDF よりキュレーション済みのサマリーを優先する。raw PDF は既定で ignore される `refs/papers/` に留め、引用キーは安定させる。
+- 関連研究を広く集める場合は `/research-related-work` を使い、調査設計は `refs/research/`、議論は `notes/related-work-map.md`、採用文献は `refs/summaries/` と `.bib` へ分ける。raw search result や未検証 report を文献レビュー本文へ直接入れない。
 - `refs/links.toml` は外部 project / directory への共有 link 台帳である。tracked ファイルには絶対パスを書かず、`location_ref` を `refs/local/locations.toml` の個人設定で解決する。
 - `refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、field name、投稿先指定、外部ツール名などの識別子だけは英語のままでよい。
 - `_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱である。内容は Git 管理されない。残す情報は `refs/` や `notes/` の適切な台帳へ整理し、秘密情報や個人環境の絶対パスを tracked ファイルへ移さない。
@@ -112,6 +113,7 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。恒久
 - 初回セットアップ・上流更新: `/setup`、`/update-paperops`
 - セッション再開・進捗記録: `/resume-session`、`/note-writing-session`
 - 俯瞰・発散: `/open-paper-scan`
+- 関連研究・文献議論: `/research-related-work`、`/update-refs`
 - 執筆設計・本文調整: `/design-manuscript-claims`、`/calibrate-claims`、`/paragraph-surgery`
 - 結果パターン・AI 初稿の診断・条件文脈化: `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`
 - 日英同期・公開語彙: `/sync-ja-en`、`/public-terminology-pass`
@@ -126,6 +128,7 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。恒久
 | `/note-writing-session` | セッション進捗を記録し、引き継ぎファイルを更新 |
 | `/sync-ja-en` | 日本語と英語のブロックを同期 |
 | `/update-refs` | 参考文献と参照知識の整合性を検証 |
+| `/research-related-work` | 関連研究を調査設計、深掘り、議論、refs 昇格へ整理 |
 | `/improve-writing-harness` | プロジェクトローカルの摩擦を特定・修正 |
 | `/feedback-paper-harness` | 再利用可能な改善を上流ハーネスにフィードバック |
 | `/resolve-local-paths` | `refs/links.toml` と `refs/local/` から外部 link とローカルパスエイリアスを解決 |
@@ -157,10 +160,10 @@ manuscript/mirror/   map.toml, block-ledger.yml, terminology.yml, status.md, cha
 manuscript/venue.md  投稿先情報
 manuscript/publication-metadata.toml  公開タイトル、著者、ライセンス、build provenance
 submission/          投稿先公式テンプレート、最終提出用 TeX
-refs/                知識層: links.toml, summaries, local（papers, bib, excerpts はスキルが必要時に作成）
+refs/                知識層: links.toml, summaries, research, local（papers, bib, excerpts はスキルが必要時に作成）
 _handoff/            人間から AI への未整理ファイル受け取り箱（内容は Git 管理しない）
 notes/research-requests.md  paper draft から生じた追加解析・図表・実験要望
-notes/               project-brief, contribution-claims, result-pattern-map, claim-evidence-map, argument-map, condition-context-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
+notes/               project-brief, contribution-claims, related-work-map, result-pattern-map, claim-evidence-map, argument-map, condition-context-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
 scripts/             ビルド、TeX 構造、lint、citation-check、skill 対応、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills wrapper、rules/、hooks/

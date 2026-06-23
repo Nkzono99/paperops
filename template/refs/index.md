@@ -8,6 +8,7 @@
 
 - `links.toml`: paper draft から外部 project / directory への共有 link 台帳。絶対パスは書かず、`location_ref` で `local/` の個人設定へ接続する
 - `summaries/`: 再利用に最適化された構造化サマリー（スキルが初回使用時にサブディレクトリを作成）
+- `research/`: 関連研究を広く集めるための調査設計、field framework、議論前の一時成果物の置き場
 - `links.toml`: 外部 project / directory の共有可能な metadata registry。絶対パスは含めず、`refs/local/locations.toml` の alias を参照する
 - `links.md`: link registry の schema と運用メモ
 - `local/`: ignored なマシン固有パスエイリアス
@@ -20,6 +21,10 @@
 個人環境の絶対パスは `refs/local/locations.toml` にだけ書く。原稿、notes、tracked な refs にはローカル絶対パスを混ぜず、必要な provenance は export manifest、artifact index、または `notes/reproducibility.md` に公開可能な形で記録する。
 
 runops project へ追加解析・図表・追加実験の要望を戻す場合は、まず `notes/research-requests.md` に paper 側の文脈を残し、runops MCP の `runops.paper.request.draft` で候補 request を検証する。人間が確認した snippet だけを runops 側の `research/paper_requests.toml` に転記し、転記後は `runops.paper.requests.list` と `runops.paper.request.plan` で queue と routing を確認する。
+
+## 関連研究の探索
+
+関連研究、研究動向、比較対象、反論文献を広く集める場合は `/research-related-work` を使う。調査対象と field framework は `refs/research/<topic-slug>/` に置き、raw findings は既定で Git 管理しない。採用する文献だけを `refs/summaries/`、`manuscript/shared/bib/references.bib`、`notes/related-work-map.md` へ昇格する。
 
 ## サマリー形式
 

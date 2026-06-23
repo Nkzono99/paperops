@@ -17,5 +17,8 @@ refs/local/locations.toml
 tex-env.toml
 refs/papers/**
 !refs/papers/.gitkeep
+refs/research/**/results/**
+refs/research/**/report.generated.md
+refs/research/**/raw-findings.*
 *.pdf
 !manuscript/shared/figures/**/*.pdf

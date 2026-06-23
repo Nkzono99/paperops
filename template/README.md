@@ -12,21 +12,22 @@
 4. 人間から AI に渡す未整理ファイルがある場合は `_handoff/` に置き、必要なものを `refs/` や `notes/` に整理する。
 5. `tex-env.example.toml` を `tex-env.toml` にコピーし、TeX 環境を設定する（任意）。
 6. `.github/workflows/*.yml` 内のプレースホルダーワークフロー参照を、実際の `paperops` リポジトリパスに置き換える。
-7. `manuscript/publication-metadata.toml`、`notes/project-brief.md`、`notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/venue.md`、`notes/contribution-claims.md`、`notes/reproducibility.md` を記入する。
+7. `manuscript/publication-metadata.toml`、`notes/project-brief.md`、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/venue.md`、`notes/contribution-claims.md`、`notes/reproducibility.md` を記入する。
 
 ## 基本ワークフロー
 
 1. `resume-session` で開始する。
 2. `notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md` で、今日の block が扱う result pattern、claim、読者の懸念を確認する。
-3. `manuscript/ja/` で執筆または改訂する。
-4. 新しい公開用語や内部語の置換が必要なら `manuscript/mirror/terminology.yml` に記録する。
-5. 必要なブロックを `manuscript/en/` にミラーし、確認済み同期後に `python scripts/mirror-freshness-check.py --root manuscript --update` で ledger を更新する。投稿前は `make mirror-strict-check` または `make pre-submit` で freshness warning を残さない。
-6. 通読レビューでは `/start-manuscript-review` で review branch と inline comment ルールを確認し、終了後に `/collect-manuscript-review` で TeX diff と comment を台帳化する。
-7. 1 節を書いた直後や週次レビューでは `/review-public-manuscript` を `section` / `weekly` として使い、公開原稿だけで読者が詰まる語彙・前提・figure story を確認する。
-8. 投稿先公式テンプレートへ展開する段階では `submission/<venue>/` を使い、`manuscript/` と混ぜない。
-9. `notes/` に進捗を記録し、AI が文献・解析・図表・投稿文面に関与した場合は `notes/ai-use.md` も更新する。
-10. 主要な変更を共有する前に `make ci` を実行し、参考文献、citation key、ミラー、block freshness、公開語彙、claim-evidence、skill 対応、ビルド構造を確認する。
-11. 投稿・外部共有の直前には `make pre-submit` を実行し、引用サマリー、公開メタデータ、再現性メモ、submission slot、submission drift、workflow 参照、スタータープレースホルダーの残存を確認する。
+3. 関連研究を集める場合は `/research-related-work` で `refs/research/` の調査設計、`notes/related-work-map.md` の議論、`refs/summaries/` への昇格を分ける。
+4. `manuscript/ja/` で執筆または改訂する。
+5. 新しい公開用語や内部語の置換が必要なら `manuscript/mirror/terminology.yml` に記録する。
+6. 必要なブロックを `manuscript/en/` にミラーし、確認済み同期後に `python scripts/mirror-freshness-check.py --root manuscript --update` で ledger を更新する。投稿前は `make mirror-strict-check` または `make pre-submit` で freshness warning を残さない。
+7. 通読レビューでは `/start-manuscript-review` で review branch と inline comment ルールを確認し、終了後に `/collect-manuscript-review` で TeX diff と comment を台帳化する。
+8. 1 節を書いた直後や週次レビューでは `/review-public-manuscript` を `section` / `weekly` として使い、公開原稿だけで読者が詰まる語彙・前提・figure story を確認する。
+9. 投稿先公式テンプレートへ展開する段階では `submission/<venue>/` を使い、`manuscript/` と混ぜない。
+10. `notes/` に進捗を記録し、AI が文献・解析・図表・投稿文面に関与した場合は `notes/ai-use.md` も更新する。
+11. 主要な変更を共有する前に `make ci` を実行し、参考文献、citation key、ミラー、block freshness、公開語彙、claim-evidence、skill 対応、ビルド構造を確認する。
+12. 投稿・外部共有の直前には `make pre-submit` を実行し、引用サマリー、公開メタデータ、再現性メモ、submission slot、submission drift、workflow 参照、スタータープレースホルダーの残存を確認する。
 
 既存原稿がある場合は `/import-manuscript` でインポートできる。
 
@@ -36,7 +37,7 @@
 
 `_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱である。内容は既定で Git 管理されない。AI は、残す価値のある情報を `refs/summaries/`、`refs/links.toml`、`notes/research-requests.md`、`notes/handoff.md`、`notes/reproducibility.md` などへ整理し、秘密情報や個人環境の絶対パスを tracked ファイルへ移さない。
 
-`refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、投稿先指定、外部ツール名などの識別子は英語のままでよい。simulation results や figure data を本文に入れる前に、必要なら `/map-result-patterns` で `notes/result-pattern-map.md` に result pattern / evidence packet として束ねる。AI 初稿が条件数の列挙や防御的な caveat に寄りすぎた場合は `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新してから本文を直す。
+`refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、投稿先指定、外部ツール名などの識別子は英語のままでよい。関連研究を広く集める場合は `/research-related-work` で `refs/research/` に調査設計を置き、採用する文献だけ `refs/summaries/` と `.bib` へ昇格する。simulation results や figure data を本文に入れる前に、必要なら `/map-result-patterns` で `notes/result-pattern-map.md` に result pattern / evidence packet として束ねる。AI 初稿が条件数の列挙や防御的な caveat に寄りすぎた場合は `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions` で `notes/result-pattern-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md` を更新してから本文を直す。
 
 構成、読者体験、執筆ハーネスの違和感をまだ修正や記録に固定せず広げたい場合は `/open-paper-scan` を使う。出た idea はその場では採用せず、必要になったものだけ後で `/map-result-patterns`、`/audit-ai-draft`、`/design-manuscript-claims`、`/improve-writing-harness`、`/feedback-paper-harness` へ渡す。
 
@@ -64,9 +65,9 @@ nested private repo 運用や Windows の dubious ownership で git 操作が止
 - `manuscript/`: バイリンガルソース、共有アセット、ミラー制御、投稿先情報
 - `manuscript/publication-metadata.toml`: 公開タイトル、著者、ライセンス、最後に共有した build provenance
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX の分離スロット
-- `refs/`: 参照知識、サマリー、外部 link 台帳、ローカルパスエイリアス（raw PDF は `refs/papers/` に置いても既定で ignore し、共有時は `refs/summaries/` を優先）
+- `refs/`: 参照知識、サマリー、関連研究の調査設計、外部 link 台帳、ローカルパスエイリアス（raw PDF は `refs/papers/` に置いても既定で ignore し、共有時は `refs/summaries/` を優先）
 - `_handoff/`: 人間から AI へ渡す未整理ファイルの一時受け取り箱（内容は Git 管理しない）
-- `notes/`: プロジェクト概要、貢献主張、result pattern map、claim-evidence map、argument map、condition-context map、追加解析・実験要望、読者モデル、AI 利用ログ、再現性メモ、引き継ぎ、意思決定の追跡
+- `notes/`: プロジェクト概要、貢献主張、related-work map、result pattern map、claim-evidence map、argument map、condition-context map、追加解析・実験要望、読者モデル、AI 利用ログ、再現性メモ、引き継ぎ、意思決定の追跡
 - `.github/ISSUE_TEMPLATE/`: 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 - `.claude/`: プロジェクトローカルの設定、スキル、ルール、フック
 - `.agents/`: Codex 用のプロジェクトローカルスキル互換入口

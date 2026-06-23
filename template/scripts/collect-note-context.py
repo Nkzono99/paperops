@@ -9,6 +9,7 @@ SECTIONS = [
     ("結果パターン", "notes/result-pattern-map.md"),
     ("主張と証拠", "notes/claim-evidence-map.md"),
     ("論旨設計", "notes/argument-map.md"),
+    ("関連研究", "notes/related-work-map.md"),
     ("条件文脈", "notes/condition-context-map.md"),
     ("読者モデル", "notes/reviewer-model.md"),
     ("引き継ぎ", "notes/handoff.md"),

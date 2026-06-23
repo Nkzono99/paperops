@@ -10,6 +10,7 @@
 - AI 初稿が条件数列挙や防御的 caveat に寄る問題を診断する `/audit-ai-draft`、`/contextualize-conditions`、`notes/argument-map.md`、`notes/condition-context-map.md`、`make argument-focus-check` を追加した。
 - 改善指示が局所修正へ固着する前に、原稿・読者体験・執筆ハーネスを俯瞰して発散的な違和感と改善案を出す `/open-paper-scan` を追加した。既存下流リポジトリで取り込む場合は `.agents/skills/open-paper-scan/` と `.claude/skills/open-paper-scan/`、AGENTS/CLAUDE/README の案内を更新する。
 - simulation results、figure data、analysis artifact を本文や claim に直接流し込む前の中間層として、`notes/result-pattern-map.md` と `/map-result-patterns` を追加した。`make argument-focus-check` は result pattern map の starter 構造も確認する。既存下流リポジトリで取り込む場合は新規 note、skill wrapper、AGENTS/CLAUDE/README/docs の案内を更新する。
+- Deep-Research-skills の outline / field framework / deep research / report の型を参考に、関連研究を集めて議論へ変換する `/research-related-work`、`notes/related-work-map.md`、`refs/research/` を追加した。raw findings は既定で Git 管理せず、採用文献だけ `refs/summaries/` と `.bib` へ昇格する。
 
 ## 0.3.0 - 2026-06-22
 

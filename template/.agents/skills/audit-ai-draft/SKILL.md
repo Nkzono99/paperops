@@ -13,6 +13,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 
 - PDF、TeX、または対象 section / block ID
 - `notes/project-brief.md`
+- `notes/related-work-map.md`
 - `notes/result-pattern-map.md`
 - `notes/claim-evidence-map.md`
 - `notes/argument-map.md`
@@ -28,6 +29,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - `これは直接証明ではない`、`主張しない`、`screening である` のような防御的記述を、必要な場所へ集約する。
 - 内部 provenance 語、local run label、directory name、artifact name を公開語へ置換する。
 - `notes/argument-map.md` と `notes/claim-evidence-map.md` を更新する改稿計画を出す。
+- 関連研究の位置づけが未整理な場合は、本文を磨く前に `notes/related-work-map.md` または `/research-related-work` へ戻す。
 
 ## 手順
 
@@ -81,6 +83,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - Keep / compress / move / cut
 - block ID 単位の rewrite plan
 - `notes/claim-evidence-map.md` と `notes/argument-map.md` の更新案
+- 関連研究・反論文献の整理が必要なら `notes/related-work-map.md` の更新案
 
 ## チェック
 

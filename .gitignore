@@ -18,6 +18,9 @@ template/refs/local/locations.toml
 template/.claude/settings.local.json
 template/refs/papers/**
 !template/refs/papers/.gitkeep
+template/refs/research/**/results/**
+template/refs/research/**/report.generated.md
+template/refs/research/**/raw-findings.*
 template/**/*.pdf
 !template/manuscript/shared/figures/**/*.pdf
 

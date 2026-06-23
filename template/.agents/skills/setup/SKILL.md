@@ -25,6 +25,7 @@ description: テンプレートから作成した新しい論文リポジトリ�
 - `.github/workflows/*.yml` に `YOUR_ORG/paperops` が残っているか
 - `manuscript/publication-metadata.toml` にプレースホルダーが残っているか
 - `notes/project-brief.md` にプレースホルダーが残っているか
+- `notes/related-work-map.md` が未記入か
 - `notes/claim-evidence-map.md` が未記入か
 - `notes/reviewer-model.md` が未記入か
 - `notes/ai-use.md` が未記入か
@@ -131,6 +132,11 @@ Copy-Item refs/local/locations.example.toml refs/local/locations.toml
 - トピックに基づく貢献主張のドラフトを提案（ユーザーに確認を求める）
 - 具体的でない場合はプレースホルダーを維持
 
+#### notes/related-work-map.md
+
+- 関連研究の初期スコープ、source cluster 候補、比較・反論の観点を TODO として置く
+- 広い文献収集が必要な場合は、本文執筆の前に `/research-related-work` を使うよう案内する
+
 #### notes/claim-evidence-map.md
 
 - Core claim、essential results、Not claiming の初期案を提案する
@@ -179,7 +185,7 @@ make ci
 ## Codex 実行メモ
 
 - Claude 固有の `allowed-tools` は Codex の利用可能な shell / file editing tool に読み替える。
-- 編集前に `README.md`、`AGENTS.md`、`notes/project-brief.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/venue.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`refs/local/locations.example.toml` を確認する。
+- 編集前に `README.md`、`AGENTS.md`、`notes/project-brief.md`、`notes/related-work-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md`、`manuscript/venue.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`refs/local/locations.example.toml` を確認する。
 - `refs/local/locations.toml` はローカル絶対パスを含みうるため、Codex は自動作成・自動編集せず、ユーザーに copy command と編集方針を提示する。
 - Core claim、reader model、AI use log は `notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md` の starter を埋めるか、未定 TODO として残す。
 - 初回セットアップ後、可能なら `make ci`、外部共有に近い状態なら `make pre-submit` も実行する。難しい場合は `make lint-bib`、`make citation-check`、`make mirror-check` を個別に実行する。

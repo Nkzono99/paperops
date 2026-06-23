@@ -12,7 +12,7 @@ description: 論文プロジェクト、原稿、執筆ハーネスを俯瞰し�
 ## 入力
 
 - ユーザーが指定した PDF、TeX、section、README、notes、または scope
-- scope が未指定なら、`README.md`、`AGENTS.md`、`CLAUDE.md`、`notes/project-brief.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/ja/sections/`、`manuscript/en/sections/`、`.agents/skills/` を薄く横断する
+- scope が未指定なら、`README.md`、`AGENTS.md`、`CLAUDE.md`、`notes/project-brief.md`、`notes/related-work-map.md`、`notes/result-pattern-map.md`、`notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/ja/sections/`、`manuscript/en/sections/`、`.agents/skills/` を薄く横断する
 - 公開読者視点を保つ必要がある場合は、最初は公開原稿と図表 caption だけを読む
 
 ## 目的
@@ -87,13 +87,14 @@ description: 論文プロジェクト、原稿、執筆ハーネスを俯瞰し�
 候補:
 
 - `/audit-ai-draft`: AI 初稿を論旨設計へ戻す
+- `/research-related-work`: 関連研究、研究動向、比較対象、反論文献を広く集めて議論へ整理する
 - `/map-result-patterns`: raw result や figure data を result pattern / evidence packet へ束ねる
 - `/contextualize-conditions`: 条件数や case count を論文上の役割へ翻訳する
 - `/design-manuscript-claims`: 原稿全体を主張中心に再設計する
 - `/review-public-manuscript`: 公開原稿だけで外部読者視点の詰まりを検出する
 - `/improve-writing-harness`: project-local の摩擦を実装で直す
 - `/feedback-paper-harness`: 再利用可能な改善を上流へ戻す
-- `notes/claim-evidence-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md`、`notes/reviewer-model.md`: 記録が必要になった後の置き場所
+- `notes/related-work-map.md`、`notes/claim-evidence-map.md`、`notes/argument-map.md`、`notes/condition-context-map.md`、`notes/reviewer-model.md`: 記録が必要になった後の置き場所
 
 ## 出力形式
 
