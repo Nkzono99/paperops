@@ -7,6 +7,8 @@ from pathlib import Path
 SECTIONS = [
     ("プロジェクト概要", "notes/project-brief.md"),
     ("主張と証拠", "notes/claim-evidence-map.md"),
+    ("論旨設計", "notes/argument-map.md"),
+    ("条件文脈", "notes/condition-context-map.md"),
     ("読者モデル", "notes/reviewer-model.md"),
     ("引き継ぎ", "notes/handoff.md"),
     ("Todo", "notes/todo.md"),

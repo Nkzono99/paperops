@@ -37,6 +37,7 @@ make mirror-check   # ja/ と en/ のブロックレベルのドリフトを検�
 make mirror-freshness-check # 前回同期 ledger から ja/en block の更新を検出
 make mirror-strict-check # mirror freshness warning を失敗扱いで検出
 make public-terms-check # 公開原稿に内部語・禁止語が残っていないか検証
+make argument-focus-check # AI 初稿の列挙・防御過多・ローカル条件依存を検出
 make claim-evidence-check # supported claim に証拠と本文対応があるか検証
 make submission-drift-check # submission/<venue> と manuscript/en の同期注意点を検出
 make skill-mirror-check # .agents source と .claude wrapper の対応を検証
@@ -69,6 +70,7 @@ powershell -ExecutionPolicy Bypass -File scripts/build-en-pdf.ps1
 - `refs/links.toml` は外部 project / directory への共有 link 台帳である。tracked ファイルには絶対パスを書かず、`location_ref` を `refs/local/locations.toml` の個人設定で解決する。
 - `refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、field name、投稿先指定、外部ツール名などの識別子だけは英語のままでよい。
 - `_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱である。内容は Git 管理されない。残す情報は `refs/` や `notes/` の適切な台帳へ整理し、秘密情報や個人環境の絶対パスを tracked ファイルへ移さない。
+- AI 初稿が条件数の列挙、run inventory、防御的 caveat に寄ったら、本文を直接磨く前に `/audit-ai-draft` と `/contextualize-conditions` で `notes/argument-map.md` と `notes/condition-context-map.md` を更新する。
 - 投稿先公式テンプレートや最終提出用 TeX は `submission/<venue>/` に置き、`manuscript/ja,en` のミラー原稿と混ぜない。
 - 公開・投稿前には `manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`notes/ai-use.md` を更新し、`make pre-submit` を実行する。
 - 新しい主張は `notes/claim-evidence-map.md` に evidence、scope、limitation とともに記録する。
@@ -108,6 +110,7 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。恒久
 - 初回セットアップ・上流更新: `/setup`、`/update-paperops`
 - セッション再開・進捗記録: `/resume-session`、`/note-writing-session`
 - 執筆設計・本文調整: `/design-manuscript-claims`、`/calibrate-claims`、`/paragraph-surgery`
+- AI 初稿の診断・条件文脈化: `/audit-ai-draft`、`/contextualize-conditions`
 - 日英同期・公開語彙: `/sync-ja-en`、`/public-terminology-pass`
 - 通読レビュー: `/start-manuscript-review` で開始し、終了後に `/collect-manuscript-review`
 - 公開前点検: `/review-public-manuscript`、`/figure-story-audit`、`/venue-fit-review`、`/ai-disclosure-check`
@@ -130,6 +133,8 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。恒久
 | `/start-manuscript-review` | TeX 直編集レビュー用 branch を用意し、人間向けの通読ガイドを表示 |
 | `/collect-manuscript-review` | TeX diff と inline comment からレビュー台帳を生成し、必要に応じて原稿へ反映 |
 | `/design-manuscript-claims` | 作業報告型の原稿を主張中心の構造へ再設計 |
+| `/audit-ai-draft` | AI 初稿を公開読者視点と repo 文脈の両方から診断し、論旨設計と改稿計画を作る |
+| `/contextualize-conditions` | 条件数、case count、run inventory を claim role と公開条件名へ翻訳 |
 | `/calibrate-claims` | evidence strength に合わせて防御的文体と過剰主張を調整 |
 | `/public-terminology-pass` | ローカル語・内部語・未定義略語を公開語へ置換 |
 | `/paragraph-surgery` | 段落単位の flow、topic sentence、stress position を整える |
@@ -150,7 +155,7 @@ submission/          投稿先公式テンプレート、最終提出用 TeX
 refs/                知識層: links.toml, summaries, local（papers, bib, excerpts はスキルが必要時に作成）
 _handoff/            人間から AI への未整理ファイル受け取り箱（内容は Git 管理しない）
 notes/research-requests.md  paper draft から生じた追加解析・図表・実験要望
-notes/               project-brief, contribution-claims, claim-evidence-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
+notes/               project-brief, contribution-claims, claim-evidence-map, argument-map, condition-context-map, reviewer-model, ai-use, reproducibility, handoff, todo, decision-log
 scripts/             ビルド、TeX 構造、lint、citation-check、skill 対応、ミラー/鮮度/submission チェック、公開語彙・claim-evidence チェック、レビュー回収、エクスポート、コンテキスト収集
 .github/ISSUE_TEMPLATE/ 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 .claude/             settings.json（権限＋deny）、skills wrapper、rules/、hooks/

@@ -30,6 +30,7 @@ description: 節単位・週次・投稿前の公開原稿を外部読者・一�
 - `general-researcher`: 著者の codebase を知らない隣接分野研究者として読む。
 - `reader-assumptions`: 読者が本文だけから復元できない前提を探す。
 - `local-terminology`: run label、directory name、script name、simulator flag、analysis artifact name を探す。
+- `condition-context`: `2/12`、`0/8`、case、condition、series などの denominator が読者に意味を持つ文脈へ翻訳されているかを探す。
 - `public-reproducibility`: data availability、case count、diagnostic assumptions、figure/table label から再現性ギャップを探す。
 
 ## 読んではいけないもの
@@ -87,6 +88,8 @@ repo-aware editor と public-only reviewer を同じ判断に混ぜない。publ
 - `Blocking gaps`: 投稿前に直すべき未定義語・再現性不足
 - `Reader-assumption gaps`: 公開原稿だけでは復元できない前提
 - `Local terminology`: local label / simulator term / artifact term と推奨 public term の表
+- `Count-led claims`: 条件数や case count が主語になっている箇所
+- `Missing paper context`: denominator の意味や claim role が本文だけでは分からない箇所
 - `Major revisions`: 説明不足や図表不足
 - `Minor revisions`: 表記、定義、参照、図注の改善
 - `Figure/table cleanup`: title、legend、axis、caption、table header の置換候補

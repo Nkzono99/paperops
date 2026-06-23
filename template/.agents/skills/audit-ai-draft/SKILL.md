@@ -1,0 +1,104 @@
+---
+name: audit-ai-draft
+description: AI が作った論文初稿を、列挙的な作業報告から主張中心の原稿へ戻すために診断し、論旨設計メモと改稿計画を作る。
+---
+
+# audit-ai-draft
+
+AI に一旦書かせた原稿、または大きく自動生成した節を、投稿可能な論文の構成へ近づけるために使う。公開読者としての読みに加え、repo 内の `notes/` と `refs/` を見て、何を主張として前面に出し、何を根拠・境界条件・補助情報へ下げるかを設計する。
+
+## 入力
+
+- PDF、TeX、または対象 section / block ID
+- `notes/project-brief.md`
+- `notes/claim-evidence-map.md`
+- `notes/argument-map.md`
+- `notes/reviewer-model.md`
+- `notes/reproducibility.md`
+- `manuscript/mirror/terminology.yml`
+- 必要に応じて `refs/links.toml` と `refs/summaries/`
+
+## 目的
+
+- 節ごとに一つずつ言及するだけの均等な構成を避け、中心主張、機構、証拠、境界条件の階層を作る。
+- `12 条件中 2 条件`、`8 条件中 0 条件`、保存時刻数、run 数のようなローカル結果を、そのまま本文の主張にせず、論文内での意味へ抽象化する。
+- `これは直接証明ではない`、`主張しない`、`screening である` のような防御的記述を、必要な場所へ集約する。
+- 内部 provenance 語、local run label、directory name、artifact name を公開語へ置換する。
+- `notes/argument-map.md` と `notes/claim-evidence-map.md` を更新する改稿計画を出す。
+
+## 手順
+
+### 1. Public-only first read
+
+最初に公開原稿だけを読み、repo 内部知識で補完しない。以下を短く書く:
+
+- 読者が理解できる中心主張
+- 読者が迷う主張
+- 節構成が列挙型に見える箇所
+- 面白い結果なのに埋もれている箇所
+- 防御的記述が主張を弱めている箇所
+
+### 2. Local-detail smell を検出する
+
+以下の表現を探す:
+
+- `N 条件中 M 条件`、`N/M`、`N 個の保存時刻のうち M 個`
+- `screening`、`exploratory`、`bracket`、`caveat` が結果の主語になっている箇所
+- `主張しない`、`証明ではない`、`限定される` が各節で繰り返される箇所
+- run label、export 名、directory 名、script 名、artifact 名
+- 図の caption が「何を示すか」ではなく「何を計算したか」だけを述べる箇所
+
+### 3. Local-to-claim abstraction を作る
+
+ローカルな数え上げを、以下のいずれかへ分類する:
+
+- **Core evidence**: 中心主張を直接支える。本文で強く扱う。
+- **Mechanism evidence**: なぜそうなるかを説明する。因果・機構の節へ置く。
+- **Boundary condition**: 主張が破れる条件。Discussion か negative control として扱う。
+- **Screening / provenance**: 本文では圧縮し、`notes/reproducibility.md`、supplement、figure-data package へ退避する。
+- **Discard / future work**: 今の主張に寄与しない。
+
+`notes/argument-map.md` の「ローカル条件から公開主張への抽象化」を埋める。
+
+### 4. Defense budget を決める
+
+同じ caveat を何度も繰り返さない。重要な caveat は、Abstract / Methods / Discussion / Data Availability のどこか一箇所で強く明示し、Results では主張と証拠を前に出す。
+
+`notes/argument-map.md` の「Defense budget」を埋める。
+
+### 5. 改稿計画を作る
+
+ユーザーが明示的に本文編集を求めるまでは、原稿を直接書き換えない。まず以下を出す:
+
+- 一文の中心主張
+- Section-level reorder / compression plan
+- Figure story
+- Keep / compress / move / cut
+- block ID 単位の rewrite plan
+- `notes/claim-evidence-map.md` と `notes/argument-map.md` の更新案
+
+## チェック
+
+- `make argument-focus-check`
+- 本文を編集した場合は `make mirror-check`
+- 公開語彙を変えた場合は `make public-terms-check`
+- 投稿前なら `make pre-submit`
+
+## 出力形式
+
+- `Public-reader diagnosis`
+- `Central claim candidate`
+- `Evidence hierarchy`
+- `Local-to-public abstraction table`
+- `Defense budget`
+- `Section rewrite plan`
+- `Figure story`
+- `Files to update`
+- `Checks run`
+
+## Codex 実行メモ
+
+- PDF が入力された場合は、可能ならテキスト抽出と数ページの視覚確認を行う。
+- サブエージェントを使える場合は、public-only reviewer と repo-aware harness designer を分ける。
+- `refs/` と `notes/` の作業用ドキュメントは日本語で書く。
+- 本文に戻す文言は、ローカル条件数ではなく、物理的意味、機構、境界条件、読者の持ち帰りを主語にする。

@@ -7,6 +7,7 @@
 - 公開原稿へ内部 provenance 語が混入しないよう、公開語彙チェックの starter terminology と関連 writing skills の guard を強化した。
 - `mirror-freshness-check --strict` と `make mirror-strict-check` を追加し、`make pre-submit` で freshness warning を失敗扱いにするようにした。
 - 公開原稿の既定 bibliography を `references` のみにし、`mypapers` は作業 draft 用の opt-in 枠として readiness warning の対象にした。
+- AI 初稿が条件数列挙や防御的 caveat に寄る問題を診断する `/audit-ai-draft`、`/contextualize-conditions`、`notes/argument-map.md`、`notes/condition-context-map.md`、`make argument-focus-check` を追加した。
 
 ## 0.3.0 - 2026-06-22
 

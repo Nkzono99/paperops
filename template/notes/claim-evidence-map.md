@@ -21,6 +21,12 @@
 - 本論文では主張しないことを記録する。
 - 将来課題、補足、別論文へ送ることを記録する。
 
+## 条件・ケースの論文上の役割
+
+| 条件グループ | ローカル証拠 | 論文上の文脈 | claim role | scope statement | 条件数を書く場所 |
+| --- | --- | --- | --- | --- | --- |
+| 未記入 | 未記入 | 未記入 | core evidence / mechanism / boundary / robustness / negative control / exploratory | 未記入 | 本文 / 図注 / Methods / supplement / notes |
+
 ## 主張強度の調整
 
 - `draft`: まだ仮説または作業中の主張。

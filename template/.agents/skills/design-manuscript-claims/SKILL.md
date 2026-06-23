@@ -70,6 +70,15 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 `Current blocks` には `% block: ...` ID または section file を入れる。block ID がない範囲は section と近い見出しで示す。
 設計後、ユーザーが了承した claim / evidence / scope / limitation は `notes/claim-evidence-map.md` に反映する。
 
+### 3.5 条件数を論文コンテキストへ抽象化する
+
+`12 条件中 2 条件`、`8 条件中 0 条件`、保存時刻数、run 数、screening 条件は、そのまま `Essential results` に入れない。まず `/contextualize-conditions` の方針で、各結果を `mechanism`、`contrast`、`boundary`、`robustness`、`exception`、`provenance-only` のどれかへ分類する。
+
+- 条件数は claim ではなく evidence metadata として扱う。
+- 0 条件は「失敗」ではなく、negative evidence、boundary、insufficient coverage のどれかへ分類する。
+- `notes/condition-context-map.md` に denominator の意味、公開条件名、本文での言い方を残す。
+- `notes/claim-evidence-map.md` には `condition role` と `public scope` を反映する。
+
 ### 4. 本文の配置を決める
 
 各材料を次に分類する:

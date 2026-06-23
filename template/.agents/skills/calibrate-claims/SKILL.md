@@ -23,8 +23,9 @@ description: 原稿の主張強度を evidence strength に合わせる。防御
    - mechanism qualifier: 因果機構の未確定性を示す語
    - vague hedge: 主張責任を曖昧にするだけの語
 3. 証拠が十分な箇所は、`may`, `might`, `could`, `suggest` に逃げず、scope を明示して言い切る。
-4. 証拠が弱い箇所は、動詞を曖昧にするのではなく limitation / uncertainty を分離する。
-5. `notes/claim-evidence-map.md` の status、scope、limitation を必要に応じて更新する。
+4. 証拠が局所的な条件集合に依存する場合は、`may suggest` に逃げず、`この条件軸では`、`tested boundary conditions では`、`この保持仮定の範囲では` のように scope を明示して言い切る。
+5. limitation は claim 文に混ぜすぎず、後続文または boundary claim として分離する。
+6. `notes/claim-evidence-map.md` の status、scope、limitation を必要に応じて更新する。
 
 ## 出力
 
@@ -40,4 +41,5 @@ description: 原稿の主張強度を evidence strength に合わせる。防御
 
 - `notes/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/mirror/status.md` を先に読む。
 - 防御的すぎる hedge と過剰主張の両方を点検する。
+- 条件数が少ない証拠は、弱い主張なのか境界条件として鋭い証拠なのかを分ける。
 - 本文を編集したら `make mirror-check`、必要なら `/sync-ja-en` を実行する。

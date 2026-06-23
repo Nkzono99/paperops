@@ -36,7 +36,7 @@
 
 `_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱である。内容は既定で Git 管理されない。AI は、残す価値のある情報を `refs/summaries/`、`refs/links.toml`、`notes/research-requests.md`、`notes/handoff.md`、`notes/reproducibility.md` などへ整理し、秘密情報や個人環境の絶対パスを tracked ファイルへ移さない。
 
-`refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、投稿先指定、外部ツール名などの識別子は英語のままでよい。
+`refs/` と `notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、投稿先指定、外部ツール名などの識別子は英語のままでよい。AI 初稿が条件数の列挙や防御的な caveat に寄りすぎた場合は `/audit-ai-draft` と `/contextualize-conditions` で `notes/argument-map.md` と `notes/condition-context-map.md` を更新してから本文を直す。
 
 `tex-env.toml` では TeX Live / Docker だけでなく、JA / EN ごとの `latexmk` mode と engine も設定できる。日本語ドラフトで `uplatex + dvipdfmx` が必要な場合は、`tex-env.example.toml` の `[latex.ja]` 例をコピーする。
 
@@ -64,7 +64,7 @@ nested private repo 運用や Windows の dubious ownership で git 操作が止
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX の分離スロット
 - `refs/`: 参照知識、サマリー、外部 link 台帳、ローカルパスエイリアス（raw PDF は `refs/papers/` に置いても既定で ignore し、共有時は `refs/summaries/` を優先）
 - `_handoff/`: 人間から AI へ渡す未整理ファイルの一時受け取り箱（内容は Git 管理しない）
-- `notes/`: プロジェクト概要、貢献主張、claim-evidence map、追加解析・実験要望、読者モデル、AI 利用ログ、再現性メモ、引き継ぎ、意思決定の追跡
+- `notes/`: プロジェクト概要、貢献主張、claim-evidence map、argument map、condition-context map、追加解析・実験要望、読者モデル、AI 利用ログ、再現性メモ、引き継ぎ、意思決定の追跡
 - `.github/ISSUE_TEMPLATE/`: 原稿レビュー、エビデンス不足、ハーネス摩擦の収集フォーム
 - `.claude/`: プロジェクトローカルの設定、スキル、ルール、フック
 - `.agents/`: Codex 用のプロジェクトローカルスキル互換入口

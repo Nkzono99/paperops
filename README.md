@@ -75,6 +75,7 @@ CLI の詳細は [`docs/cli.md`](docs/cli.md) を参照する。
 - `submission/<venue>/`: 投稿先公式テンプレートと最終提出用 TeX の分離
 - `manuscript/publication-metadata.toml`、`notes/ai-use.md`、`notes/reproducibility.md`: 公開メタデータ、AI 利用開示、計算環境、図表 provenance の投稿前確認
 - `make pre-submit`: `make ci` に加えて引用サマリー、strict mirror freshness、submission slot、スタータープレースホルダー、workflow 参照、公開メタデータ不足を検出
+- `make argument-focus-check`: AI 初稿が条件数列挙、防御的 caveat、ローカル実行ログに寄りすぎていないかを advisory に検出
 - `make citation-check`: TeX 本文中の citation key と `.bib` の不整合を早期検出
 - `make public-terms-check` / `make claim-evidence-check`: 内部語の公開本文混入と supported claim の evidence 対応を早期検出
 - `make mirror-freshness-check` / `make mirror-strict-check` / `make submission-drift-check`: 日英 block の同期鮮度と投稿版への科学的変更戻し忘れを点検
