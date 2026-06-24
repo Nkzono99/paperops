@@ -19,6 +19,11 @@ LOCAL_PROVENANCE_RE = re.compile(
     r"(run label|directory name|script name|artifact name|raw run|scheduler log|中間出力ディレクトリ|実行識別子)",
     re.IGNORECASE,
 )
+NOTE_LABEL_ONLY_RE = re.compile(
+    r"^(?:[-*]\s*)?(?:[A-Z]{1,8}-?\d{2,5}\s+)?[A-Za-z0-9][A-Za-z0-9_./:-]*"
+    r"(?:\s+[A-Za-z0-9][A-Za-z0-9_./:-]*){0,5}$"
+)
+NOTE_LABEL_MARKER_RE = re.compile(r"\b[A-Z]{1,8}-?\d{2,5}\b|[-_][A-Za-z0-9]")
 COMPARATOR_OVERCLAIM_RE = re.compile(
     r"(lost in|not captured by|better than|stronger than|weaker than|outperform|"
     r"従来近似|従来法|近似では失われ|より強い|より弱い|"
@@ -120,6 +125,17 @@ def manuscript_files(root: Path) -> list[Path]:
     ]
 
 
+def note_files(root: Path) -> list[Path]:
+    notes = root / "notes"
+    if not notes.exists():
+        return []
+    return [
+        path
+        for path in sorted(notes.glob("**/*.md"))
+        if not path.name.endswith(".generated.md")
+    ]
+
+
 def check_manuscript_smells(root: Path, findings: list[Finding]) -> None:
     defensive_counts: dict[str, int] = {}
     for path in manuscript_files(root):
@@ -171,6 +187,30 @@ def check_manuscript_smells(root: Path, findings: list[Finding]) -> None:
             )
 
 
+def check_note_smells(root: Path, findings: list[Finding]) -> None:
+    for path in note_files(root):
+        rel_path = path.relative_to(root).as_posix()
+        for number, line in enumerate(read_text(path).splitlines(), start=1):
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#") or stripped.startswith("|"):
+                continue
+            if stripped.endswith(":") or "未記入" in stripped:
+                continue
+            if (
+                NOTE_LABEL_ONLY_RE.fullmatch(stripped)
+                and NOTE_LABEL_MARKER_RE.search(stripped)
+                and any(ch.isalpha() for ch in stripped)
+            ):
+                findings.append(
+                    Finding(
+                        "warning",
+                        f"`{rel_path}:{number}` はラベルだけの行に見えます。"
+                        " route/status label は field として残してよいですが、同じ bullet か直後に"
+                        " 前提・判断根拠・本文への影響を普通の文で展開してください",
+                    )
+                )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="AI 初稿が列挙的・防御的・ローカル条件依存になっていないか確認する。")
     parser.add_argument("--root", type=Path, default=Path("."))
@@ -181,6 +221,7 @@ def main() -> int:
     findings: list[Finding] = []
     check_view_maps(root, findings)
     check_manuscript_smells(root, findings)
+    check_note_smells(root, findings)
 
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]

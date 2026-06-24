@@ -55,6 +55,61 @@ latexmk_args() {
   LATEXMK_ARGS+=("-output-directory=$output_dir" main.tex)
 }
 
+run_engine_once() {
+  local engine="$1"
+  (
+    cd "$LANG_DIR"
+    export TEXINPUTS="../shared/style//:${TEXINPUTS:-}"
+    export BIBINPUTS="../shared/bib//:${BIBINPUTS:-}"
+    export BSTINPUTS="../shared/style//:${BSTINPUTS:-}"
+    "$engine" -interaction=nonstopmode -halt-on-error "-output-directory=$BUILD_DIR" main.tex
+  )
+}
+
+run_direct_engine_build() {
+  local engine="$1"
+  if ! command -v "$engine" >/dev/null 2>&1; then
+    return 1
+  fi
+  echo "latexmk が見つからないため、${engine} + bibtex の direct-engine fallback を実行します。"
+  run_engine_once "$engine"
+  if command -v bibtex >/dev/null 2>&1; then
+    (
+      cd "$BUILD_DIR"
+      bibtex main || true
+    )
+  else
+    echo "bibtex が見つからないため、参考文献処理をスキップします。"
+  fi
+  run_engine_once "$engine"
+  run_engine_once "$engine"
+  if [[ -f "$BUILD_DIR/main.log" ]] && grep -q "Missing character" "$BUILD_DIR/main.log"; then
+    echo "PDF 生成ログに Missing character が含まれています。font / engine 設定を確認してください。"
+    return 1
+  fi
+  if [[ ! -f "$BUILD_DIR/main.pdf" ]]; then
+    echo "direct-engine fallback は完了しましたが、PDF は生成されませんでした。"
+    return 1
+  fi
+  echo "英語 PDF を direct-engine fallback で生成しました: $BUILD_DIR/main.pdf"
+  return 0
+}
+
+try_direct_engine_build() {
+  local engines=()
+  if [[ -n "${PAPEROPS_EN_DIRECT_ENGINE:-}" ]]; then
+    engines+=("$PAPEROPS_EN_DIRECT_ENGINE")
+  else
+    engines+=(lualatex xelatex pdflatex)
+  fi
+  for engine in "${engines[@]}"; do
+    if run_direct_engine_build "$engine"; then
+      return 0
+    fi
+  done
+  return 1
+}
+
 if [[ "${PAPER_TEMPLATE_RUN_LATEX:-0}" == "1" ]]; then
   latexmk_args "$BUILD_DIR"
   if [[ -n "${TEX_DOCKER_IMAGE:-}" ]]; then
@@ -72,8 +127,11 @@ if [[ "${PAPER_TEMPLATE_RUN_LATEX:-0}" == "1" ]]; then
       "${LATEXMK_ARGS[@]}"
     )
   else
-    echo "latexmk が見つかりません。tex-env.toml で TeX Live パスを設定するか、Docker イメージを指定してください。"
-    echo "英語原稿の構造検証を完了しました。"
+    if ! try_direct_engine_build; then
+      echo "latexmk と direct-engine fallback が見つかりません。tex-env.toml で TeX Live パスを設定するか、Docker イメージを指定してください。"
+      echo "PDF は未生成です。英語原稿の構造検証だけを完了しました。"
+      exit 1
+    fi
   fi
 else
   echo "PAPER_TEMPLATE_RUN_LATEX=1 が未設定です。英語原稿の構造検証を完了しました。"

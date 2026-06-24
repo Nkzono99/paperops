@@ -21,6 +21,13 @@ class Finding:
     message: str
 
 
+def replacement_hint(term: dict) -> str:
+    rule = term.get("replacement_rule")
+    if isinstance(rule, str) and rule.strip():
+        return f" replacement: {rule.strip()}"
+    return ""
+
+
 def clean_scalar(value: str) -> str:
     value = value.strip()
     if " #" in value:
@@ -158,13 +165,25 @@ def check_terms(root: Path, terms: list[dict]) -> list[Finding]:
 
         if status in {"internal_only", "forbidden"} and occurrences:
             for occurrence in occurrences:
-                findings.append(Finding("error", f"`{term_id}` は `{status}` ですが、{occurrence} が出現しています"))
+                findings.append(
+                    Finding(
+                        "error",
+                        f"`{term_id}` は `{status}` ですが、{occurrence} が出現しています。"
+                        f"{replacement_hint(term)}",
+                    )
+                )
             continue
 
         avoid_values = [str(item) for item in term.get("avoid", []) if not is_placeholder(str(item))]
         avoid_occurrences = find_occurrences(root, avoid_values)
         for occurrence in avoid_occurrences:
-            findings.append(Finding("error", f"`{term_id}` の avoid 語が公開原稿に残っています: {occurrence}"))
+            findings.append(
+                Finding(
+                    "error",
+                    f"`{term_id}` の avoid 語が公開原稿に残っています: {occurrence}。"
+                    f"{replacement_hint(term)}",
+                )
+            )
 
         if status == "needs_definition" and occurrences:
             if normalize_bool(term.get("first_definition_required", False)) and is_placeholder(

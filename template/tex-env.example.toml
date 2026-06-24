@@ -12,6 +12,11 @@
 
 # LaTeX engine を切り替える場合
 # 既定は JA / EN ともに latexmk -pdf。
+# latexmk がなく PAPER_TEMPLATE_RUN_LATEX=1 の場合、build script は direct-engine fallback を試す。
+# 既定の fallback 順は JA: xelatex -> lualatex -> pdflatex、EN: lualatex -> xelatex -> pdflatex。
+# 一時的に固定する場合:
+#   PAPEROPS_JA_DIRECT_ENGINE=xelatex
+#   PAPEROPS_EN_DIRECT_ENGINE=lualatex
 # JA で uplatex + dvipdfmx を使う例:
 # [latex.ja]
 # latexmk_mode = "pdfdvi"

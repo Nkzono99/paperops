@@ -389,6 +389,10 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         "doctor scope: structure and local setup only; run "
         "make readiness-check before sharing or submission."
     )
+    print(
+        "Skill context budget warning: if Codex says skill descriptions were shortened, "
+        "see TROUBLESHOOTING.md and keep only the plugins needed for the current profile."
+    )
     return 0
 
 

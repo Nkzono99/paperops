@@ -70,6 +70,24 @@ class ArgumentFocusCheckTest(unittest.TestCase):
         self.assertIn("direct comparator", result.stdout)
         self.assertIn("run completion と physical equilibrium", result.stdout)
 
+    def test_warns_when_notes_compress_handoff_into_label_only_rows(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = copy_template(tmp)
+            note = target / "notes" / "handoff.md"
+            note.write_text(
+                note.read_text(encoding="utf-8")
+                + "\n- RR-0009 current-balance gap\n"
+                + "- figure-redesign-open\n",
+                encoding="utf-8",
+            )
+
+            result = run_python_script(SCRIPT, "--root", target, "--strict")
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("notes/handoff.md", result.stdout)
+        self.assertIn("ラベルだけ", result.stdout)
+        self.assertIn("前提・判断根拠・本文への影響", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

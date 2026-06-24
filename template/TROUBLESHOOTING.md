@@ -1,5 +1,23 @@
 # トラブルシューティング
 
+## Skill context budget warning
+
+Codex が次の warning を出すことがある:
+
+```text
+Skill descriptions were shortened to fit the 2% skills context budget.
+```
+
+これは skill 本体が読めないという意味ではなく、一覧に表示される description が短縮されたという通知である。通常執筆では、paperops の project-local skill を優先し、GitHub / Slack / Gmail / HPC / 解析系 plugin は必要になった時だけ有効化する。
+
+目安:
+
+- 通常執筆: paperops の原稿、引用、査読、同期 skill を優先する。
+- GitHub issue / release 作業: GitHub plugin を有効にする。
+- HPC / 解析作業: 解析 project 側で必要な plugin だけを有効にする。
+
+warning が出ても作業は継続できる。入口選択が曖昧になった場合は、`AGENTS.md` の主要 skill 一覧を読み、必要な skill の `SKILL.md` を直接開いてから進める。
+
 ## nested private paper repo
 
 解析リポジトリや working リポジトリの配下に、この paper repo を private repo として nested clone する運用では、親 repo と paper repo の `.git` が混ざりやすい。

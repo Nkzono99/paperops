@@ -40,6 +40,9 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "_handoff" / "README.md").is_file())
             self.assertTrue((target / "_archives" / "AGENTS.md").is_file())
             self.assertTrue((target / "_archives" / "README.md").is_file())
+            troubleshooting = (target / "TROUBLESHOOTING.md").read_text(encoding="utf-8")
+            self.assertIn("Skill descriptions were shortened", troubleshooting)
+            self.assertIn("通常執筆", troubleshooting)
             self.assertTrue((target / "evidence" / "results" / "result-card-template.md").is_file())
             self.assertTrue((target / "evidence" / "figures" / "figure-card-template.md").is_file())
             self.assertTrue((target / "evidence" / "sources" / "source-card-template.md").is_file())
@@ -154,6 +157,8 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("doctor: ok", out)
             self.assertIn("doctor scope: structure and local setup only", out)
             self.assertIn("make readiness-check", out)
+            self.assertIn("Skill context budget warning", out)
+            self.assertIn("TROUBLESHOOTING.md", out)
 
     def test_doctor_rejects_invalid_link_registry(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
