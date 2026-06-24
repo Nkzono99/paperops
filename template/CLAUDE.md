@@ -12,6 +12,7 @@
 - `refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` の作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名は英語のままでよい。
 - raw PDF、未整理ファイル、個人環境の絶対パス、confidential reviewer correspondence は tracked file へ混ぜない。
 - `_handoff/` は人間から AI への一時受け取り箱であり、内容は Git 管理しない。
+- `_archives/` は sealed scratch archive である。通常の執筆・レビュー・関連研究では読まず、明示的な restore / inspect / compare 指示がある場合だけ扱う。
 - 生成されたコンテンツは、明示的にスターターや共有すべき成果物でない限り Git 管理しない。
 
 ## よく使うコマンド
@@ -63,6 +64,7 @@ manuscript/          日英原稿、共有アセット、ミラー制御、投�
 submission/          投稿先公式テンプレートと最終提出用 TeX
 refs/                文献、外部 source、外部 link、import state、local path alias
 _handoff/            未整理ファイルの一時受け取り箱
+_archives/           sealed scratch archive
 evidence/            result / figure / source card
 claims/              claim / scientific gate / argument card
 review/              feedback / review round / response card

@@ -38,6 +38,7 @@ from paperops.cli.scaffold import (
     scaffold_source,
     source_dir_context,
 )
+from paperops.cli.scratch import add_scratch_parser
 from paperops.cli.upgrade import (
     plan_upgrade_chain,
     print_upgrade_chain,
@@ -213,6 +214,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="Warn when refs/local/locations.toml is missing.",
     )
     links_parser.set_defaults(func=cmd_links)
+
+    add_scratch_parser(subcommands)
 
     version_parser = subcommands.add_parser(
         "version",

@@ -23,6 +23,7 @@
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX
 - `refs/`: 文献サマリー、関連研究調査、外部 source、外部 project link、外部 bundle import state
 - `_handoff/`: 人間から AI へ渡す未整理ファイル
+- `_archives/`: 過去稿を sealed split bundle として封印する scratch archive
 - `evidence/`: result / figure / source card
 - `claims/`: claim / scientific gate / argument card
 - `review/`: feedback / review round / response card
@@ -38,6 +39,7 @@
 3. Abstract、Conclusion、主要図表に使う claim は `claims/gates/` で readiness を確認する。
 4. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
 5. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
+6. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
 
 ## 設計原則
 

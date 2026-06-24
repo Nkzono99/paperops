@@ -19,6 +19,7 @@ EXCLUDED_SCAFFOLD_PATTERNS = (
     ".venv/*",
     "dist",
     "dist/*",
+    "_archives/*",
     "harness-feedback",
     "harness-feedback/*",
     "harness-lab",
@@ -42,6 +43,8 @@ EXCLUDED_SCAFFOLD_PATTERNS = (
 SCAFFOLD_INCLUDE_EXCEPTIONS = (
     "_handoff/.gitkeep",
     "_handoff/README.md",
+    "_archives/AGENTS.md",
+    "_archives/README.md",
 )
 
 MANAGED_UPDATE_PATTERNS = (

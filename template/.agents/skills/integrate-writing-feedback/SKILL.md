@@ -16,6 +16,8 @@ description: Use when routing manuscript, human, reviewer, or PDF feedback back 
 
 raw confidential text は `_handoff/` やローカル入力に留め、tracked card には要約、comment ID、対象 block、route を残す。
 
+`_archives/` は feedback source にしない。過去稿からの復元や比較は、ユーザーが明示した場合だけ `pops scratch` 経由で扱う。
+
 ## 先に読む
 
 1. `manuscript/mirror/status.md`

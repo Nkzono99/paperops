@@ -71,4 +71,5 @@
 - `notes/views/` は俯瞰ビュー。旧 `notes/*.md` の一部は互換ビュー。
 - 作業用ドキュメントは原則日本語で書く。
 - raw correspondence、未整理ファイル、個人環境の実パスは tracked file へ混ぜない。
+- `_archives/` は sealed scratch archive。通常の skill は読まず、明示的な restore / inspect / compare 指示がある場合だけ扱う。
 - `make skill-mirror-check` は `.agents/skills/` と `.claude/skills/` の対応を確認する。

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `pops scratch archive/reset/restore/list/inspect` を追加し、同じ論文 repo 内で現行の `manuscript/`、`notes/`、`refs/`、カード層などを `_archives/` の split bundle に封印してから1から書き直せるようにした。archive part は既定で 48 MiB に分割し、通常の AI 執筆では `_archives/` を読まないルールと `archive-seal-check` を追加した。
+
 ## 0.6.0 - 2026-06-24
 
 - README、下流 README、AGENTS / CLAUDE、主要 docs を短縮し、重複していた運用説明や長いスキル解説を必要最低限の入口・境界ルール中心に整理した。

@@ -37,12 +37,15 @@
 ## 情報の置き場所
 
 - `_handoff/`: 人間から AI へ渡す未整理ファイル。内容は Git 管理しない。
+- `_archives/`: 1から書き直すための sealed scratch archive。通常の AI 執筆では読まない。
 - `refs/summaries/`: 採用する文献や外部 source の確認済み要約。
 - `refs/research/`: 関連研究調査の設計と raw finding。
 - `refs/source-reach/`: Web、GitHub、動画、RSS、SNS など外部 source channel の調査メモ。
 - `refs/links.toml`: 共有できる外部 project / directory link の意味。
 - `refs/imports/`: 外部 export bundle の source index、integrity、claim role、取り込み状態。
 - `refs/local/locations.toml`: 個人環境の実パス。Git 管理しない。
+
+過去稿を封印して同じ repo で書き直す場合は、`pops scratch archive`、`pops scratch reset`、`pops scratch restore` を使う。archive は `_archives/` に split bundle として置かれ、通常の skill は参照しない。
 
 `refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名などの識別子は英語のままでよい。
 

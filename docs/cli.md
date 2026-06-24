@@ -33,6 +33,7 @@ uvx --from paper-harness-cli pops doctor
 - `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出す。
 - `pops links list [path]`: `refs/links.toml` の外部 link を表示する。
 - `pops links check [path]`: link registry と local location の対応を検証する。
+- `pops scratch archive/reset/restore/list/inspect`: 現在の論文作業層を `_archives/` の split bundle に封印し、同じ repo で1から書き直す。
 - `pops version`, `pops --version`: CLI と上流情報を表示する。
 
 ## 更新対象
@@ -75,6 +76,18 @@ uvx --from paper-harness-cli pops links check
 `kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。追加解析や図表要望は `requests/analysis/` に切り出してから runops 側へ渡す。
 
 外部 export bundle を図表・表・claim evidence に使う場合は、`refs/imports/` に import state を記録し、`make external-import-check` を実行する。
+
+## Scratch Archives
+
+```sh
+uvx --from paper-harness-cli pops scratch archive --label before-rewrite
+uvx --from paper-harness-cli pops scratch reset --yes
+uvx --from paper-harness-cli pops scratch restore <archive-id> --yes
+```
+
+`pops scratch archive` は `manuscript/`、`submission/`、`notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/` を `_archives/<id>/archive.zip.partNNNN` に分割保存する。既定の part size は 48 MiB で、GitHub の単一ファイル制限にかからないようにする。
+
+`pops scratch reset --yes` は作業層と `_handoff/` payload を starter 状態に戻す。`_archives/` は残る。通常の AI 執筆では archive 内容を読まず、復元や比較を明示された場合だけ `pops scratch restore <id> --yes` を使う。
 
 ## 更新通知
 

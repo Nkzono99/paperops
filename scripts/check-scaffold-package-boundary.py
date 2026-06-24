@@ -28,6 +28,7 @@ CANARY_RELS = (
     ".harnessops/project.toml",
     "harness-feedback/records/feedback.md",
     "harness-lab/records/lab.md",
+    "_archives/old/manuscript/main.tex",
     "refs/source-reach/canary/raw/cookie.txt",
     "refs/source-reach/canary/doctor.generated.json",
     "refs/source-reach/canary/capture.generated.json",
@@ -50,10 +51,13 @@ def main() -> int:
     dist_dir = tmp_root / "dist"
     init_dir = tmp_root / "init" / "paper-demo"
 
-    canaries = [ROOT / "template" / rel for rel in CANARY_RELS]
+    template_root = ROOT / "template"
+    canaries = [template_root / rel for rel in CANARY_RELS]
     previous = {path: path.read_bytes() for path in canaries if path.exists()}
+    created_dirs: set[Path] = set()
     try:
         for canary in canaries:
+            created_dirs.update(missing_parents(canary.parent, template_root))
             canary.parent.mkdir(parents=True, exist_ok=True)
             canary.write_text(
                 "generated canary for scaffold package boundary check\n",
@@ -69,6 +73,11 @@ def main() -> int:
                 canary.write_bytes(previous[canary])
             else:
                 canary.unlink(missing_ok=True)
+        for directory in sorted(created_dirs, key=lambda path: len(path.parts), reverse=True):
+            try:
+                directory.rmdir()
+            except OSError:
+                pass
         if args.out_dir is None:
             shutil.rmtree(tmp_root, ignore_errors=True)
 
@@ -149,6 +158,16 @@ def is_excluded_scaffold_path(rel: str) -> bool:
 
 def normalize_rel(path: Path) -> str:
     return path.as_posix()
+
+
+def missing_parents(path: Path, stop: Path) -> list[Path]:
+    parents: list[Path] = []
+    current = path
+    while current != stop and current != current.parent:
+        if not current.exists():
+            parents.append(current)
+        current = current.parent
+    return parents
 
 
 def run(command: Iterable[str], *, cwd: Path) -> None:

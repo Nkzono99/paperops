@@ -24,6 +24,8 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - `manuscript/mirror/terminology.yml`
 - 必要に応じて `refs/links.toml` と `refs/summaries/`
 
+`_archives/` は読まない。過去稿との比較は、ユーザーが明示的に archive compare / restore を頼んだ場合だけ行う。
+
 ## 目的
 
 - 節ごとに一つずつ言及するだけの均等な構成を避け、中心主張、機構、証拠、境界条件の階層を作る。

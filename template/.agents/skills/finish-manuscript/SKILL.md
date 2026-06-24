@@ -34,6 +34,8 @@ description: Use when /goal asks Codex to finish a manuscript from scratch or re
 
 対象原稿が repo 外にある場合は、先に `import-manuscript` で取り込む。raw confidential reviewer text や雑多な人間入力は `_handoff/` に置き、tracked card には要約、ID、route だけを残す。
 
+`_archives/` は sealed scratch archive であり、通常の from-scratch / revision / peer review loop では読まない。ユーザーが明示的に restore / inspect / compare を頼んだ場合だけ `pops scratch` 経由で扱う。
+
 ## From-scratch lane
 
 1から書く場合は、文章生成へ急がず、先に論文としての骨格を作る。

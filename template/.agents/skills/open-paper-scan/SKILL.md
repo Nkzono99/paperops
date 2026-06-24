@@ -15,6 +15,8 @@ description: Use when broadly scanning a paper project for structural issues or 
 - scope が未指定なら、`README.md`、`AGENTS.md`、`CLAUDE.md`、`notes/project-brief.md`、`notes/views/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/views/result-pattern-map.md`、`notes/views/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/ja/sections/`、`manuscript/en/sections/`、`.agents/skills/` を薄く横断する
 - 公開読者視点を保つ必要がある場合は、最初は公開原稿と図表 caption だけを読む
 
+`_archives/` は open scan の入力にしない。過去稿比較を明示された場合だけ別作業として扱う。
+
 ## 目的
 
 - 一番新しい摩擦や目についた bug に早く閉じず、設計思想、読者体験、主張設計、評価不能性、管理過多を見る。

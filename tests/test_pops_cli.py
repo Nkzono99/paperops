@@ -38,6 +38,8 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "AGENTS.md").is_file())
             self.assertTrue((target / "_handoff").is_dir())
             self.assertTrue((target / "_handoff" / "README.md").is_file())
+            self.assertTrue((target / "_archives" / "AGENTS.md").is_file())
+            self.assertTrue((target / "_archives" / "README.md").is_file())
             self.assertTrue((target / "evidence" / "results" / "result-card-template.md").is_file())
             self.assertTrue((target / "evidence" / "figures" / "figure-card-template.md").is_file())
             self.assertTrue((target / "evidence" / "sources" / "source-card-template.md").is_file())
@@ -91,6 +93,13 @@ class PopsCliTest(unittest.TestCase):
             (source / ".harness" / "state.json").write_text("no\n", encoding="utf-8")
             (source / ".harnessops").mkdir()
             (source / ".harnessops" / "lock.json").write_text("no\n", encoding="utf-8")
+            (source / "_archives" / "old" / "manuscript").mkdir(parents=True)
+            (source / "_archives" / "old" / "manuscript" / "main.tex").write_text(
+                "no\n",
+                encoding="utf-8",
+            )
+            (source / "_archives" / "AGENTS.md").write_text("ok\n", encoding="utf-8")
+            (source / "_archives" / "README.md").write_text("ok\n", encoding="utf-8")
             (source / "notes").mkdir()
             (source / "notes" / "source-reach.md").write_text("ok\n", encoding="utf-8")
 
@@ -111,6 +120,9 @@ class PopsCliTest(unittest.TestCase):
             self.assertFalse((target / "harness-lab").exists())
             self.assertFalse((target / ".harness").exists())
             self.assertFalse((target / ".harnessops" / "lock.json").exists())
+            self.assertTrue((target / "_archives" / "AGENTS.md").is_file())
+            self.assertTrue((target / "_archives" / "README.md").is_file())
+            self.assertFalse((target / "_archives" / "old").exists())
             self.assertIn("_handoff/secret.txt", plan.excluded)
             self.assertIn("refs/source-reach/topic/raw", plan.excluded)
             self.assertIn("refs/source-reach/topic/raw/cookie.txt", plan.excluded)
@@ -119,6 +131,7 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("harness-lab", plan.excluded)
             self.assertIn(".harness/state.json", plan.excluded)
             self.assertIn(".harnessops/lock.json", plan.excluded)
+            self.assertIn("_archives/old", plan.excluded)
 
     def test_init_uses_uvx_flow_without_project_local_cli(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

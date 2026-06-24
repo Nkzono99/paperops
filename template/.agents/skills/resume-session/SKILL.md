@@ -47,3 +47,4 @@ description: 執筆セッション開始時に原稿の状態を要約し、ミ�
 - 原稿編集前に `manuscript/mirror/status.md` を確認し、必要なら `make mirror-check` を実行する。
 - ユーザーには、現在状態、中心主張、次に安全に進める作業、未解決リスクを短く返す。
 - 追加の view は、次作業に必要なものだけ読む。
+- `_archives/` は通常読まない。明示的な restore / inspect / compare 指示がある場合だけ扱う。
