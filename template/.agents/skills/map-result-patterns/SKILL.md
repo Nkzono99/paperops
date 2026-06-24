@@ -1,6 +1,6 @@
 ---
 name: map-result-patterns
-description: simulation results、figure data、analysis artifact、run output を、本文の主張へ直接流し込む前に result pattern / evidence packet へ抽象化する。ユーザーが「結果と原稿の間の中間層」「結果を論文上の文脈へ整理」「run 結果から主張候補を作る」と頼んだときに使う。
+description: Use when turning results, figures, or run outputs into result patterns before writing claims.
 ---
 
 # map-result-patterns

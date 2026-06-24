@@ -1,6 +1,6 @@
 ---
 name: hops-research-improvements
-description: HarnessOps core、または HarnessOps を導入した target/project repository で、既に出たハーネス改善案を evidence、既存 dossier/feedback、外部事例、比較評価、park/reject、hops lab/feedback workflow へ接続するときに使う。発散的な最初の発想だけが目的なら hops-open-meta-scan を先に使い、この skill は raw ideas を選別・調査・記録候補化する selection/routing lane として使う。
+description: Use when turning existing HOPS improvement ideas into evidence, routing, records, or eval candidates.
 ---
 Use `uvx --from harnessops hops <command>` for CLI invocations in target/project repos; do not rely on `hops` being on PATH.
 

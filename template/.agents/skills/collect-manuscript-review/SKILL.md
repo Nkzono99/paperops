@@ -1,6 +1,6 @@
 ---
 name: collect-manuscript-review
-description: TeX 直編集 diff と inline review comment を回収し、レビュー台帳を作成して、必要に応じて source-of-truth 原稿と EN mirror へ反映する。
+description: Use when collecting TeX review diffs and inline comments into a review ledger.
 ---
 
 # collect-manuscript-review

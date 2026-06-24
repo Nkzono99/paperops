@@ -1,6 +1,6 @@
 ---
 name: source-reach-scan
-description: 外部 Web、GitHub、論文ページ、動画、RSS、SNS、議論サイトなどから情報を集める前に、到達経路、認証、raw 保存先、refs への昇格方針を決めるときに使う。
+description: Use when planning external source collection, raw storage, and refs promotion.
 ---
 
 # source-reach-scan

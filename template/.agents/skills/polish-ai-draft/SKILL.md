@@ -1,6 +1,6 @@
 ---
 name: polish-ai-draft
-description: AI 初稿、機械的な文体、過度に定型的なつなぎ、宣伝調、三点列挙、曖昧な出典、AI らしい防御的文章を、主張と証拠を変えずに論文向けに磨くときに使う。
+description: Use when polishing AI-like draft prose without changing claims or evidence.
 ---
 
 # polish-ai-draft

@@ -1,6 +1,6 @@
 ---
 name: hops-invention-steward
-description: Run the invention and lab-organization lane inside a HOPS daily supervisor after the open-meta-scan lane. Use for reviewing raw ideas, evidence/routing, research-scan or feedback records, and safe harness-lab queue organization even when earlier lanes already made changes.
+description: Use when organizing HOPS invention ideas and lab routing after open meta scan.
 ---
 Use `uvx --from harnessops hops <command>` in target/project repos unless repo-local docs prove `hops` is available.
 

@@ -1,6 +1,6 @@
 ---
 name: figure-story-audit
-description: figure/table が claim, evidence, boundary を支えているか、caption・本文参照・claim-evidence map を監査する。
+description: Use when checking whether figures support claims, evidence, captions, and text references.
 ---
 
 # figure-story-audit

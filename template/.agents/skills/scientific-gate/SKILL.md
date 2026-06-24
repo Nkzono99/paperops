@@ -1,6 +1,6 @@
 ---
 name: scientific-gate
-description: 中心主張、Abstract、Conclusion、主要図表、claim package を書く前に、結果・文献・再現性・人間承認の準備状態を科学的ゲートとして判定するときに使う。
+description: Use when judging claim readiness before Abstract, Conclusion, or main figures.
 ---
 
 # scientific-gate

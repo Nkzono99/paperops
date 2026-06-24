@@ -1,6 +1,6 @@
 ---
 name: hops-open-meta-scan
-description: HarnessOps core、target repository、project repository を meta 的に眺め、発散的な改善案、構造的な違和感、逆張り仮説、未言語化のテーマを出すときに使う。ユーザーが「meta的な視点で改善案はある？」「発想を広げたい」「普通に眺めて違和感を出して」「まだ記録や評価はしないで」と頼んだときに使う。lab record、research-scan、GitHub issue、採用判断へ進める前の invention lane として使い、証拠化や routing が必要になったら hops-research-improvements へ渡す。
+description: Use when broadening HOPS improvement ideas before recording, issue creation, or implementation.
 ---
 Use `uvx --from harnessops hops <command>` for CLI invocations in target/project repos; do not rely on `hops` being on PATH.
 

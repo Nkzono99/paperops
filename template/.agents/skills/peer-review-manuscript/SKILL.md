@@ -1,6 +1,6 @@
 ---
 name: peer-review-manuscript
-description: Use when 投稿前原稿を peer review、査読者、reviewer 2、meta-review、major/minor comments、accept/revise/reject recommendation の形で厳しく評価するときに使う。
+description: Use when reviewing a manuscript as a strict peer reviewer before submission.
 ---
 
 # peer-review-manuscript

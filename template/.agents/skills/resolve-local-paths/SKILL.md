@@ -1,6 +1,6 @@
 ---
 name: resolve-local-paths
-description: refs/links.toml と refs/local/ からシミュレーション出力、runops project、図のソース、外部知識のローカルパスエイリアスを解決する。
+description: Use when resolving local path aliases from refs/links.toml and refs/local.
 ---
 
 # resolve-local-paths

@@ -1,6 +1,6 @@
 ---
 name: hops-maintenance-steward
-description: Run the maintenance lane inside a HOPS daily supervisor. Use for applying HarnessOps/update-harness changes, doctor/migrate repair, managed artifact drift, generated view refresh, and lab memory maintenance before issue or invention work.
+description: Use when refreshing HOPS overlays, managed artifacts, generated views, or lab memory.
 ---
 Use `uvx --from harnessops hops <command>` in target/project repos unless repo-local docs prove `hops` is available.
 

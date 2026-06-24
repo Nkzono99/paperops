@@ -1,6 +1,6 @@
 ---
 name: hops-issue-execution-steward
-description: Run the issue lane inside a HOPS daily supervisor. Use for open GitHub issue triage, importing or recording issue context, executing safe issue packets, and preparing authorized issue close/comment/label actions.
+description: Use when triaging and executing open GitHub issues through HOPS.
 ---
 Use `uvx --from harnessops hops <command>` in target/project repos unless repo-local docs prove `hops` is available.
 

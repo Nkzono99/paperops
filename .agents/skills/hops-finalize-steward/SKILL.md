@@ -1,6 +1,6 @@
 ---
 name: hops-finalize-steward
-description: Run the finalization lane inside a HOPS daily supervisor. Use after other lanes to validate accumulated changes, publish authorized main-branch updates, perform authorized issue actions, and release only when explicit criteria are met.
+description: Use when finalizing a HOPS daily run with validation, publishing, issue actions, or release checks.
 ---
 Use `uvx --from harnessops hops <command>` in target/project repos unless repo-local docs prove `hops` is available.
 

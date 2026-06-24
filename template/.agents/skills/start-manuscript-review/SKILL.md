@@ -1,6 +1,6 @@
 ---
 name: start-manuscript-review
-description: 人間が PDF/TeX を通読して直接修正するレビューセッションを開始する。レビュー用 branch を用意し、inline comment の書き方と終了後の回収手順を案内する。
+description: Use when starting a human PDF or TeX manuscript review session.
 ---
 
 # start-manuscript-review

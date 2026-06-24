@@ -1,6 +1,6 @@
 ---
 name: integrate-writing-feedback
-description: 人間の原稿レビュー、プロンプトでの改稿指示、査読コメント、PDF/TeXへの指摘を feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映するときに使う。
+description: Use when routing manuscript, human, reviewer, or PDF feedback back to paper cards.
 ---
 
 # integrate-writing-feedback

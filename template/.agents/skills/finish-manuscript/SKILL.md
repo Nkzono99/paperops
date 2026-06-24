@@ -1,6 +1,6 @@
 ---
 name: finish-manuscript
-description: Use when /goal or a long-running task asks Codex to finish an academic manuscript, either from an empty project/outline or by revising an existing draft with human, peer-review, or editor feedback until submission-ready.
+description: Use when /goal asks Codex to finish a manuscript from scratch or revise a draft through feedback loops.
 ---
 
 # finish-manuscript

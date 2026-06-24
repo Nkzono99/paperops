@@ -1,6 +1,6 @@
 ---
 name: release
-description: paperops のリリースノート作成、バージョン更新、検証、コミット、タグ作成、GitHub Release 公開、PyPI publish workflow 確認まで行うときに使う。ユーザーが「リリースして」「releaseして」「リリースノートを書いて公開して」と依頼した場合に使う。
+description: Use when preparing and publishing a paperops release, tag, GitHub Release, and PyPI workflow.
 ---
 
 # release
