@@ -37,14 +37,34 @@ def write_repo(root: Path, *, pyproject_version: str, src_version: str, changelo
 
 
 class ReleaseVersionTruthTest(unittest.TestCase):
-    def test_default_check_accepts_current_released_version_with_unreleased_notes(self) -> None:
+    def run_check(
+        self,
+        *,
+        changelog: str,
+        pyproject_version: str = "0.2.0",
+        src_version: str | None = None,
+        **kwargs: object,
+    ) -> list[str]:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             write_repo(
                 root,
-                pyproject_version="0.2.0",
-                src_version="0.2.0",
-                changelog="""# Change Log
+                pyproject_version=pyproject_version,
+                src_version=src_version or pyproject_version,
+                changelog=changelog,
+            )
+            return release_truth.check_release_version_truth(root, **kwargs)
+
+    def assert_check_failure(self, expected: str, **kwargs: object) -> str:
+        with self.assertRaises(release_truth.CheckFailure) as raised:
+            self.run_check(**kwargs)
+        message = str(raised.exception)
+        self.assertIn(expected, message)
+        return message
+
+    def test_default_check_accepts_current_released_version_with_unreleased_notes(self) -> None:
+        facts = self.run_check(
+            changelog="""# Change Log
 
 ## Unreleased
 
@@ -62,20 +82,14 @@ class ReleaseVersionTruthTest(unittest.TestCase):
 
 - First package release.
 """,
-            )
-
-            facts = release_truth.check_release_version_truth(root)
+        )
 
         self.assertIn("pyproject/src version: 0.2.0", facts)
 
     def test_default_check_rejects_duplicate_package_release_heading(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            write_repo(
-                root,
-                pyproject_version="0.2.0",
-                src_version="0.2.0",
-                changelog="""# Change Log
+        self.assert_check_failure(
+            "duplicate package release heading",
+            changelog="""# Change Log
 
 ## Unreleased
 
@@ -83,41 +97,27 @@ class ReleaseVersionTruthTest(unittest.TestCase):
 
 ## 0.2.0 - 2026-04-14
 """,
-            )
-
-            with self.assertRaises(release_truth.CheckFailure) as raised:
-                release_truth.check_release_version_truth(root)
-
-        self.assertIn("duplicate package release heading", str(raised.exception))
+        )
 
     def test_default_check_rejects_metadata_mismatch(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            write_repo(
-                root,
-                pyproject_version="0.2.0",
-                src_version="0.3.0",
-                changelog="""# Change Log
+        self.assert_check_failure(
+            "must match",
+            src_version="0.3.0",
+            changelog="""# Change Log
 
 ## Unreleased
 
 ## 0.2.0 - 2026-05-14
 """,
-            )
-
-            with self.assertRaises(release_truth.CheckFailure) as raised:
-                release_truth.check_release_version_truth(root)
-
-        self.assertIn("must match", str(raised.exception))
+        )
 
     def test_release_mode_rejects_existing_target_tag(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            write_repo(
-                root,
-                pyproject_version="0.3.0",
-                src_version="0.3.0",
-                changelog="""# Change Log
+        self.assert_check_failure(
+            "already exists",
+            pyproject_version="0.3.0",
+            release_version="0.3.0",
+            existing_tags={"v0.3.0"},
+            changelog="""# Change Log
 
 ## Unreleased
 
@@ -129,25 +129,14 @@ class ReleaseVersionTruthTest(unittest.TestCase):
 
 - Previous release.
 """,
-            )
-
-            with self.assertRaises(release_truth.CheckFailure) as raised:
-                release_truth.check_release_version_truth(
-                    root,
-                    release_version="0.3.0",
-                    existing_tags={"v0.3.0"},
-                )
-
-        self.assertIn("already exists", str(raised.exception))
+        )
 
     def test_release_mode_requires_target_metadata_and_empty_unreleased(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            write_repo(
-                root,
-                pyproject_version="0.2.0",
-                src_version="0.2.0",
-                changelog="""# Change Log
+        message = self.assert_check_failure(
+            "[project].version must be '0.3.0'",
+            release_version="0.3.0",
+            existing_tags=set(),
+            changelog="""# Change Log
 
 ## Unreleased
 
@@ -161,17 +150,7 @@ class ReleaseVersionTruthTest(unittest.TestCase):
 
 - Previous release.
 """,
-            )
-
-            with self.assertRaises(release_truth.CheckFailure) as raised:
-                release_truth.check_release_version_truth(
-                    root,
-                    release_version="0.3.0",
-                    existing_tags=set(),
-                )
-
-        message = str(raised.exception)
-        self.assertIn("[project].version must be '0.3.0'", message)
+        )
         self.assertIn("'## Unreleased' must be empty", message)
 
 
