@@ -22,6 +22,7 @@
 ### 参照・関連研究
 
 - `resolve-local-paths`: `refs/links.toml` と local path を確認する。
+- `make external-import-check`: `refs/imports/` の source index / integrity / provenance state を確認する。
 - `update-refs`: 文献サマリーを整える。
 - `source-reach-scan`: 外部 source channel と raw capture 方針を整理する。
 - `research-related-work`: 関連研究の調査設計、raw finding、採用文献を分ける。

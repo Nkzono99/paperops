@@ -21,6 +21,7 @@ Quarto manuscripts、showyourwork!、research compendium のような外部ハ�
 - `notes/views/argument-map.md`
 - `notes/reproducibility.md`
 - `refs/links.toml`
+- `refs/imports/`（外部 bundle を使う場合）
 - 対象の figure/table、Results section、analysis summary、runops export summary
 
 ## 目的
@@ -45,6 +46,8 @@ Quarto manuscripts、showyourwork!、research compendium のような外部ハ�
 - exploratory または provenance-only に留める材料
 
 この段階では claim に昇格しない。
+
+外部 export bundle 由来の結果は、先に `refs/imports/*.toml` の state を確認する。`script_only_candidate`、`dirty_integrated_candidate`、`dirty_indexed_candidate` は supported evidence にせず、`tracked_indexed_export` または `paper_imported_state` でも `claim_evidence_policy` と `must_not_claim` を見て authoring guard / provenance-only / notes-only を分ける。
 
 ### 2. Result pattern にする
 
@@ -112,6 +115,7 @@ claim ID が未定なら `CLM-0001 / 未定` のように仮置きし、claim �
 - result pattern は claim ではない。claim へ昇格するには evidence、warrant、scope、limitation が必要。
 - すべての result を本文に入れない。論文の story を支えない pattern は notes-only または discard にする。
 - 外部 project や runops にある結果は、可能なら `refs/links.toml` や export summary を経由し、個人環境の絶対パスを tracked ファイルへ入れない。
+- 外部 bundle を使う前に `make external-import-check` を実行し、source index / integrity manifest / source commit / dirty state の warning を確認する。
 - `refs/` と `notes/` の作業用ドキュメントは日本語で書く。
 
 ## Codex 実行メモ

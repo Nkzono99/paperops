@@ -23,6 +23,7 @@ uvx --from paper-harness-cli pops links check
 
 make ci
 make pre-submit
+make external-import-check
 make paper-layer-card-check
 make figure-reference-check
 ```
@@ -34,11 +35,12 @@ make figure-reference-check
 1. `/resume-session` で前回の状態を読む。
 2. 今日扱う claim、evidence、feedback、request を確認する。
 3. 必要なら `/map-result-patterns` で raw result や figure data を evidence card にする。
-4. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-5. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
-6. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
-7. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映する。
-8. 共有前に `make ci`、投稿前に `make pre-submit` を実行する。
+4. 外部 export bundle を使う場合は `refs/imports/` に import state を残し、`make external-import-check` で source index / integrity / claim role を確認する。
+5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
+6. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
+7. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
+8. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映する。
+9. 共有前に `make ci`、投稿前に `make pre-submit` を実行する。
 
 ## スキル入口
 
@@ -60,7 +62,7 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 ```text
 manuscript/          日英原稿、共有アセット、ミラー制御、投稿先情報
 submission/          投稿先公式テンプレートと最終提出用 TeX
-refs/                文献、外部 source、外部 link、local path alias
+refs/                文献、外部 source、外部 link、import state、local path alias
 _handoff/            未整理ファイルの一時受け取り箱
 evidence/            result / figure / source card
 claims/              claim / scientific gate / argument card

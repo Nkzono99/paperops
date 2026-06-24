@@ -21,7 +21,7 @@
 
 - `manuscript/`: 日英原稿、ミラー制御、投稿先情報
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX
-- `refs/`: 文献サマリー、関連研究調査、外部 source、外部 project link
+- `refs/`: 文献サマリー、関連研究調査、外部 source、外部 project link、外部 bundle import state
 - `_handoff/`: 人間から AI へ渡す未整理ファイル
 - `evidence/`: result / figure / source card
 - `claims/`: claim / scientific gate / argument card
@@ -37,7 +37,7 @@
 2. Agent は必要に応じて feedback / evidence / claim / request card を更新する。
 3. Abstract、Conclusion、主要図表に使う claim は `claims/gates/` で readiness を確認する。
 4. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
-5. 外部 project や runops の成果物は `refs/links.toml` と `refs/local/locations.toml` で共有意図と実パスを分ける。
+5. 外部 project や runops の成果物は `refs/links.toml` と `refs/local/locations.toml` で共有意図と実パスを分け、bundle を使う前に `refs/imports/` と `make external-import-check` で source index / integrity / claim role を確認する。
 
 ## 設計原則
 

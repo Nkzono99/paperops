@@ -64,6 +64,8 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "notes" / "views" / "claim-evidence-map.md").is_file())
             self.assertTrue((target / "manuscript").is_dir())
             self.assertTrue((target / "refs" / "links.toml").is_file())
+            self.assertTrue((target / "refs" / "imports" / "README.md").is_file())
+            self.assertTrue((target / "refs" / "imports" / "import-state-template.toml").is_file())
             self.assertTrue((target / "refs" / "source-reach" / "README.md").is_file())
             self.assertTrue((target / "notes" / "source-reach.md").is_file())
             self.assertTrue((target / "notes" / "scientific-gate.md").is_file())

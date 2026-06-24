@@ -42,6 +42,7 @@ uvx --from paper-harness-cli pops doctor
 - `notes/views/`: カード正本を人間が俯瞰するビュー
 - `manuscript/ja`, `manuscript/en`: block ID で対応する原稿
 - `refs/`: 文献サマリー、外部 source、外部 project link
+- `refs/imports/`: 外部 export bundle の source index / integrity / provenance state
 - `_handoff/`: 人間から AI へ渡す未整理ファイルの一時置き場
 
 人間は主に原稿レベルのレビューや自然文の指示を出す。Agent はそれを `review/feedback/` の card にし、必要なら claim / gate / evidence / request / manuscript へ遡って反映する。
@@ -54,6 +55,7 @@ uvx --from paper-harness-cli pops doctor
 uvx --from paper-harness-cli pops update-paperops --plan
 uvx --from paper-harness-cli pops update-paperops --apply
 uvx --from paper-harness-cli pops links check
+make external-import-check
 ```
 
 下流プロジェクトでの確認:

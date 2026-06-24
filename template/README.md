@@ -41,6 +41,7 @@
 - `refs/research/`: 関連研究調査の設計と raw finding。
 - `refs/source-reach/`: Web、GitHub、動画、RSS、SNS など外部 source channel の調査メモ。
 - `refs/links.toml`: 共有できる外部 project / directory link の意味。
+- `refs/imports/`: 外部 export bundle の source index、integrity、claim role、取り込み状態。
 - `refs/local/locations.toml`: 個人環境の実パス。Git 管理しない。
 
 `refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名などの識別子は英語のままでよい。
@@ -49,6 +50,7 @@
 
 - `/source-reach-scan`, `/research-related-work`: 外部 source と関連研究を整理する。
 - `/map-result-patterns`, `/scientific-gate`: 結果を証拠カードにし、主張として書けるか判定する。
+- `make external-import-check`: 外部 bundle を evidence や figure に接続する前に import state を確認する。
 - `/review-public-manuscript`, `/peer-review-manuscript`: 公開原稿や投稿前原稿を読者・査読者目線で読む。
 - `/respond-to-peer-review`: 実査読コメントへの返答を整理する。
 - `/integrate-writing-feedback`: 人間レビューや指示を上流カードと原稿へ反映する。

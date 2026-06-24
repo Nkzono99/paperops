@@ -24,6 +24,7 @@ Academic Research Skills の pipeline / integrity gate / material provenance の
 - `notes/views/research-requests.md`
 - `notes/source-reach.md`
 - `refs/links.toml`
+- `refs/imports/`
 - `refs/summaries/`
 - `manuscript/venue.md`
 - 必要に応じて対象の figure/table、Methods、Results、Abstract、Conclusion
@@ -49,6 +50,7 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 - estimand、metric、unit of analysis、comparison
 - figure/table、manuscript block
 - artifact / script / input / provenance link
+- 外部 bundle import state、source index / integrity manifest、source commit / dirty state、artifact category、`must_not_claim`
 - 文献・関連研究の support と反論
 - independence、convergence、sensitivity、selection、negative/null case
 - method novelty claim の direct comparator status。同じ総量、同じ物理条件、同じ estimator、同じ denominator の matched comparator が無い場合、比較表現ではなく representation scope として書く。
@@ -66,7 +68,7 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 1. 対象範囲を決める。Abstract / Conclusion / central claim / figure story / section claim のどれを gate するか明記する。
 2. `evidence/` と `notes/views/result-pattern-map.md` から claim に昇格しようとしている evidence packet を確認する。raw result を直接 claim にしない。
 3. `claims/claims/` と `notes/views/claim-evidence-map.md` の status と矛盾していないか確認する。
-4. `notes/reproducibility.md`、`refs/links.toml`、`notes/source-reach.md` から provenance と再現可能性を確認する。
+4. `notes/reproducibility.md`、`refs/links.toml`、`refs/imports/`、`notes/source-reach.md` から provenance と再現可能性を確認する。外部 bundle 由来の evidence は `make external-import-check` の warning を確認する。
 5. `notes/related-work-map.md` と `refs/summaries/` から関連研究、反論、引用可能な support を確認する。
 6. 各 claim を gate status へ分類し、gate card に block reason と次の route を書く。
 7. `ready-to-write` の claim だけ、本文や caption で使える scope statement を作る。
