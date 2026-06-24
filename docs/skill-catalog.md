@@ -37,6 +37,7 @@
 ### 原稿編集
 
 - `import-manuscript`: 既存原稿を取り込む。
+- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。
 - `sync-ja-en`: 日英 block を同期する。
 - `paragraph-surgery`: 段落単位で流れを整える。
 - `polish-ai-draft`: claim lock 後に AI 初稿の文体を整える。
