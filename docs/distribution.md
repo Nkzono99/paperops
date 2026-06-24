@@ -51,10 +51,4 @@ workflow は distribution build / twine check / scaffold package boundary check 
 5. `main` を push し、`v<version>` tag と GitHub Release を作る。
 6. PyPI publish workflow の成功を確認する。
 
-## 運用ルール
-
-- 一人開発では `main` へ直接取り込んでよい。
-- `make smoke` は必須 gate ではなく、リスクの高い変更や公開前確認で必要に応じて通す。
-- ユーザーに影響する CLI / scaffold 変更は `CHANGELOG.md` に記録する。
-- 下流互換性に影響する変更は `pops update-paperops` と docs に反映する。
-- release tag と GitHub Release は `main` に push 済みの commit にだけ作る。
+運用方針は [change-policy.md](change-policy.md) を正本にする。

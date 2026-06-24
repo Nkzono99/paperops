@@ -8,6 +8,7 @@
 - 既存下流でこの import gate を使う場合は、`pops update-paperops --apply` で管理対象の `Makefile`、`scripts/`、skill を更新し、必要に応じて `refs/imports/README.md` と `refs/imports/import-state-template.toml` を手動追加する。
 - 外部 bundle import gate の説明を `refs/imports/README.md` へ寄せ、README / docs / AGENTS / CLAUDE 側は短い入口だけにした。
 - `pops doctor` に残っていた旧 link schema 用の未使用 helper と、links invalid-kind の重複テストを削除した。
+- 配布手順 docs から運用ルールの重複説明を外し、方針は `docs/change-policy.md` に寄せた。
 
 ## 0.5.0 - 2026-06-23
 
