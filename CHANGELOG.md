@@ -10,6 +10,7 @@
 - `pops doctor` に残っていた旧 link schema 用の未使用 helper と、links invalid-kind の重複テストを削除した。
 - 配布手順 docs から運用ルールの重複説明を外し、方針は `docs/change-policy.md` に寄せた。
 - `/goal` で原稿を完成まで進める `finish-manuscript` skill を追加した。1からの執筆、既存稿の改稿、peer review / editor feedback loop、上流 card への遡及を扱う。
+- `setup` と `resume-session` skill を軽量な入口へ整理し、常時読む項目と必要時に読む意味論ビューを分けた。
 
 ## 0.5.0 - 2026-06-23
 

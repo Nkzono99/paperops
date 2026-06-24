@@ -5,97 +5,74 @@ description: テンプレートから作成した新しい論文リポジトリ�
 
 # setup
 
-テンプレートから作成した新しい論文リポジトリの初回セットアップを実行する。README の「初回使用前」の手順を対話的に一括で行う。
+`pops init` 直後の論文リポジトリを、作業を始められる最小状態にする。初回 setup は構造、ローカル安全性、公開 metadata を整える lane であり、論文の claim 設計や文献調査を深掘りしすぎない。
 
-## 前提条件
+## 前提
 
-- `pops init` で `paperops` から生成したリポジトリであること。
-- プレースホルダーがまだ置き換えられていない状態であること。
+- `pops init` で `paperops` から生成した repository である。
+- 既存内容を上書きせず、placeholder または未記入項目だけを埋める。
+- `refs/local/locations.toml` は個人パスを含みうるため AI は自動作成・自動編集しない。
 
-## 手順
+## 軽量確認
 
-### 1. セットアップ状態の検出
+最初は存在確認と placeholder 検出だけを行い、重い意味論ノートを全部読まない。
 
-以下をチェックし、未完了の手順を特定する:
+常時確認する:
 
-- `README.md` にプレースホルダー（`paper-my-topic`）が残っているか
-- `.venv/` が存在するか
-- `refs/local/locations.toml` が存在するか
-- `tex-env.toml` が存在するか
-- `_handoff/` と `_handoff/README.md` が存在するか
-- `evidence/`、`claims/`、`review/`、`requests/` と `notes/views/` が存在するか
+- `README.md` に `paper-my-topic` が残っているか
+- `.pops/manifest.toml`、`.venv/`、`tex-env.toml` の有無
+- `refs/local/locations.example.toml` と `refs/local/locations.toml` の有無
+- `_handoff/`、`_handoff/README.md`、`_handoff/.gitkeep` の有無
+- `evidence/`、`claims/`、`review/`、`requests/`、`notes/views/` の有無
 - `.gitignore` が `_handoff/*` と `refs/source-reach/**/raw/**` を保護しているか
 - `.github/workflows/*.yml` に `YOUR_ORG/paperops` が残っているか
-- `manuscript/publication-metadata.toml` にプレースホルダーが残っているか
-- `notes/project-brief.md` にプレースホルダーが残っているか
-- `notes/related-work-map.md` が未記入か
-- `notes/source-reach.md` が未記入か
-- `notes/views/scientific-gate.md` が未記入か
-- `notes/views/claim-evidence-map.md` が未記入か
-- `notes/reviewer-model.md` が未記入か
-- `notes/views/peer-review.md` が未記入か
-- `notes/ai-draft-polish.md` が未記入か
-- `notes/ai-use.md` が未記入か
-- `manuscript/venue.md` が未記入か
-- `notes/contribution-claims.md` がプレースホルダーのままか
-- `notes/reproducibility.md` が未記入か
+- `manuscript/publication-metadata.toml` と `manuscript/venue.md` の placeholder
+- `notes/project-brief.md` と `notes/contribution-claims.md` の placeholder
 
-既に完了済みの手順はスキップする。全て完了済みの場合はその旨を通知して終了する。
+必要時に読む:
 
-### 2. プロジェクト情報の収集
+- claim / evidence を初期化する時だけ `notes/views/scientific-gate.md`、`notes/views/claim-evidence-map.md`
+- 関連研究を初期化する時だけ `notes/related-work-map.md`、`notes/source-reach.md`
+- 読者や投稿先を初期化する時だけ `notes/reviewer-model.md`、`notes/views/peer-review.md`
+- AI draft や AI 利用方針を確認する時だけ `notes/ai-draft-polish.md`、`notes/ai-use.md`
+- 再現性の初期値が必要な時だけ `notes/reproducibility.md`
 
-ユーザーに以下を質問する（一度にまとめて聞く）:
+## 情報収集
 
-- **リポジトリ名**: 例 `paper-plasma-turbulence`
-- **論文トピック**: 1行の説明
-- **公開タイトル**: 日本語・英語（未定でも可）
-- **著者**: 名前（複数可）
-- **上流テンプレートリポジトリ**: GitHub のオーナー/リポジトリ名（例 `Nkzono99/paperops`）
-- **投稿先候補**（未定でも可）: ジャーナル名、締切、ページ制限等
-- **TeX 環境**（任意）: ユーザー空間 TeX Live のパス、Docker イメージ、またはシステム TeX Live（デフォルト）
-- **公開ライセンス**（未定でも可）: 原稿、コード、データの扱い
+一度にまとめて聞く:
 
-### 3. pops 実行経路と Python 環境の確認
+- repository 名
+- 論文トピック
+- 公開タイトル（日本語・英語、未定可）
+- 著者
+- 上流 `paperops` repository（例 `Nkzono99/paperops`）
+- 投稿先候補、締切、ページ制限（未定可）
+- TeX 環境（未定なら system default）
+- 原稿、コード、データの公開ライセンス（未定可）
 
-`pops` は project-local `.venv` ではなく、`uvx` から実行する。
-以下を確認する:
+## 実行経路
 
-- `uvx` または `uv` が PATH 上にあるか
-- `.pops/manifest.toml` が存在するか
-
-`.pops/manifest.toml` が不足している場合は、`uvx` から setup を実行する:
+`pops` は project-local `.venv` ではなく `uvx` から実行する。`.pops/manifest.toml` が無い場合は次を案内または実行する。
 
 ```sh
 uvx --from paper-harness-cli pops setup
 ```
 
-論文プロジェクト用の Python 環境が必要な場合は、`make venv` で `.venv/` を作成してよい。`.venv` に `pops` をインストールする必要はない。
+論文プロジェクト用の Python 環境が必要な場合だけ `make venv` を使う。`.venv` に `pops` を入れる必要はない。
 
-### 4. ローカル設定ファイルの案内
+## ローカル安全性
 
-#### refs/local/locations.toml
-
-`refs/local/locations.toml` はローカル絶対パスを含みうるため、AI は自動作成・自動編集しない。存在しない場合は、ユーザーに以下の copy command と編集方針を案内する:
+`refs/local/locations.toml` が無い場合は、ユーザーに copy command と編集方針だけを案内する。
 
 ```sh
 cp refs/local/locations.example.toml refs/local/locations.toml
 ```
 
-Windows / PowerShell の場合:
-
 ```powershell
 Copy-Item refs/local/locations.example.toml refs/local/locations.toml
 ```
 
-ユーザーに以下を案内する:
-
-- パスをプロジェクトのシミュレーション出力や図のソースに合わせて編集すること
-- このファイルは `.gitignore` 対象なので個人パスを含めてよいこと
-- `.claude/settings.json` では `refs/local/locations.toml` の AI 編集を deny しているため、値の記入はユーザーが行うこと
-
-#### _handoff/ と ignored raw output
-
-`_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱として使う。存在しない場合は、`_handoff/README.md` と `_handoff/.gitkeep` を追加する。`.gitignore` に以下がない場合は追記し、秘密情報や未整理 raw output が tracked file に混入しないようにする:
+`_handoff/` は人間から AI へ渡す未整理ファイルの一時受け取り箱として使う。無い場合は `_handoff/README.md` と `_handoff/.gitkeep` を用意し、`.gitignore` に次を保持する。
 
 ```gitignore
 _handoff/*
@@ -106,132 +83,50 @@ refs/source-reach/**/doctor.generated.*
 refs/source-reach/**/capture.generated.*
 ```
 
-#### tex-env.toml（任意）
+`tex-env.toml` は、ユーザーが TeX Live path や Docker image を提供した場合だけ `tex-env.example.toml` から作る。
 
-ユーザーが TeX 環境情報を提供した場合のみ:
+## 初期反映
 
-- `tex-env.example.toml` を `tex-env.toml` にコピー
-- 提供された TeX Live パスまたは Docker イメージで設定を記入
+- `.github/workflows/*.yml` の `YOUR_ORG/paperops` を実際の上流 repository に置換する。
+- `README.md` の repository 名と 1 行説明を更新する。
+- `notes/project-brief.md` にトピック、目標、著者を入れる。
+- `manuscript/venue.md` は投稿先候補がある場合だけ埋める。
+- `manuscript/publication-metadata.toml` に title、authors、repository URL、upstream、license を入れる。未定項目は placeholder のまま残してよい。
+- `notes/contribution-claims.md` は、具体化できる範囲だけ仮 claim を置く。弱い claim は TODO にする。
 
-### 5. GitHub ワークフローの設定
+## 意味論スターター
 
-`.github/workflows/*.yml` 内の `YOUR_ORG/paperops` を、ユーザーが指定した実際の `paperops` ソースリポジトリパスに置換する。
+必要時だけ、次の starter を薄く埋める。未確定なら TODO のまま残す。
 
-対象ファイル:
-- `.github/workflows/ci.yml`
-- `.github/workflows/release.yml`
-- `.github/workflows/mirror-check.yml`
+- related work: `/research-related-work` に渡す初期 scope、source cluster、debate axis。
+- source reach: 外部 Web、GitHub、動画、RSS、SNS、議論サイトを使う可能性と raw capture 方針。
+- card layers: `evidence/README.md`、`claims/README.md`、`review/README.md`、`requests/README.md` を確認し、カード層を正本、`notes/views/` を俯瞰ビューとして扱う。
+- scientific gate: Abstract / Conclusion / main figure caption に出す前の gate status。evidence 未確定なら `analysis-needed` または `assumption-blocked` のままにする。
+- claim-evidence map: Core claim、essential results、Not claiming の仮案。evidence 未確定なら `draft` のままにする。
+- reviewer model / peer review: 投稿先候補、想定読者、likely skepticism、AI review / confidentiality の TODO。
+- AI use / polish: AI 初稿を使う場合の claim lock、polish log、AI 利用方針。
+- reproducibility: 入力データ、解析環境、figure provenance、既知の非再現ステップ。
 
-### 6. プロジェクトメタデータの記入
+## 検証
 
-収集した情報で以下を更新する:
-
-#### README.md
-
-- `paper-my-topic` をリポジトリ名に置換
-- プロジェクトの1行説明を追加
-
-#### notes/project-brief.md
-
-- トピック、目標、著者を記入
-- 「この論文が存在する理由」セクションの記入を案内
-
-#### manuscript/venue.md
-
-- 投稿先候補が提供された場合は記入
-- 未定の場合はプレースホルダーを維持し、後で記入するよう案内
-
-#### manuscript/publication-metadata.toml
-
-- リポジトリ URL、公開タイトル、著者、上流 branch、ライセンス情報を記入
-- 未定項目は残してよいが、外部共有前に `make readiness-check` で検出されることを案内
-- `frontmatter/*.tex` と矛盾しないよう注意する
-
-#### notes/contribution-claims.md
-
-- トピックに基づく貢献主張のドラフトを提案（ユーザーに確認を求める）
-- 具体的でない場合はプレースホルダーを維持
-
-#### notes/related-work-map.md
-
-- 関連研究の初期スコープ、source cluster 候補、比較・反論の観点を TODO として置く
-- 広い文献収集が必要な場合は、本文執筆の前に `/research-related-work` を使うよう案内する
-
-#### notes/source-reach.md
-
-- 外部 Web、GitHub、動画、RSS、SNS、議論サイトを使う予定があれば channel と raw capture 方針を TODO として置く
-- platform-specific source を使う場合は `/source-reach-scan` で credential need と Git 管理しない raw output を分けるよう案内する
-
-#### card layers
-
-- `evidence/README.md`、`claims/README.md`、`review/README.md`、`requests/README.md` を確認する。
-- 新しい result、claim、feedback、request はカード層を正本にし、`notes/views/` は俯瞰ビューとして扱う。
-- 人間の原稿レビューやプロンプト指示は `/integrate-writing-feedback` に渡すよう案内する。
-
-#### notes/views/scientific-gate.md
-
-- 中心主張を Abstract / Conclusion / main figure caption に出す前の gate status を TODO として置く
-- evidence が未確定の場合は `analysis-needed` または `assumption-blocked` のまま残し、AI に強い結論を書かせない
-
-#### notes/views/claim-evidence-map.md
-
-- Core claim、essential results、Not claiming の初期案を提案する
-- evidence が未確定の場合は `draft` のまま残し、過剰主張しない
-
-#### notes/ai-draft-polish.md
-
-- AI 初稿を使う予定がある場合、claim lock と polish log を後で記録できるようにする
-- AI 利用開示を隠すための文体修正ではなく、主張・証拠を保つ文体修正として扱う
-
-#### notes/reviewer-model.md
-
-- 投稿先候補、article type、primary reader、likely skepticism を初期案として記入する
-- 未定項目は TODO として残す
-
-#### notes/views/peer-review.md
-
-- 初期状態では未実施のままにし、AI review / confidentiality 欄だけ TODO として確認対象にする
-- 投稿前の模擬査読は `/peer-review-manuscript`、実査読返答は `/respond-to-peer-review` を使うよう案内する
-
-#### notes/ai-use.md
-
-- セットアップ時点では policy stance を確認し、未使用の場合は利用ログを未記入のまま残す
-- AI が文献、解析、図表に関与した場合は人間検証が必要であることを案内する
-
-#### notes/reproducibility.md
-
-- 入力データ、解析環境、図表 provenance、既知の非再現ステップの初期値を記入
-- 解析が未開始の場合は、後で埋める TODO として残す
-
-### 7. 検証
+初回 setup 後は可能なら次を実行する。
 
 ```sh
 make ci
 ```
 
-エラーがあれば修正を案内する。
-外部共有や投稿に近い状態まで埋まっている場合は、追加で `make pre-submit` を実行する。
+外部共有や投稿に近い状態まで埋まっている場合だけ `make pre-submit` も実行する。難しい場合は `make lint-bib`、`make citation-check`、`make mirror-check` を個別に実行する。
 
 ## 出力
 
-セットアップ完了後、以下を表示する:
-
-- 実行した手順の一覧
-- スキップした手順とその理由
-- 手動で後から行う必要がある作業（venue.md の詳細記入、publication-metadata.toml、reproducibility.md、locations.toml のパス設定等）
-- 次のステップの提案（「最初のセッションを `/resume-session` で開始してください」等）
-
-## 注意事項
-
-- 既存の内容を上書きしない。プレースホルダーのみ置換する。
-- 判断に迷う場合はユーザーに確認する。
-- `make venv` の実行には Python 3.11 以上が必要。見つからない場合はインストールを案内する。
-- セットアップの決定を `notes/decision-log.md` に記録する。
+- 実行した手順
+- スキップした手順と理由
+- 手動で残す作業（`refs/local/locations.toml`、venue、metadata、reproducibility など）
+- 次の推奨ステップ（例: `/resume-session`、`/research-related-work`、`/scientific-gate`）
 
 ## Codex 実行メモ
 
-- Claude 固有の `allowed-tools` は Codex の利用可能な shell / file editing tool に読み替える。
-- 編集前に `README.md`、`AGENTS.md`、`evidence/README.md`、`claims/README.md`、`review/README.md`、`requests/README.md`、`notes/project-brief.md`、`notes/views/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/views/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/views/peer-review.md`、`notes/ai-draft-polish.md`、`notes/ai-use.md`、`manuscript/venue.md`、`manuscript/publication-metadata.toml`、`notes/reproducibility.md`、`refs/local/locations.example.toml` を確認する。
-- `refs/local/locations.toml` はローカル絶対パスを含みうるため、Codex は自動作成・自動編集せず、ユーザーに copy command と編集方針を提示する。
-- Core claim、reader model、AI use log は `notes/views/claim-evidence-map.md`、`notes/reviewer-model.md`、`notes/ai-use.md` の starter を埋めるか、未定 TODO として残す。
-- 初回セットアップ後、可能なら `make ci`、外部共有に近い状態なら `make pre-submit` も実行する。難しい場合は `make lint-bib`、`make citation-check`、`make mirror-check` を個別に実行する。
+- 編集前に軽量確認を行い、必要時に読むリストだけ追加で開く。
+- Core claim、reader model、AI use log は埋められる範囲だけ starter として更新し、未定なら TODO にする。
+- `refs/local/locations.toml` は自動作成・自動編集しない。
+- セットアップの決定は `notes/decision-log.md` に短く記録する。
