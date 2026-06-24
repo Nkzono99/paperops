@@ -61,6 +61,7 @@ uvx --from paper-harness-cli pops links check
 ```sh
 make ci
 make pre-submit
+make figure-reference-check
 ```
 
 paperops 本体の確認:

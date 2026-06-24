@@ -8,6 +8,9 @@ uses_results: []
 manuscript_blocks: []
 checks:
   color_range: unchecked
+  decision_boundary_visible: unchecked
+  manuscript_reference: unchecked
+  current_manuscript_role_aligned: unchecked
   axes: unchecked
   denominator: unchecked
   caption_scope: unchecked
@@ -30,6 +33,9 @@ updated: YYYY-MM-DD
 ## 監査項目
 
 - color range / saturation:
+- decision boundary / threshold visibility:
+- current manuscript role: main / supplement / notes-only / removed
+- manuscript reference:
 - axis / zero / dual-axis:
 - denominator / condition names:
 - caption が claim より強くなっていないか:

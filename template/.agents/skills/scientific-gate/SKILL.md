@@ -51,11 +51,15 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 - artifact / script / input / provenance link
 - 文献・関連研究の support と反論
 - independence、convergence、sensitivity、selection、negative/null case
+- method novelty claim の direct comparator status。同じ総量、同じ物理条件、同じ estimator、同じ denominator の matched comparator が無い場合、比較表現ではなく representation scope として書く。
+- run completion、final snapshot、physical equilibrium、calibrated exposure、independent snapshots の status。完了計算や最終時刻を steady state / 帯電平衡として扱わない。
+- current manuscript figure set と figure role。外部 crosswalk candidate の Main Figure label は、現行本文の `includegraphics` と figure card / review response で再確認する。
 - AI が転記した数値ではなく、人間または解析スクリプトで確認した数値か
 - gate status と block reason
 - human approval の要否と承認記録
 
 数値、分母、単位、条件名、比較対象が不一致なら `analysis-needed` にする。時系列 snapshot、screening result、最大値、favorable condition を主要証拠に使う場合は、estimand と scope を明記する。
+直接対照が未実施の方法新規性 claim、time-history の completion を equilibrium に読む claim、現行 figure set とずれた crosswalk candidate は `analysis-needed` または `assumption-blocked` にする。
 
 ## 手順
 

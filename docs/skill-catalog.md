@@ -54,7 +54,7 @@
 
 ### 投稿前点検
 
-- `figure-story-audit`: figure/table が claim を支えているか点検する。
+- `figure-story-audit`: figure/table が claim、decision boundary、本文参照、現行 figure role を支えているか点検する。
 - `venue-fit-review`: 投稿先・読者モデルとの fit を確認する。
 - `ai-disclosure-check`: AI 利用開示と人間検証を確認する。
 

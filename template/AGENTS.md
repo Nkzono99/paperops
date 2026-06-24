@@ -24,6 +24,7 @@ uvx --from paper-harness-cli pops links check
 make ci
 make pre-submit
 make paper-layer-card-check
+make figure-reference-check
 ```
 
 `make ci` は日常確認、`make pre-submit` は投稿・外部共有前の確認に使う。TeX 環境がない場合、ビルド系 helper は構造検証へフォールバックする。
@@ -34,9 +35,10 @@ make paper-layer-card-check
 2. 今日扱う claim、evidence、feedback、request を確認する。
 3. 必要なら `/map-result-patterns` で raw result や figure data を evidence card にする。
 4. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-5. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
-6. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映する。
-7. 共有前に `make ci`、投稿前に `make pre-submit` を実行する。
+5. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
+6. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
+7. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映する。
+8. 共有前に `make ci`、投稿前に `make pre-submit` を実行する。
 
 ## スキル入口
 

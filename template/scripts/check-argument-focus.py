@@ -19,6 +19,23 @@ LOCAL_PROVENANCE_RE = re.compile(
     r"(run label|directory name|script name|artifact name|raw run|scheduler log|中間出力ディレクトリ|実行識別子)",
     re.IGNORECASE,
 )
+COMPARATOR_OVERCLAIM_RE = re.compile(
+    r"(lost in|not captured by|better than|stronger than|weaker than|outperform|"
+    r"従来近似|従来法|近似では失われ|より強い|より弱い|"
+    r"center[- ]charge|net[- ]charge|grain[- ]centered|object[- ]level|"
+    r"中心電荷|粒子中心|平均化|axisym|random patch)",
+    re.IGNORECASE,
+)
+COMPLETION_WORD_RE = re.compile(
+    r"(completed|completion|final snapshot|latest|last|onset|fraction|saved snapshots?|"
+    r"完了|最終|保存時刻|後半|割合)",
+    re.IGNORECASE,
+)
+EQUILIBRIUM_WORD_RE = re.compile(
+    r"(equilibrium|steady[- ]state|steady state|calibrated exposure|independent samples?|probability|"
+    r"帯電平衡|物理的平衡|定常|較正済み|独立標本|確率)",
+    re.IGNORECASE,
+)
 
 
 @dataclass
@@ -135,6 +152,22 @@ def check_manuscript_smells(root: Path, findings: list[Finding]) -> None:
                     Finding(
                         "warning",
                         f"`{rel_path}:{number}` に内部 provenance 語があります。公開語へ置換するか notes/refs へ退避してください",
+                    )
+                )
+            if COMPARATOR_OVERCLAIM_RE.search(stripped):
+                findings.append(
+                    Finding(
+                        "warning",
+                        f"`{rel_path}:{number}` に direct comparator 未確認の比較・方法新規性 claim らしい表現があります。"
+                        " matched comparator が無い場合は `not collapsed to ...` のような使用範囲表現に落とし、`requests/analysis/` に比較依頼を残してください",
+                    )
+                )
+            if COMPLETION_WORD_RE.search(stripped) and EQUILIBRIUM_WORD_RE.search(stripped):
+                findings.append(
+                    Finding(
+                        "warning",
+                        f"`{rel_path}:{number}` で run completion と physical equilibrium / calibrated exposure / independent sample が近接しています。"
+                        " completed run、final snapshot、steady state、time calibration、independent samples を別 status として gate してください",
                     )
                 )
             if DEFENSIVE_RE.search(stripped):

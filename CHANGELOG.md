@@ -3,6 +3,7 @@
 ## Unreleased
 
 - README、下流 README、AGENTS / CLAUDE、主要 docs を短縮し、重複していた運用説明や長いスキル解説を必要最低限の入口・境界ルール中心に整理した。
+- main-text figure label が本文から参照されているかを確認する `figure-reference-check` を追加し、`make smoke` と下流 `make ci` に組み込んだ。あわせて method novelty の direct comparator、completion と equilibrium の混同、saturated heatmap / hidden threshold、claim-to-figure crosswalk と現行 figure role の drift を scientific / figure gate の checklist に追加した。
 
 ## 0.5.0 - 2026-06-23
 

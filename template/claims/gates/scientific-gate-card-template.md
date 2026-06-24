@@ -22,9 +22,12 @@ updated: YYYY-MM-DD
 
 - independence:
 - convergence:
+- completion vs equilibrium:
+- direct comparator:
 - sensitivity:
 - source-check:
 - figure audit:
+- current figure role:
 - reproducibility:
 
 ## Block reason

@@ -89,6 +89,35 @@ class ArgumentFocusCheckTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("`notes/views/result-pattern-map.md` が見つかりません", result.stdout)
 
+    def test_warns_on_comparator_and_equilibrium_overclaim_patterns(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            shutil.copytree(ROOT / "template", target)
+            section = target / "manuscript" / "en" / "sections" / "30_results.tex"
+            section.write_text(
+                section.read_text(encoding="utf-8")
+                + "\nThe surface representation is lost in a center-charge approximation.\n"
+                + "The completed run reaches charging equilibrium at the final snapshot.\n",
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--root",
+                    str(target),
+                    "--strict",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("direct comparator", result.stdout)
+        self.assertIn("run completion と physical equilibrium", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

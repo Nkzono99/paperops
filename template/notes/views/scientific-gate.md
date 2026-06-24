@@ -29,8 +29,11 @@ Gate status は `ready-to-write`、`analysis-needed`、`assumption-blocked`、`s
 - 時系列 snapshot を独立標本として扱っていないか:
 - 最大値や favorable condition を主要証拠にしていないか:
 - screening result と completed result を同じ推論に混ぜていないか:
+- completed run / final snapshot を physical equilibrium、calibrated exposure、independent sample と誤読していないか:
+- method novelty / representation claim に direct comparator が必要か。必要なら同じ総量・条件・estimator・denominator で比較されているか:
 - convergence / sensitivity / target selection / mesh / integration range:
-- figure の色域、軸、分母、二重軸、caption:
+- figure の色域、decision boundary、threshold、軸、分母、二重軸、caption、本文参照:
+- external crosswalk candidate の Main Figure label が、現行 manuscript figure set と figure role note に整合しているか:
 - 反論・関連研究との接続:
 - AI が転記した数値ではなく、解析 artifact から確認した数値か:
 

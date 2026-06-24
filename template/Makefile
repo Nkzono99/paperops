@@ -1,4 +1,4 @@
-.PHONY: venv build-ja build-en lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check argument-focus-check claim-evidence-check paper-layer-card-check submission-drift-check skill-mirror-check links-check collect-context readiness-check export-arxiv ci pre-submit
+.PHONY: venv build-ja build-en lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check argument-focus-check figure-reference-check claim-evidence-check paper-layer-card-check submission-drift-check skill-mirror-check links-check collect-context readiness-check export-arxiv ci pre-submit
 
 PYTHON_FALLBACK := $(shell command -v python3.11 2>/dev/null || command -v python3 2>/dev/null || command -v python 2>/dev/null)
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(PYTHON_FALLBACK)))
@@ -38,6 +38,9 @@ public-terms-check:
 argument-focus-check:
 	$(PYTHON) scripts/check-argument-focus.py --root .
 
+figure-reference-check:
+	$(PYTHON) scripts/check-figure-references.py --root .
+
 claim-evidence-check:
 	$(PYTHON) scripts/check-claim-evidence.py --root .
 
@@ -62,7 +65,7 @@ readiness-check:
 export-arxiv:
 	bash scripts/export-arxiv.sh
 
-ci: lint-bib citation-check mirror-check mirror-freshness-check public-terms-check argument-focus-check claim-evidence-check paper-layer-card-check skill-mirror-check links-check build-ja build-en
+ci: lint-bib citation-check mirror-check mirror-freshness-check public-terms-check argument-focus-check figure-reference-check claim-evidence-check paper-layer-card-check skill-mirror-check links-check build-ja build-en
 
 pre-submit: ci lint-bib-pre-submit mirror-strict-check
 	$(PYTHON) scripts/readiness-check.py --root . --require-submission
