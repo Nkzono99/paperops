@@ -73,52 +73,40 @@ def resolve_view_path(root: Path, preferred: str, legacy: str, findings: list[Fi
     return None
 
 
-def check_argument_map(root: Path, findings: list[Finding]) -> None:
-    resolved = resolve_view_path(root, "notes/views/argument-map.md", "notes/argument-map.md", findings)
-    if resolved is None:
-        return
-    rel_path, path = resolved
-    text = read_text(path)
-    required = ["一文の中心主張", "証拠の階層", "ローカル条件から公開主張への抽象化", "Defense budget"]
-    for heading in required:
-        if f"## {heading}" not in text:
-            findings.append(Finding("error", f"`{rel_path}` に `{heading}` セクションがありません"))
-    if is_blank(section_body(text, "一文の中心主張")):
-        findings.append(Finding("warning", f"`{rel_path}` の一文の中心主張が未記入です"))
-
-
-def check_condition_context_map(root: Path, findings: list[Finding]) -> None:
-    resolved = resolve_view_path(
-        root,
-        "notes/views/condition-context-map.md",
-        "notes/condition-context-map.md",
-        findings,
-    )
-    if resolved is None:
-        return
-    rel_path, path = resolved
-    text = read_text(path)
-    required = ["条件軸の公開名", "Local condition から paper context への対応", "条件の役割", "本文で言ってよい形"]
-    for heading in required:
-        if f"## {heading}" not in text:
-            findings.append(Finding("error", f"`{rel_path}` に `{heading}` セクションがありません"))
-
-
-def check_result_pattern_map(root: Path, findings: list[Finding]) -> None:
-    resolved = resolve_view_path(
-        root,
+REQUIRED_VIEW_MAPS = [
+    (
+        "notes/views/argument-map.md",
+        "notes/argument-map.md",
+        ("一文の中心主張", "証拠の階層", "ローカル条件から公開主張への抽象化", "Defense budget"),
+        "一文の中心主張",
+    ),
+    (
         "notes/views/result-pattern-map.md",
         "notes/result-pattern-map.md",
-        findings,
-    )
-    if resolved is None:
-        return
-    rel_path, path = resolved
-    text = read_text(path)
-    required = ["結果パターン inventory", "観察から解釈への変換", "Evidence packet 化する場合", "Claim に昇格する前の確認"]
-    for heading in required:
-        if f"## {heading}" not in text:
-            findings.append(Finding("error", f"`{rel_path}` に `{heading}` セクションがありません"))
+        ("結果パターン inventory", "観察から解釈への変換", "Evidence packet 化する場合", "Claim に昇格する前の確認"),
+        None,
+    ),
+    (
+        "notes/views/condition-context-map.md",
+        "notes/condition-context-map.md",
+        ("条件軸の公開名", "Local condition から paper context への対応", "条件の役割", "本文で言ってよい形"),
+        None,
+    ),
+]
+
+
+def check_view_maps(root: Path, findings: list[Finding]) -> None:
+    for preferred, legacy, headings, blank_warning_heading in REQUIRED_VIEW_MAPS:
+        resolved = resolve_view_path(root, preferred, legacy, findings)
+        if resolved is None:
+            continue
+        rel_path, path = resolved
+        text = read_text(path)
+        for heading in headings:
+            if f"## {heading}" not in text:
+                findings.append(Finding("error", f"`{rel_path}` に `{heading}` セクションがありません"))
+        if blank_warning_heading and is_blank(section_body(text, blank_warning_heading)):
+            findings.append(Finding("warning", f"`{rel_path}` の一文の中心主張が未記入です"))
 
 
 def manuscript_files(root: Path) -> list[Path]:
@@ -191,9 +179,7 @@ def main() -> int:
 
     root = args.root.resolve()
     findings: list[Finding] = []
-    check_argument_map(root, findings)
-    check_result_pattern_map(root, findings)
-    check_condition_context_map(root, findings)
+    check_view_maps(root, findings)
     check_manuscript_smells(root, findings)
 
     errors = [finding for finding in findings if finding.severity == "error"]
