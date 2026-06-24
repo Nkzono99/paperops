@@ -17,7 +17,7 @@
 
 ローカル絶対パス、秘密情報、未公開データの詳細は `refs/links.toml` に書かない。共有できる結論や文献知識は `refs/summaries/` または `notes/` に残す。
 
-外部 export bundle を使う場合は、link に加えて `refs/imports/*.toml` に import state を作る。そこでは source index、integrity manifest、source commit、dirty state、artifact category、claim role、`must_not_claim` を記録し、図表や claim に接続する前に `make external-import-check` を実行する。
+外部 export bundle を使う場合は、link に加えて `refs/imports/README.md` に従い import state を作る。
 
 ## 作業手順
 
@@ -25,4 +25,4 @@
 2. 自分の環境では `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーし、対応する `[paths.<location_ref>]` の `path` を記入する。
 3. セッション中は `/resolve-local-paths` で link を解決する。
 4. `uvx --from paper-harness-cli pops links check` または `make links-check` で link 台帳を検証する。
-5. 外部 bundle を使う場合は `refs/imports/` の state record を作り、`make external-import-check` で source index / integrity / claim role を確認する。
+5. 外部 bundle を使う場合は `refs/imports/` の state record を作る。

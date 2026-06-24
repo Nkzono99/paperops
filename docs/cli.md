@@ -74,7 +74,7 @@ uvx --from paper-harness-cli pops links check
 
 `kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。追加解析や図表要望は `requests/analysis/` に切り出してから runops 側へ渡す。
 
-外部 export bundle を図表・表・claim evidence に使う場合は、`refs/imports/import-state-template.toml` をコピーして source index、integrity manifest、source commit、artifact category、`must_not_claim` を記録し、`make external-import-check` を実行する。これは warning 中心の authoring gate であり、外部 bundle 更新を論文 claim の強化と誤読しないための確認である。
+外部 export bundle を図表・表・claim evidence に使う場合は、`refs/imports/` に import state を記録し、`make external-import-check` を実行する。
 
 ## 更新通知
 

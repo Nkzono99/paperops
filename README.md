@@ -55,7 +55,6 @@ uvx --from paper-harness-cli pops doctor
 uvx --from paper-harness-cli pops update-paperops --plan
 uvx --from paper-harness-cli pops update-paperops --apply
 uvx --from paper-harness-cli pops links check
-make external-import-check
 ```
 
 下流プロジェクトでの確認:

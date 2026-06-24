@@ -6,6 +6,8 @@
 - main-text figure label が本文から参照されているかを確認する `figure-reference-check` を追加し、`make smoke` と下流 `make ci` に組み込んだ。あわせて method novelty の direct comparator、completion と equilibrium の混同、saturated heatmap / hidden threshold、claim-to-figure crosswalk と現行 figure role の drift を scientific / figure gate の checklist に追加した。
 - 外部 export bundle を論文側へ取り込む前の `refs/imports/` import state と `external-import-check` を追加した。source index、integrity manifest、source commit / dirty state、artifact category、claim evidence policy、`must_not_claim` を warning 中心に確認し、partial / dirty candidate を supported evidence と誤読しにくくした。
 - 既存下流でこの import gate を使う場合は、`pops update-paperops --apply` で管理対象の `Makefile`、`scripts/`、skill を更新し、必要に応じて `refs/imports/README.md` と `refs/imports/import-state-template.toml` を手動追加する。
+- 外部 bundle import gate の説明を `refs/imports/README.md` へ寄せ、README / docs / AGENTS / CLAUDE 側は短い入口だけにした。
+- `pops doctor` に残っていた旧 link schema 用の未使用 helper と、links invalid-kind の重複テストを削除した。
 
 ## 0.5.0 - 2026-06-23
 

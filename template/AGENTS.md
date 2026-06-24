@@ -23,7 +23,6 @@ uvx --from paper-harness-cli pops links check
 
 make ci
 make pre-submit
-make external-import-check
 make paper-layer-card-check
 make figure-reference-check
 ```
@@ -35,7 +34,7 @@ make figure-reference-check
 1. `/resume-session` で前回の状態を読む。
 2. 今日扱う claim、evidence、feedback、request を確認する。
 3. 必要なら `/map-result-patterns` で raw result や figure data を evidence card にする。
-4. 外部 export bundle を使う場合は `refs/imports/` に import state を残し、`make external-import-check` で source index / integrity / claim role を確認する。
+4. 外部 export bundle を使う場合は `refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
 6. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
 7. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。

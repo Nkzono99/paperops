@@ -37,7 +37,7 @@
 2. Agent は必要に応じて feedback / evidence / claim / request card を更新する。
 3. Abstract、Conclusion、主要図表に使う claim は `claims/gates/` で readiness を確認する。
 4. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
-5. 外部 project や runops の成果物は `refs/links.toml` と `refs/local/locations.toml` で共有意図と実パスを分け、bundle を使う前に `refs/imports/` と `make external-import-check` で source index / integrity / claim role を確認する。
+5. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
 
 ## 設計原則
 
