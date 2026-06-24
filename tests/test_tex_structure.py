@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 
-SCRIPT = Path(__file__).resolve().parents[1] / "template" / "scripts" / "check-tex-structure.py"
+from tests.helpers import ROOT, run_python_script
+
+
+SCRIPT = ROOT / "template" / "scripts" / "check-tex-structure.py"
 
 
 class TexStructureTest(unittest.TestCase):
@@ -45,22 +46,16 @@ class TexStructureTest(unittest.TestCase):
             (bib / "references.bib").write_text("", encoding="utf-8")
             (style / "elsarticle-num.bst").write_text("", encoding="utf-8")
 
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    str(SCRIPT),
-                    "--root",
-                    str(root),
-                    "--main",
-                    str(lang / "main.tex"),
-                    "--label",
-                    "test",
-                ],
-                capture_output=True,
-                text=True,
+            result = run_python_script(
+                SCRIPT,
+                "--root",
+                root,
+                "--main",
+                lang / "main.tex",
+                "--label",
+                "test",
                 encoding="utf-8",
                 errors="replace",
-                check=False,
             )
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

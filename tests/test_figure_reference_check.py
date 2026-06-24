@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import subprocess
-import sys
 import tempfile
 import textwrap
 import unittest
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+from tests.helpers import ROOT, run_python_script
+
+
 SCRIPT = ROOT / "template" / "scripts" / "check-figure-references.py"
 
 
@@ -33,11 +33,11 @@ class FigureReferenceCheckTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                [sys.executable, str(SCRIPT), "--root", str(root), "--strict"],
-                check=False,
-                capture_output=True,
-                text=True,
+            result = run_python_script(
+                SCRIPT,
+                "--root",
+                root,
+                "--strict",
                 encoding="utf-8",
                 errors="replace",
             )
@@ -67,11 +67,11 @@ class FigureReferenceCheckTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                [sys.executable, str(SCRIPT), "--root", str(root), "--strict"],
-                check=False,
-                capture_output=True,
-                text=True,
+            result = run_python_script(
+                SCRIPT,
+                "--root",
+                root,
+                "--strict",
                 encoding="utf-8",
                 errors="replace",
             )

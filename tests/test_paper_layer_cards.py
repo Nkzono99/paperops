@@ -1,30 +1,18 @@
 from __future__ import annotations
 
-import shutil
-import subprocess
-import sys
 import tempfile
 import unittest
-from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+from tests.helpers import ROOT, copy_template, run_python_script
+
+
 SCRIPT = ROOT / "template" / "scripts" / "check-paper-layer-cards.py"
 
 
 class PaperLayerCardsTest(unittest.TestCase):
     def test_template_layer_cards_are_valid(self) -> None:
-        result = subprocess.run(
-            [
-                sys.executable,
-                str(SCRIPT),
-                "--root",
-                str(ROOT / "template"),
-            ],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
+        result = run_python_script(SCRIPT, "--root", ROOT / "template")
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("paper layer cards", result.stdout)
@@ -32,23 +20,12 @@ class PaperLayerCardsTest(unittest.TestCase):
 
     def test_missing_feedback_template_is_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / "paper-demo"
-            shutil.copytree(ROOT / "template", target)
+            target = copy_template(tmp)
             feedback_template = target / "review" / "feedback" / "feedback-card-template.md"
             if feedback_template.exists():
                 feedback_template.unlink()
 
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    str(SCRIPT),
-                    "--root",
-                    str(target),
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+            result = run_python_script(SCRIPT, "--root", target)
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("`review/feedback/feedback-card-template.md` が見つかりません", result.stdout)

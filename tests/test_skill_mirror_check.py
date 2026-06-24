@@ -1,26 +1,10 @@
 from __future__ import annotations
 
-import contextlib
-import io
-import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
-
-from paperops.cli.main import main  # noqa: E402
-
-
-def run_cli(args: list[str]) -> tuple[int, str, str]:
-    stdout = io.StringIO()
-    stderr = io.StringIO()
-    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-        code = main(args)
-    return code, stdout.getvalue(), stderr.getvalue()
+from tests.helpers import run_cli, run_python_script
 
 
 class SkillMirrorCheckTest(unittest.TestCase):
@@ -31,12 +15,7 @@ class SkillMirrorCheckTest(unittest.TestCase):
             self.assertEqual(code, 0, err)
 
             script = target / "scripts" / "check-skill-mirror.py"
-            ok = subprocess.run(
-                [sys.executable, str(script), "--root", str(target)],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+            ok = run_python_script(script, "--root", target)
             self.assertEqual(ok.returncode, 0, ok.stdout + ok.stderr)
             self.assertIn(".agents source と .claude 互換入口", ok.stdout)
 
@@ -49,12 +28,7 @@ class SkillMirrorCheckTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            failed = subprocess.run(
-                [sys.executable, str(script), "--root", str(target)],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+            failed = run_python_script(script, "--root", target)
 
         self.assertEqual(failed.returncode, 1)
         self.assertIn("cwd 依存の参照", failed.stdout)

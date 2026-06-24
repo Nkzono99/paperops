@@ -1,27 +1,15 @@
 from __future__ import annotations
 
-import contextlib
-import io
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
+from tests.helpers import ROOT, run_cli
 
 from paperops import __version__  # noqa: E402
-from paperops.cli.main import main, write_manifest  # noqa: E402
+from paperops.cli.main import write_manifest  # noqa: E402
 from paperops.cli.scaffold import copy_scaffold  # noqa: E402
-
-
-def run_cli(args: list[str]) -> tuple[int, str, str]:
-    stdout = io.StringIO()
-    stderr = io.StringIO()
-    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-        code = main(args)
-    return code, stdout.getvalue(), stderr.getvalue()
 
 
 def set_scaffold_version(root: Path, version: str) -> None:

@@ -1,26 +1,10 @@
 from __future__ import annotations
 
-import contextlib
-import io
-import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "src"))
-
-from paperops.cli.main import main  # noqa: E402
-
-
-def run_cli(args: list[str]) -> tuple[int, str, str]:
-    stdout = io.StringIO()
-    stderr = io.StringIO()
-    with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
-        code = main(args)
-    return code, stdout.getvalue(), stderr.getvalue()
+from tests.helpers import run_cli, run_python_script
 
 
 class LinksCheckTest(unittest.TestCase):
@@ -41,16 +25,10 @@ class LinksCheckTest(unittest.TestCase):
             )
 
             cli_code, cli_out, _cli_err = run_cli(["links", "check", str(target)])
-            script_result = subprocess.run(
-                [
-                    sys.executable,
-                    str(target / "scripts" / "check-links.py"),
-                    "--root",
-                    str(target),
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
+            script_result = run_python_script(
+                target / "scripts" / "check-links.py",
+                "--root",
+                target,
             )
 
         self.assertEqual(cli_code, 1)

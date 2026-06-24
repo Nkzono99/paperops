@@ -1,22 +1,19 @@
 from __future__ import annotations
 
-import shutil
-import subprocess
-import sys
 import tempfile
 import unittest
-from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+from tests.helpers import ROOT, copy_template, run_python_script
+
+
 SCRIPT = ROOT / "template" / "scripts" / "check-argument-focus.py"
 
 
 class ArgumentFocusCheckTest(unittest.TestCase):
     def test_strict_fails_on_local_condition_count(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / "paper-demo"
-            shutil.copytree(ROOT / "template", target)
+            target = copy_template(tmp)
             section = target / "manuscript" / "ja" / "sections" / "30_results.tex"
             section.write_text(
                 section.read_text(encoding="utf-8")
@@ -26,18 +23,7 @@ class ArgumentFocusCheckTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    str(SCRIPT),
-                    "--root",
-                    str(target),
-                    "--strict",
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+            result = run_python_script(SCRIPT, "--root", target, "--strict")
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("ローカル条件数の列挙", result.stdout)
@@ -47,52 +33,29 @@ class ArgumentFocusCheckTest(unittest.TestCase):
 
     def test_missing_condition_context_map_is_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / "paper-demo"
-            shutil.copytree(ROOT / "template", target)
+            target = copy_template(tmp)
             (target / "notes" / "views" / "condition-context-map.md").unlink()
             (target / "notes" / "condition-context-map.md").unlink()
 
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    str(SCRIPT),
-                    "--root",
-                    str(target),
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+            result = run_python_script(SCRIPT, "--root", target)
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("`notes/views/condition-context-map.md` が見つかりません", result.stdout)
 
     def test_missing_result_pattern_map_is_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / "paper-demo"
-            shutil.copytree(ROOT / "template", target)
+            target = copy_template(tmp)
             (target / "notes" / "views" / "result-pattern-map.md").unlink()
             (target / "notes" / "result-pattern-map.md").unlink()
 
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    str(SCRIPT),
-                    "--root",
-                    str(target),
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+            result = run_python_script(SCRIPT, "--root", target)
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("`notes/views/result-pattern-map.md` が見つかりません", result.stdout)
 
     def test_warns_on_comparator_and_equilibrium_overclaim_patterns(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / "paper-demo"
-            shutil.copytree(ROOT / "template", target)
+            target = copy_template(tmp)
             section = target / "manuscript" / "en" / "sections" / "30_results.tex"
             section.write_text(
                 section.read_text(encoding="utf-8")
@@ -101,18 +64,7 @@ class ArgumentFocusCheckTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    str(SCRIPT),
-                    "--root",
-                    str(target),
-                    "--strict",
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+            result = run_python_script(SCRIPT, "--root", target, "--strict")
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("direct comparator", result.stdout)

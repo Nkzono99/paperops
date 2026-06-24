@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import shutil
-import subprocess
-import sys
 import tempfile
 import textwrap
 import unittest
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+from tests.helpers import ROOT, copy_template, run_python_script
+
+
 SCRIPT = ROOT / "template" / "scripts" / "check-external-imports.py"
 
 
@@ -34,13 +33,8 @@ def write_minimal_links(root: Path) -> None:
     )
 
 
-def run_check(root: Path, *extra: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [sys.executable, str(SCRIPT), "--root", str(root), *extra],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
+def run_check(root: Path, *extra: str):
+    return run_python_script(SCRIPT, "--root", root, *extra)
 
 
 class ExternalImportCheckTest(unittest.TestCase):
@@ -53,8 +47,7 @@ class ExternalImportCheckTest(unittest.TestCase):
 
     def test_tracked_export_without_index_integrity_or_claim_policy_warns(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp) / "paper-demo"
-            shutil.copytree(ROOT / "template", root)
+            root = copy_template(tmp)
             (root / "refs" / "imports").mkdir(parents=True, exist_ok=True)
             record = root / "refs" / "imports" / "runops-main.toml"
             record.write_text(
@@ -85,10 +78,9 @@ class ExternalImportCheckTest(unittest.TestCase):
 
     def test_live_source_index_count_drift_is_warning_and_strict_failure(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp) / "paper-demo"
+            root = copy_template(tmp)
             export = Path(tmp) / "analysis-project" / "exports" / "paper"
             export.mkdir(parents=True)
-            shutil.copytree(ROOT / "template", root)
             (root / "refs" / "imports").mkdir(parents=True, exist_ok=True)
             (root / "refs" / "local" / "locations.toml").write_text(
                 textwrap.dedent(
