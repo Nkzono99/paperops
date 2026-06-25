@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    uses: YOUR_ORG/paperops/.github/workflows/reusable-build.yml@main
+    uses: Nkzono99/paperops/.github/workflows/reusable-build.yml@main
     with:
       working-directory: .
       run-latex: false

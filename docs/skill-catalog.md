@@ -59,7 +59,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 ### 参照・ローカル状態
 
-- `resolve-local-paths`: `refs/links.toml` と local path を確認する。
+- `resolve-local-paths`: `refs/links.toml` と local path を確認する。`runops-main` の runops ディレクトリリンクを解決し、paper request queue や export bundle へ安全につなぐ入口でもある。
 - `update-refs`: 文献サマリーを整える。
 - `note-writing-session`: 進捗記録。
 
@@ -94,6 +94,7 @@ Writer には card 正本や gate 語彙を直接読み込ませすぎない。`
 - カード正本は `evidence/`、`claims/`、`review/`、`requests/`。
 - `notes/views/` には pure overview view と controlled authoring view がある。
 - `notes/views/concept-terms.md` は概念語ビューであり、claim / argument / evidence card の意味と本文語彙の対応を記録する。
+- `notes/views/*.md` は `view_type` と `source_of_truth` の front matter を持つ。`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
 - `paper_ir` は生成一時物であり、手書き正本にはしない。
 - `contracts/` は文章テンプレートではなく section 入出力契約である。
 - `manuscript/writing-profile.yml` は論文種別・投稿先ごとの overlay である。

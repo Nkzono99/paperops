@@ -85,6 +85,7 @@ uvx --from paper-harness-cli pops links check
 ```
 
 `kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。追加解析や図表要望は `requests/analysis/` に切り出してから runops 側へ渡す。
+下流 skill としては `/resolve-local-paths` が runops ディレクトリリンクの入口であり、`pops links list --resolve-local` と `pops links check` で `runops-main` の共有 link と個人環境パスを分けて確認する。
 
 runops queue へ渡す予定の request は、下流 repo で `make research-request-handoff-check` または `make audit` を実行して確認する。通常は warning のみで、`python scripts/check-research-request-handoff.py --root . --strict` は投稿前や queue handoff の完了判定に使う。
 

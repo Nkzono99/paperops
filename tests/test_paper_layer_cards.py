@@ -30,6 +30,17 @@ class PaperLayerCardsTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("`review/feedback/feedback-card-template.md` が見つかりません", result.stdout)
 
+    def test_view_metadata_is_required(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = copy_template(tmp)
+            view = target / "notes" / "views" / "result-pattern-map.md"
+            view.write_text("# 結果パターンビュー\n", encoding="utf-8")
+
+            result = run_python_script(SCRIPT, "--root", target)
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("`notes/views/result-pattern-map.md` に `view_type: pure_overview` がありません", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

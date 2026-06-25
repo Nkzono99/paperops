@@ -1,3 +1,12 @@
+---
+view_type: pure_overview
+source_of_truth:
+  - evidence/results/
+  - evidence/figures/
+authoritative_for:
+  - overview
+---
+
 # 結果パターンビュー
 
 このファイルは `evidence/results/` と `evidence/figures/` のカードを人間が俯瞰するためのビューである。result の正本は result card / figure card に置く。

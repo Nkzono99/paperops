@@ -1,3 +1,13 @@
+---
+view_type: controlled_authoring
+source_of_truth:
+  - evidence/results/
+  - evidence/figures/
+authoritative_for:
+  - public_condition_names
+  - denominator_wording
+---
+
 # 条件文脈ビュー
 
 このファイルは result / claim / figure card の条件名と denominator を公開文脈へ翻訳するビューである。

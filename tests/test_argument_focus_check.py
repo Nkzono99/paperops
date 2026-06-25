@@ -88,6 +88,13 @@ class ArgumentFocusCheckTest(unittest.TestCase):
         self.assertIn("ラベルだけ", result.stdout)
         self.assertIn("前提・判断根拠・本文への影響", result.stdout)
 
+    def test_ignores_yaml_frontmatter_when_scanning_note_labels(self) -> None:
+        result = run_python_script(SCRIPT, "--root", ROOT / "template")
+
+        self.assertEqual(result.returncode, 0)
+        self.assertNotIn("notes/views/result-pattern-map.md:2", result.stdout)
+        self.assertNotIn("view_type", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

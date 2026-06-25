@@ -1,3 +1,14 @@
+---
+view_type: controlled_authoring
+source_of_truth:
+  - claims/claims/
+  - claims/arguments/
+  - evidence/
+authoritative_for:
+  - manuscript_terminology
+  - plain_language_expansion
+---
+
 # 概念語ビュー
 
 このファイルは、本文で圧縮された英語名詞句や hyphen / slash compound を、人間が俯瞰して採用・展開・禁止を判断するためのビューである。概念の正本は claim / argument / evidence card に置き、ここでは本文での呼び方と用法だけを管理する。

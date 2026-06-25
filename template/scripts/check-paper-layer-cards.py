@@ -32,6 +32,7 @@ REQUIRED_FILES = [
     "notes/views/claim-evidence-map.md",
     "notes/views/scientific-gate.md",
     "notes/views/argument-map.md",
+    "notes/views/concept-terms.md",
     "notes/views/condition-context-map.md",
     "notes/views/assumption-ledger.md",
     "notes/views/claim-upgrade-gates.md",
@@ -52,6 +53,20 @@ FRONTMATTER_REQUIREMENTS = {
     "review/responses/response-card-template.md": ["---", "type: response", "feedback_cards:"],
     "requests/analysis/analysis-request-template.md": ["---", "type: analysis_request", "requested_outputs:"],
     "requests/writing/writing-request-template.md": ["---", "type: writing_request", "target_blocks:"],
+}
+
+
+VIEW_FRONTMATTER_REQUIREMENTS = {
+    "notes/views/result-pattern-map.md": ["---", "view_type: pure_overview", "source_of_truth:"],
+    "notes/views/claim-evidence-map.md": ["---", "view_type: pure_overview", "source_of_truth:"],
+    "notes/views/scientific-gate.md": ["---", "view_type: pure_overview", "source_of_truth:"],
+    "notes/views/peer-review.md": ["---", "view_type: pure_overview", "source_of_truth:"],
+    "notes/views/research-requests.md": ["---", "view_type: pure_overview", "source_of_truth:"],
+    "notes/views/assumption-ledger.md": ["---", "view_type: pure_overview", "source_of_truth:"],
+    "notes/views/claim-upgrade-gates.md": ["---", "view_type: pure_overview", "source_of_truth:"],
+    "notes/views/argument-map.md": ["---", "view_type: controlled_authoring", "source_of_truth:"],
+    "notes/views/concept-terms.md": ["---", "view_type: controlled_authoring", "source_of_truth:"],
+    "notes/views/condition-context-map.md": ["---", "view_type: controlled_authoring", "source_of_truth:"],
 }
 
 
@@ -80,7 +95,8 @@ def check_required_files(root: Path, findings: list[Finding]) -> None:
 
 
 def check_frontmatter_tokens(root: Path, findings: list[Finding]) -> None:
-    for rel_path, tokens in FRONTMATTER_REQUIREMENTS.items():
+    requirements = FRONTMATTER_REQUIREMENTS | VIEW_FRONTMATTER_REQUIREMENTS
+    for rel_path, tokens in requirements.items():
         path = root / rel_path
         if not path.exists():
             continue

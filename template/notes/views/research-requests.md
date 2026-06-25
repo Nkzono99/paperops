@@ -1,3 +1,12 @@
+---
+view_type: pure_overview
+source_of_truth:
+  - requests/analysis/
+  - requests/writing/
+authoritative_for:
+  - overview
+---
+
 # 追加依頼ビュー
 
 このファイルは `requests/analysis/` と `requests/writing/` のカードを人間が俯瞰するためのビューである。依頼の正本は request card に置く。

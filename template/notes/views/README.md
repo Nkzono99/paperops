@@ -8,6 +8,11 @@
 
 `notes/views/` には二種類の view がある。
 
+各 view は YAML front matter に `view_type` と `source_of_truth` を持つ。迷った場合はまず front matter を見る。
+
+- `view_type: pure_overview`: 正本カードを読むための総覧。判断の正本は `source_of_truth` に戻す。
+- `view_type: controlled_authoring`: カード正本の意味を本文語彙、条件名、読者順序へ変換するための編集可能な統制ビュー。科学的主張や証拠そのものの正本ではない。
+
 ### pure overview view
 
 pure overview view は、カード正本を人間が読むための集約である。必要なら手で更新してよいが、判断の正本は対応する card に戻す。

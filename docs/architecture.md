@@ -55,6 +55,7 @@
 | `_archives/` | sealed scratch archive | 通常読まない封印物 | `pops scratch archive/restore` |
 
 `notes/views/concept-terms.md` と `notes/views/condition-context-map.md` は controlled authoring view として扱う。ここには「カード正本から見える意味」を本文語彙へ変換するときの判断を書く。
+各 `notes/views/*.md` は `view_type` と `source_of_truth` の front matter を持つ。`pure_overview` は総覧であり判断の正本はカードへ戻す。`controlled_authoring` は本文語彙、条件名、読者順序の統制判断を置く編集可能な view である。
 
 ## 情報フロー
 

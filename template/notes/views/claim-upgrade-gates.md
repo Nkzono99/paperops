@@ -1,3 +1,11 @@
+---
+view_type: pure_overview
+source_of_truth:
+  - claims/gates/
+authoritative_for:
+  - overview
+---
+
 # Claim Upgrade Gates View
 
 このファイルは external validation needs、claim stress-test、observational boundary など、claim を強める前に止める gate を俯瞰するビューである。正本は `claims/gates/` の scientific gate card と、必要な `requests/analysis/` / `review/responses/` のカードに置く。

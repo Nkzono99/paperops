@@ -1,3 +1,11 @@
+---
+view_type: pure_overview
+source_of_truth:
+  - claims/gates/
+authoritative_for:
+  - overview
+---
+
 # Assumption Ledger View
 
 このファイルは `claims/gates/` の central_assumptions を人間が俯瞰するためのビューである。正本は gate card と関連する claim / evidence / request card に置く。

@@ -9,6 +9,7 @@
 - `pops` は `uvx --from paper-harness-cli pops ...` で実行する。
 - 人間は主に原稿レビューや自然文の指示を出す。Agent は必要に応じて `/integrate-writing-feedback` で feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
 - `evidence/`、`claims/`、`review/`、`requests/` はカード正本である。`notes/views/` は pure overview view と controlled authoring view を含む。旧 `notes/*.md` の一部は互換ビューとして扱う。
+- `notes/views/*.md` の `view_type` と `source_of_truth` を確認し、`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
 - `contracts/` は section ごとの入出力契約であり、文章テンプレートではない。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
 - `workflow/` は全体状態、section 状態、issue class、stale 伝播の状態正本である。本文編集前に `pops workflow status` を確認する。
 - `refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` の作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名は英語のままでよい。
@@ -53,7 +54,7 @@ make figure-reference-check
 
 - 初回セットアップ・更新: `/setup`, `/update-paperops`
 - セッション再開・記録: `/resume-session`, `/note-writing-session`
-- 関連研究・外部 source: `/source-reach-scan`, `/research-related-work`, `/update-refs`
+- 関連研究・外部 source: `/source-reach-scan`, `/research-related-work`, `/update-refs`, `/resolve-local-paths`
 - 証拠・主張: `/map-result-patterns`, `/scientific-gate`, `/design-manuscript-claims`, `/calibrate-claims`
 - AI 初稿診断: `/audit-ai-draft`, `/contextualize-conditions`, `/polish-ai-draft`
 - 原稿調整: `/paragraph-surgery`, `/public-terminology-pass`, `/sync-ja-en`

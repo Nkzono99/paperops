@@ -46,6 +46,19 @@ class SetupResumeSkillScopeTest(unittest.TestCase):
 
         self.assertLess(len(resume.splitlines()), 70)
 
+    def test_resolve_local_paths_is_runops_directory_link_skill(self) -> None:
+        skill = self.read_skill("resolve-local-paths")
+
+        for required in [
+            "runops ディレクトリリンク",
+            "`runops-main`",
+            "pops links list --resolve-local",
+            "research-request-handoff-check",
+            "job submit は行わない",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, skill)
+
 
 if __name__ == "__main__":
     unittest.main()

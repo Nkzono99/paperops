@@ -1,3 +1,14 @@
+---
+view_type: controlled_authoring
+source_of_truth:
+  - claims/arguments/
+  - claims/claims/
+  - evidence/
+authoritative_for:
+  - manuscript_argument_order
+  - reader_path
+---
+
 # 論旨設計ビュー
 
 このファイルは `claims/arguments/` の argument card を人間が俯瞰するためのビューである。論旨構造の正本は argument card に置く。

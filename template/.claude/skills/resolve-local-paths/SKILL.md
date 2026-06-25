@@ -1,6 +1,6 @@
 ---
 name: resolve-local-paths
-description: refs/links.toml と refs/local/ からシミュレーション出力、runops project、図のソース、外部知識のローカルパスエイリアスを解決する。
+description: refs/links.toml と refs/local/ から runops ディレクトリリンク、図のソース、外部知識のローカルパスエイリアスを解決する。
 allowed-tools: Read, Glob
 ---
 

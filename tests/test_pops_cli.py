@@ -72,6 +72,10 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "notes" / "ai-draft-polish.md").is_file())
             self.assertTrue((target / ".pops" / "manifest.toml").is_file())
             self.assertFalse((target / "refs" / "local" / "locations.toml").exists())
+            for workflow in (target / ".github" / "workflows").glob("*.yml"):
+                workflow_text = workflow.read_text(encoding="utf-8")
+                self.assertNotIn("YOUR_ORG/paperops", workflow_text)
+                self.assertIn("Nkzono99/paperops/.github/workflows/reusable-", workflow_text)
             gitignore = (target / ".gitignore").read_text(encoding="utf-8")
             self.assertIn("_handoff/*", gitignore)
             self.assertIn(".paperops/cache/", gitignore)

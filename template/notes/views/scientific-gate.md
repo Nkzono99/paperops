@@ -1,3 +1,13 @@
+---
+view_type: pure_overview
+source_of_truth:
+  - claims/gates/
+  - claims/claims/
+  - evidence/
+authoritative_for:
+  - overview
+---
+
 # 科学的ゲートビュー
 
 このファイルは `claims/gates/` の gate card を人間が俯瞰するためのビューである。gate 判定の正本は gate card に置く。

@@ -1,3 +1,13 @@
+---
+view_type: pure_overview
+source_of_truth:
+  - claims/claims/
+  - claims/gates/
+  - evidence/
+authoritative_for:
+  - overview
+---
+
 # 主張と証拠のビュー
 
 このファイルは `claims/claims/`、`claims/gates/`、`evidence/` のカードを人間が俯瞰するためのビューである。claim の正本は claim card に置く。

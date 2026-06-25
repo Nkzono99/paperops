@@ -32,7 +32,7 @@
 - `claims/`: claim / scientific gate / argument card の正本
 - `review/`: feedback / review round / response card の正本
 - `requests/`: analysis / writing request card の正本
-- `notes/views/`: pure overview view と controlled authoring view
+- `notes/views/`: `view_type` / `source_of_truth` つきの pure overview view と controlled authoring view
 - `contracts/`: section ごとの読者質問、入力、出力、禁止構造
 - `workflow/`: 全体状態、section 状態、issue class、stale 伝播
 - `manuscript/writing-profile.yml`: 論文種別・投稿先ごとの overlay

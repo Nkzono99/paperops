@@ -1,11 +1,11 @@
 ---
 name: resolve-local-paths
-description: Use when resolving local path aliases from refs/links.toml and refs/local.
+description: runops ディレクトリリンクや外部 project link を refs/links.toml と refs/local/ から解決する。
 ---
 
 # resolve-local-paths
 
-執筆セッションでリポジトリ外に保存された runops project、シミュレーション出力、図のソース、外部知識にアクセスする必要がある場合にこのスキルを使用する。
+執筆セッションでリポジトリ外に保存された runops project、シミュレーション出力、図のソース、外部知識にアクセスする必要がある場合にこのスキルを使用する。特に `refs/links.toml` の `runops-main` から runops ディレクトリリンクを解決し、paper 側の request / evidence / import state へ安全につなぐ入口として使う。
 
 ## 読み込むファイル
 
@@ -15,6 +15,15 @@ description: Use when resolving local path aliases from refs/links.toml and refs
 - `refs/imports/`（外部 bundle を使う場合）
 - `refs/local/aliases.md`
 - `refs/links.md`
+
+## 最初に実行する確認
+
+```sh
+uvx --from paper-harness-cli pops links list --resolve-local
+uvx --from paper-harness-cli pops links check
+```
+
+`refs/links.toml` の `runops-main` は、既定の runops project link である。`refs/local/locations.toml` が存在すれば `location_ref = "runops_main"` の実パスを確認し、存在しない場合は `refs/local/locations.example.toml` の schema と `refs/links.toml` の意味だけを説明する。明示依頼なしに `refs/local/locations.toml` を作成・編集しない。
 
 ## 責務
 

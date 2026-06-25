@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- 下流 GitHub Actions の reusable workflow 参照を `YOUR_ORG/paperops` placeholder から `Nkzono99/paperops` に変更し、`pops init` 直後の初回 setup warning を減らした。fork や自前 upstream を使う場合だけ workflow `uses:` を手動で差し替える。
+- `notes/views/*.md` に `view_type` と `source_of_truth` の front matter を追加し、pure overview view と controlled authoring view の違いを機械可読にした。`paper-layer-card-check` でも view metadata を検査する。
+- `/resolve-local-paths` を runops ディレクトリリンクの入口として明確化し、`runops-main`、`pops links list --resolve-local`、paper request handoff の確認手順を追記した。
+
 ## 0.7.0 - 2026-06-25
 
 - `workflow/` と `pops workflow` を追加し、論文執筆プロセスを固定の階層型状態機械と section 依存グラフとして扱えるようにした。全体状態、section 状態、Issue Router、transition guard、loop policy、stale 伝播を `workflow/machine.yml` と `workflow/current-state.yml` に持たせ、`workflow-check` と `finish-manuscript` に接続した。

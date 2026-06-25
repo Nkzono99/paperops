@@ -1,3 +1,13 @@
+---
+view_type: pure_overview
+source_of_truth:
+  - review/rounds/
+  - review/feedback/
+  - review/responses/
+authoritative_for:
+  - overview
+---
+
 # 査読・返答ビュー
 
 このファイルは `review/feedback/`、`review/rounds/`、`review/responses/` のカードを人間が俯瞰するためのビューである。個別コメントの正本は feedback card に置く。

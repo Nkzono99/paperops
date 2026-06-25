@@ -15,6 +15,6 @@ on:
 
 jobs:
   mirror-check:
-    uses: YOUR_ORG/paperops/.github/workflows/reusable-mirror-check.yml@main
+    uses: Nkzono99/paperops/.github/workflows/reusable-mirror-check.yml@main
     with:
       working-directory: .

@@ -136,6 +136,17 @@ def note_files(root: Path) -> list[Path]:
     ]
 
 
+def content_lines_without_frontmatter(text: str) -> list[tuple[int, str]]:
+    lines = text.splitlines()
+    start = 0
+    if lines and lines[0].strip() == "---":
+        for index, line in enumerate(lines[1:], start=1):
+            if line.strip() == "---":
+                start = index + 1
+                break
+    return list(enumerate(lines[start:], start=start + 1))
+
+
 def check_manuscript_smells(root: Path, findings: list[Finding]) -> None:
     defensive_counts: dict[str, int] = {}
     for path in manuscript_files(root):
@@ -190,7 +201,7 @@ def check_manuscript_smells(root: Path, findings: list[Finding]) -> None:
 def check_note_smells(root: Path, findings: list[Finding]) -> None:
     for path in note_files(root):
         rel_path = path.relative_to(root).as_posix()
-        for number, line in enumerate(read_text(path).splitlines(), start=1):
+        for number, line in content_lines_without_frontmatter(read_text(path)):
             stripped = line.strip()
             if not stripped or stripped.startswith("#") or stripped.startswith("|"):
                 continue
