@@ -52,7 +52,7 @@
 | `manuscript/` | 読者へ出す本文 | 成果物 | Writer / editor pass |
 | `submission/` | 投稿先に合わせた提出版 | 派生成果物 | `prepare-submission` 相当の投稿前作業 |
 | `_handoff/` | 未整理入力の一時置き場 | Git 管理しない | 人間入力、raw file intake |
-| `_archives/` | sealed scratch archive | 通常読まない封印物 | `pops scratch archive/restore` |
+| `_archives/` | sealed scratch archive | 通常読まない封印物 | `pops scratch archive/restart/restore` |
 
 `notes/views/storyline.md`、`notes/views/concept-terms.md`、`notes/views/condition-context-map.md` は controlled authoring view として扱う。ここには「カード正本から見える意味」を、本文の story spine、語彙、条件名へ変換するときの判断を書く。
 各 `notes/views/*.md` は `view_type` と `source_of_truth` の front matter を持つ。`pure_overview` は総覧であり判断の正本はカードへ戻す。`controlled_authoring` は本文語彙、条件名、読者順序の統制判断を置く編集可能な view である。
@@ -76,7 +76,7 @@
 15. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
 16. Submission hygiene は STRUCTURE_ACCEPTED 後に扱う。著者 metadata、license、Open Research DOI、readiness-check 改修は、Results hierarchy や Discussion functions の blocker より優先しない。`submission_loop --apply` も STRUCTURE_ACCEPTED 系 guard が未達なら拒否される。
 17. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
-18. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
+18. 1から書き直す評価では、`pops scratch restart` で現行層を `_archives/` に封印し、作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
 
 ## paper_ir と section compiler
 

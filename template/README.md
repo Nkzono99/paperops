@@ -25,7 +25,7 @@
 6. `manuscript/ja/` を中心に書く。
 7. 必要な block を `manuscript/en/` に同期する。
 8. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、`pops workflow route-review` で戻る深さを決める。
-9. Submission hygiene は STRUCTURE_ACCEPTED 後に主作業にする。完了前は `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `make pre-submit` を実行する。
+9. Submission hygiene は STRUCTURE_ACCEPTED 後に主作業にする。完了前は `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `manuscript/publication-metadata.toml` の `[submission]`、`[open_research]`、`[human_verification]` を埋めて `make pre-submit` を実行する。
 
 ## 中間層
 
@@ -52,8 +52,8 @@
 - `refs/imports/`: 外部 export bundle の source index、integrity、claim role、取り込み状態。
 - `refs/local/locations.toml`: 個人環境の実パス。Git 管理しない。
 
-過去稿を封印して同じ repo で書き直す場合は、`pops scratch archive`、`pops scratch reset`、`pops scratch restore` を使う。archive は `_archives/` に split bundle として置かれ、通常の skill は参照しない。
-Agent に任せる場合は `/archive-scratch` を使い、`_handoff/` 同梱や restore のような破壊的操作は明示してから実行する。
+過去稿を封印して同じ repo で書き直す場合は、`pops scratch restart --yes` を使う。archive だけを作る場合は `pops scratch archive`、既存 archive の確認や復元には `pops scratch list`、`pops scratch inspect`、`pops scratch restore` を使う。archive は `_archives/` に split bundle として置かれ、通常の skill は参照しない。
+Agent に任せる場合は `/archive-scratch` を使い、`_handoff/` 同梱、reset、restore のような破壊的操作は明示してから実行する。
 
 `refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名などの識別子は英語のままでよい。
 

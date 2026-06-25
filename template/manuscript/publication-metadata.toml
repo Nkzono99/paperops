@@ -24,6 +24,24 @@ manuscript = "未定"
 code = "未定"
 data = "未定"
 
+[submission]
+conflict_of_interest = "未定"
+suggested_reviewers_prepared = false
+front_matter_checked = false
+
+[open_research]
+data_doi_or_persistent_url = ""
+software_doi_or_persistent_url = ""
+data_software_citation_key = ""
+data_software_citation_described = false
+
+[human_verification]
+pdf_reviewed = false
+citation_intent_checked = false
+ai_disclosure_approved = false
+central_assumptions_approved = false
+claim_gate_approved = false
+
 [provenance]
 last_public_build_commit = ""
 last_public_build_command = ""

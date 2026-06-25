@@ -57,6 +57,11 @@ submission_tex_paths() {
   export BSTINPUTS=".///:style//:../../manuscript/shared/style//:${BSTINPUTS:-}"
 }
 
+submission_bibtex_paths() {
+  export BIBINPUTS="$SLOT_DIR//:$SLOT_DIR/style//:$ROOT/manuscript/shared/bib//:$ROOT/refs/bib/curated//:$ROOT/refs/bib/imported//:${BIBINPUTS:-}"
+  export BSTINPUTS="$SLOT_DIR//:$SLOT_DIR/style//:$ROOT/manuscript/shared/style//:${BSTINPUTS:-}"
+}
+
 audit_build_log() {
   if [[ -f "$BUILD_DIR/main.log" ]]; then
     "$PYTHON" "$ROOT/scripts/audit-build-log.py" --log "$BUILD_DIR/main.log" --label "投稿版 $VENUE PDF"
@@ -110,6 +115,7 @@ run_direct_engine_build() {
   if command -v bibtex >/dev/null 2>&1; then
     (
       cd "$BUILD_DIR"
+      submission_bibtex_paths
       run_with_runner bibtex main || true
     )
   else

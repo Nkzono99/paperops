@@ -42,6 +42,11 @@ audit_build_log() {
   fi
 }
 
+set_bibtex_paths() {
+  export BIBINPUTS="$ROOT/manuscript/shared/bib//:${BIBINPUTS:-}"
+  export BSTINPUTS="$ROOT/manuscript/shared/style//:${BSTINPUTS:-}"
+}
+
 latexmk_mode_flag() {
   case "${1:-pdf}" in
     -*)
@@ -91,6 +96,7 @@ run_direct_engine_build() {
   if command -v bibtex >/dev/null 2>&1; then
     (
       cd "$BUILD_DIR"
+      set_bibtex_paths
       run_with_runner bibtex main || true
     )
   else

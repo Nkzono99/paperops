@@ -43,7 +43,7 @@ uvx --from paper-harness-cli pops doctor
 - `pops workflow advance <state> [path]`: guard が満たされた場合だけ全体状態を進める。
 - `pops workflow invalidate <artifact-id> [path]`: claim / result / figure などに依存する section を stale にする。
 - `pops workflow route-review [path] --issue-class <class> [--apply]`: review 指摘を evidence / story / section / prose / submission loop へ戻す。
-- `pops scratch archive/reset/restore/list/inspect`: 現在の論文作業層を `_archives/` の split bundle に封印し、同じ repo で1から書き直す。
+- `pops scratch archive/restart/reset/restore/list/inspect`: 現在の論文作業層を `_archives/` の split bundle に封印し、同じ repo で1から書き直す。
 - `pops version`, `pops --version`: CLI と上流情報を表示する。
 
 ## 更新対象
@@ -116,11 +116,14 @@ uvx --from paper-harness-cli pops workflow route-review --issue-class story-loop
 
 ```sh
 uvx --from paper-harness-cli pops scratch archive --label before-rewrite
+uvx --from paper-harness-cli pops scratch restart --label before-rewrite --yes
 uvx --from paper-harness-cli pops scratch reset --yes
 uvx --from paper-harness-cli pops scratch restore <archive-id> --yes
 ```
 
 `pops scratch archive` は `manuscript/`、`submission/`、`notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/` を `_archives/<id>/archive.zip.partNNNN` に分割保存する。既定の part size は 48 MiB で、GitHub の単一ファイル制限にかからないようにする。
+
+`pops scratch restart --yes` は archive 作成と reset を一操作で行う。`--include-handoff` を付けると `_handoff/` payload も封印してから starter 状態へ戻す。既存稿を残さず1から執筆へ戻したい場合は、`archive` と `reset` を別々に実行するより `restart` を使う。
 
 `pops scratch reset --yes` は作業層と `_handoff/` payload を starter 状態に戻す。`_archives/` は残る。通常の AI 執筆では archive 内容を読まず、復元や比較を明示された場合だけ `pops scratch restore <id> --yes` を使う。
 

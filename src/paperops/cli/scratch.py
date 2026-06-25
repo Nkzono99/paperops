@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 from fnmatch import fnmatch
 from pathlib import Path, PurePosixPath
 
+from paperops.cli.constants import EXCLUDED_SCAFFOLD_PATTERNS, SCAFFOLD_INCLUDE_EXCEPTIONS
 from paperops.cli.manifest import dumps_manifest_toml, read_manifest
 from paperops.cli.project import find_project_root
 from paperops.cli.scaffold import scaffold_source
@@ -93,6 +94,33 @@ def add_scratch_parser(
     )
     archive_parser.set_defaults(func=cmd_scratch)
 
+    restart_parser = scratch_subcommands.add_parser(
+        "restart",
+        help="Archive current writing layers, then reset them to the scaffold starter.",
+    )
+    restart_parser.add_argument("path", nargs="?", type=Path, help="Project directory, defaults to cwd.")
+    restart_parser.add_argument("--id", default="", help="Archive id, defaults to timestamp-label.")
+    restart_parser.add_argument("--label", default="scratch restart", help="Human-readable archive label.")
+    restart_parser.add_argument(
+        "--include-handoff",
+        action="store_true",
+        help="Include _handoff payloads in the sealed archive before reset.",
+    )
+    restart_parser.add_argument(
+        "--part-size-mib",
+        type=int,
+        default=48,
+        help="Maximum split bundle part size in MiB, defaults to 48.",
+    )
+    restart_parser.add_argument(
+        "--part-size-bytes",
+        type=int,
+        default=0,
+        help=argparse.SUPPRESS,
+    )
+    restart_parser.add_argument("--yes", action="store_true", help="Confirm destructive reset after archive.")
+    restart_parser.set_defaults(func=cmd_scratch)
+
     reset_parser = scratch_subcommands.add_parser(
         "reset",
         help="Reset manuscript layers to the bundled scaffold starter.",
@@ -148,6 +176,25 @@ def cmd_scratch(args: argparse.Namespace) -> int:
             print(f"Archive directory: {archive.path}")
             print(f"Bundle parts: {len(archive.parts)}")
             print("Note: sealed archives are not read during normal AI writing workflows.")
+            return 0
+        if args.scratch_action == "restart":
+            if not args.yes:
+                print("error: scratch restart resets writing layers after archiving; re-run with --yes.", file=sys.stderr)
+                return 2
+            part_size = args.part_size_bytes or args.part_size_mib * 1024 * 1024
+            archive = create_scratch_archive(
+                root,
+                archive_id=args.id,
+                label=args.label,
+                include_handoff=args.include_handoff,
+                part_size_bytes=part_size,
+            )
+            print(f"Archived scratch state: {archive.archive_id}")
+            print(f"Archive directory: {archive.path}")
+            print(f"Bundle parts: {len(archive.parts)}")
+            copied = reset_scratch_layers(root, require_archive=False)
+            print(f"Reset scratch writing layers from scaffold: {copied} files")
+            print("Sealed archives remain under _archives/.")
             return 0
         if args.scratch_action == "reset":
             if not args.yes:
@@ -397,6 +444,8 @@ def copy_scaffold_paths(root: Path, paths: tuple[str, ...]) -> int:
                 continue
             for src in sorted(src_root.rglob("*")):
                 rel = src.relative_to(source)
+                if should_exclude_from_scaffold_reset(rel.as_posix()):
+                    continue
                 dst = root / rel
                 if src.is_dir():
                     dst.mkdir(parents=True, exist_ok=True)
@@ -441,6 +490,12 @@ def should_exclude_from_archive(rel: str) -> bool:
     if rel.endswith(".pdf") and not rel.startswith("manuscript/shared/figures/"):
         return True
     return any(fnmatch(rel, pattern) for pattern in ARCHIVE_EXCLUDED_PATTERNS)
+
+
+def should_exclude_from_scaffold_reset(rel: str) -> bool:
+    if rel in SCAFFOLD_INCLUDE_EXCEPTIONS:
+        return False
+    return any(fnmatch(rel, pattern) for pattern in EXCLUDED_SCAFFOLD_PATTERNS)
 
 
 def is_relative_to(path: Path, parent: Path) -> bool:

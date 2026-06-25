@@ -102,6 +102,95 @@ class ScratchArchiveTest(unittest.TestCase):
             self.assertEqual(summary.read_text(encoding="utf-8"), "# CUSTOM REF\n")
             self.assertFalse(handoff_secret.exists())
 
+    def test_scratch_restart_archives_then_resets_added_scratch_layers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+
+            added_files = [
+                target / "manuscript" / "ja" / "sections" / "custom.tex",
+                target / "submission" / "demo-venue" / "main.tex",
+                target / "notes" / "sessions" / "custom-session.md",
+                target / "refs" / "summaries" / "custom-source.md",
+                target / "evidence" / "results" / "RES-CUSTOM.md",
+                target / "claims" / "claims" / "CLM-CUSTOM.md",
+                target / "review" / "feedback" / "FB-CUSTOM.md",
+                target / "requests" / "analysis" / "AREQ-CUSTOM.md",
+                target / "_handoff" / "secret.txt",
+            ]
+            for path in added_files:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("custom scratch content\n", encoding="utf-8")
+
+            code, out, err = run_cli(
+                [
+                    "scratch",
+                    "restart",
+                    str(target),
+                    "--id",
+                    "restart-001",
+                    "--label",
+                    "before restart",
+                    "--include-handoff",
+                    "--yes",
+                ]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("Archived scratch state: restart-001", out)
+            self.assertIn("Reset scratch writing layers from scaffold", out)
+            self.assertTrue((target / "_archives" / "restart-001" / "manifest.toml").is_file())
+            for path in added_files:
+                self.assertFalse(path.exists(), path.as_posix())
+            self.assertTrue((target / "manuscript" / "ja" / "main.tex").is_file())
+            self.assertTrue((target / "_handoff" / "README.md").is_file())
+
+            code, out, err = run_cli(["scratch", "inspect", str(target), "restart-001"])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("_handoff", out)
+
+    def test_scratch_reset_excludes_generated_scaffold_artifacts(self) -> None:
+        generated_rels = [
+            Path("manuscript/mirror/reports/smoke-check.md"),
+            Path("notes/session-context.generated.md"),
+            Path("_handoff/source-payload.txt"),
+        ]
+        source_paths = [ROOT / "template" / rel for rel in generated_rels]
+        previous = {path: path.read_bytes() if path.exists() else None for path in source_paths}
+        try:
+            for path in source_paths:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("generated source artifact\n", encoding="utf-8")
+
+            with tempfile.TemporaryDirectory() as tmp:
+                target = Path(tmp) / "paper-demo"
+                code, _out, err = run_cli(["init", str(target)])
+                self.assertEqual(code, 0, err)
+
+                code, _out, err = run_cli(
+                    [
+                        "scratch",
+                        "reset",
+                        str(target),
+                        "--allow-without-archive",
+                        "--yes",
+                    ]
+                )
+
+                self.assertEqual(code, 0, err)
+                for rel in generated_rels:
+                    self.assertFalse((target / rel).exists(), rel.as_posix())
+                self.assertTrue((target / "_handoff" / "README.md").is_file())
+                self.assertTrue((target / "_handoff" / ".gitkeep").is_file())
+        finally:
+            for path, content in previous.items():
+                if content is None:
+                    path.unlink(missing_ok=True)
+                else:
+                    path.write_bytes(content)
+
     def test_archive_seal_check_accepts_template_and_rejects_expanded_archive(self) -> None:
         script = ROOT / "template" / "scripts" / "check-archive-seal.py"
 

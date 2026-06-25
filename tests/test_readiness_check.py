@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+import textwrap
 import unittest
 
 
@@ -38,6 +39,81 @@ class ReadinessCheckTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0)
         self.assertIn("bibliography に `mypapers` が含まれています", result.stdout)
+
+    def test_submission_mode_flags_metadata_human_verification_and_frontmatter(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = copy_template(tmp)
+            submission = target / "submission" / "demo-venue"
+            submission.mkdir()
+            (submission / "main.tex").write_text(
+                textwrap.dedent(
+                    r"""\
+                    \documentclass{article}
+                    \title{Title Goes Here}
+                    \author{Author A}
+                    \begin{document}
+                    \begin{keypoints}
+                    \item TODO
+                    \end{keypoints}
+                    \begin{abstract}
+                    TBD
+                    \end{abstract}
+                    Open Research Statement: TBD.
+                    \end{document}
+                    """
+                ),
+                encoding="utf-8",
+            )
+
+            result = run_python_script(
+                SCRIPT,
+                "--root",
+                target,
+                "--allow-placeholders",
+                "--require-submission",
+            )
+
+        self.assertEqual(result.returncode, 1)
+        for expected in [
+            "author 1 に ORCID がありません",
+            "author 1 に email がありません",
+            "`licenses.code` が未記入です",
+            "`open_research.data_doi_or_persistent_url` が未記入です",
+            "`human_verification.pdf_reviewed` が承認されていません",
+            "`submission/demo-venue/main.tex` の front matter にスターター用プレースホルダーが残っています",
+            "`submission/demo-venue/main.tex` の Key Points が未確定です",
+            "`submission/demo-venue/main.tex` の Open Research Statement が未確定です",
+        ]:
+            self.assertIn(expected, result.stdout)
+
+    def test_submission_mode_requires_data_software_citation_key_in_bib(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = copy_template(tmp)
+            metadata = target / "manuscript" / "publication-metadata.toml"
+            metadata.write_text(
+                metadata.read_text(encoding="utf-8").replace(
+                    'data_software_citation_key = ""',
+                    'data_software_citation_key = "DATASET2026"',
+                ),
+                encoding="utf-8",
+            )
+            submission = target / "submission" / "demo-venue"
+            submission.mkdir()
+            (submission / "main.tex").write_text(
+                "\\documentclass{article}\n\\begin{document}\nReady.\n\\end{document}\n",
+                encoding="utf-8",
+            )
+
+            result = run_python_script(
+                SCRIPT,
+                "--root",
+                target,
+                "--allow-placeholders",
+                "--require-submission",
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("data/software citation key `DATASET2026` が `.bib` にありません", result.stdout)
 
     def test_mirror_freshness_strict_fails_on_warning(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

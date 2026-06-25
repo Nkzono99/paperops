@@ -13,7 +13,8 @@ description: 過去稿を封印して1から書き直す、scratch archive を�
 - 現在地が paper project root か不明なら `uvx --from paper-harness-cli pops doctor` を先に実行する。
 - archive は `manuscript/`、`submission/`、`notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/` を sealed split bundle として `_archives/<id>/` に置く。
 - `_handoff/` は既定では含めない。人間が明示した場合だけ `--include-handoff` を使う。
-- reset / restore は破壊的操作である。ユーザーが対象 archive id と実行意思を明示していない場合は、`--yes` を付けて実行しない。
+- `archive` は封印だけを行い、現行の作業層は残る。1から執筆へ戻す場合は `restart` を使う。
+- reset / restart / restore は破壊的操作である。ユーザーが対象 archive id または reset の実行意思を明示していない場合は、`--yes` を付けて実行しない。
 
 ## 封印する
 
@@ -35,7 +36,13 @@ make archive-seal-check
 
 ## 書き直す
 
-archive 作成後にだけ、現在の作業層を starter へ戻す。
+現行稿を封印してから現在の作業層を starter へ戻す。通常はこちらを使う。
+
+```sh
+uvx --from paper-harness-cli pops scratch restart --label "before major rewrite" --yes
+```
+
+`_handoff/` payload も封印したいと明示された場合は `--include-handoff` を付ける。archive 作成済みで reset だけ行う場合は次を使う。
 
 ```sh
 uvx --from paper-harness-cli pops scratch reset --yes
@@ -66,7 +73,7 @@ uvx --from paper-harness-cli pops scratch restore <archive-id> --yes
 - 作成または対象にした archive id
 - `_handoff/` を含めたか
 - `make archive-seal-check` の結果
-- reset / restore を実行した場合、置き換えた範囲と残る `_archives/`
+- restart / reset / restore を実行した場合、置き換えた範囲と残る `_archives/`
 
 ## Codex 実行メモ
 

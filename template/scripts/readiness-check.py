@@ -15,6 +15,7 @@ except ModuleNotFoundError:
 PLACEHOLDER_RE = re.compile(
     r"(paper-my-topic|YOUR_ORG/paperops|置き換えてください|未定|未記入|TBD|TODO|Untitled|著者名|所属|Title Goes Here|日本語論文タイトルの仮置き|Placeholder English Paper Title|Author A|Author B)"
 )
+UNCERTAIN_RE = re.compile(r"(未定|未記入|TBD|TODO|pending|draft|Title Goes Here|Author A|Author B)", re.I)
 
 
 @dataclass
@@ -83,7 +84,42 @@ def is_blank(value) -> bool:
     return False
 
 
-def check_metadata(root: Path, findings: list[Finding], allow_placeholders: bool) -> None:
+def bool_is_true(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "yes", "approved", "checked", "done"}
+    return False
+
+
+def collect_bib_keys(root: Path) -> set[str]:
+    keys: set[str] = set()
+    for path in sorted((root / "manuscript" / "shared" / "bib").glob("*.bib")):
+        text = read_text(path)
+        keys.update(match.group(1).strip() for match in re.finditer(r"@\w+\s*\{\s*([^,\s]+)", text))
+    return keys
+
+
+def check_required_bool(
+    metadata: dict,
+    dotted_key: str,
+    findings: list[Finding],
+    rel_path: str,
+    *,
+    require_submission: bool,
+) -> None:
+    value = get_nested(metadata, dotted_key)
+    severity = "error" if require_submission else "warning"
+    if not bool_is_true(value):
+        add(findings, severity, f"`{rel_path}` の `{dotted_key}` が承認されていません")
+
+
+def check_metadata(
+    root: Path,
+    findings: list[Finding],
+    allow_placeholders: bool,
+    require_submission: bool,
+) -> None:
     rel_path = "manuscript/publication-metadata.toml"
     path = require_file(root, rel_path, findings)
     if path is None:
@@ -107,25 +143,63 @@ def check_metadata(root: Path, findings: list[Finding], allow_placeholders: bool
         "licenses.manuscript",
     ]
     severity = "warning" if allow_placeholders else "error"
+    submission_severity = "error" if require_submission else severity
     for key in required_scalars:
         value = get_nested(metadata, key)
         if is_blank(value):
-            add(findings, severity, f"`{rel_path}` の `{key}` が未記入です")
+            add(findings, submission_severity, f"`{rel_path}` の `{key}` が未記入です")
 
     authors = metadata.get("authors")
     if not isinstance(authors, list) or not authors:
-        add(findings, severity, f"`{rel_path}` に `[[authors]]` がありません")
+        add(findings, submission_severity, f"`{rel_path}` に `[[authors]]` がありません")
     else:
         for index, author in enumerate(authors, start=1):
             if not isinstance(author, dict) or is_blank(author.get("name")):
-                add(findings, severity, f"`{rel_path}` の author {index} に名前がありません")
+                add(findings, submission_severity, f"`{rel_path}` の author {index} に名前がありません")
             if not isinstance(author, dict) or is_blank(author.get("affiliation")):
-                add(findings, "warning", f"`{rel_path}` の author {index} に affiliation がありません")
+                add(findings, submission_severity if require_submission else "warning", f"`{rel_path}` の author {index} に affiliation がありません")
+            if require_submission:
+                if not isinstance(author, dict) or is_blank(author.get("orcid")):
+                    add(findings, "error", f"`{rel_path}` の author {index} に ORCID がありません")
+                if not isinstance(author, dict) or is_blank(author.get("email")):
+                    add(findings, "error", f"`{rel_path}` の author {index} に email がありません")
+        if require_submission and not any(isinstance(author, dict) and bool_is_true(author.get("corresponding")) for author in authors):
+            add(findings, "error", f"`{rel_path}` に corresponding author がありません")
 
     for key in ["repository.url", "licenses.code", "licenses.data", "provenance.last_public_build_commit"]:
         value = get_nested(metadata, key)
         if is_blank(value):
-            add(findings, "warning", f"`{rel_path}` の `{key}` が未記入です")
+            add(findings, "error" if require_submission else "warning", f"`{rel_path}` の `{key}` が未記入です")
+
+    if not require_submission:
+        return
+
+    for key in [
+        "submission.conflict_of_interest",
+        "open_research.data_doi_or_persistent_url",
+    ]:
+        if is_blank(get_nested(metadata, key)):
+            add(findings, "error", f"`{rel_path}` の `{key}` が未記入です")
+
+    for key in [
+        "submission.suggested_reviewers_prepared",
+        "submission.front_matter_checked",
+        "open_research.data_software_citation_described",
+        "human_verification.pdf_reviewed",
+        "human_verification.citation_intent_checked",
+        "human_verification.ai_disclosure_approved",
+        "human_verification.central_assumptions_approved",
+        "human_verification.claim_gate_approved",
+    ]:
+        check_required_bool(metadata, key, findings, rel_path, require_submission=require_submission)
+
+    citation_key = get_nested(metadata, "open_research.data_software_citation_key")
+    if is_blank(citation_key):
+        add(findings, "error", f"`{rel_path}` の `open_research.data_software_citation_key` が未記入です")
+    else:
+        bib_keys = collect_bib_keys(root)
+        if str(citation_key) not in bib_keys:
+            add(findings, "error", f"data/software citation key `{citation_key}` が `.bib` にありません")
 
 
 def check_workflows(root: Path, findings: list[Finding], allow_placeholders: bool) -> None:
@@ -235,6 +309,41 @@ def check_submission_slot(root: Path, findings: list[Finding], require_submissio
         if not (venue_dir / "README.md").exists() and not (venue_dir / "main.tex").exists():
             severity = "error" if require_submission else "warning"
             add(findings, severity, f"`{rel_path}` に `README.md` または `main.tex` がありません")
+        if require_submission and (venue_dir / "main.tex").exists():
+            check_submission_frontmatter(root, venue_dir / "main.tex", findings)
+
+
+def check_submission_frontmatter(root: Path, main_tex: Path, findings: list[Finding]) -> None:
+    rel_path = main_tex.relative_to(root).as_posix()
+    text = read_text(main_tex)
+    frontmatter_patterns = [
+        r"\\title\{(?P<value>[^}]*)\}",
+        r"\\author\{(?P<value>[^}]*)\}",
+    ]
+    for pattern in frontmatter_patterns:
+        match = re.search(pattern, text, re.DOTALL)
+        value = match.group("value").strip() if match is not None else ""
+        if not value:
+            add(findings, "error", f"`{rel_path}` の front matter が未記入です")
+            break
+        if UNCERTAIN_RE.search(value):
+            add(findings, "error", f"`{rel_path}` の front matter にスターター用プレースホルダーが残っています")
+            break
+
+    keypoints_match = re.search(r"\\begin\{keypoints\}(?P<body>.*?)\\end\{keypoints\}", text, re.DOTALL | re.I)
+    if keypoints_match is not None:
+        keypoints = [line for line in keypoints_match.group("body").splitlines() if r"\item" in line]
+        body = keypoints_match.group("body")
+        if len(keypoints) < 2 or UNCERTAIN_RE.search(body):
+            add(findings, "error", f"`{rel_path}` の Key Points が未確定です")
+
+    abstract_match = re.search(r"\\begin\{abstract\}(?P<body>.*?)\\end\{abstract\}", text, re.DOTALL | re.I)
+    if abstract_match is not None and UNCERTAIN_RE.search(abstract_match.group("body")):
+        add(findings, "error", f"`{rel_path}` の Abstract が未確定です")
+
+    open_research_match = re.search(r"Open Research Statement\s*:?\s*(?P<body>.*)", text, re.I)
+    if open_research_match is None or UNCERTAIN_RE.search(open_research_match.group("body")):
+        add(findings, "error", f"`{rel_path}` の Open Research Statement が未確定です")
 
 
 def check_public_bibliography(root: Path, findings: list[Finding]) -> None:
@@ -285,7 +394,7 @@ def main() -> int:
         findings,
         args.allow_placeholders,
     )
-    check_metadata(root, findings, args.allow_placeholders)
+    check_metadata(root, findings, args.allow_placeholders, args.require_submission)
     check_workflows(root, findings, args.allow_placeholders)
     check_issue_templates(root, findings)
     check_paper_quality_notes(root, findings, args.allow_placeholders)
