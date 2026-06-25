@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.0 - 2026-06-25
+
 - `pops scratch restart` を追加し、`archive` だけでは現行 `manuscript/`、`submission/`、`notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/` が残る問題を避け、sealed archive 作成後に同じ repo を starter 状態へ戻せるようにした。`--include-handoff` 指定時は `_handoff/` payload も封印してから reset する。既存下流リポジトリで取り込む場合は、CLI 更新に加えて `/archive-scratch`、README、AGENTS / CLAUDE の archive 手順を更新する必要がある。
 - direct-engine fallback の BibTeX 実行時に `BIBINPUTS` / `BSTINPUTS` を絶対パスで設定し、`build/` ディレクトリから `bibtex main` を実行しても共有 `.bib`、`.bst`、投稿先 slot の style を解決できるようにした。既存下流リポジトリで取り込む場合は、`scripts/build-ja.sh`、`scripts/build-en.sh`、`scripts/build-submission.sh` を更新する必要がある。closes #69
 - 投稿前 `readiness-check --require-submission` を強化し、author ORCID / email / corresponding author、code/data license、Open Research DOI または persistent URL、data/software citation key の `.bib` 接続、human verification、投稿版 front matter / Key Points / Abstract / Open Research Statement の未確定値を error として検出するようにした。既存下流リポジトリで取り込む場合は、`manuscript/publication-metadata.toml` と `scripts/readiness-check.py` を更新し、投稿前に `[submission]`、`[open_research]`、`[human_verification]` を埋める必要がある。closes #70
