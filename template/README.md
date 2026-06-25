@@ -53,6 +53,7 @@
 - `refs/local/locations.toml`: 個人環境の実パス。Git 管理しない。
 
 過去稿を封印して同じ repo で書き直す場合は、`pops scratch archive`、`pops scratch reset`、`pops scratch restore` を使う。archive は `_archives/` に split bundle として置かれ、通常の skill は参照しない。
+Agent に任せる場合は `/archive-scratch` を使い、`_handoff/` 同梱や restore のような破壊的操作は明示してから実行する。
 
 `refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` に作る作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名などの識別子は英語のままでよい。
 
@@ -66,6 +67,7 @@
 - `/review-public-manuscript`, `/peer-review-manuscript`: 公開原稿や投稿前原稿を読者・査読者目線で読む。
 - `/respond-to-peer-review`: 実査読コメントへの返答を整理する。
 - `/integrate-writing-feedback`: 人間レビューや指示を上流カードと原稿へ反映する。
+- `/archive-scratch`: 過去稿を封印し、1から書き直すための reset / restore を安全に扱う。
 - `/open-paper-scan`: まだ記録や実装に固定せず、俯瞰的な違和感や改善案を出す。
 - `/feedback-paper-harness`: 再利用可能な摩擦を上流 `paperops` に戻す。
 

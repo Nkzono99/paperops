@@ -64,6 +64,7 @@ make figure-obligation-check
 - 通読レビュー: `/start-manuscript-review`, `/collect-manuscript-review`, `/integrate-writing-feedback`
 - 査読: `/review-public-manuscript`, `/peer-review-manuscript`, `/respond-to-peer-review`
 - 投稿前点検: `/plan-figure-story`, `/figure-story-audit`, `/venue-fit-review`, `/ai-disclosure-check`
+- アーカイブ・書き直し: `/archive-scratch`
 - 俯瞰・改善: `/open-paper-scan`, `/design-paper-storyline`, `/feedback-paper-harness`
 
 Codex では `.agents/skills/` の同名 skill を入口として使う。恒久的な手順変更は `.agents/skills/<skill>/SKILL.md` を更新する。

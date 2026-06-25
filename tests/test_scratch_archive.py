@@ -10,6 +10,40 @@ from tests.helpers import ROOT, run_cli, run_python_script
 
 
 class ScratchArchiveTest(unittest.TestCase):
+    def test_archive_scratch_skill_documents_safe_workflow(self) -> None:
+        agent_skill = ROOT / "template" / ".agents" / "skills" / "archive-scratch" / "SKILL.md"
+        claude_skill = ROOT / "template" / ".claude" / "skills" / "archive-scratch" / "SKILL.md"
+
+        self.assertTrue(agent_skill.is_file())
+        text = agent_skill.read_text(encoding="utf-8")
+        for required in [
+            "pops scratch archive",
+            "pops scratch list",
+            "pops scratch inspect",
+            "pops scratch restore",
+            "make archive-seal-check",
+            "_archives/",
+            "--include-handoff",
+        ]:
+            self.assertIn(required, text)
+        self.assertIn("通常の執筆", text)
+        self.assertIn("明示", text)
+
+        self.assertTrue(claude_skill.is_file())
+        self.assertIn(
+            "@${CLAUDE_SKILL_DIR}/../../../.agents/skills/archive-scratch/SKILL.md",
+            claude_skill.read_text(encoding="utf-8"),
+        )
+
+        docs = [
+            ROOT / "docs" / "skill-catalog.md",
+            ROOT / "template" / "README.md",
+            ROOT / "template" / "AGENTS.md",
+            ROOT / "template" / "CLAUDE.md",
+        ]
+        for path in docs:
+            self.assertIn("/archive-scratch", path.read_text(encoding="utf-8"), path.as_posix())
+
     def test_scratch_archive_reset_and_restore_uses_split_bundle(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"

@@ -25,6 +25,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `import-manuscript`: 既存原稿を取り込む。
 - `update-paperops`: 上流 scaffold 更新。
 - `pull-template-updates`: 旧名の互換入口。将来は短い redirect のみにする。
+- `archive-scratch` (`/archive-scratch`): 過去稿を sealed scratch archive として封印し、明示時だけ一覧・確認・reset・restore を行う。
 
 ### 参照・関連研究
 
