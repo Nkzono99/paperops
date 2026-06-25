@@ -1,7 +1,34 @@
 # notes/views
 
-`notes/views/` はカード層を人間が俯瞰するための集約ビューである。
+`notes/views/` はカード層を人間が俯瞰し、本文へ変換するときの判断を置くための view 層である。
 
-正本は `evidence/`、`claims/`、`review/`、`requests/` のカードである。ここには、現在の中心主張、result pattern、gate、中心仮定、claim upgrade blocker、査読対応、追加依頼、概念語ビューを一覧化する。必要なら手で更新してよいが、カードの status、依存関係、route と矛盾する場合はカード側を優先する。
+正本は `evidence/`、`claims/`、`review/`、`requests/` のカードである。カードの status、依存関係、route と矛盾する場合はカード側を優先する。
 
-`notes/views/concept-terms.md` は claim / argument / evidence card の意味を本文語彙へ写すときのビューである。concept-term compression、つまり強い英語名詞句への単語化を見つけたら、強調語として accepted にするか、普通の文へほどくか、avoid にして本文から外す。
+## View types
+
+`notes/views/` には二種類の view がある。
+
+### pure overview view
+
+pure overview view は、カード正本を人間が読むための集約である。必要なら手で更新してよいが、判断の正本は対応する card に戻す。
+
+- `claim-evidence-map.md`: claim / evidence / gate の総覧 cache。claim の正本は `claims/claims/`、gate の正本は `claims/gates/`、証拠の正本は `evidence/` に置く。
+- `result-pattern-map.md`: result / figure card の見取り図。result の正本は `evidence/results/` と `evidence/figures/` に置く。
+- `scientific-gate.md`: gate card を人間が読むための総覧。判定の正本は `claims/gates/` に置く。
+- `peer-review.md`: feedback / review round / response card の総覧。個別指摘の正本は `review/feedback/` に置く。
+- `research-requests.md`: analysis / writing request card の総覧。依頼の正本は `requests/` に置く。
+- `assumption-ledger.md`, `claim-upgrade-gates.md`: gate card の assumption や upgrade blocker を読むための view。
+
+### controlled authoring view
+
+controlled authoring view は、カード正本の意味を本文語彙や読者向け条件へ変換するための編集可能な統制ビューである。これは単なる派生 cache ではないが、科学的主張や証拠そのものの正本ではない。
+
+- `concept-terms.md`: claim / argument / evidence card の意味を本文語彙へ写すときの view。concept-term compression、つまり強い英語名詞句への単語化を見つけたら、強調語として accepted にするか、普通の文へほどくか、avoid にして本文から外す。
+- `condition-context-map.md`: local condition、denominator、case count、run inventory を読者向けの公開条件名へ変換する view。
+- `argument-map.md`: section role、reader job、本文順序、defense budget を本文構成へ写す view。argument card の正本は `claims/arguments/` に置く。
+
+## paper_ir への接続
+
+`paper_ir` は、カード正本と controlled authoring view から Writer に渡す context を作る生成一時物である。新しい手書き正本にはしない。
+
+section compiler は `paper_ir` を使って、Methods / Results / Discussion の reader question、answer、evidence、figure、caveat location、sentence budget、forbidden_terms を決める。Writer には生の card ontology を直接渡しすぎない。

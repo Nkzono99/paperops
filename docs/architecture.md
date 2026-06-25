@@ -1,6 +1,6 @@
 # アーキテクチャ
 
-`paperops` は、テンプレート保守と個別論文執筆を分ける。
+`paperops` は、テンプレート保守と個別論文執筆を分ける。目的は、AI に原稿を直接書かせることではなく、研究状態を検証可能な中間層へ整理し、承認済みの材料だけを論文本文へ変換することである。
 
 ## ルート層
 
@@ -30,7 +30,25 @@
 - `requests/`: analysis / writing request card
 - `notes/`: project brief、読者モデル、AI 利用、再現性、`notes/views/`
 
-`evidence/`、`claims/`、`review/`、`requests/` がカード正本で、`notes/views/` は人間が俯瞰するビューである。`notes/views/concept-terms.md` は、claim / argument / evidence card の意味を本文の語彙へ圧縮するときの概念語ビューとして扱い、単語化された表現を採用・展開・禁止へ分ける。旧 `notes/*.md` の一部は互換ビューとして残す。
+`evidence/`、`claims/`、`review/`、`requests/` がカード正本である。`notes/views/` は正本を人間と Agent が読むための view だが、すべてを単なる派生 cache として扱わない。
+
+## 層契約
+
+| 層 | 役割 | 正本性 | 主な更新入口 |
+| --- | --- | --- | --- |
+| `evidence/` | result / figure / source を論文上の証拠単位へ整理する | 正本 | `/map-result-patterns`, `/research-related-work` |
+| `claims/` | claim、scientific gate、argument を管理する | 正本 | `/scientific-gate`, `/design-manuscript-claims` |
+| `review/` | 人間レビュー、模擬査読、実査読 response を管理する | 正本 | `/integrate-writing-feedback`, `/peer-review-manuscript`, `/respond-to-peer-review` |
+| `requests/` | 追加解析や改稿依頼を管理する | 正本 | `/integrate-writing-feedback`, runops handoff |
+| `notes/views/` の pure overview view | 正本カードを俯瞰する | 派生 view | 該当 card 更新後に手動または半自動で更新 |
+| `notes/views/` の controlled authoring view | 本文での呼び方、条件名、概念語、読者向け語彙を統制する | 編集可能な統制 view | `/public-terminology-pass`, `/contextualize-conditions`, `/polish-ai-draft` |
+| `paper_ir` | card / view から Writer に渡す材料を section ごとにまとめる | 生成一時物 | `finish-manuscript` の section compiler phase |
+| `manuscript/` | 読者へ出す本文 | 成果物 | Writer / editor pass |
+| `submission/` | 投稿先に合わせた提出版 | 派生成果物 | `prepare-submission` 相当の投稿前作業 |
+| `_handoff/` | 未整理入力の一時置き場 | Git 管理しない | 人間入力、raw file intake |
+| `_archives/` | sealed scratch archive | 通常読まない封印物 | `pops scratch archive/restore` |
+
+`notes/views/concept-terms.md` と `notes/views/condition-context-map.md` は controlled authoring view として扱う。ここには「カード正本から見える意味」を本文語彙へ変換するときの判断を書く。
 
 ## 情報フロー
 
@@ -38,9 +56,40 @@
 2. Agent は必要に応じて feedback / evidence / claim / request card を更新する。
 3. Abstract、Conclusion、主要図表に使う claim は `claims/gates/` で readiness を確認する。
 4. 本文に出る強い名詞句は `notes/views/concept-terms.md` で確認し、accepted term、普通の文へほどく語、avoid 語を分ける。
-5. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
-6. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
-7. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
+5. 原稿を書く前に、必要な範囲で `paper_ir` を作る。
+6. section compiler が Methods / Results / Discussion それぞれの reader question、answer、evidence、figure、caveat location、sentence budget を決める。
+7. Writer は `paper_ir` と承認済み claim package を使って本文を書く。Writer に生の card ontology を直接渡しすぎない。
+8. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
+9. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
+10. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
+
+## paper_ir と section compiler
+
+`paper_ir` は、既存 card と controlled view から作る生成一時物である。新しい手書き正本にはしない。目的は、研究 integrity 層と文章層の間に、読者向けの変換契約を置くことである。
+
+`paper_ir` の最小単位は次を持つ。
+
+- `id`
+- `section`
+- `reader_question`
+- `answer`
+- `evidence`
+- `warrant`
+- `role`
+- `preceded_by`
+- `followed_by`
+- `caveat_location`
+- `sentence_budget`
+- `forbidden_terms`
+- `plain_language_terms`
+
+section compiler は、`finish-manuscript` の中で Writer の前に走る段階として扱う。
+
+- `compile-methods`: method unit ごとに、本文 / supplement / code への配分、非標準性、結果感度、再実装に必要な情報を決める。
+- `compile-results`: reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence の順に、結果の読み順を作る。
+- `compile-discussion`: observation / inference / mechanism_hypothesis / alternative_explanation / implication / prediction / limitation を分ける。
+
+これにより、AI が持っている情報を均等に説明したり、内部 label を本文へ漏らしたり、limitation だけを過剰に複製したりする失敗を減らす。
 
 ## 設計原則
 
@@ -48,4 +97,5 @@
 - `pops update-paperops` はハーネス管理ファイルだけを更新し、下流固有の原稿・notes・refs・カードを自動上書きしない。
 - 作業用ドキュメントは原則日本語で書く。識別子、citation key、TOML field name は英語のままでよい。
 - raw PDF、未整理ファイル、個人環境の絶対パス、confidential correspondence は tracked な共有ファイルへ混ぜない。
-- 検証はローカルでも CI でも短時間で回せる粒度に保つ。
+- `paper_ir` や session context のような生成一時物は、明示的な starter artifact でない限り Git 管理しない。
+- 検証は strict / advisory / diagnostic を分ける。管理のための checklist を、文章生成の generator として使いすぎない。

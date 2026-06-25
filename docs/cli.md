@@ -15,7 +15,11 @@ uvx --from paper-harness-cli pops doctor
 
 `pops init` / `pops setup` は `.pops/manifest.toml` を作成するが、CLI 用の project-local `.venv` は作らない。`.venv` は論文プロジェクト用の Python 環境が必要な場合に `make venv` で作る。
 
-下流の `make ci` には、argument focus、concept-term compression、main-text figure reference、claim evidence、外部 bundle import state、research request handoff、カード層などの advisory checks も含まれる。
+下流の Makefile は、確認を三つの profile に分ける。
+
+- `make ci`: 構造、引用、mirror、公開語彙、カード層、link、build fallback など、壊れていると作業を続けにくい項目を確認する。
+- `make audit`: argument focus、concept-term compression、main-text figure reference、claim evidence、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
+- `make pre-submit`: `ci` と `audit` に加え、concept term、figure reference、research request handoff、external import、readiness を投稿前 profile として厳しめに確認する。
 
 ## コマンド一覧
 
@@ -75,9 +79,13 @@ uvx --from paper-harness-cli pops links check
 
 `kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。追加解析や図表要望は `requests/analysis/` に切り出してから runops 側へ渡す。
 
-runops queue へ渡す予定の request は、下流 repo で `make research-request-handoff-check` を実行して確認する。通常は warning のみで、`python scripts/check-research-request-handoff.py --root . --strict` は投稿前や queue handoff の完了判定に使う。
+runops queue へ渡す予定の request は、下流 repo で `make research-request-handoff-check` または `make audit` を実行して確認する。通常は warning のみで、`python scripts/check-research-request-handoff.py --root . --strict` は投稿前や queue handoff の完了判定に使う。
 
-外部 export bundle を図表・表・claim evidence に使う場合は、`refs/imports/` に import state を記録し、`make external-import-check` を実行する。
+外部 export bundle を図表・表・claim evidence に使う場合は、`refs/imports/` に import state を記録し、`make external-import-check` または `make audit` を実行する。
+
+## paper_ir
+
+`paper_ir` は、card 正本と controlled authoring view から Writer に渡す context を作る生成一時物である。`pops` の永続管理対象ではなく、通常は skill が必要に応じて作る。手書き正本は `evidence/`、`claims/`、`review/`、`requests/` に置き、`paper_ir` は Methods / Results / Discussion の section compiler へ渡す一時的な変換結果として扱う。
 
 ## Scratch Archives
 

@@ -19,10 +19,11 @@
 
 1. `/resume-session` で前回の状態を読む。
 2. 今日扱う claim、evidence、feedback、request を確認する。
-3. `manuscript/ja/` を中心に書く。
-4. 必要な block を `manuscript/en/` に同期する。
-5. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
-6. 共有前は `make ci`、投稿前は `make pre-submit` を実行する。
+3. 必要なら `paper_ir` と section compiler で Results / Discussion / Methods の読者向け構造を作る。
+4. `manuscript/ja/` を中心に書く。
+5. 必要な block を `manuscript/en/` に同期する。
+6. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
+7. 共有前は `make ci` と `make audit`、投稿前は `make pre-submit` を実行する。
 
 ## 中間層
 
@@ -30,9 +31,9 @@
 - `claims/`: claim / scientific gate / argument card の正本
 - `review/`: feedback / review round / response card の正本
 - `requests/`: analysis / writing request card の正本
-- `notes/views/`: カード正本を人間が俯瞰するビュー
+- `notes/views/`: pure overview view と controlled authoring view
 
-旧 `notes/*.md` の一部は互換ビューであり、正本は上のカード層に置く。
+旧 `notes/*.md` の一部は互換ビューであり、正本は上のカード層に置く。`paper_ir` は card と controlled view から Writer に渡す context を作る生成一時物であり、手書き正本にはしない。
 
 ## 情報の置き場所
 
@@ -53,6 +54,7 @@
 
 - `/source-reach-scan`, `/research-related-work`: 外部 source と関連研究を整理する。
 - `/map-result-patterns`, `/scientific-gate`: 結果を証拠カードにし、主張として書けるか判定する。
+- `/finish-manuscript`: `/goal` で原稿完成まで進め、Writer 前に `paper_ir` と section compiler を通す。
 - `/review-public-manuscript`, `/peer-review-manuscript`: 公開原稿や投稿前原稿を読者・査読者目線で読む。
 - `/respond-to-peer-review`: 実査読コメントへの返答を整理する。
 - `/integrate-writing-feedback`: 人間レビューや指示を上流カードと原稿へ反映する。

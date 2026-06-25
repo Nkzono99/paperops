@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `paper_ir` と section compiler の仕様を追加した。card 正本と controlled authoring view から Writer 用 context を生成一時物として作り、Results / Discussion / Methods の読者向け構造へ変換してから本文を書く方針を docs、downstream AGENTS / CLAUDE、`finish-manuscript` に反映した。あわせて `make ci` を構造確認、`make audit` を advisory authoring checks、`make pre-submit` を投稿前 profile として分離し、template Makefile の Python fallback を Windows-safe にした。
 - `latexmk` がない環境でも `PAPER_TEMPLATE_RUN_LATEX=1` 時に direct-engine fallback を試すようにした。JA は `xelatex`、EN は `lualatex` を優先し、`bibtex` と追加 LaTeX pass を走らせ、PDF 未生成や `Missing character` を明確に失敗として扱う。
 - 公開原稿と notes の読みやすさ guard を強化した。`target-snapshot sample`、`exposure diagnostic`、`not evidence` などの内部 analysis label / defensive wording を starter terminology で検出し、`notes/**/*.md` の label-only 行には前提・判断根拠・本文への影響を書くよう `argument-focus-check` が警告する。
 - 論文 claim gate と査読ループのカードを拡張した。central assumption ledger、claim stress-test、external validation gate、path criterion、evidence-design coverage、figure state visualization、response closure audit を scaffold と skill に追加し、AI が補助 artifact や応急的な原稿修正を claim support / review closure と誤読しにくくした。

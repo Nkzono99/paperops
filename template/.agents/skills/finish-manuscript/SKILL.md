@@ -9,6 +9,8 @@ description: Use when /goal asks Codex to finish a manuscript from scratch or re
 
 この skill は監督役であり、既存の専門 skill を置き換えない。本文だけを局所修正せず、必要な指摘を `review/feedback/`、`claims/`、`evidence/`、`refs/`、`requests/`、`manuscript/` へ遡って反映する。
 
+Writer に生の card ontology を直接渡さない。本文生成の前に、必要な card と controlled authoring view から `paper_ir` を作り、section compiler で Methods / Results / Discussion の読者向け契約へ変換する。
+
 ## 最初に決める
 
 `/goal` で使われている場合、goal は「投稿可能な原稿と検証済みの対応記録を作る」と具体化する。途中で広がりすぎたら、今の blocker、次の review loop、Finish criteria の未達項目へ戻る。
@@ -37,6 +39,36 @@ description: Use when /goal asks Codex to finish a manuscript from scratch or re
 
 `_archives/` は sealed scratch archive であり、通常の from-scratch / revision / peer review loop では読まない。ユーザーが明示的に restore / inspect / compare を頼んだ場合だけ `pops scratch` 経由で扱う。
 
+## paper_ir phase
+
+`paper_ir` は生成一時物であり、手書き正本ではない。`claims/`、`evidence/`、`review/`、`requests/` と `notes/views/` から、Writer に渡す最小 context を section ごとに作る。
+
+各 IR item には、必要な範囲で次を含める。
+
+- `reader_question`
+- `answer`
+- `evidence`
+- `warrant`
+- `role`
+- `preceded_by`
+- `followed_by`
+- `caveat_location`
+- `sentence_budget`
+- `forbidden_terms`
+- `plain_language_terms`
+
+### compile-results
+
+`compile-results` は、結果を実施順や保有情報順ではなく、読者の疑問順に並べる。各 subsection は `reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence` の順にする。caveat は主張の意味を変える場合だけ置く。
+
+### compile-discussion
+
+`compile-discussion` は、claim を `observation`、`inference`、`mechanism_hypothesis`、`alternative_explanation`、`implication`、`prediction`、`limitation` に分ける。Discussion では新しい実験事実を増やさず、観察から解釈命題、機構、含意、識別可能な予測へ進める。
+
+### compile-methods
+
+`compile-methods` は、method unit ごとに本文 / supplement / code の配分を決める。非標準か、結果がその選択に敏感か、読者が再実装するために必要か、引用で代替できるかを見て、bookkeeping と物理モデル説明を混同しない。
+
 ## From-scratch lane
 
 1から書く場合は、文章生成へ急がず、先に論文としての骨格を作る。
@@ -46,9 +78,10 @@ description: Use when /goal asks Codex to finish a manuscript from scratch or re
 3. raw result がある場合は `map-result-patterns` で result pattern / evidence packet にする。
 4. 中心主張、Abstract、Conclusion、main figure caption の前に `scientific-gate` を通す。
 5. `design-manuscript-claims` で core claim、essential results、keep / compress / move / cut を決める。
-6. human approval が必要な assumption、claim scope、投稿先 fit を明示し、承認なしに中心主張へ昇格しない。
-7. `manuscript/ja/` を source-of-truth として draft し、必要に応じて `paragraph-surgery` と `polish-ai-draft` で整える。
-8. `sync-ja-en`、`figure-story-audit`、`public-terminology-pass`、`concept-term-check`、`ai-disclosure-check` を必要範囲で通す。
+6. `paper_ir` phase で compile-results / compile-discussion / compile-methods を必要範囲で通す。
+7. human approval が必要な assumption、claim scope、投稿先 fit を明示し、承認なしに中心主張へ昇格しない。
+8. `manuscript/ja/` を source-of-truth として draft し、必要に応じて `paragraph-surgery` と `polish-ai-draft` で整える。
+9. `sync-ja-en`、`figure-story-audit`、`public-terminology-pass`、`concept-term-check`、`ai-disclosure-check` を必要範囲で通す。
 
 ## Revision lane
 

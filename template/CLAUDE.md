@@ -8,7 +8,7 @@
 
 - `pops` は `uvx --from paper-harness-cli pops ...` で実行する。
 - 人間は主に原稿レビューや自然文の指示を出す。Agent は必要に応じて `/integrate-writing-feedback` で feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
-- `evidence/`、`claims/`、`review/`、`requests/` はカード正本である。`notes/views/` は俯瞰ビュー、旧 `notes/*.md` の一部は互換ビューとして扱う。
+- `evidence/`、`claims/`、`review/`、`requests/` はカード正本である。`notes/views/` は pure overview view と controlled authoring view を含む。旧 `notes/*.md` の一部は互換ビューとして扱う。
 - `refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` の作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名は英語のままでよい。
 - raw PDF、未整理ファイル、個人環境の絶対パス、confidential reviewer correspondence は tracked file へ混ぜない。
 - `_handoff/` は人間から AI への一時受け取り箱であり、内容は Git 管理しない。
@@ -23,13 +23,14 @@ uvx --from paper-harness-cli pops update-paperops --plan
 uvx --from paper-harness-cli pops links check
 
 make ci
+make audit
 make pre-submit
 make paper-layer-card-check
 make concept-term-check
 make figure-reference-check
 ```
 
-`make ci` は日常確認、`make pre-submit` は投稿・外部共有前の確認に使う。TeX 環境がない場合、ビルド系 helper は構造検証へフォールバックする。
+`make ci` は構造と壊れやすい不整合の確認、`make audit` は執筆品質の advisory check、`make pre-submit` は投稿・外部共有前の厳しめ確認に使う。TeX 環境がない場合、ビルド系 helper は構造検証へフォールバックする。
 
 ## 執筆フロー
 
@@ -38,11 +39,12 @@ make figure-reference-check
 3. 必要なら `/map-result-patterns` で raw result や figure data を evidence card にする。
 4. 外部 export bundle を使う場合は `refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-6. 強い英語名詞句や hyphen / slash compound は `notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
-7. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
-8. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
-9. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映する。
-10. 共有前に `make ci`、投稿前に `make pre-submit` を実行する。
+6. Writer の前に、必要な card と controlled authoring view から `paper_ir` を作り、Results / Discussion / Methods の section compiler で読者向け構造へ変換する。
+7. 強い英語名詞句や hyphen / slash compound は `notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
+8. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
+9. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
+10. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映する。
+11. 共有前に `make ci` と `make audit`、投稿前に `make pre-submit` を実行する。
 
 ## スキル入口
 
@@ -71,7 +73,7 @@ evidence/            result / figure / source card
 claims/              claim / scientific gate / argument card
 review/              feedback / review round / response card
 requests/            analysis / writing request card
-notes/views/         カード正本を人間が俯瞰するビュー
+notes/views/         pure overview view と controlled authoring view
 notes/               project brief、読者モデル、AI 利用、再現性、handoff、decision log
 .agents/skills/      Codex 用 project skill
 .claude/skills/      Claude Code 用 wrapper
