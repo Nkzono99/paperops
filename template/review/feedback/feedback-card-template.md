@@ -10,6 +10,7 @@ issue_type: overclaim
 severity: major
 upstream_routes:
   - claim_scope_change
+route_explanation: ""
 status: open
 related_cards: []
 created: YYYY-MM-DD
@@ -25,6 +26,8 @@ updated: YYYY-MM-DD
 ## なぜ本文だけでは済まないか
 
 原稿表現だけの問題か、claim / evidence / gate / figure / request へ戻す必要があるかを書く。
+
+`upstream_routes` の label だけで終わらせず、route_explanation に前提、判断根拠、本文 claim への影響、閉じる条件を普通の文で書く。
 
 ## Upstream routes
 

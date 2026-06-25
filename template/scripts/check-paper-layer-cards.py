@@ -33,6 +33,8 @@ REQUIRED_FILES = [
     "notes/views/scientific-gate.md",
     "notes/views/argument-map.md",
     "notes/views/condition-context-map.md",
+    "notes/views/assumption-ledger.md",
+    "notes/views/claim-upgrade-gates.md",
     "notes/views/peer-review.md",
     "notes/views/research-requests.md",
 ]
@@ -59,6 +61,8 @@ LEGACY_VIEW_FILES = [
     "notes/scientific-gate.md",
     "notes/argument-map.md",
     "notes/condition-context-map.md",
+    "notes/assumption-ledger.md",
+    "notes/claim-upgrade-gates.md",
     "notes/peer-review.md",
     "notes/research-requests.md",
 ]

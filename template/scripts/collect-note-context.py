@@ -14,6 +14,8 @@ SECTIONS = [
     ("結果パターン", ["notes/views/result-pattern-map.md", "notes/result-pattern-map.md"]),
     ("主張と証拠", ["notes/views/claim-evidence-map.md", "notes/claim-evidence-map.md"]),
     ("論旨設計", ["notes/views/argument-map.md", "notes/argument-map.md"]),
+    ("中心仮定", ["notes/views/assumption-ledger.md", "notes/assumption-ledger.md"]),
+    ("主張強化ゲート", ["notes/views/claim-upgrade-gates.md", "notes/claim-upgrade-gates.md"]),
     ("関連研究", "notes/related-work-map.md"),
     ("外部ソース到達", "notes/source-reach.md"),
     ("条件文脈", ["notes/views/condition-context-map.md", "notes/condition-context-map.md"]),

@@ -4,6 +4,7 @@
 
 - `latexmk` がない環境でも `PAPER_TEMPLATE_RUN_LATEX=1` 時に direct-engine fallback を試すようにした。JA は `xelatex`、EN は `lualatex` を優先し、`bibtex` と追加 LaTeX pass を走らせ、PDF 未生成や `Missing character` を明確に失敗として扱う。
 - 公開原稿と notes の読みやすさ guard を強化した。`target-snapshot sample`、`exposure diagnostic`、`not evidence` などの内部 analysis label / defensive wording を starter terminology で検出し、`notes/**/*.md` の label-only 行には前提・判断根拠・本文への影響を書くよう `argument-focus-check` が警告する。
+- 論文 claim gate と査読ループのカードを拡張した。central assumption ledger、claim stress-test、external validation gate、path criterion、evidence-design coverage、figure state visualization、response closure audit を scaffold と skill に追加し、AI が補助 artifact や応急的な原稿修正を claim support / review closure と誤読しにくくした。
 - Skill context budget warning の導線を追加した。`TROUBLESHOOTING.md` と `pops doctor` で、warning は skill 本体が読めない通知ではなく description 圧縮であること、通常執筆・GitHub・解析時の plugin profile 目安を示す。
 - `pops scratch archive/reset/restore/list/inspect` を追加し、同じ論文 repo 内で現行の `manuscript/`、`notes/`、`refs/`、カード層などを `_archives/` の split bundle に封印してから1から書き直せるようにした。archive part は既定で 48 MiB に分割し、通常の AI 執筆では `_archives/` を読まないルールと `archive-seal-check` を追加した。
 

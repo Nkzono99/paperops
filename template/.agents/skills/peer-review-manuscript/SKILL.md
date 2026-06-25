@@ -46,6 +46,10 @@ description: Use when reviewing a manuscript as a strict peer reviewer before su
 - `Clarity`: reader が research question、figure story、limitation を追えるか
 - `Reproducibility`: data / code / parameter / environment / reference が確認できるか
 - `Ethics / AI-use / confidentiality`: AI 利用、第三者原稿、査読依頼、非公開情報の扱いが適切か
+- `Line-level public readability`: 未定義語、内部 analysis label、過剰な名詞句、列挙、defensive caveat が読者に負荷をかけないか
+- `Rendered figure readability`: PDF または生成済み figure image を実際に見て、first figure、axis、caption、standard visualization が読めるか
+- `Source-of-truth language`: bilingual repo では source-of-truth language と mirror language の両方で、人間が書いた論文として自然か
+- `Anti-defensive prose`: limitation と review-response 由来の防御的説明を分け、Abstract / Conclusion / caption が claim-first になっているか
 
 ユーザーが点数を求めた場合だけ、0-100 などの score を併記する。点数は診断の補助であり、コメントの根拠を置き換えない。
 
@@ -60,6 +64,13 @@ description: Use when reviewing a manuscript as a strict peer reviewer before su
 | R3 | 再現性、図表、読者理解、構成、Data/Code availability |
 
 必要に応じて R4 を skeptical generalist、R5 を related-work / competing-explanation reviewer として追加する。subagent を使う場合はユーザーが明示的に許可したときだけにし、公開アーティファクトだけを渡す。
+
+通常の scientific review とは別に、次の gate を明示する:
+
+- line-level public readability reviewer: block ID ごとに rewrite-now / move-to-notes / define-denominator / open-research-request を出す。
+- source-of-truth language reviewer: JA source-of-truth と EN mirror の両方を読み、英語だけでは見えない不自然さを拾う。
+- rendered figure reviewer: figure image または PDF を見た場合だけ pass にする。読めない場合は `not inspected` と書き、caption 推測で通さない。
+- anti-defensive prose reviewer: `not evidence`、`not used for ranking`、`does not prove` 型の文を、必要な limitation か defensive prose かに分ける。
 
 各 reviewer は次の形にする:
 
@@ -89,6 +100,8 @@ Concern matrix を作る:
 | --- | --- | --- | --- | --- | --- |
 | PR-001 | 未記入 | blocking / major / minor | R1,R2 | section / figure | manuscript / figure / analysis / refs / response-only |
 
+各 concern には必要に応じて `scientific-blocker`、`readability-blocker`、`figure-rendering-blocker`、`public-vocabulary-blocker` を別列またはタグで付ける。
+
 ### 5. Repo-aware routing
 
 ユーザーが記録や修正を求めた場合だけ、repo 内部文脈を読んで対応先を決める。
@@ -110,6 +123,7 @@ Concern matrix を作る:
 - `Reviewer reports`: R1 / R2 / R3 の summary, major, minor, required checks, recommendation
 - `Meta-review`: consensus、共通懸念、固有懸念、採否リスク
 - `Concern matrix`: concern ID、severity、raised by、route
+- `Readability / figure gates`: line-level public readability、source-of-truth language、rendered figure、anti-defensive prose の結果
 - `Revision priorities`: now / next / later
 - `Routing`: 後段 skill と更新先 notes
 - `Confidentiality / AI-use note`: AI review 利用時の開示・ポリシー確認メモ

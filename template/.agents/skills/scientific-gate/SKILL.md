@@ -18,6 +18,8 @@ Academic Research Skills の pipeline / integrity gate / material provenance の
 - `notes/views/scientific-gate.md`
 - `notes/views/result-pattern-map.md`
 - `notes/views/claim-evidence-map.md`
+- `notes/views/assumption-ledger.md`
+- `notes/views/claim-upgrade-gates.md`
 - `notes/related-work-map.md`
 - `notes/reviewer-model.md`
 - `notes/reproducibility.md`
@@ -51,8 +53,14 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 - figure/table、manuscript block
 - artifact / script / input / provenance link
 - 外部 bundle import state、source index / integrity manifest、source commit / dirty state、artifact category、`must_not_claim`
+- central_assumptions、claim_stress_tests、external_validation_gates、path_criterion、evidence_design
 - 文献・関連研究の support と反論
 - independence、convergence、sensitivity、selection、negative/null case
+- path-dependent claim では endpoint work、cumulative work、energy barrier、from-rest subset、force threshold。endpoint != reachability を前提にし、`W_final > 0` を release from rest の十分条件として書かない。
+- evidence-design coverage。count / fraction / percentage / maximum / screening / time-correlated saved snapshots には denominator、unit of analysis、independence caveat、same denominator / same criterion、validated scope、not covered を書く。
+- central assumption ledger。artifact role を measured model / validated solver output / proxy / sensitivity / authoring guard に分け、proxy や sensitivity を claim support に昇格しない。
+- claim stress-test。各 claim component について stress input、stress outcome、allowed wording、must-not-claim、nearest caveat、source artifacts を書く。
+- external validation needs。外部測定、文献拘束、追加 model validation が未通過の row は claim support ではなく claim upgrade blocker として扱い、Abstract / Conclusion / Key Points / main caption へ昇格させない。
 - method novelty claim の direct comparator status。同じ総量、同じ物理条件、同じ estimator、同じ denominator の matched comparator が無い場合、比較表現ではなく representation scope として書く。
 - run completion、final snapshot、physical equilibrium、calibrated exposure、independent snapshots の status。完了計算や最終時刻を steady state / 帯電平衡として扱わない。
 - current manuscript figure set と figure role。外部 crosswalk candidate の Main Figure label は、現行本文の `includegraphics` と figure card / review response で再確認する。
@@ -62,6 +70,7 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 
 数値、分母、単位、条件名、比較対象が不一致なら `analysis-needed` にする。時系列 snapshot、screening result、最大値、favorable condition を主要証拠に使う場合は、estimand と scope を明記する。
 直接対照が未実施の方法新規性 claim、time-history の completion を equilibrium に読む claim、現行 figure set とずれた crosswalk candidate は `analysis-needed` または `assumption-blocked` にする。
+method sanity、workflow QA、readiness table、overclaim consistency audit、condition matrix、claim stress-test、external validation needs は、存在しても full numerical verification や review closure ではない。
 
 ## 手順
 
@@ -71,8 +80,9 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 4. `notes/reproducibility.md`、`refs/links.toml`、`refs/imports/`、`notes/source-reach.md` から provenance と再現可能性を確認する。外部 bundle 由来の evidence は `make external-import-check` の warning を確認する。
 5. `notes/related-work-map.md` と `refs/summaries/` から関連研究、反論、引用可能な support を確認する。
 6. 各 claim を gate status へ分類し、gate card に block reason と次の route を書く。
-7. `ready-to-write` の claim だけ、本文や caption で使える scope statement を作る。
-8. 人間承認が必要な assumption は、AI が勝手に受容せず gate card と `notes/views/scientific-gate.md` の approval log に残す。
+7. central assumptions、claim stress tests、external validation gates がある場合は、`notes/views/assumption-ledger.md` と `notes/views/claim-upgrade-gates.md` にも俯瞰用の row を残す。
+8. `ready-to-write` の claim だけ、本文や caption で使える scope statement を作る。
+9. 人間承認が必要な assumption は、AI が勝手に受容せず gate card と `notes/views/scientific-gate.md` の approval log に残す。
 
 ## Role pass
 
@@ -90,6 +100,9 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 - `Claim readiness table`
 - `Blocking issues`
 - `Approved writing scope`
+- `Allowed wording / must-not-claim`
+- `Assumption ledger updates`
+- `Claim stress-test / external validation gate updates`
 - `Assumption approvals needed`
 - `Routes`: `/map-result-patterns`、`/research-related-work`、`/source-reach-scan`、`/calibrate-claims`、`/figure-story-audit`、`/peer-review-manuscript`、`requests/analysis/`
 - `Files updated`

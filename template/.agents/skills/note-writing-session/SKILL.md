@@ -19,6 +19,7 @@ description: 作業セッションの終了近くにセッション進捗を記�
 8. AI が文献、解析、コード、図表、投稿文面、査読・返答案に関与した場合は `notes/ai-use.md` を更新する。AI 初稿の文体 polish を行った場合は `notes/ai-draft-polish.md` に claim lock と変更範囲を残す。
 9. データ、解析環境、図表生成、共有 artifact が変わった場合は `notes/reproducibility.md` を更新する。
 10. 公開本文に出さない run label、export 名、directory 名、script 名、artifact 名などは、本文ではなく `notes/reproducibility.md`、`notes/handoff.md`、`refs/` の日本語作業メモに分離して記録する。
+11. `resolution_route`、`closure_status`、`runops_id`、`RR-0000` などの route/status label は field として残してよいが、同じ bullet または隣接行に prose explanation を置く。前提、判断根拠、本文 claim への影響、未解決条件が読めない label-only note を残さない。
 
 ## 推奨出力
 
@@ -36,5 +37,6 @@ description: 作業セッションの終了近くにセッション進捗を記�
 - 模擬査読や reviewer response の進捗は `review/` と `notes/views/peer-review.md` に残す。
 - データ、解析環境、図表生成、共有 artifact が変わった場合は `notes/reproducibility.md` を更新する。
 - 恒久的な判断と一時的な作業メモを混ぜない。
+- route/status label は便利な圧縮語として使ってよいが、後続の人間や弱いモデルが前提を復元できる prose explanation を併記する。
 - `refs/` と `notes/` の作業用ドキュメントは日本語で書き、内部 provenance 語を公開本文へ戻さない。
 - 原稿構造、参考文献、ミラー状態を変えた場合は `make ci` または該当チェックを実行する。

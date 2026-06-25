@@ -38,8 +38,11 @@ description: Use when collecting TeX review diffs and inline comments into a rev
    - inline comment の論点
    - 人間の表現修正から推定できる好み
    - 科学的意味が変わる可能性のある変更
+   - inline comment ごとの resolution_route: manuscript-change-closed / manuscript-clarified-open-analysis / moved-to-research-request / moved-to-harness-feedback / figure-redesign-open / human-decision-open
+   - route/status label に対する prose explanation
    - open question
 5. 本文を直す前に、反映方針を提示する。科学的意味、主張、証拠、図表、追加解析に関わる指摘は `/integrate-writing-feedback` に渡し、`review/feedback/` の feedback card から上流へ遡らせる。ユーザーが明示的に「反映して」「修正して」「apply」などを依頼している場合も、本文だけで済む修正か feedback card 化が必要な修正かを分ける。
+6. response matrix へ渡す場合、raw comment を保存せず、要約、resolution_route、prose explanation、closure_status、not_closed_reason、next_required_evidence を残す。`figure-redesign-open` や `moved-to-research-request` の label だけで終わらせない。
 
 ## Apply フェーズ
 
@@ -64,6 +67,7 @@ description: Use when collecting TeX review diffs and inline comments into a rev
 - `Review ledger`: 生成または更新した `notes/reviews/review-YYYY-MM-DD.md`
 - `Collected comments`: marker、file、line、block の要約
 - `Diff interpretation`: 直接編集から見える表現方針
+- `Resolution routing`: resolution_route と prose explanation
 - `Apply plan`: source-of-truth、対象 block、EN mirror への反映要否
 - `Open questions`: 人間判断が必要な論点
 - `Edits applied`: 実際に変更したファイル

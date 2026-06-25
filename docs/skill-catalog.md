@@ -29,7 +29,7 @@
 ### 主張・証拠
 
 - `map-result-patterns`: raw result や figure data を evidence card へ束ねる。
-- `scientific-gate`: 中心主張を Abstract / Conclusion / main figure に出してよいか判定する。
+- `scientific-gate`: 中心主張を Abstract / Conclusion / main figure に出してよいか、中心仮定や claim upgrade blocker も含めて判定する。
 - `design-manuscript-claims`: 作業報告型の原稿を主張中心に再設計する。
 - `calibrate-claims`: evidence strength に合わせて主張の強さを調整する。
 - `contextualize-conditions`: 条件数や run inventory を論文上の比較へ翻訳する。
@@ -47,15 +47,15 @@
 ### レビュー
 
 - `review-public-manuscript`: 公開原稿だけを外部読者視点で読む。
-- `peer-review-manuscript`: 投稿前原稿を査読者パネルとして読む。
-- `respond-to-peer-review`: editor / reviewer comments を response matrix と revision plan に分ける。
+- `peer-review-manuscript`: 投稿前原稿を査読者パネルとして読み、科学面、line-level readability、rendered figure を分けて見る。
+- `respond-to-peer-review`: editor / reviewer comments を response matrix、closure audit、revision plan に分ける。
 - `start-manuscript-review`: 人間の通読レビューを開始する。
 - `collect-manuscript-review`: TeX diff と inline comment を回収する。
 - `integrate-writing-feedback`: 人間レビューや自然文指示を feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
 
 ### 投稿前点検
 
-- `figure-story-audit`: figure/table が claim、decision boundary、本文参照、現行 figure role を支えているか点検する。
+- `figure-story-audit`: figure/table が claim、decision boundary、path criterion、denominator、state visualization、本文参照を支えているか点検する。
 - `venue-fit-review`: 投稿先・読者モデルとの fit を確認する。
 - `ai-disclosure-check`: AI 利用開示と人間検証を確認する。
 

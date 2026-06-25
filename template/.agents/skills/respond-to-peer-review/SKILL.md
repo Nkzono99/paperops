@@ -64,6 +64,16 @@ reviewer の文脈を壊さず、扱いやすい単位へ分割する。
 | --- | --- | --- | --- | --- | --- | --- |
 | R1-001 | 未記入 | accept-change / rebut / clarify | file/block/figure | note/ref/result | human / AI | open |
 
+closure audit を必ず追加する。
+
+| comment ID | resolution_route | prose explanation | closure_status | not_closed_reason | next_required_evidence |
+| --- | --- | --- | --- | --- | --- |
+| R1-001 | manuscript-change-closed / manuscript-clarified-open-analysis / moved-to-research-request / moved-to-harness-feedback / figure-redesign-open / human-decision-open | 未記入 | closed / first-pass-addressed / partially-addressed / scope-corrected-open / analysis-open / human-decision-open | 未記入 | 未記入 |
+
+`resolution_route` や `closure_status` の label だけで終わらせない。prose explanation には、前提、対応した変更、まだ閉じていない科学的要求、本文 claim への影響を書く。
+
+`manuscript_change` があるだけでは `closed` にしない。open research request、未実施の比較、未検証 artifact、human decision が残る場合は `analysis-open`、`scope-corrected-open`、または `partially-addressed` にする。
+
 ### 4. Revision plan を作る
 
 修正先を分ける:
@@ -97,6 +107,7 @@ line/page number は最終レイアウト確定後に入れる。未確定なら
 - `Comment inventory`: editor / reviewer ごとの comment ID
 - `Triage`: accept / clarify / add-analysis / add-reference / rebut / scope-limit / response-only / ask-human
 - `Response matrix`: 対応方針、変更先、証拠、status
+- `Closure audit`: resolution_route、prose explanation、closure_status、not_closed_reason、next_required_evidence
 - `Revision plan`: 実装順序と検証
 - `Draft response letter`: editor / reviewer ごとの下書き
 - `Files to update`: notes、refs、manuscript、figures
@@ -115,6 +126,7 @@ line/page number は最終レイアウト確定後に入れる。未確定なら
 
 - `manuscript/mirror/status.md` で source-of-truth を確認する。
 - `review/feedback/` や `notes/views/peer-review.md` を更新する場合は raw quote ではなく要約と comment ID を中心にする。
+- raw comment を保存せず、要約、resolution_route、prose explanation、closure_status、evidence route だけを tracked card に残す。
 - 追加文献が必要なら `/research-related-work` または `/update-refs` へ渡す。
 - 外部 source channel の到達経路が未整理なら `/source-reach-scan` へ渡す。
 - reviewer comment が中心主張の assumption を突いている場合は `/scientific-gate` へ戻す。

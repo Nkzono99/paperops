@@ -22,9 +22,9 @@
 
 ## Result pattern 由来の evidence
 
-| 主張ID | pattern ID | packet ID | evidence card | evidence role | warrant | scope / limitation | 本文ブロック |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| CLM-0001 | RP-0001 | EP-0001 | RES-0001 | core evidence / mechanism / boundary / robustness / negative control | 未記入 | 未記入 | 未記入 |
+| 主張ID | pattern ID | packet ID | evidence card | evidence role | denominator / unit | validated scope | not covered | warrant | scope / limitation | 本文ブロック |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CLM-0001 | RP-0001 | EP-0001 | RES-0001 | core evidence / mechanism / boundary / robustness / negative control | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 |
 
 ## 主張しないこと
 
@@ -46,6 +46,12 @@
 
 ## Scientific gate との対応
 
-| 主張ID | gate card | gate status | block reason | approved writing scope | next route |
+| 主張ID | gate card | gate status | block reason | approved writing scope | allowed wording | must-not-claim | next route |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| CLM-0001 | `claims/gates/GATE-0001.md` | ready-to-write / analysis-needed / assumption-blocked / supplement-only / defer | 未記入 | 未記入 | 未記入 | 未記入 | `/scientific-gate` / `/map-result-patterns` / `/research-related-work` |
+
+## Assumption / upgrade gate links
+
+| 主張ID | central assumptions | claim stress-test | external validation gates | path criterion | evidence-design warning |
 | --- | --- | --- | --- | --- | --- |
-| CLM-0001 | `claims/gates/GATE-0001.md` | ready-to-write / analysis-needed / assumption-blocked / supplement-only / defer | 未記入 | 未記入 | `/scientific-gate` / `/map-result-patterns` / `/research-related-work` |
+| CLM-0001 | `notes/views/assumption-ledger.md` | `notes/views/claim-upgrade-gates.md` | `notes/views/claim-upgrade-gates.md` | unchecked | unchecked |

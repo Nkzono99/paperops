@@ -14,7 +14,7 @@ description: Use when routing manuscript, human, reviewer, or PDF feedback back 
 - `/collect-manuscript-review` が作った review ledger。
 - `/peer-review-manuscript` や `/respond-to-peer-review` の concern / comment。
 
-raw confidential text は `_handoff/` やローカル入力に留め、tracked card には要約、comment ID、対象 block、route を残す。
+raw confidential text は `_handoff/` やローカル入力に留め、tracked card には要約、comment ID、対象 block、route、prose explanation を残す。
 
 `_archives/` は feedback source にしない。過去稿からの復元や比較は、ユーザーが明示した場合だけ `pops scratch` 経由で扱う。
 
@@ -45,7 +45,8 @@ raw confidential text は `_handoff/` やローカル入力に留め、tracked c
 5. claim / gate / evidence を更新した場合は、対応する `notes/views/` も更新する。旧 `notes/*.md` は互換ビューなので、正本として新規情報を書き込まない。
 6. 追加作業が必要なら `requests/analysis/` または `requests/writing/` に request card を作る。
 7. 原稿を直す場合は `manuscript/mirror/status.md` の source-of-truth 言語を尊重し、`% block:` ID を保持する。
-8. 解決済み feedback card は `status: resolved` にし、反映ログへ更新 card、本文 block、検証コマンドを書く。未解決なら `status: open` のまま route を明確にする。
+8. route/status label は field として保持してよいが、隣に prose explanation を書く。何を前提に、どの evidence / claim / figure に遡り、本文 claim へどう影響するかを一文で説明する。
+9. 解決済み feedback card は `status: resolved` にし、反映ログへ更新 card、本文 block、検証コマンドを書く。未解決なら `status: open` のまま route と closure blocker を明確にする。
 
 ## 出力
 
@@ -55,6 +56,7 @@ raw confidential text は `_handoff/` やローカル入力に留め、tracked c
 - `Views updated`: 更新した `notes/views/`
 - `Validation`: 実行したコマンド
 - `Remaining open feedback`: 未解決の card と理由
+- `Route explanations`: route/status label と prose explanation
 
 ## 注意
 

@@ -14,6 +14,9 @@ checks:
   axes: unchecked
   denominator: unchecked
   caption_scope: unchecked
+  path_criterion: unchecked
+  state_visualization: unchecked
+  evidence_design: unchecked
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 ---
@@ -37,7 +40,15 @@ updated: YYYY-MM-DD
 - current manuscript role: main / supplement / notes-only / removed
 - manuscript reference:
 - axis / zero / dual-axis:
-- denominator / condition names:
+- denominator / condition names / same denominator:
+- independence caveat:
+- max-comparison: controlled-condition metric / envelope / screening maxima / exploratory extrema
+- verification coverage: validated scope / not covered
+- path criterion: endpoint != reachability, cumulative work, energy barrier, from-rest subset
+- state variable visualized: map / inventory / decomposition / attribution
+- outcome-only figure risk:
+- state visualization is not comparator:
+- representative / diagnostic curve role: diagnostic-only / denominator source / condition ranking
 - caption が claim より強くなっていないか:
 
 ## 修正 route

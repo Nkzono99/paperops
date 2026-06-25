@@ -8,13 +8,15 @@
 - 直近の gate verdict: 未記入
 - Abstract / Conclusion に使ってよい claim:
 - 書く前に止める claim:
+- 中心仮定:
+- claim upgrade blocker:
 - 次の確認:
 
 ## Claim readiness table
 
-| claim ID | gate card | claim | result / source / figure cards | estimand / metric | unit of analysis | comparison | evidence artifact | refs / related work | required checks | gate status | block reason |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CLM-0001 | GATE-0001 | 未記入 | RES-0001 / SRC-0001 / FIG-0001 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | independence / convergence / sensitivity / source-check | draft | 未記入 |
+| claim ID | gate card | claim | result / source / figure cards | estimand / metric | unit of analysis | comparison | evidence artifact | refs / related work | required checks | gate status | block reason | allowed wording | must-not-claim |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| CLM-0001 | GATE-0001 | 未記入 | RES-0001 / SRC-0001 / FIG-0001 | 未記入 | 未記入 | 未記入 | 未記入 | 未記入 | independence / convergence / sensitivity / source-check | draft | 未記入 | 未記入 | 未記入 |
 
 Gate status は `ready-to-write`、`analysis-needed`、`assumption-blocked`、`supplement-only`、`defer` のいずれかにする。
 
@@ -28,6 +30,12 @@ Gate status は `ready-to-write`、`analysis-needed`、`assumption-blocked`、`s
 
 - 時系列 snapshot を独立標本として扱っていないか:
 - 最大値や favorable condition を主要証拠にしていないか:
+- fraction / count / maximum は same denominator、same criterion、independence caveat を持つか:
+- partial validation の validated scope と not covered を分けたか:
+- release / detachment 系 claim で endpoint work、cumulative work、energy barrier、from-rest subset、force threshold を分けたか:
+- external validation needs を claim support ではなく claim upgrade blocker として扱ったか:
+- claim stress-test の allowed wording と must-not-claim が Abstract / Conclusion / caption より先に固定されているか:
+- proxy / sensitivity / authoring guard を measured model や validated solver output と誤読していないか:
 - screening result と completed result を同じ推論に混ぜていないか:
 - completed run / final snapshot を physical equilibrium、calibrated exposure、independent sample と誤読していないか:
 - method novelty / representation claim に direct comparator が必要か。必要なら同じ総量・条件・estimator・denominator で比較されているか:
@@ -48,6 +56,11 @@ Gate status は `ready-to-write`、`analysis-needed`、`assumption-blocked`、`s
 本文、Abstract、Conclusion、caption で言ってよい表現だけを書く。
 
 - CLM-0001:
+
+## Linked views
+
+- `notes/views/assumption-ledger.md`
+- `notes/views/claim-upgrade-gates.md`
 
 ## Human approval log
 

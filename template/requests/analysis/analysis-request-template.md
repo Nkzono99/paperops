@@ -7,6 +7,8 @@ related_claims: []
 related_results: []
 target_project_link: ""
 requested_outputs: []
+verification_axes: []
+runops_id: ""
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 ---
@@ -27,9 +29,18 @@ updated: YYYY-MM-DD
 
 - artifact:
 - metric / estimand:
+- denominator / unit of analysis:
+- independence caveat:
+- validated scope:
+- not covered:
 - provenance:
 - result card update:
 
 ## Handoff
 
 runops など外部 project に渡す場合、`refs/links.toml` の link ID と、相手側 request ID を書く。
+
+- runops_id: blank / draft:* / queued ID
+- draft snippet:
+- duplicate check:
+- no-execution guarantee:
