@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -29,7 +30,7 @@ class TemplateBuildFallbackTest(unittest.TestCase):
 
             result = subprocess.run(
                 [
-                    os.environ.get("PYTHON", "python3.11"),
+                    os.environ.get("PYTHON", sys.executable),
                     str(Path(__file__).resolve().parents[1] / "template" / "scripts" / "audit-build-log.py"),
                     "--log",
                     str(log_path),
