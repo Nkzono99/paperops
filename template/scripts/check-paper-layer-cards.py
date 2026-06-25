@@ -43,9 +43,20 @@ REQUIRED_FILES = [
 
 FRONTMATTER_REQUIREMENTS = {
     "evidence/results/result-card-template.md": ["---", "type: result", "claim_links:"],
-    "evidence/figures/figure-card-template.md": ["---", "type: figure", "supports_claims:"],
+    "evidence/figures/figure-card-template.md": [
+        "---",
+        "type: figure",
+        "supports_claims:",
+        "satisfies_visual_obligations:",
+    ],
     "evidence/sources/source-card-template.md": ["---", "type: source", "source_kind:"],
-    "claims/claims/claim-card-template.md": ["---", "type: claim", "depends_on:"],
+    "claims/claims/claim-card-template.md": [
+        "---",
+        "type: claim",
+        "depends_on:",
+        "visual_obligations:",
+        "no_figure_reason:",
+    ],
     "claims/gates/scientific-gate-card-template.md": ["---", "type: scientific_gate", "gate_status:"],
     "claims/arguments/argument-card-template.md": ["---", "type: argument", "claim_order:"],
     "review/feedback/feedback-card-template.md": ["---", "type: feedback", "target:", "upstream_routes:"],

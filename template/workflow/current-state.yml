@@ -16,6 +16,10 @@
     "STORY_LOCKED": {
       "core_claims_ordered": false,
       "figure_story_fixed": false,
+      "figure_candidate_inventory_complete": false,
+      "visual_obligations_satisfied": false,
+      "main_figure_roles_covered": false,
+      "figure_story_human_approved": false,
       "keep_compress_move_cut_decided": false,
       "abstract_conclusion_scope_aligned": false
     },

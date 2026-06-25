@@ -20,7 +20,7 @@
 1. `/resume-session` で前回の状態を読む。
 2. 今日扱う claim、evidence、feedback、request を確認する。
 3. `pops workflow status` と `pops workflow next` で、全体状態と stale section を確認する。
-4. 必要なら `contracts/` と `manuscript/writing-profile.yml` を重ね、`paper_ir` と section compiler で Results / Discussion / Methods の読者向け構造を作る。
+4. 必要なら `contracts/` と `manuscript/writing-profile.yml` を重ね、`plan-figure-story` で本文生成前の visual obligation と主図構成を決め、`paper_ir` と section compiler で Results / Discussion / Methods の読者向け構造を作る。
 5. `manuscript/ja/` を中心に書く。
 6. 必要な block を `manuscript/en/` に同期する。
 7. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、`pops workflow route-review` で戻る深さを決める。
@@ -33,7 +33,7 @@
 - `review/`: feedback / review round / response card の正本
 - `requests/`: analysis / writing request card の正本
 - `notes/views/`: `view_type` / `source_of_truth` つきの pure overview view と controlled authoring view
-- `contracts/`: section ごとの読者質問、入力、出力、禁止構造
+- `contracts/`: section と figure story の読者質問、入力、出力、禁止構造
 - `workflow/`: 全体状態、section 状態、issue class、stale 伝播
 - `manuscript/writing-profile.yml`: 論文種別・投稿先ごとの overlay
 
@@ -58,7 +58,8 @@
 
 - `/source-reach-scan`, `/research-related-work`: 外部 source と関連研究を整理する。
 - `/map-result-patterns`, `/scientific-gate`: 結果を証拠カードにし、主張として書けるか判定する。
-- `/finish-manuscript`: `/goal` で原稿完成まで進め、Writer 前に `paper_ir` と section compiler を通す。
+- `/plan-figure-story`: 本文生成前に claim から visual obligation、Figure 1、主図/補足図、missing figure を設計する。
+- `/finish-manuscript`: `/goal` で原稿完成まで進め、Writer 前に `plan-figure-story`、`paper_ir`、section compiler を通す。
 - `/review-public-manuscript`, `/peer-review-manuscript`: 公開原稿や投稿前原稿を読者・査読者目線で読む。
 - `/respond-to-peer-review`: 実査読コメントへの返答を整理する。
 - `/integrate-writing-feedback`: 人間レビューや指示を上流カードと原稿へ反映する。
@@ -68,7 +69,7 @@
 ## ディレクトリ
 
 - `manuscript/`: 日英原稿、共有アセット、ミラー制御、投稿先情報
-- `contracts/`: Introduction / Methods / Results / Discussion / Conclusion の入出力契約
+- `contracts/`: Introduction / Methods / Results / Discussion / Conclusion と figure story の入出力契約
 - `workflow/`: 階層型状態機械、現在状態、review round summary、人間判断
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX
 - `refs/`: 文献、外部 source、外部 link、ローカルパス alias

@@ -7,6 +7,8 @@ description: Use when checking whether figures support claims, evidence, caption
 
 図表を結果の置き場ではなく、主張を支える証拠として監査する。
 
+既存図だけを読む監査では missing figure を安定して発見できない。本文生成前に必要図表を設計する場合は、先に `plan-figure-story` を使って claim の visual obligation と Figure 1 role を固定してから、この skill で caption、本文参照、denominator、path criterion を監査する。
+
 ## 最初に読むファイル
 
 - `notes/views/result-pattern-map.md`
@@ -16,6 +18,7 @@ description: Use when checking whether figures support claims, evidence, caption
 - 対象の figure/table caption
 - caption を参照する本文 block
 - `notes/reproducibility.md`
+- `contracts/figures.yml`
 
 ## 手順
 
@@ -31,8 +34,9 @@ description: Use when checking whether figures support claims, evidence, caption
 10. heatmap / phase-space / color map の場合、主張を運ぶ visual contrast、W=0 などの decision boundary、critical threshold、color-bin saturation、denominator を確認する。ほぼ同色で境界が読めない場合は、boundary curve、threshold table、criterion hierarchy、signed-work profile への差し替えを検討する。
 11. main-text figure は caption だけでなく本文側から `\ref{fig:...}` / `\autoref{fig:...}` / `\cref{fig:...}` で narrative に接続されているか確認する。
 12. claim-to-figure crosswalk や外部 candidate display を読む場合、required artifact の存在と current manuscript role は別 status として扱う。現行 `includegraphics`、figure role note、review response が main / supplement / notes-only を上書きしている場合は `stale_main_figure_candidate` として扱い、claim promotion を止める。
-13. `notes/views/result-pattern-map.md` の packet、`notes/views/claim-evidence-map.md` の Figure/table 欄、必要なら `notes/views/condition-context-map.md` を更新する。
-14. 図表 provenance が必要なら `notes/reproducibility.md` に追記する。
+13. `satisfies_visual_obligations` が claim card の `visual_obligations` と対応しているか確認する。対応しない主図は、必要なら `plan-figure-story` に戻す。
+14. `notes/views/result-pattern-map.md` の packet、`notes/views/claim-evidence-map.md` の Figure/table 欄、必要なら `notes/views/condition-context-map.md` を更新する。
+15. 図表 provenance が必要なら `notes/reproducibility.md` に追記する。
 
 ## 出力
 

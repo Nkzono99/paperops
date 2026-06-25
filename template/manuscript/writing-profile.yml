@@ -19,6 +19,16 @@ overlays:
       - comparison_definition
       - figure_or_table_reference
       - scope_statement
+    figure_requirements:
+      - model_or_state_visualization
+      - estimator_or_decision_criterion
+      - primary_evidence
+      - mechanism_or_boundary_comparison
+    figure_defaults:
+      figure_1_role: model_or_state_visualization
+      sensitivity_default: supplement
+      screening_default: supplement
+      max_main_sensitivity_figures: 1
     discussion_requirements:
       - mechanism_hypothesis
       - alternative_explanation

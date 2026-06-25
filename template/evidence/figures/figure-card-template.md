@@ -6,6 +6,8 @@ figure_ref: ""
 supports_claims: []
 uses_results: []
 manuscript_blocks: []
+current_manuscript_role: main
+satisfies_visual_obligations: []
 checks:
   color_range: unchecked
   decision_boundary_visible: unchecked
@@ -26,6 +28,10 @@ updated: YYYY-MM-DD
 ## 図表の役割
 
 この figure/table が読者に示す比較、境界、negative case、mechanism を書く。
+
+- current_manuscript_role: main / supplement / notes-only / removed
+- satisfies_visual_obligations:
+- missing_action:
 
 ## 支える claim
 

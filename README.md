@@ -49,7 +49,7 @@ uvx --from paper-harness-cli pops doctor
 - `_handoff/`: 人間から AI へ渡す未整理ファイルの一時置き場
 - `_archives/`: 同じ repo で1から書き直すために封印した過去稿 archive
 
-人間は主に原稿レベルのレビューや自然文の指示を出す。Agent はそれを `review/feedback/` の card にし、必要なら claim / gate / evidence / request / manuscript へ遡って反映する。本文生成の前には、必要に応じて `pops workflow status`、`contracts/`、`writing-profile.yml` を確認し、card と controlled view から `paper_ir` を作り、Results / Discussion / Methods の section compiler を通す。
+人間は主に原稿レベルのレビューや自然文の指示を出す。Agent はそれを `review/feedback/` の card にし、必要なら claim / gate / evidence / request / manuscript へ遡って反映する。本文生成の前には、必要に応じて `pops workflow status`、`contracts/`、`writing-profile.yml` を確認し、`plan-figure-story` で visual obligation と主図構成を決めてから、card と controlled view から `paper_ir` を作り、Results / Discussion / Methods の section compiler を通す。
 
 ## よく使うコマンド
 
@@ -70,6 +70,7 @@ make ci
 make audit
 make pre-submit
 make figure-reference-check
+make figure-obligation-check
 ```
 
 paperops 本体の確認:

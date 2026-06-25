@@ -92,6 +92,10 @@
     "STORY_LOCKED": [
       "core_claims_ordered",
       "figure_story_fixed",
+      "figure_candidate_inventory_complete",
+      "visual_obligations_satisfied",
+      "main_figure_roles_covered",
+      "figure_story_human_approved",
       "keep_compress_move_cut_decided",
       "abstract_conclusion_scope_aligned"
     ],

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `plan-figure-story`、`contracts/figures.yml`、`figure-obligation-check` を追加した。中心 claim から本文生成前に visual obligation を作り、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図の missing figure を検出できるようにした。既存下流リポジトリで取り込む場合は、新 skill、new contract、`scripts/check-figure-obligations.py`、Makefile target、`workflow/` guard、`manuscript/writing-profile.yml` の figure requirements、claim / figure card template の crosswalk field を手動で追加する必要がある。
 - 下流 GitHub Actions の reusable workflow 参照を `YOUR_ORG/paperops` placeholder から `Nkzono99/paperops` に変更し、`pops init` 直後の初回 setup warning を減らした。fork や自前 upstream を使う場合だけ workflow `uses:` を手動で差し替える。
 - `notes/views/*.md` に `view_type` と `source_of_truth` の front matter を追加し、pure overview view と controlled authoring view の違いを機械可読にした。`paper-layer-card-check` でも view metadata を検査する。
 - `/resolve-local-paths` を runops ディレクトリリンクの入口として明確化し、`runops-main`、`pops links list --resolve-local`、paper request handoff の確認手順を追記した。

@@ -8,6 +8,8 @@ evidence_cards: []
 source_cards: []
 figure_cards: []
 manuscript_blocks: []
+visual_obligations: []
+no_figure_reason: ""
 scope: ""
 limitation: ""
 human_approval: needed
@@ -26,6 +28,13 @@ updated: YYYY-MM-DD
 - result cards:
 - source cards:
 - figure cards:
+
+## Visual obligations
+
+- visual_obligations:
+- no_figure_reason:
+
+中心 claim を読むために必要な state / setup / criterion / primary evidence / mechanism 図を `VO-*` ID で列挙する。図が不要な claim は `no_figure_reason` を書く。
 
 ## Warrant
 

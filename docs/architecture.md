@@ -45,7 +45,7 @@
 | `notes/views/` の pure overview view | 正本カードを俯瞰する | 派生 view | 該当 card 更新後に手動または半自動で更新 |
 | `notes/views/` の controlled authoring view | 本文での呼び方、条件名、概念語、読者向け語彙を統制する | 編集可能な統制 view | `/public-terminology-pass`, `/contextualize-conditions`, `/polish-ai-draft` |
 | `paper_ir` | card / view から Writer に渡す材料を section ごとにまとめる | 生成一時物 | `finish-manuscript` の section compiler phase |
-| `contracts/` | section ごとの読者質問、入力、出力、禁止構造を定める | 既定契約 | `finish-manuscript` の plan-section / audit-section |
+| `contracts/` | section ごとの読者質問、入力、出力、禁止構造と figure story 契約を定める | 既定契約 | `finish-manuscript` の plan-section / `plan-figure-story` / audit-section |
 | `manuscript/writing-profile.yml` | 論文種別、投稿先、分野別要求を section 契約へ重ねる | プロジェクト設定 | 初期 setup、投稿先変更時 |
 | `workflow/` | 全体状態、section 状態、issue class、stale 伝播を管理する | 状態正本 | `pops workflow`, `finish-manuscript` の Issue Router |
 | `.paperops/cache/` | section plan や一時 IR を置く | Git 管理しない生成物 | `finish-manuscript` の plan-section |
@@ -65,19 +65,22 @@
 4. 本文に出る強い名詞句は `notes/views/concept-terms.md` で確認し、accepted term、普通の文へほどく語、avoid 語を分ける。
 5. `pops workflow status` と `pops workflow next` で、全体状態、stale section、次に通す guard を確認する。
 6. `contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ねて、section が答える読者質問と必要出力を確認する。
-7. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
-8. section compiler が Methods / Results / Discussion それぞれの reader question、answer、evidence、figure、caveat location、sentence budget を決める。
-9. Writer は `paper_ir` と承認済み claim package を使って本文を書く。Writer に生の card ontology を直接渡しすぎない。
-10. Review 後は `pops workflow route-review` で evidence / story / section / prose / submission loop のどこへ戻るかを決め、上流 artifact が変わったら `pops workflow invalidate <artifact-id>` で依存 section を stale にする。
-11. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
-12. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
-13. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
+7. 本文生成前に `plan-figure-story` で中心 claim から visual obligation を作り、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図の欠落を確認する。
+8. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
+9. section compiler が Methods / Results / Discussion それぞれの reader question、answer、evidence、figure、caveat location、sentence budget を決める。
+10. Writer は `paper_ir` と承認済み claim package を使って本文を書く。Writer に生の card ontology を直接渡しすぎない。
+11. Review 後は `pops workflow route-review` で evidence / story / section / prose / submission loop のどこへ戻るかを決め、上流 artifact が変わったら `pops workflow invalidate <artifact-id>` で依存 section を stale にする。
+12. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
+13. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
+14. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
 
 ## paper_ir と section compiler
 
 `paper_ir` は、既存 card と controlled view から作る生成一時物である。新しい手書き正本にはしない。目的は、研究 integrity 層と文章層の間に、読者向けの変換契約を置くことである。
 
 `contracts/` は文章テンプレートではなく、section ごとの入出力契約である。Introduction は `problem -> unresolved tension -> precise gap -> approach -> contribution -> scope` のような論理機能を持ち、Methods / Results / Discussion はそれぞれ情報配置、subsection 契約、推論型を明示する。`manuscript/writing-profile.yml` は `paper_type: computational_modeling` のような論文種別 overlay と投稿先要求を重ねる。`finish-manuscript` は `plan-section -> draft-section -> audit-section` の順で使い、plan は必要なら `.paperops/cache/section-plan-<section>.yml` に置く。
+
+`contracts/figures.yml` は figure story 契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
 
 `paper_ir` の最小単位は次を持つ。
 

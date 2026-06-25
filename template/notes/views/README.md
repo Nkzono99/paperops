@@ -36,4 +36,4 @@ controlled authoring view は、カード正本の意味を本文語彙や読者
 
 `paper_ir` は、カード正本と controlled authoring view から Writer に渡す context を作る生成一時物である。新しい手書き正本にはしない。
 
-section compiler は `paper_ir` を使って、Methods / Results / Discussion の reader question、answer、evidence、figure、caveat location、sentence budget、forbidden_terms を決める。Writer には生の card ontology を直接渡しすぎない。
+本文生成前に `plan-figure-story` で claim の visual obligation と主図/補足図の切り分けを決める。section compiler はその後に `paper_ir` を使って、Methods / Results / Discussion の reader question、answer、evidence、figure、caveat location、sentence budget、forbidden_terms を決める。Writer には生の card ontology を直接渡しすぎない。

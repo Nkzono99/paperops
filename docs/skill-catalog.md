@@ -36,10 +36,11 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `map-result-patterns`: raw result や figure data を evidence card へ束ねる。
 - `scientific-gate`: 中心主張を Abstract / Conclusion / main figure に出してよいか、中心仮定や claim upgrade blocker も含めて判定する。
 - `design-manuscript-claims`: 作業報告型の原稿を主張中心に再設計し、`paper_ir` の seed を作る。
+- `plan-figure-story`: 本文生成前に中心 claim から visual obligation を作り、Figure 1、主図、補足図、missing figure を設計する。
 
 ### 原稿完成
 
-- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。Writer の前に `workflow/`、`contracts/`、`writing-profile.yml`、`paper_ir`、section compiler を通す。
+- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。Writer の前に `workflow/`、`contracts/`、`writing-profile.yml`、`plan-figure-story`、`paper_ir`、section compiler を通す。
 - `audit-ai-draft`: AI 初稿をそのまま磨かず、claim / evidence / section compiler へ戻す routing skill として使う。
 
 ### レビュー・査読
@@ -87,7 +88,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 原稿編集では `make concept-term-check` と `notes/views/concept-terms.md` も使う。AI 初稿で起きやすい concept-term compression、つまり強い英語名詞句への単語化は、claim / argument / evidence card の意味を本文へ写すときの語彙問題として扱い、必要なら普通の文へほどく。
 
-Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は、`contracts/` の section 入出力契約と `manuscript/writing-profile.yml` の paper type overlay を確認し、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results`、`compile-discussion`、`compile-methods` の section compiler を通してから本文生成へ進む。
+Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は、`contracts/` の section 入出力契約、`contracts/figures.yml`、`manuscript/writing-profile.yml` の paper type overlay を確認し、`plan-figure-story` で visual obligation を本文生成前に固定する。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results`、`compile-discussion`、`compile-methods` の section compiler を通してから本文生成へ進む。
 
 ## 重要な境界
 
@@ -97,6 +98,7 @@ Writer には card 正本や gate 語彙を直接読み込ませすぎない。`
 - `notes/views/*.md` は `view_type` と `source_of_truth` の front matter を持つ。`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
 - `paper_ir` は生成一時物であり、手書き正本にはしない。
 - `contracts/` は文章テンプレートではなく section 入出力契約である。
+- `contracts/figures.yml` は figure story の契約であり、missing figure を本文生成前に見つけるための visual obligation を定義する。
 - `manuscript/writing-profile.yml` は論文種別・投稿先ごとの overlay である。
 - `workflow/` は階層型状態機械と stale 伝播の状態正本である。review 後は Issue Router で戻る深さを決める。
 - 作業用ドキュメントは原則日本語で書く。

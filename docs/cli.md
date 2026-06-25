@@ -18,8 +18,8 @@ uvx --from paper-harness-cli pops doctor
 下流の Makefile は、確認を三つの profile に分ける。
 
 - `make ci`: 構造、引用、mirror、公開語彙、カード層、link、build fallback など、壊れていると作業を続けにくい項目を確認する。
-- `make audit`: argument focus、concept-term compression、main-text figure reference、claim evidence、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
-- `make pre-submit`: `ci` と `audit` に加え、concept term、figure reference、research request handoff、external import、readiness を投稿前 profile として厳しめに確認する。
+- `make audit`: argument focus、concept-term compression、main-text figure reference、figure obligation、claim evidence、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
+- `make pre-submit`: `ci` と `audit` に加え、concept term、figure reference、figure obligation、research request handoff、external import、readiness を投稿前 profile として厳しめに確認する。
 
 ## コマンド一覧
 

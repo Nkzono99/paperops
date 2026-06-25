@@ -42,6 +42,7 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "_archives" / "README.md").is_file())
             self.assertTrue((target / "contracts" / "results.yml").is_file())
             self.assertTrue((target / "contracts" / "methods.yml").is_file())
+            self.assertTrue((target / "contracts" / "figures.yml").is_file())
             self.assertTrue((target / "workflow" / "machine.yml").is_file())
             self.assertTrue((target / "workflow" / "current-state.yml").is_file())
             self.assertTrue((target / "workflow" / "decisions.yml").is_file())
@@ -61,6 +62,13 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "review" / "responses" / "response-card-template.md").is_file())
             self.assertTrue((target / "requests" / "analysis" / "analysis-request-template.md").is_file())
             self.assertTrue((target / "requests" / "writing" / "writing-request-template.md").is_file())
+            self.assertTrue((target / "scripts" / "check-figure-obligations.py").is_file())
+            self.assertTrue(
+                (target / ".agents" / "skills" / "plan-figure-story" / "SKILL.md").is_file()
+            )
+            self.assertTrue(
+                (target / ".claude" / "skills" / "plan-figure-story" / "SKILL.md").is_file()
+            )
             self.assertTrue((target / "notes" / "views" / "claim-evidence-map.md").is_file())
             self.assertTrue((target / "manuscript").is_dir())
             self.assertTrue((target / "refs" / "links.toml").is_file())

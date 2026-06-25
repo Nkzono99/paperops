@@ -1,0 +1,87 @@
+schema_version: 1
+
+contract: figures
+
+purpose: >
+  本文生成前に、中心 claim を読者が理解するために必要な visual obligation を決める。
+  figure-story-audit は既存図の監査であり、この契約は missing figure を先に見つけるための入口である。
+
+roles:
+  model_or_state_visualization:
+    reader_question: "何をモデル化し、どの状態量が新規性や解釈の入口なのか。"
+    examples:
+      - geometry
+      - surface state
+      - field map
+      - spatially resolved charge distribution
+      - microstructure
+  estimator_or_decision_criterion:
+    reader_question: "どの判定式、経路、閾値、階層で結果を読めばよいのか。"
+    examples:
+      - cumulative work path
+      - endpoint vs reachability
+      - barrier-free subset
+      - threshold curve
+      - criterion hierarchy
+  primary_evidence:
+    reader_question: "中心 claim を支える主結果は何か。"
+    examples:
+      - controlled comparison
+      - main quantitative contrast
+      - primary figure/table
+  mechanism_or_boundary_comparison:
+    reader_question: "どの機構、代替説明、境界条件が claim scope を決めるのか。"
+    examples:
+      - relaxation comparison
+      - negative control
+      - mechanism decomposition
+  sensitivity_or_screening:
+    reader_question: "中心 claim の外側にある感度や探索的範囲はどこか。"
+    default_location: supplement
+
+visual_obligations:
+  fields:
+    id: "VO-0001 のような安定 ID"
+    claim_id: "支える claim"
+    role: "model_or_state_visualization / estimator_or_decision_criterion / primary_evidence / mechanism_or_boundary_comparison / sensitivity_or_screening"
+    required: true
+    visual_object: "何を描くか"
+    source_artifacts: []
+    main_or_supplement: main
+    missing_action: "generate_figure / request_analysis / justify_no_figure"
+    no_figure_reason: ""
+
+paper_type_rules:
+  computational_modeling:
+    require:
+      - model_or_state_visualization
+      - estimator_or_decision_criterion
+      - primary_evidence
+      - mechanism_or_boundary_comparison
+    triggers:
+      spatially_resolved_state:
+        cue_words:
+          - spatial distribution
+          - surface state
+          - field map
+          - microstructure
+          - charge distribution
+        require:
+          - model_or_state_visualization
+      path_dependent_estimator:
+        cue_words:
+          - cumulative work
+          - barrier
+          - trajectory path
+          - threshold crossing
+        require:
+          - estimator_or_decision_criterion
+    figure_defaults:
+      figure_1_role: model_or_state_visualization
+      sensitivity_default: supplement
+      screening_default: supplement
+      max_main_sensitivity_figures: 1
+
+audit:
+  command: make figure-obligation-check
+  strict_command: python scripts/check-figure-obligations.py --root . --strict

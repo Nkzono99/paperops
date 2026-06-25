@@ -13,6 +13,8 @@ Writer に生の card ontology を直接渡さない。本文生成の前に、�
 
 section contract は文章テンプレートではなく入出力契約として扱う。`contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ね、`plan-section -> draft-section -> audit-section` の順で、読者質問、入力、出力、禁止構造、論文種別 overlay を確認する。
 
+図表は本文生成後の飾りとして扱わない。本文生成前に `plan-figure-story` で claim から visual obligation を作り、`contracts/figures.yml` と `manuscript/writing-profile.yml` の figure requirement を確認し、`figure-obligation-check` で missing figure を検出する。
+
 workflow は直列パイプラインではなく階層型状態機械として扱う。本文編集前に `pops workflow status` と `pops workflow next` を確認し、`UNDER_REVIEW` 後は Issue Router で evidence / story / section / prose / submission loop のどこへ戻るかを決める。
 
 ## 最初に決める
@@ -35,6 +37,7 @@ workflow は直列パイプラインではなく階層型状態機械として�
 - `notes/related-work-map.md`
 - `notes/reviewer-model.md`
 - `contracts/`
+- `contracts/figures.yml`
 - `workflow/machine.yml`
 - `workflow/current-state.yml`
 - `workflow/round-summary.yml`
@@ -93,6 +96,8 @@ Review 後は、Reviewer にそのまま改稿させない。`review/feedback/` 
 
 Results の subsection plan は、`reader_question`、`answer`、`evidence`、`scope`、`consequence` を必ず持つ。run inventory、解析を実施した順の列挙、同じ limitation の反復を topic sentence にしない。
 
+Results plan の前に `plan-figure-story` を通し、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図が claim に対して足りているか確認する。既存図だけを監査して `figure_story_fixed` にしない。
+
 ### compile-discussion
 
 `compile-discussion` は、claim を `observation`、`inference`、`mechanism_hypothesis`、`alternative_explanation`、`implication`、`prediction`、`limitation` に分ける。Discussion では新しい実験事実を増やさず、観察から解釈命題、機構、含意、識別可能な予測へ進める。
@@ -114,10 +119,11 @@ Results の subsection plan は、`reader_question`、`answer`、`evidence`、`s
 3. raw result がある場合は `map-result-patterns` で result pattern / evidence packet にする。
 4. 中心主張、Abstract、Conclusion、main figure caption の前に `scientific-gate` を通す。
 5. `design-manuscript-claims` で core claim、essential results、keep / compress / move / cut を決める。
-6. `paper_ir` phase で compile-results / compile-discussion / compile-methods を必要範囲で通す。
-7. human approval が必要な assumption、claim scope、投稿先 fit を明示し、承認なしに中心主張へ昇格しない。
-8. `manuscript/ja/` を source-of-truth として draft し、必要に応じて `paragraph-surgery` と `polish-ai-draft` で整える。
-9. `sync-ja-en`、`figure-story-audit`、`public-terminology-pass`、`concept-term-check`、`ai-disclosure-check` を必要範囲で通す。
+6. `plan-figure-story` で本文生成前に visual obligation、Figure 1 role、main / supplement の切り分けを決め、`make figure-obligation-check` を通す。
+7. `paper_ir` phase で compile-results / compile-discussion / compile-methods を必要範囲で通す。
+8. human approval が必要な assumption、claim scope、投稿先 fit を明示し、承認なしに中心主張へ昇格しない。
+9. `manuscript/ja/` を source-of-truth として draft し、必要に応じて `paragraph-surgery` と `polish-ai-draft` で整える。
+10. `sync-ja-en`、`figure-story-audit`、`public-terminology-pass`、`concept-term-check`、`ai-disclosure-check` を必要範囲で通す。
 
 ## Revision lane
 
@@ -174,6 +180,7 @@ subagent を使える場合でも、confidential な reviewer text、未公開�
 
 - `/goal` 中は、今の blocker、次の 1-3 手、Finish criteria の未達項目を短く更新する。
 - 原稿を編集したら `make mirror-check` を実行する。引用や bibliography に触れたら `make citation-check`、概念語に触れたら `make concept-term-check`、図表に触れたら `make figure-reference-check`、claim / evidence / layer card に触れたら `make claim-evidence-check` と `make paper-layer-card-check` を実行する。
+- 図表を本文生成前に設計する場合は `plan-figure-story` と `make figure-obligation-check` を使う。投稿前には `scripts/check-figure-obligations.py --root . --strict` で supported claim に visual obligation または `no_figure_reason` があるか確認する。
 - 投稿直前または大きな改稿後は `make pre-submit` を目標にする。テンプレート初期状態や未設定項目で通らない場合は、失敗理由を完成 blocker として残す。
 - AI が本文、レビュー、response draft に関与した場合は `ai-disclosure-check` を通す。
 - 文章を磨くために evidence の弱さを隠さない。`analysis-needed` や `assumption-blocked` は文体ではなく upstream route で処理する。
