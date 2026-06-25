@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.8.0 - 2026-06-25
+
 - `/archive-scratch` skill を追加し、`pops scratch archive/list/inspect/reset/restore` を使った過去稿封印、1からの書き直し、明示時だけの復元確認を下流テンプレートの標準入口にした。既存下流リポジトリで取り込む場合は、新 skill、Claude wrapper、AGENTS / CLAUDE / README の skill 入口を追加する必要がある。
 - `scripts/build-submission.sh`、`audit-build-log.py`、`PAPEROPS_RUNNER_PREFIX` を追加し、`submission/<venue>/main.tex` の opt-in PDF build、build log audit、HPC / CI runner prefix をテンプレート標準にした。既存下流リポジトリで取り込む場合は、新 script、Makefile の `build-submission` target、`tex-env.example.toml`、`submission/README.md` を更新する必要がある。closes #68
 - `workflow/subagent-roster.yml` と review round の Subagent delegation ledger を追加し、`finish-manuscript` が main agent / orchestrator として story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer、public_reader、submission_hygienist などの subagent report を feedback card、claim/evidence update、section plan へ統合する導線を明文化した。既存下流リポジトリで取り込む場合は、新 roster、review card templates、peer-review view、AGENTS / CLAUDE / README、`finish-manuscript` を更新し、review round に integration decision 欄を追加する必要がある。
