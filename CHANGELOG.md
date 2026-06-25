@@ -8,6 +8,7 @@
 - Skill context budget warning の導線を追加した。`TROUBLESHOOTING.md` と `pops doctor` で、warning は skill 本体が読めない通知ではなく description 圧縮であること、通常執筆・GitHub・解析時の plugin profile 目安を示す。
 - `pops scratch archive/reset/restore/list/inspect` を追加し、同じ論文 repo 内で現行の `manuscript/`、`notes/`、`refs/`、カード層などを `_archives/` の split bundle に封印してから1から書き直せるようにした。archive part は既定で 48 MiB に分割し、通常の AI 執筆では `_archives/` を読まないルールと `archive-seal-check` を追加した。
 - `research-request-handoff-check` を追加し、paper 側の open analysis request と linked runops project の `paper_request_queue` の drift を warning できるようにした。`runops_id = draft:*`、queue 未登録、local path 未解決、status mismatch を検出し、`pre-submit` では strict に確認する。
+- repo-local の HOPS 関連 skill vendor copy を削除し、HarnessOps plugin から参照する方針へ寄せた。
 
 ## 0.6.0 - 2026-06-24
 
