@@ -1,4 +1,4 @@
-.PHONY: venv smoke cli-smoke scaffold-package-boundary-check lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check storyline-check quantity-integrity-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
+.PHONY: venv smoke cli-smoke scaffold-package-boundary-check build-submission lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check storyline-check quantity-integrity-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
 PYTHON_BOOTSTRAP ?= python
@@ -15,6 +15,9 @@ cli-smoke:
 
 scaffold-package-boundary-check:
 	$(PYTHON) scripts/check-scaffold-package-boundary.py
+
+build-submission:
+	bash template/scripts/build-submission.sh $(VENUE)
 
 lint-bib:
 	$(PYTHON) template/scripts/lint-bib.py --root template

@@ -29,3 +29,15 @@ submission/
 4. `manuscript/en/` の公開本文を `submission/<venue>/main.tex` に展開し、投稿先固有の class/style に合わせる。
 5. 投稿版で生じた科学的変更は `manuscript/` 側にも戻し、二重管理にしない。
 6. 投稿前は `make pre-submit` を実行し、`submission/<venue>/README.md` または `submission/<venue>/main.tex` の存在と drift を確認する。
+
+## PDF build
+
+既定では `make build-submission VENUE=<venue>` は `submission/<venue>/main.tex` の構造検証だけを行う。PDF 実ビルドは opt-in で、TeX 環境がある場合に次を使う。
+
+```sh
+PAPER_TEMPLATE_RUN_LATEX=1 make build-submission VENUE=<venue>
+```
+
+`scripts/build-submission.sh` は `submission/<venue>/build/` に出力し、`submission/<venue>/style/`、`manuscript/shared/style/`、`manuscript/shared/bib/`、`refs/bib/` を TeX/BibTeX の探索対象に加える。`latexmk` がなければ `PAPEROPS_SUBMISSION_DIRECT_ENGINE` または `lualatex -> xelatex -> pdflatex` の順で direct-engine fallback を試す。HPC や CI で実行 prefix が必要な場合は `PAPEROPS_RUNNER_PREFIX` を使う。
+
+PDF 生成後は `scripts/audit-build-log.py` が fatal error、undefined citation/reference、Missing character、BibTeX database error、empty bibliography を確認する。投稿先固有の `.cls` / `.sty` / `.bst` の由来は、このディレクトリの README に記録する。

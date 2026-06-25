@@ -27,6 +27,21 @@ mkdir -p "$BUILD_DIR"
 
 "$PYTHON" "$ROOT/scripts/check-tex-structure.py" --root "$ROOT" --main "$MAIN_TEX" --label "日本語原稿"
 
+run_with_runner() {
+  if [[ -n "${PAPEROPS_RUNNER_PREFIX:-}" ]]; then
+    # shellcheck disable=SC2086
+    $PAPEROPS_RUNNER_PREFIX "$@"
+  else
+    "$@"
+  fi
+}
+
+audit_build_log() {
+  if [[ -f "$BUILD_DIR/main.log" ]]; then
+    "$PYTHON" "$ROOT/scripts/audit-build-log.py" --log "$BUILD_DIR/main.log" --label "日本語 PDF"
+  fi
+}
+
 latexmk_mode_flag() {
   case "${1:-pdf}" in
     -*)
@@ -62,7 +77,7 @@ run_engine_once() {
     export TEXINPUTS="../shared/style//:${TEXINPUTS:-}"
     export BIBINPUTS="../shared/bib//:${BIBINPUTS:-}"
     export BSTINPUTS="../shared/style//:${BSTINPUTS:-}"
-    "$engine" -interaction=nonstopmode -halt-on-error "-output-directory=$BUILD_DIR" main.tex
+    run_with_runner "$engine" -interaction=nonstopmode -halt-on-error "-output-directory=$BUILD_DIR" main.tex
   )
 }
 
@@ -76,7 +91,7 @@ run_direct_engine_build() {
   if command -v bibtex >/dev/null 2>&1; then
     (
       cd "$BUILD_DIR"
-      bibtex main || true
+      run_with_runner bibtex main || true
     )
   else
     echo "bibtex が見つからないため、参考文献処理をスキップします。"
@@ -87,6 +102,7 @@ run_direct_engine_build() {
     echo "PDF 生成ログに Missing character が含まれています。CJK font / engine 設定を確認してください。"
     return 1
   fi
+  audit_build_log
   if [[ ! -f "$BUILD_DIR/main.pdf" ]]; then
     echo "direct-engine fallback は完了しましたが、PDF は生成されませんでした。"
     return 1
@@ -118,14 +134,16 @@ if [[ "${PAPER_TEMPLATE_RUN_LATEX:-0}" == "1" ]]; then
       "$TEX_DOCKER_IMAGE" \
       env TEXINPUTS="../shared/style//:" BIBINPUTS="../shared/bib//:" BSTINPUTS="../shared/style//:" \
       "${LATEXMK_ARGS[@]}"
+    audit_build_log
   elif command -v latexmk >/dev/null 2>&1; then
     (
       cd "$LANG_DIR"
       export TEXINPUTS="../shared/style//:${TEXINPUTS:-}"
       export BIBINPUTS="../shared/bib//:${BIBINPUTS:-}"
       export BSTINPUTS="../shared/style//:${BSTINPUTS:-}"
-      "${LATEXMK_ARGS[@]}"
+      run_with_runner "${LATEXMK_ARGS[@]}"
     )
+    audit_build_log
   else
     if ! try_direct_engine_build; then
       echo "latexmk と direct-engine fallback が見つかりません。tex-env.toml で TeX Live パスを設定するか、Docker イメージを指定してください。"

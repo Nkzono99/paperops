@@ -59,7 +59,7 @@ if "docker" in config:
 
 latex = config.get("latex", {})
 if isinstance(latex, dict):
-    for lang in ("ja", "en"):
+    for lang in ("ja", "en", "submission"):
         settings = latex.get(lang, {})
         if not isinstance(settings, dict):
             continue
@@ -101,6 +101,15 @@ while IFS=$'\t' read -r _tex_env_key _tex_env_value; do
     PAPEROPS_EN_DVIPDF)
       PAPEROPS_EN_DVIPDF="${PAPEROPS_EN_DVIPDF:-$_tex_env_value}"
       ;;
+    PAPEROPS_SUBMISSION_LATEXMK_MODE)
+      PAPEROPS_SUBMISSION_LATEXMK_MODE="${PAPEROPS_SUBMISSION_LATEXMK_MODE:-$_tex_env_value}"
+      ;;
+    PAPEROPS_SUBMISSION_LATEX)
+      PAPEROPS_SUBMISSION_LATEX="${PAPEROPS_SUBMISSION_LATEX:-$_tex_env_value}"
+      ;;
+    PAPEROPS_SUBMISSION_DVIPDF)
+      PAPEROPS_SUBMISSION_DVIPDF="${PAPEROPS_SUBMISSION_DVIPDF:-$_tex_env_value}"
+      ;;
   esac
 done <<< "$_tex_env_vars"
 
@@ -114,9 +123,12 @@ fi
 
 export PAPEROPS_JA_LATEXMK_MODE="${PAPEROPS_JA_LATEXMK_MODE:-pdf}"
 export PAPEROPS_EN_LATEXMK_MODE="${PAPEROPS_EN_LATEXMK_MODE:-pdf}"
+export PAPEROPS_SUBMISSION_LATEXMK_MODE="${PAPEROPS_SUBMISSION_LATEXMK_MODE:-pdf}"
 export PAPEROPS_JA_LATEX="${PAPEROPS_JA_LATEX:-}"
 export PAPEROPS_EN_LATEX="${PAPEROPS_EN_LATEX:-}"
+export PAPEROPS_SUBMISSION_LATEX="${PAPEROPS_SUBMISSION_LATEX:-}"
 export PAPEROPS_JA_DVIPDF="${PAPEROPS_JA_DVIPDF:-}"
 export PAPEROPS_EN_DVIPDF="${PAPEROPS_EN_DVIPDF:-}"
+export PAPEROPS_SUBMISSION_DVIPDF="${PAPEROPS_SUBMISSION_DVIPDF:-}"
 
 unset _TEX_ENV_ROOT _TEX_ENV_TOML _TEX_ENV_PYTHON _tex_env_vars _tex_env_key _tex_env_value

@@ -26,3 +26,10 @@
 # EN 側を明示する例:
 # [latex.en]
 # latexmk_mode = "pdf"
+#
+# submission/<venue>/main.tex を投稿先スロット内でビルドする場合:
+# [latex.submission]
+# latexmk_mode = "pdf"
+#
+# HPC / CI / container wrapper を前置する場合:
+#   PAPEROPS_RUNNER_PREFIX="tssrun -p <partition>"

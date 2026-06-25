@@ -1,4 +1,4 @@
-.PHONY: venv build-ja build-en lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check storyline-check quantity-integrity-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context readiness-check export-arxiv ci audit pre-submit
+.PHONY: venv build-ja build-en build-submission lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check storyline-check quantity-integrity-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context readiness-check export-arxiv ci audit pre-submit
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
 PYTHON_BOOTSTRAP ?= python
@@ -12,6 +12,9 @@ build-ja:
 
 build-en:
 	bash scripts/build-en.sh
+
+build-submission:
+	bash scripts/build-submission.sh $(VENUE)
 
 lint-bib:
 	$(PYTHON) scripts/lint-bib.py --root .
