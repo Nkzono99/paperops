@@ -66,7 +66,7 @@
 5. `pops workflow status` と `pops workflow next` で、全体状態、stale section、次に通す guard を確認する。
 6. `workflow/focus-policy.yml` と `make content-first-check` で、次の作業が本文 blocker を減らす intent かを確認する。
 7. subagent を使う場合は `workflow/subagent-roster.yml` を読み、main agent / orchestrator が role brief、privacy、`subagent_report`、integration decision を管理する。
-8. `contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ねて、section が答える読者質問と必要出力を確認する。
+8. `contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ねて、section が答える読者質問、必要出力、`section_depth` floor を確認する。
 9. 本文生成前に `design-paper-storyline` で story spine、Results hierarchy、Discussion functions を固定する。
 10. 本文生成前に `plan-figure-story` で中心 claim から visual obligation を作り、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図の欠落を確認する。
 11. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
@@ -102,7 +102,7 @@
 - `forbidden_terms`
 - `plain_language_terms`
 
-section compiler は、`finish-manuscript` の中で Writer の前に走る段階として扱う。
+section compiler は、`finish-manuscript` の中で Writer の前に走る段階として扱う。Results / Discussion は `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。
 
 - `compile-methods`: method unit ごとに、本文 / supplement / code への配分、非標準性、結果感度、再実装に必要な情報を決める。
 - `compile-results`: reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence の順に、結果の読み順を作る。

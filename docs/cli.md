@@ -19,7 +19,8 @@ uvx --from paper-harness-cli pops doctor
 
 - `make ci`: 構造、引用、mirror、公開語彙、カード層、link、build fallback など、壊れていると作業を続けにくい項目を確認する。
 - `make audit`: argument focus、concept-term compression、content-first intent、main-text figure reference、figure obligation、claim evidence、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
-- `make finish-manuscript-check`: STRUCTURE_ACCEPTED 前に `/goal` を完了扱いしないための content-first finish gate。`make pre-submit` とは別に、原稿本文 blocker が閉じているかを確認する。
+- `make section-depth-check`: Results / Discussion が `manuscript/writing-profile.yml` の `section_depth` floor を大きく下回っていないか advisory に確認する。JA は `ja_chars`、EN は `en_words` として数える。
+- `make finish-manuscript-check`: STRUCTURE_ACCEPTED 前に `/goal` を完了扱いしないための content-first finish gate。`make pre-submit` とは別に、原稿本文 blocker と Results / Discussion の section-depth blocker が閉じているかを確認する。
 - `make pre-submit`: `ci` と `audit`、`finish-manuscript-check` に加え、concept term、figure reference、figure obligation、research request handoff、external import、readiness を投稿前 profile として厳しめに確認する。
 
 ## コマンド一覧

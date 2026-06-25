@@ -45,3 +45,30 @@ author_preferences:
   method_detail_bias: interpretation_relevant_first
   results_order_bias: claim_dependency_order
   discussion_bias: interpretation_with_scope
+
+section_depth:
+  length_is_floor_not_target: true
+  profile: full_article
+  soft_floor:
+    full_article:
+      results:
+        ja_chars: 2400
+        en_words: 900
+        min_paragraphs: 6
+      discussion:
+        ja_chars: 2000
+        en_words: 750
+        min_paragraphs: 5
+    short_article:
+      results:
+        ja_chars: 1200
+        en_words: 450
+        min_paragraphs: 3
+      discussion:
+        ja_chars: 1000
+        en_words: 350
+        min_paragraphs: 3
+  subsection_policy:
+    allowed_not_required: true
+    min_paragraphs_per_subsection: 2
+    one_paragraph_subsections: merge_or_expand

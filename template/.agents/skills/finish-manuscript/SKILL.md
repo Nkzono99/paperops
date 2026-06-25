@@ -15,6 +15,8 @@ Writer に生の card ontology を直接渡さない。本文生成の前に `de
 
 section contract は文章テンプレートではなく入出力契約として扱う。`contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ね、`plan-section -> draft-section -> audit-section` の順で、読者質問、入力、出力、禁止構造、論文種別 overlay を確認する。
 
+Results / Discussion では `manuscript/writing-profile.yml` の `section_depth` を確認する。`ja_chars` は日本語原稿の TeX noise を除いた文字数、`en_words` は英語原稿の TeX noise を除いた word count として扱う。これは length floor であって target ではない。短い場合は水増しせず、missing evidence、comparison、mechanism warrant、boundary、implication、next test を特定して section plan へ戻る。
+
 図表は本文生成後の飾りとして扱わない。本文生成前に `plan-figure-story` で claim から visual obligation を作り、`contracts/figures.yml` と `manuscript/writing-profile.yml` の figure requirement を確認し、`figure-obligation-check` で missing figure を検出する。
 
 workflow は直列パイプラインではなく階層型状態機械として扱う。本文編集前に `pops workflow status` と `pops workflow next` を確認し、`UNDER_REVIEW` 後は Issue Router で evidence / story / section / prose / submission loop のどこへ戻るかを決める。
@@ -165,6 +167,8 @@ Results の subsection plan は、`reader_question`、`answer`、`evidence`、`s
 
 Results hierarchy は、`notes/views/storyline.md` の `Section depth map` と `Results hierarchy` に対応する。図表を並べるだけ、代表値だけを置く、境界条件と感度解析を一段落へ圧縮する場合は section-depth blocker として扱う。
 
+`section-depth-check` が Results を short と判定した場合は、subsection を増やすこと自体を目的にしない。reader question、answer、quantitative evidence、comparison、scope、consequence のどれが欠けているかを特定し、one-paragraph subsections は統合するか、読者質問に答えるだけの内容を加える。
+
 Results plan の前に `plan-figure-story` を通し、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図が claim に対して足りているか確認する。既存図だけを監査して `figure_story_fixed` にしない。
 
 ### compile-discussion
@@ -174,6 +178,8 @@ Results plan の前に `plan-figure-story` を通し、state/setup 図、criteri
 `observation` には直接 evidence を要求する。`mechanism_hypothesis`、`implication`、`prediction` は Discussion で扱えるが、根拠、確信度、どの limitation がどの claim を弱めるかを明示する。
 
 Discussion functions は、少なくとも `principal_finding`、`mechanism_warrant`、`prior_work_delta`、`alternative_or_boundary`、`implication`、`decisive_next_test` を分ける。Discussion が limitation の列挙だけなら、polish ではなく section-depth blocker として `design-paper-storyline` へ戻す。
+
+`section-depth-check` が Discussion を short と判定した場合は、文量だけを増やさない。observation の繰り返し、generic limitation、曖昧な prior-work mention で埋めず、どの interpretive function が欠けているかを feedback card または section plan に戻す。
 
 ### compile-methods
 
@@ -249,6 +255,7 @@ subagent を使える場合でも、confidential な reviewer text、未公開�
 - human approval が必要な assumption、投稿先、claim scope、response stance が未承認のまま残っていない。
 - `review/feedback/` と reviewer loop に blocking / major の open item が残っていない。残す場合は defer 理由と本文での scope limit がある。
 - 図表、caption、本文参照、claim-evidence map、related work、AI disclosure、reproducibility の不整合が解消されている。
+- Results / Discussion が `section_depth` の soft floor を満たすか、short_article profile または人間承認済みの例外として記録されている。
 - 概念語ビューで accepted / plain-language / avoid が整理され、表記揺れや過剰な concept-term compression が残っていない。
 - 実査読改訂では、comment inventory、response matrix、本文変更、response letter が対応している。
 - 原稿本文、mirror、引用、figure reference、layer card、submission drift など、変更範囲に応じたチェックを通している。

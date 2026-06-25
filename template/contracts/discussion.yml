@@ -49,6 +49,8 @@ hard_rules:
 
 soft_rules:
   - Start from the principal finding, not from a list of caveats.
+  - `section_depth` in `manuscript/writing-profile.yml` is a soft floor, not a target; expand only by adding missing mechanism warrant, prior-work delta, alternative, boundary, implication, or next test.
+  - Subsections are allowed but not required. Avoid one-paragraph subsections; merge them or expand the interpretive function.
   - Discuss prior work where it changes interpretation.
   - Prefer one strong alternative explanation over a generic list.
 

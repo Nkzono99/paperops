@@ -75,7 +75,9 @@ description: Use when reviewing public manuscript text for reader assumptions an
    - Results の各 subsection が reader question、answer、quantity、figure/table、consequence を持つか
    - Discussion が mechanism_warrant、prior_work_delta、alternative_or_boundary、implication、decisive_next_test を持つか
    - storyline が title / abstract / conclusion で保存されているか
+   - `section_depth` の floor を、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words` として確認しているか
    - section-depth 不足を Submission hygiene と混同していないか
+   - one-paragraph subsections が、必要な読者質問に答える単位ではなく過剰分割になっていないか
 7. 追加解析候補を High / Medium / Low に分類する。
 8. 対応を以下に分解する:
    - 原稿修正

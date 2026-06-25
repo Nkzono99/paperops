@@ -20,7 +20,7 @@
 1. `/resume-session` で前回の状態を読む。
 2. 今日扱う claim、evidence、feedback、request を確認する。
 3. `pops workflow status` と `pops workflow next` で、全体状態と stale section を確認する。
-4. 必要なら `workflow/subagent-roster.yml`、`contracts/`、`manuscript/writing-profile.yml` を重ね、`design-paper-storyline` と `make content-first-check` で story spine、Results hierarchy、Discussion functions、次の作業が本文 blocker を減らすことを確認する。subagent を使う場合、main agent は orchestrator として role brief と integration decision を `review/rounds/` に残す。
+4. 必要なら `workflow/subagent-roster.yml`、`contracts/`、`manuscript/writing-profile.yml` を重ね、`design-paper-storyline`、`make content-first-check`、`make section-depth-check` で story spine、Results hierarchy、Discussion functions、Results / Discussion の薄さ、次の作業が本文 blocker を減らすことを確認する。subagent を使う場合、main agent は orchestrator として role brief と integration decision を `review/rounds/` に残す。
 5. `plan-figure-story` で本文生成前の visual obligation と主図構成を決め、`paper_ir` と section compiler で Results / Discussion / Methods の読者向け構造を作る。
 6. `manuscript/ja/` を中心に書く。
 7. 必要な block を `manuscript/en/` に同期する。
@@ -37,7 +37,7 @@
 - `contracts/`: section と figure story の読者質問、入力、出力、禁止構造
 - `workflow/`: 全体状態、section 状態、issue class、stale 伝播
 - `workflow/subagent-roster.yml`: subagent role、delegation contract、orchestrator の integration decision 契約
-- `manuscript/writing-profile.yml`: 論文種別・投稿先ごとの overlay
+- `manuscript/writing-profile.yml`: 論文種別・投稿先ごとの overlay と `section_depth` floor。JA は `ja_chars`、EN は `en_words` として数え、長さは target ではなく floor として扱う。
 
 旧 `notes/*.md` の一部は互換ビューであり、正本は上のカード層に置く。`paper_ir` は card と controlled view から Writer に渡す context を作る生成一時物であり、手書き正本にはしない。
 
@@ -62,7 +62,7 @@ Agent に任せる場合は `/archive-scratch` を使い、`_handoff/` 同梱、
 - `/source-reach-scan`, `/research-related-work`: 外部 source と関連研究を整理する。
 - `/map-result-patterns`, `/scientific-gate`: 結果を証拠カードにし、主張として書けるか判定する。
 - `/plan-figure-story`: 本文生成前に claim から visual obligation、Figure 1、主図/補足図、missing figure を設計する。
-- `/finish-manuscript`: `/goal` で原稿完成まで進め、Writer 前に `workflow/subagent-roster.yml`、`plan-figure-story`、`paper_ir`、section compiler を通す。main agent は orchestrator として subagent の review を統合する。
+- `/finish-manuscript`: `/goal` で原稿完成まで進め、Writer 前に `workflow/subagent-roster.yml`、`plan-figure-story`、`paper_ir`、section compiler、`section-depth-check` を通す。main agent は orchestrator として subagent の review を統合する。
 - `/design-paper-storyline`: 原稿全体の story spine、Results hierarchy、Discussion functions を俯瞰し、Submission hygiene へ逸れる前に本文 blocker を固定する。
 - `/review-public-manuscript`, `/peer-review-manuscript`: 公開原稿や投稿前原稿を読者・査読者目線で読む。
 - `/respond-to-peer-review`: 実査読コメントへの返答を整理する。

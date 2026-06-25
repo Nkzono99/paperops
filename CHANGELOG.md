@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `section-depth-check` と `manuscript/writing-profile.yml` の `section_depth` floor を追加し、Results / Discussion が短すぎる場合に manuscript content blocker として検出できるようにした。JA 原稿は TeX noise を除いた `ja_chars`、EN 原稿は TeX noise を除いた `en_words` で数え、長さは target ではなく floor として扱う。既存下流リポジトリで取り込む場合は、`scripts/check-section-depth.py`、Makefile の `section-depth-check` / `finish-manuscript-check` / `pre-submit` 接続、`manuscript/writing-profile.yml` の `section_depth`、Results / Discussion contract、AGENTS / CLAUDE / README、`finish-manuscript` / `review-public-manuscript` を更新する必要がある。
+
 ## 0.9.0 - 2026-06-25
 
 - `pops scratch restart` を追加し、`archive` だけでは現行 `manuscript/`、`submission/`、`notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/` が残る問題を避け、sealed archive 作成後に同じ repo を starter 状態へ戻せるようにした。`--include-handoff` 指定時は `_handoff/` payload も封印してから reset する。既存下流リポジトリで取り込む場合は、CLI 更新に加えて `/archive-scratch`、README、AGENTS / CLAUDE の archive 手順を更新する必要がある。

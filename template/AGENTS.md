@@ -32,6 +32,7 @@ make paper-layer-card-check
 make workflow-check
 make concept-term-check
 make content-first-check
+make section-depth-check
 make finish-manuscript-check
 make figure-reference-check
 make figure-obligation-check
@@ -46,7 +47,7 @@ make figure-obligation-check
 3. 必要なら `/map-result-patterns` で raw result や figure data を evidence card にする。
 4. 外部 export bundle を使う場合は `refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-6. Writer の前に、`pops workflow status`、`workflow/subagent-roster.yml`、`contracts/`、`manuscript/writing-profile.yml`、`/design-paper-storyline` を確認し、`make content-first-check` で次の作業が本文 blocker を減らすことを確認する。subagent を使う場合は story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分け、orchestrator が `review/rounds/` に integration decision を残す。`/plan-figure-story` で visual obligation と主図構成を決め、その後、必要な card と controlled authoring view から `paper_ir` を作り、Results / Discussion / Methods の section compiler で読者向け構造へ変換する。
+6. Writer の前に、`pops workflow status`、`workflow/subagent-roster.yml`、`contracts/`、`manuscript/writing-profile.yml`、`/design-paper-storyline` を確認し、`make content-first-check` で次の作業が本文 blocker を減らすことを確認する。subagent を使う場合は story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分け、orchestrator が `review/rounds/` に integration decision を残す。`/plan-figure-story` で visual obligation と主図構成を決め、その後、必要な card と controlled authoring view から `paper_ir` を作り、Results / Discussion / Methods の section compiler で読者向け構造へ変換する。`section_depth` は JA を `ja_chars`、EN を `en_words` で数える floor であり、水増し target にしない。
 7. 強い英語名詞句や hyphen / slash compound は `notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
 8. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
 9. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
