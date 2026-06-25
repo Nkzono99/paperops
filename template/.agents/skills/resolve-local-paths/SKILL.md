@@ -37,6 +37,8 @@ description: Use when resolving local path aliases from refs/links.toml and refs
 
 追加作業が必要な場合は、まず `requests/analysis/` に paper 側の文脈を残し、`notes/views/research-requests.md` で俯瞰する。runops 側へ渡す前に `runops.paper.request.draft` で候補 request を検証し、`data.valid = true` かつ `existing_queue.duplicate_id = false` の場合だけ `toml_snippet` を採用する。duplicate id warning がある場合は、snippet が返っていても追記せず、別の id で draft し直す。
 
+paper 側 request と linked queue の drift は `make research-request-handoff-check` で確認する。`runops_id = draft:*` は draft staged but not queued、queued ID は linked `paper_request_queue` 内の `[[requests]]` と照合する。投稿前や queue handoff を閉じる前は `python scripts/check-research-request-handoff.py --root . --strict` を使う。
+
 このスキルは runops の run creation、survey expansion、job submit は行わない。必要な場合は runops project 側の明示操作として提案する。
 
 ## 記録先の使い分け

@@ -15,7 +15,7 @@ uvx --from paper-harness-cli pops doctor
 
 `pops init` / `pops setup` は `.pops/manifest.toml` を作成するが、CLI 用の project-local `.venv` は作らない。`.venv` は論文プロジェクト用の Python 環境が必要な場合に `make venv` で作る。
 
-下流の `make ci` には、argument focus、main-text figure reference、claim evidence、外部 bundle import state、カード層などの advisory checks も含まれる。
+下流の `make ci` には、argument focus、main-text figure reference、claim evidence、外部 bundle import state、research request handoff、カード層などの advisory checks も含まれる。
 
 ## コマンド一覧
 
@@ -74,6 +74,8 @@ uvx --from paper-harness-cli pops links check
 ```
 
 `kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。追加解析や図表要望は `requests/analysis/` に切り出してから runops 側へ渡す。
+
+runops queue へ渡す予定の request は、下流 repo で `make research-request-handoff-check` を実行して確認する。通常は warning のみで、`python scripts/check-research-request-handoff.py --root . --strict` は投稿前や queue handoff の完了判定に使う。
 
 外部 export bundle を図表・表・claim evidence に使う場合は、`refs/imports/` に import state を記録し、`make external-import-check` を実行する。
 

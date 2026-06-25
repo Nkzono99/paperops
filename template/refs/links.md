@@ -25,4 +25,5 @@
 2. 自分の環境では `refs/local/locations.example.toml` を `refs/local/locations.toml` にコピーし、対応する `[paths.<location_ref>]` の `path` を記入する。
 3. セッション中は `/resolve-local-paths` で link を解決する。
 4. `uvx --from paper-harness-cli pops links check` または `make links-check` で link 台帳を検証する。
-5. 外部 bundle を使う場合は `refs/imports/` の state record を作る。
+5. runops へ渡す追加解析 request がある場合は、`make research-request-handoff-check` で paper 側 request と linked `paper_request_queue` の drift を確認する。`--strict` は投稿前や queue handoff 完了判定で使う。
+6. 外部 bundle を使う場合は `refs/imports/` の state record を作る。
