@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "overall": {
+    "state": "SCOPED",
+    "summary": "スターター状態。中心 claim、evidence、section plan をまだ固定していない。"
+  },
+  "guards": {
+    "EVIDENCE_READY": {
+      "central_claim_one_sentence": false,
+      "essential_results_selected": false,
+      "primary_evidence_attached": false,
+      "negative_or_null_cases_classified": false,
+      "central_assumptions_approved": false,
+      "main_vs_supplement_figures_split": false
+    },
+    "STORY_LOCKED": {
+      "core_claims_ordered": false,
+      "figure_story_fixed": false,
+      "keep_compress_move_cut_decided": false,
+      "abstract_conclusion_scope_aligned": false
+    },
+    "SECTION_PLANNED": {
+      "reader_questions_defined": false,
+      "figure_order_fixed": false,
+      "main_text_supplement_cut_decided": false,
+      "discussion_claim_types_defined": false,
+      "section_contracts_checked": false
+    },
+    "DRAFTED": {
+      "planned_sections_drafted": false,
+      "paper_ir_used": false,
+      "no_stale_sections": true
+    },
+    "UNDER_REVIEW": {
+      "draft_readable": false,
+      "public_only_review_ready": false
+    },
+    "STRUCTURE_ACCEPTED": {
+      "blocking_concern_zero": true,
+      "major_concern_zero_or_scoped": true,
+      "no_stale_sections": true,
+      "unregistered_new_claim_zero": true,
+      "last_review_routes_manuscript_only": false
+    },
+    "POLISHED": {
+      "structure_accepted": false,
+      "concept_terms_checked": false,
+      "figure_references_checked": false,
+      "prose_loop_only_remaining": false
+    },
+    "SUBMISSION_READY": {
+      "pre_submit_passed": false,
+      "venue_requirements_checked": false,
+      "ai_disclosure_checked": false,
+      "response_or_cover_letter_ready_if_needed": false
+    }
+  },
+  "sections": {
+    "introduction": {
+      "state": "UNPLANNED",
+      "depends_on": {
+        "claims": [
+          "CLM-0001@v1"
+        ],
+        "contract": [
+          "CONTRACT-introduction@v1"
+        ]
+      }
+    },
+    "methods": {
+      "state": "UNPLANNED",
+      "depends_on": {
+        "evidence": [
+          "RES-0001@v1"
+        ],
+        "contract": [
+          "CONTRACT-methods@v1"
+        ]
+      }
+    },
+    "results.core_relaxation": {
+      "state": "UNPLANNED",
+      "depends_on": {
+        "claims": [
+          "CLM-0003@v1"
+        ],
+        "evidence": [
+          "RES-0012@v1"
+        ],
+        "figures": [
+          "FIG-0005@v1"
+        ],
+        "contract": [
+          "CONTRACT-results@v1"
+        ]
+      }
+    },
+    "discussion.mechanism": {
+      "state": "UNPLANNED",
+      "depends_on": {
+        "claims": [
+          "CLM-0003@v1"
+        ],
+        "evidence": [
+          "RES-0012@v1"
+        ],
+        "contract": [
+          "CONTRACT-discussion@v1"
+        ]
+      }
+    },
+    "abstract": {
+      "state": "UNPLANNED",
+      "depends_on": {
+        "claims": [
+          "CLM-0001@v1"
+        ],
+        "figures": [
+          "FIG-0001@v1"
+        ]
+      }
+    },
+    "conclusion": {
+      "state": "UNPLANNED",
+      "depends_on": {
+        "claims": [
+          "CLM-0001@v1"
+        ],
+        "contract": [
+          "CONTRACT-conclusion@v1"
+        ]
+      }
+    }
+  },
+  "review": {
+    "blocking_concerns": [],
+    "major_concerns": [],
+    "last_issue_class": ""
+  },
+  "loop_counters": {}
+}

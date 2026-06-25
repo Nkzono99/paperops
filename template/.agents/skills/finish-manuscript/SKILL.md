@@ -13,6 +13,8 @@ Writer に生の card ontology を直接渡さない。本文生成の前に、�
 
 section contract は文章テンプレートではなく入出力契約として扱う。`contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ね、`plan-section -> draft-section -> audit-section` の順で、読者質問、入力、出力、禁止構造、論文種別 overlay を確認する。
 
+workflow は直列パイプラインではなく階層型状態機械として扱う。本文編集前に `pops workflow status` と `pops workflow next` を確認し、`UNDER_REVIEW` 後は Issue Router で evidence / story / section / prose / submission loop のどこへ戻るかを決める。
+
 ## 最初に決める
 
 `/goal` で使われている場合、goal は「投稿可能な原稿と検証済みの対応記録を作る」と具体化する。途中で広がりすぎたら、今の blocker、次の review loop、Finish criteria の未達項目へ戻る。
@@ -33,6 +35,10 @@ section contract は文章テンプレートではなく入出力契約として
 - `notes/related-work-map.md`
 - `notes/reviewer-model.md`
 - `contracts/`
+- `workflow/machine.yml`
+- `workflow/current-state.yml`
+- `workflow/round-summary.yml`
+- `workflow/decisions.yml`
 - `manuscript/writing-profile.yml`
 - `review/feedback/`
 - `review/rounds/`
@@ -42,6 +48,24 @@ section contract は文章テンプレートではなく入出力契約として
 対象原稿が repo 外にある場合は、先に `import-manuscript` で取り込む。raw confidential reviewer text や雑多な人間入力は `_handoff/` に置き、tracked card には要約、ID、route だけを残す。
 
 `_archives/` は sealed scratch archive であり、通常の from-scratch / revision / peer review loop では読まない。ユーザーが明示的に restore / inspect / compare を頼んだ場合だけ `pops scratch` 経由で扱う。
+
+## Workflow phase
+
+まず `pops workflow status` と `pops workflow next` を実行する。`workflow/current-state.yml` に stale section がある場合、全文改稿へ進まず、該当 section の route を確認する。claim、result、figure、section contract を更新した場合は `pops workflow invalidate <artifact-id>` を実行し、依存 section を `STALE` にする。
+
+全体状態は `SCOPED`、`EVIDENCE_READY`、`STORY_LOCKED`、`SECTION_PLANNED`、`DRAFTED`、`UNDER_REVIEW`、`STRUCTURE_ACCEPTED`、`POLISHED`、`SUBMISSION_READY` を使う。`pops workflow advance <state>` は guard が満たされたときだけ使う。guard を満たさない場合は、文章だけで完了扱いにしない。
+
+### Issue Router
+
+Review 後は、Reviewer にそのまま改稿させない。`review/feedback/` の指摘を見て、まず Issue Router として次のどれかに分類する。
+
+- `evidence_loop`: 数値、比較、収束、対照、artifact provenance が不足している。
+- `story_loop`: 中心主張、figure story、結果階層、主図と補足図の切り分けが揺れている。
+- `section_loop`: Methods の粒度、Results subsection、Discussion の推論型、section contract が合っていない。
+- `prose_loop`: claim scope は変えず、名詞化、冗長、防御表現、段落流れだけを直す。
+- `submission_loop`: 引用、開示、投稿先形式、bibliography、Data availability を直す。
+
+分類したら `pops workflow route-review --issue-class <class>` で戻る深さを確認する。状態へ反映する場合だけ `--apply` を付ける。同じ issue class が既定回数を超えて再発した場合は、人間判断へ戻す。
 
 ## paper_ir phase
 

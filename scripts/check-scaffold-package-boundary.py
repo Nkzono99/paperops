@@ -33,6 +33,13 @@ CANARY_RELS = (
     "refs/source-reach/canary/doctor.generated.json",
     "refs/source-reach/canary/capture.generated.json",
 )
+REQUIRED_RELS = (
+    "workflow/machine.yml",
+    "workflow/current-state.yml",
+    "workflow/decisions.yml",
+    "workflow/round-summary.yml",
+    "scripts/check-workflow-state.py",
+)
 
 
 def main() -> int:
@@ -122,6 +129,16 @@ def check_wheel_contents(wheel: Path) -> None:
         raise SystemExit(
             "excluded scaffold artifacts were bundled in the wheel:\n" + formatted
         )
+    missing = [
+        rel
+        for rel in REQUIRED_RELS
+        if PACKAGE_SCAFFOLD_PREFIX + rel not in names
+    ]
+    if missing:
+        formatted = "\n".join(f"  - {name}" for name in missing)
+        raise SystemExit(
+            "required scaffold files were not bundled in the wheel:\n" + formatted
+        )
 
 
 def run_from_wheel(wheel: Path, init_dir: Path) -> None:
@@ -142,6 +159,12 @@ def check_init_contents(init_dir: Path) -> None:
         raise SystemExit(
             "excluded scaffold artifacts were copied by wheel-installed pops init:\n"
             + formatted
+        )
+    missing = [rel for rel in REQUIRED_RELS if not (init_dir / rel).is_file()]
+    if missing:
+        formatted = "\n".join(f"  - {name}" for name in missing)
+        raise SystemExit(
+            "required scaffold files were not copied by pops init:\n" + formatted
         )
 
 

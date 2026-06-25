@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "overall_states": [
+    "SCOPED",
+    "EVIDENCE_READY",
+    "STORY_LOCKED",
+    "SECTION_PLANNED",
+    "DRAFTED",
+    "UNDER_REVIEW",
+    "STRUCTURE_ACCEPTED",
+    "POLISHED",
+    "SUBMISSION_READY"
+  ],
+  "section_states": [
+    "UNPLANNED",
+    "PLANNED",
+    "DRAFTED",
+    "AUDITED",
+    "ACCEPTED",
+    "STALE"
+  ],
+  "transitions": {
+    "SCOPED": [
+      "EVIDENCE_READY"
+    ],
+    "EVIDENCE_READY": [
+      "STORY_LOCKED"
+    ],
+    "STORY_LOCKED": [
+      "SECTION_PLANNED"
+    ],
+    "SECTION_PLANNED": [
+      "DRAFTED"
+    ],
+    "DRAFTED": [
+      "UNDER_REVIEW"
+    ],
+    "UNDER_REVIEW": [
+      "EVIDENCE_READY",
+      "STORY_LOCKED",
+      "SECTION_PLANNED",
+      "POLISHED",
+      "STRUCTURE_ACCEPTED"
+    ],
+    "STRUCTURE_ACCEPTED": [
+      "POLISHED"
+    ],
+    "POLISHED": [
+      "SUBMISSION_READY",
+      "UNDER_REVIEW"
+    ],
+    "SUBMISSION_READY": []
+  },
+  "issue_classes": {
+    "evidence_loop": {
+      "route_to": "EVIDENCE_READY",
+      "meaning": "数値、比較、収束、対照、artifact provenance が不足している。"
+    },
+    "story_loop": {
+      "route_to": "STORY_LOCKED",
+      "meaning": "中心主張、figure story、結果階層、主図と補足図の切り分けが揺れている。"
+    },
+    "section_loop": {
+      "route_to": "SECTION_PLANNED",
+      "meaning": "章の reader question、情報配置、Discussion の推論型、section contract が合っていない。"
+    },
+    "prose_loop": {
+      "route_to": "POLISHED",
+      "meaning": "claim scope は変えず、名詞化、冗長、防御表現、段落流れだけを直す。"
+    },
+    "submission_loop": {
+      "route_to": "SUBMISSION_READY",
+      "meaning": "引用、開示、投稿先形式、bibliography、Data availability など最終提出面を直す。"
+    }
+  },
+  "artifact_routes": {
+    "CLM": "story_loop",
+    "RES": "evidence_loop",
+    "FIG": "story_loop",
+    "SRC": "evidence_loop",
+    "CONTRACT": "section_loop"
+  },
+  "guards": {
+    "EVIDENCE_READY": [
+      "central_claim_one_sentence",
+      "essential_results_selected",
+      "primary_evidence_attached",
+      "negative_or_null_cases_classified",
+      "central_assumptions_approved",
+      "main_vs_supplement_figures_split"
+    ],
+    "STORY_LOCKED": [
+      "core_claims_ordered",
+      "figure_story_fixed",
+      "keep_compress_move_cut_decided",
+      "abstract_conclusion_scope_aligned"
+    ],
+    "SECTION_PLANNED": [
+      "reader_questions_defined",
+      "figure_order_fixed",
+      "main_text_supplement_cut_decided",
+      "discussion_claim_types_defined",
+      "section_contracts_checked"
+    ],
+    "DRAFTED": [
+      "planned_sections_drafted",
+      "paper_ir_used",
+      "no_stale_sections"
+    ],
+    "UNDER_REVIEW": [
+      "draft_readable",
+      "public_only_review_ready"
+    ],
+    "STRUCTURE_ACCEPTED": [
+      "blocking_concern_zero",
+      "major_concern_zero_or_scoped",
+      "no_stale_sections",
+      "unregistered_new_claim_zero",
+      "last_review_routes_manuscript_only"
+    ],
+    "POLISHED": [
+      "structure_accepted",
+      "concept_terms_checked",
+      "figure_references_checked",
+      "prose_loop_only_remaining"
+    ],
+    "SUBMISSION_READY": [
+      "pre_submit_passed",
+      "venue_requirements_checked",
+      "ai_disclosure_checked",
+      "response_or_cover_letter_ready_if_needed"
+    ]
+  },
+  "loop_policy": {
+    "max_autonomous_rounds_per_issue": 2,
+    "escalate_if_no_major_reduction": true,
+    "escalate_on_scope_expansion": true,
+    "escalate_on_reviewer_disagreement_about_central_claim": true
+  }
+}

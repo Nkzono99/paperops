@@ -1,4 +1,4 @@
-.PHONY: venv build-ja build-en lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check figure-reference-check claim-evidence-check paper-layer-card-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context readiness-check export-arxiv ci audit pre-submit
+.PHONY: venv build-ja build-en lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check figure-reference-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context readiness-check export-arxiv ci audit pre-submit
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
 PYTHON_BOOTSTRAP ?= python
@@ -49,6 +49,9 @@ claim-evidence-check:
 paper-layer-card-check:
 	$(PYTHON) scripts/check-paper-layer-cards.py --root .
 
+workflow-check:
+	$(PYTHON) scripts/check-workflow-state.py --root .
+
 archive-seal-check:
 	$(PYTHON) scripts/check-archive-seal.py --root .
 
@@ -76,7 +79,7 @@ readiness-check:
 export-arxiv:
 	bash scripts/export-arxiv.sh
 
-ci: lint-bib citation-check mirror-check public-terms-check paper-layer-card-check archive-seal-check skill-mirror-check links-check build-ja build-en
+ci: lint-bib citation-check mirror-check public-terms-check paper-layer-card-check workflow-check archive-seal-check skill-mirror-check links-check build-ja build-en
 
 audit: mirror-freshness-check concept-term-check argument-focus-check figure-reference-check claim-evidence-check research-request-handoff-check external-import-check submission-drift-check
 

@@ -19,11 +19,12 @@
 
 1. `/resume-session` で前回の状態を読む。
 2. 今日扱う claim、evidence、feedback、request を確認する。
-3. 必要なら `contracts/` と `manuscript/writing-profile.yml` を重ね、`paper_ir` と section compiler で Results / Discussion / Methods の読者向け構造を作る。
-4. `manuscript/ja/` を中心に書く。
-5. 必要な block を `manuscript/en/` に同期する。
-6. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
-7. 共有前は `make ci` と `make audit`、投稿前は `make pre-submit` を実行する。
+3. `pops workflow status` と `pops workflow next` で、全体状態と stale section を確認する。
+4. 必要なら `contracts/` と `manuscript/writing-profile.yml` を重ね、`paper_ir` と section compiler で Results / Discussion / Methods の読者向け構造を作る。
+5. `manuscript/ja/` を中心に書く。
+6. 必要な block を `manuscript/en/` に同期する。
+7. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、`pops workflow route-review` で戻る深さを決める。
+8. 共有前は `make ci` と `make audit`、投稿前は `make pre-submit` を実行する。
 
 ## 中間層
 
@@ -33,6 +34,7 @@
 - `requests/`: analysis / writing request card の正本
 - `notes/views/`: pure overview view と controlled authoring view
 - `contracts/`: section ごとの読者質問、入力、出力、禁止構造
+- `workflow/`: 全体状態、section 状態、issue class、stale 伝播
 - `manuscript/writing-profile.yml`: 論文種別・投稿先ごとの overlay
 
 旧 `notes/*.md` の一部は互換ビューであり、正本は上のカード層に置く。`paper_ir` は card と controlled view から Writer に渡す context を作る生成一時物であり、手書き正本にはしない。
@@ -67,6 +69,7 @@
 
 - `manuscript/`: 日英原稿、共有アセット、ミラー制御、投稿先情報
 - `contracts/`: Introduction / Methods / Results / Discussion / Conclusion の入出力契約
+- `workflow/`: 階層型状態機械、現在状態、review round summary、人間判断
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX
 - `refs/`: 文献、外部 source、外部 link、ローカルパス alias
 - `evidence/`, `claims/`, `review/`, `requests/`: 論文を書く前後のカード層

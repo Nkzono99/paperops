@@ -10,6 +10,7 @@
 - 人間は主に原稿レビューや自然文の指示を出す。Agent は必要に応じて `/integrate-writing-feedback` で feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
 - `evidence/`、`claims/`、`review/`、`requests/` はカード正本である。`notes/views/` は pure overview view と controlled authoring view を含む。旧 `notes/*.md` の一部は互換ビューとして扱う。
 - `contracts/` は section ごとの入出力契約であり、文章テンプレートではない。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
+- `workflow/` は全体状態、section 状態、issue class、stale 伝播の状態正本である。本文編集前に `pops workflow status` を確認する。
 - `refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` の作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名は英語のままでよい。
 - raw PDF、未整理ファイル、個人環境の絶対パス、confidential reviewer correspondence は tracked file へ混ぜない。
 - `_handoff/` は人間から AI への一時受け取り箱であり、内容は Git 管理しない。
@@ -27,6 +28,7 @@ make ci
 make audit
 make pre-submit
 make paper-layer-card-check
+make workflow-check
 make concept-term-check
 make figure-reference-check
 ```
@@ -40,11 +42,11 @@ make figure-reference-check
 3. 必要なら `/map-result-patterns` で raw result や figure data を evidence card にする。
 4. 外部 export bundle を使う場合は `refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-6. Writer の前に、`contracts/` と `manuscript/writing-profile.yml` を確認し、必要な card と controlled authoring view から `paper_ir` を作り、Results / Discussion / Methods の section compiler で読者向け構造へ変換する。
+6. Writer の前に、`pops workflow status`、`contracts/`、`manuscript/writing-profile.yml` を確認し、必要な card と controlled authoring view から `paper_ir` を作り、Results / Discussion / Methods の section compiler で読者向け構造へ変換する。
 7. 強い英語名詞句や hyphen / slash compound は `notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
 8. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
 9. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
-10. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映する。
+10. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映し、必要なら `pops workflow route-review` と `pops workflow invalidate <artifact-id>` で戻る深さと stale section を更新する。
 11. 共有前に `make ci` と `make audit`、投稿前に `make pre-submit` を実行する。
 
 ## スキル入口
@@ -67,6 +69,7 @@ Claude Code では `.claude/skills/` の同名 skill を入口として使う。
 ```text
 manuscript/          日英原稿、共有アセット、ミラー制御、投稿先情報
 contracts/           section ごとの読者質問、入力、出力、禁止構造
+workflow/            全体状態、section 状態、review loop、stale 伝播
 submission/          投稿先公式テンプレートと最終提出用 TeX
 refs/                文献、外部 source、外部 link、import state、local path alias
 _handoff/            未整理ファイルの一時受け取り箱

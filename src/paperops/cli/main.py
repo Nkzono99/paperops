@@ -46,6 +46,7 @@ from paperops.cli.upgrade import (
     run_upgrade_chain,
 )
 from paperops.cli.versioning import compare_versions, package_version
+from paperops.cli.workflow import add_workflow_parser
 
 
 def app() -> None:
@@ -215,6 +216,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     links_parser.set_defaults(func=cmd_links)
 
+    add_workflow_parser(subcommands)
     add_scratch_parser(subcommands)
 
     version_parser = subcommands.add_parser(

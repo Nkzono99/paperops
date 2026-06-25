@@ -39,7 +39,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 ### 原稿完成
 
-- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。Writer の前に `contracts/`、`writing-profile.yml`、`paper_ir`、section compiler を通す。
+- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。Writer の前に `workflow/`、`contracts/`、`writing-profile.yml`、`paper_ir`、section compiler を通す。
 - `audit-ai-draft`: AI 初稿をそのまま磨かず、claim / evidence / section compiler へ戻す routing skill として使う。
 
 ### レビュー・査読
@@ -97,6 +97,7 @@ Writer には card 正本や gate 語彙を直接読み込ませすぎない。`
 - `paper_ir` は生成一時物であり、手書き正本にはしない。
 - `contracts/` は文章テンプレートではなく section 入出力契約である。
 - `manuscript/writing-profile.yml` は論文種別・投稿先ごとの overlay である。
+- `workflow/` は階層型状態機械と stale 伝播の状態正本である。review 後は Issue Router で戻る深さを決める。
 - 作業用ドキュメントは原則日本語で書く。
 - raw correspondence、未整理ファイル、個人環境の実パスは tracked file へ混ぜない。
 - `_archives/` は sealed scratch archive。通常の skill は読まず、明示的な restore / inspect / compare 指示がある場合だけ扱う。

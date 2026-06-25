@@ -22,6 +22,7 @@
 - `manuscript/`: 日英原稿、ミラー制御、投稿先情報
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX
 - `contracts/`: Introduction / Methods / Results / Discussion / Conclusion の入出力契約
+- `workflow/`: 階層型状態機械、現在状態、review round summary、人間判断
 - `refs/`: 文献サマリー、関連研究調査、外部 source、外部 project link、外部 bundle import state
 - `_handoff/`: 人間から AI へ渡す未整理ファイル
 - `_archives/`: 過去稿を sealed split bundle として封印する scratch archive
@@ -46,6 +47,7 @@
 | `paper_ir` | card / view から Writer に渡す材料を section ごとにまとめる | 生成一時物 | `finish-manuscript` の section compiler phase |
 | `contracts/` | section ごとの読者質問、入力、出力、禁止構造を定める | 既定契約 | `finish-manuscript` の plan-section / audit-section |
 | `manuscript/writing-profile.yml` | 論文種別、投稿先、分野別要求を section 契約へ重ねる | プロジェクト設定 | 初期 setup、投稿先変更時 |
+| `workflow/` | 全体状態、section 状態、issue class、stale 伝播を管理する | 状態正本 | `pops workflow`, `finish-manuscript` の Issue Router |
 | `.paperops/cache/` | section plan や一時 IR を置く | Git 管理しない生成物 | `finish-manuscript` の plan-section |
 | `manuscript/` | 読者へ出す本文 | 成果物 | Writer / editor pass |
 | `submission/` | 投稿先に合わせた提出版 | 派生成果物 | `prepare-submission` 相当の投稿前作業 |
@@ -60,13 +62,15 @@
 2. Agent は必要に応じて feedback / evidence / claim / request card を更新する。
 3. Abstract、Conclusion、主要図表に使う claim は `claims/gates/` で readiness を確認する。
 4. 本文に出る強い名詞句は `notes/views/concept-terms.md` で確認し、accepted term、普通の文へほどく語、avoid 語を分ける。
-5. `contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ねて、section が答える読者質問と必要出力を確認する。
-6. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
-7. section compiler が Methods / Results / Discussion それぞれの reader question、answer、evidence、figure、caveat location、sentence budget を決める。
-8. Writer は `paper_ir` と承認済み claim package を使って本文を書く。Writer に生の card ontology を直接渡しすぎない。
-9. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
-10. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
-11. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
+5. `pops workflow status` と `pops workflow next` で、全体状態、stale section、次に通す guard を確認する。
+6. `contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ねて、section が答える読者質問と必要出力を確認する。
+7. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
+8. section compiler が Methods / Results / Discussion それぞれの reader question、answer、evidence、figure、caveat location、sentence budget を決める。
+9. Writer は `paper_ir` と承認済み claim package を使って本文を書く。Writer に生の card ontology を直接渡しすぎない。
+10. Review 後は `pops workflow route-review` で evidence / story / section / prose / submission loop のどこへ戻るかを決め、上流 artifact が変わったら `pops workflow invalidate <artifact-id>` で依存 section を stale にする。
+11. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
+12. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
+13. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
 
 ## paper_ir と section compiler
 
@@ -97,6 +101,14 @@ section compiler は、`finish-manuscript` の中で Writer の前に走る段�
 - `compile-discussion`: observation / inference / mechanism_hypothesis / alternative_explanation / implication / prediction / limitation を分ける。
 
 これにより、AI が持っている情報を均等に説明したり、内部 label を本文へ漏らしたり、limitation だけを過剰に複製したりする失敗を減らす。
+
+## workflow state machine
+
+`workflow/` は、論文執筆を直列パイプラインではなく階層型状態機械として扱うための状態正本である。全体状態は `SCOPED` から `SUBMISSION_READY` までの固定列を持つが、review 後は一方向に進めず、Issue Router が `evidence_loop`、`story_loop`、`section_loop`、`prose_loop`、`submission_loop` のどこへ戻るかを決める。
+
+各 section は `UNPLANNED`、`PLANNED`、`DRAFTED`、`AUDITED`、`ACCEPTED`、`STALE` の局所状態を持つ。claim、result、figure、contract などの upstream artifact が変わった場合は、過去状態へ機械的に戻すのではなく、依存 section を `STALE` にする。`pops workflow invalidate CLM-0003` は、`depends_on` に `CLM-0003@...` を持つ section だけを stale にし、artifact 種別に応じた loop route を付ける。
+
+`workflow/machine.yml` は状態、transition、guard、loop policy の既定規約であり、`workflow/current-state.yml` は現在状態である。逐次ログ、stale map、context pack は `.paperops/cache/` に置き、Git 管理しない。
 
 ## 設計原則
 

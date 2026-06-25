@@ -37,6 +37,11 @@ uvx --from paper-harness-cli pops doctor
 - `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出す。
 - `pops links list [path]`: `refs/links.toml` の外部 link を表示する。
 - `pops links check [path]`: link registry と local location の対応を検証する。
+- `pops workflow status [path]`: 論文全体と section の workflow state を表示する。
+- `pops workflow next [path]`: 次に進める全体状態と guard の未達項目を表示する。
+- `pops workflow advance <state> [path]`: guard が満たされた場合だけ全体状態を進める。
+- `pops workflow invalidate <artifact-id> [path]`: claim / result / figure などに依存する section を stale にする。
+- `pops workflow route-review [path] --issue-class <class> [--apply]`: review 指摘を evidence / story / section / prose / submission loop へ戻す。
 - `pops scratch archive/reset/restore/list/inspect`: 現在の論文作業層を `_archives/` の split bundle に封印し、同じ repo で1から書き直す。
 - `pops version`, `pops --version`: CLI と上流情報を表示する。
 
@@ -49,6 +54,7 @@ uvx --from paper-harness-cli pops doctor
 - `Makefile`
 - `TROUBLESHOOTING.md`
 - `contracts/`
+- `workflow/`
 - `scripts/`
 - `.agents/`
 - `.claude/`
@@ -89,6 +95,18 @@ runops queue へ渡す予定の request は、下流 repo で `make research-req
 `paper_ir` は、card 正本と controlled authoring view から Writer に渡す context を作る生成一時物である。`pops` の永続管理対象ではなく、通常は skill が必要に応じて作る。手書き正本は `evidence/`、`claims/`、`review/`、`requests/` に置き、`paper_ir` は Methods / Results / Discussion の section compiler へ渡す一時的な変換結果として扱う。
 
 section compiler は、`contracts/<section>.yml` の入出力契約と `manuscript/writing-profile.yml` の paper type / venue overlay を重ねる。`plan-section` で作る一時 plan は必要なら `.paperops/cache/` に置き、Git 管理しない。
+
+## Workflow
+
+```sh
+uvx --from paper-harness-cli pops workflow status
+uvx --from paper-harness-cli pops workflow next
+uvx --from paper-harness-cli pops workflow advance evidence-ready
+uvx --from paper-harness-cli pops workflow invalidate CLM-0003
+uvx --from paper-harness-cli pops workflow route-review --issue-class story-loop --apply
+```
+
+`workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`workflow/current-state.yml` は現在状態と section の `depends_on` を持つ。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
 
 ## Scratch Archives
 

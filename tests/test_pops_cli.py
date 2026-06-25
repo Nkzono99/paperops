@@ -42,6 +42,10 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "_archives" / "README.md").is_file())
             self.assertTrue((target / "contracts" / "results.yml").is_file())
             self.assertTrue((target / "contracts" / "methods.yml").is_file())
+            self.assertTrue((target / "workflow" / "machine.yml").is_file())
+            self.assertTrue((target / "workflow" / "current-state.yml").is_file())
+            self.assertTrue((target / "workflow" / "decisions.yml").is_file())
+            self.assertTrue((target / "workflow" / "round-summary.yml").is_file())
             self.assertTrue((target / "manuscript" / "writing-profile.yml").is_file())
             troubleshooting = (target / "TROUBLESHOOTING.md").read_text(encoding="utf-8")
             self.assertIn("Skill descriptions were shortened", troubleshooting)
@@ -232,6 +236,26 @@ class PopsCliTest(unittest.TestCase):
 
             self.assertEqual(code, 0, err)
             self.assertTrue((target / "contracts" / "results.yml").is_file())
+
+    def test_update_paperops_can_add_missing_workflow_kernel(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            (target / "workflow" / "machine.yml").unlink()
+
+            code, out, err = run_cli(
+                ["update-paperops", "--dry-run", "--only", "workflow/", str(target)]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("+ workflow/machine.yml [workflow state machine]", out)
+
+            code, _out, err = run_cli(
+                ["update-paperops", "--apply", "--only", "workflow/", str(target)]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertTrue((target / "workflow" / "machine.yml").is_file())
 
     def test_update_paperops_explains_changed_managed_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

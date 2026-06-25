@@ -17,6 +17,8 @@ def managed_update_surface(rel: str) -> str:
         return "operator docs"
     if rel.startswith("contracts/"):
         return "section contract"
+    if rel.startswith("workflow/"):
+        return "workflow state machine"
     if rel.startswith("scripts/"):
         return "validation/build script"
     if rel.startswith(".agents/skills/"):

@@ -53,6 +53,7 @@ MANAGED_UPDATE_PATTERNS = (
     "Makefile",
     "TROUBLESHOOTING.md",
     "contracts/*",
+    "workflow/*",
     "scripts/*",
     ".agents/*",
     ".claude/*",
