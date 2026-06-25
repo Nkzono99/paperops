@@ -1,6 +1,7 @@
 .DS_Store
 .venv/
 .tools/
+.paperops/cache/
 .claude/settings.local.json
 _handoff/*
 !_handoff/.gitkeep

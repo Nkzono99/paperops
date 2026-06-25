@@ -39,7 +39,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 ### 原稿完成
 
-- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。Writer の前に `paper_ir` と section compiler を通す。
+- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。Writer の前に `contracts/`、`writing-profile.yml`、`paper_ir`、section compiler を通す。
 - `audit-ai-draft`: AI 初稿をそのまま磨かず、claim / evidence / section compiler へ戻す routing skill として使う。
 
 ### レビュー・査読
@@ -87,7 +87,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 原稿編集では `make concept-term-check` と `notes/views/concept-terms.md` も使う。AI 初稿で起きやすい concept-term compression、つまり強い英語名詞句への単語化は、claim / argument / evidence card の意味を本文へ写すときの語彙問題として扱い、必要なら普通の文へほどく。
 
-Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results`、`compile-discussion`、`compile-methods` の section compiler を通してから本文生成へ進む。
+Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は、`contracts/` の section 入出力契約と `manuscript/writing-profile.yml` の paper type overlay を確認し、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results`、`compile-discussion`、`compile-methods` の section compiler を通してから本文生成へ進む。
 
 ## 重要な境界
 
@@ -95,6 +95,8 @@ Writer には card 正本や gate 語彙を直接読み込ませすぎない。`
 - `notes/views/` には pure overview view と controlled authoring view がある。
 - `notes/views/concept-terms.md` は概念語ビューであり、claim / argument / evidence card の意味と本文語彙の対応を記録する。
 - `paper_ir` は生成一時物であり、手書き正本にはしない。
+- `contracts/` は文章テンプレートではなく section 入出力契約である。
+- `manuscript/writing-profile.yml` は論文種別・投稿先ごとの overlay である。
 - 作業用ドキュメントは原則日本語で書く。
 - raw correspondence、未整理ファイル、個人環境の実パスは tracked file へ混ぜない。
 - `_archives/` は sealed scratch archive。通常の skill は読まず、明示的な restore / inspect / compare 指示がある場合だけ扱う。

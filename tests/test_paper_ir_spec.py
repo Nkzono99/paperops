@@ -60,6 +60,69 @@ class PaperIrSpecTest(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, skill)
 
+    def test_section_contracts_define_io_not_prose_templates(self) -> None:
+        contracts_root = ROOT / "template" / "contracts"
+        expected_files = [
+            "README.md",
+            "introduction.yml",
+            "methods.yml",
+            "results.yml",
+            "discussion.yml",
+            "conclusion.yml",
+        ]
+        for name in expected_files:
+            with self.subTest(name=name):
+                self.assertTrue((contracts_root / name).is_file())
+
+        methods = (contracts_root / "methods.yml").read_text(encoding="utf-8")
+        for required in [
+            "information_placement",
+            "main_text",
+            "supplement",
+            "code_or_manifest",
+            "verification_or_convergence",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, methods)
+
+        results = (contracts_root / "results.yml").read_text(encoding="utf-8")
+        for required in [
+            "reader_question",
+            "answer",
+            "evidence",
+            "scope",
+            "consequence",
+            "run_inventory_as_topic_sentence",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, results)
+
+        discussion = (contracts_root / "discussion.yml").read_text(encoding="utf-8")
+        for required in [
+            "mechanism_hypothesis",
+            "alternative_explanation",
+            "implication",
+            "prediction",
+            "limitation",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, discussion)
+
+    def test_writing_profile_overlays_section_contracts(self) -> None:
+        profile = (ROOT / "template" / "manuscript" / "writing-profile.yml").read_text(
+            encoding="utf-8"
+        )
+        gitignore = (ROOT / "template" / ".gitignore").read_text(encoding="utf-8")
+        architecture = (ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
+
+        self.assertIn("paper_type: computational_modeling", profile)
+        self.assertIn("geometry_and_boundary_conditions", profile)
+        self.assertIn("state_variables_and_update_law", profile)
+        self.assertIn("estimator_definition", profile)
+        self.assertIn(".paperops/cache/", gitignore)
+        self.assertIn("contracts/", architecture)
+        self.assertIn("manuscript/writing-profile.yml", architecture)
+
     def test_skill_catalog_classifies_route_and_leaf_skills(self) -> None:
         catalog = (ROOT / "docs" / "skill-catalog.md").read_text(encoding="utf-8")
 

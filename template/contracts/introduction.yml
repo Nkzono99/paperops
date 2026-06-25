@@ -1,0 +1,41 @@
+section: introduction
+purpose: >
+  読者に、なぜこの研究が必要で、何が未解決で、本稿がどこまで答えるかを渡す。
+
+reader_question: なぜこの研究が必要か
+
+logic_chain:
+  - problem
+  - unresolved_tension
+  - precise_gap
+  - approach
+  - contribution
+  - scope
+  - roadmap
+
+inputs:
+  - notes/project-brief.md
+  - notes/reviewer-model.md
+  - notes/related-work-map.md
+  - notes/views/claim-evidence-map.md
+  - claims/claims/
+  - refs/summaries/
+
+outputs:
+  - reader can state the problem and gap
+  - reader knows the paper's contribution and boundary
+  - roadmap matches actual section order
+
+hard_rules:
+  - Do not claim a result before the corresponding claim is approved for writing.
+  - Distinguish prior work tension from this paper's contribution.
+  - State scope as a boundary, not as vague hedging.
+
+soft_rules:
+  - Keep the Introduction as the place for motivation, not detailed result inventory.
+  - Use roadmap only for sections that exist in the manuscript.
+
+audit_questions:
+  - Does the final paragraph tell the reader what to expect next?
+  - Is the gap precise enough that the contribution can answer it?
+  - Are citations connected to the gap rather than listed as background?

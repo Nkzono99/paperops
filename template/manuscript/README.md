@@ -8,7 +8,8 @@
 - `shared/`: 両言語で共有する style、bib、figure などを置く。
 - `publication-metadata.toml`: 投稿・共有に必要な metadata を置く。
 - `venue.md`: 投稿先、読者、投稿規程、AI 利用開示の確認先を置く。
+- `writing-profile.yml`: 論文種別、投稿先、分野別要求を `contracts/` に重ねる。
 
 `submission/` は投稿先に合わせた提出版スロットであり、原稿正本ではない。投稿版で科学的意味を変えた場合は、必ず `manuscript/` 側へ戻す。
 
-Writer は `evidence/`、`claims/`、`review/`、`requests/` と controlled authoring view から作った `paper_ir` を使い、Methods / Results / Discussion の reader question、answer、evidence、figure、caveat location を確認してから本文を書く。
+Writer は `contracts/`、`writing-profile.yml`、`evidence/`、`claims/`、`review/`、`requests/` と controlled authoring view から作った `paper_ir` を使い、Methods / Results / Discussion の reader question、answer、evidence、figure、caveat location を確認してから本文を書く。

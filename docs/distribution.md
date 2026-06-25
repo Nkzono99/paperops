@@ -27,7 +27,7 @@ uvx --from paper-harness-cli pops update-paperops --apply
 uvx --from paper-harness-cli pops update-paperops --plan
 ```
 
-`update-paperops` は `AGENTS.md`、`CLAUDE.md`、`Makefile`、`scripts/`、`.agents/`、`.claude/`、`.github/ISSUE_TEMPLATE/` などのハーネス管理面だけを扱う。原稿、notes、refs、カード層は下流固有内容として自動上書きしない。
+`update-paperops` は `AGENTS.md`、`CLAUDE.md`、`Makefile`、`contracts/`、`scripts/`、`.agents/`、`.claude/`、`.github/ISSUE_TEMPLATE/` などのハーネス管理面だけを扱う。原稿、notes、refs、カード層、`manuscript/writing-profile.yml` は下流固有内容として自動上書きしない。
 
 ## PyPI
 

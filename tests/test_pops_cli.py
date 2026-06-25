@@ -40,6 +40,9 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "_handoff" / "README.md").is_file())
             self.assertTrue((target / "_archives" / "AGENTS.md").is_file())
             self.assertTrue((target / "_archives" / "README.md").is_file())
+            self.assertTrue((target / "contracts" / "results.yml").is_file())
+            self.assertTrue((target / "contracts" / "methods.yml").is_file())
+            self.assertTrue((target / "manuscript" / "writing-profile.yml").is_file())
             troubleshooting = (target / "TROUBLESHOOTING.md").read_text(encoding="utf-8")
             self.assertIn("Skill descriptions were shortened", troubleshooting)
             self.assertIn("通常執筆", troubleshooting)
@@ -67,6 +70,7 @@ class PopsCliTest(unittest.TestCase):
             self.assertFalse((target / "refs" / "local" / "locations.toml").exists())
             gitignore = (target / ".gitignore").read_text(encoding="utf-8")
             self.assertIn("_handoff/*", gitignore)
+            self.assertIn(".paperops/cache/", gitignore)
             self.assertIn("refs/source-reach/**/raw/**", gitignore)
 
     def test_copy_scaffold_excludes_ignored_source_reach_and_handoff_payloads(self) -> None:
@@ -208,6 +212,26 @@ class PopsCliTest(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertIn("Paperops update plan", out)
             self.assertIn("unchanged managed files: 1", out)
+
+    def test_update_paperops_can_add_missing_section_contracts(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            (target / "contracts" / "results.yml").unlink()
+
+            code, out, err = run_cli(
+                ["update-paperops", "--dry-run", "--only", "contracts/", str(target)]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("+ contracts/results.yml [section contract]", out)
+
+            code, _out, err = run_cli(
+                ["update-paperops", "--apply", "--only", "contracts/", str(target)]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertTrue((target / "contracts" / "results.yml").is_file())
 
     def test_update_paperops_explains_changed_managed_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

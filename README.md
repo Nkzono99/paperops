@@ -40,13 +40,15 @@ uvx --from paper-harness-cli pops doctor
 - `review/`: 人間レビュー、査読コメント、返答のカード
 - `requests/`: 追加解析や改稿依頼のカード
 - `notes/views/`: pure overview view と controlled authoring view
+- `contracts/`: section ごとの読者質問、入力、出力、禁止構造
+- `manuscript/writing-profile.yml`: 論文種別・投稿先ごとの overlay
 - `manuscript/ja`, `manuscript/en`: block ID で対応する原稿
 - `refs/`: 文献サマリー、外部 source、外部 project link
 - `refs/imports/`: 外部 export bundle の source index / integrity / provenance state
 - `_handoff/`: 人間から AI へ渡す未整理ファイルの一時置き場
 - `_archives/`: 同じ repo で1から書き直すために封印した過去稿 archive
 
-人間は主に原稿レベルのレビューや自然文の指示を出す。Agent はそれを `review/feedback/` の card にし、必要なら claim / gate / evidence / request / manuscript へ遡って反映する。本文生成の前には、必要に応じて card と controlled view から `paper_ir` を作り、Results / Discussion / Methods の section compiler を通す。
+人間は主に原稿レベルのレビューや自然文の指示を出す。Agent はそれを `review/feedback/` の card にし、必要なら claim / gate / evidence / request / manuscript へ遡って反映する。本文生成の前には、必要に応じて `contracts/` と `writing-profile.yml` を確認し、card と controlled view から `paper_ir` を作り、Results / Discussion / Methods の section compiler を通す。
 
 ## よく使うコマンド
 

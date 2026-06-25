@@ -48,13 +48,14 @@ uvx --from paper-harness-cli pops doctor
 - `CLAUDE.md`
 - `Makefile`
 - `TROUBLESHOOTING.md`
+- `contracts/`
 - `scripts/`
 - `.agents/`
 - `.claude/`
 - `.github/ISSUE_TEMPLATE/`
 - `.github/PULL_REQUEST_TEMPLATE.md`
 
-`README.md`、`manuscript/`、`notes/`、`evidence/`、`claims/`、`review/`、`requests/`、`refs/`、`submission/` はプロジェクト固有内容として自動更新しない。
+`README.md`、`manuscript/`、`notes/`、`evidence/`、`claims/`、`review/`、`requests/`、`refs/`、`submission/` はプロジェクト固有内容として自動更新しない。`manuscript/writing-profile.yml` は論文ごとの overlay なので、既存プロジェクトでは手動で追加・調整する。
 
 ## Upgrade Chain
 
@@ -86,6 +87,8 @@ runops queue へ渡す予定の request は、下流 repo で `make research-req
 ## paper_ir
 
 `paper_ir` は、card 正本と controlled authoring view から Writer に渡す context を作る生成一時物である。`pops` の永続管理対象ではなく、通常は skill が必要に応じて作る。手書き正本は `evidence/`、`claims/`、`review/`、`requests/` に置き、`paper_ir` は Methods / Results / Discussion の section compiler へ渡す一時的な変換結果として扱う。
+
+section compiler は、`contracts/<section>.yml` の入出力契約と `manuscript/writing-profile.yml` の paper type / venue overlay を重ねる。`plan-section` で作る一時 plan は必要なら `.paperops/cache/` に置き、Git 管理しない。
 
 ## Scratch Archives
 

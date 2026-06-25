@@ -11,6 +11,8 @@ description: Use when /goal asks Codex to finish a manuscript from scratch or re
 
 Writer に生の card ontology を直接渡さない。本文生成の前に、必要な card と controlled authoring view から `paper_ir` を作り、section compiler で Methods / Results / Discussion の読者向け契約へ変換する。
 
+section contract は文章テンプレートではなく入出力契約として扱う。`contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ね、`plan-section -> draft-section -> audit-section` の順で、読者質問、入力、出力、禁止構造、論文種別 overlay を確認する。
+
 ## 最初に決める
 
 `/goal` で使われている場合、goal は「投稿可能な原稿と検証済みの対応記録を作る」と具体化する。途中で広がりすぎたら、今の blocker、次の review loop、Finish criteria の未達項目へ戻る。
@@ -30,6 +32,8 @@ Writer に生の card ontology を直接渡さない。本文生成の前に、�
 - `notes/views/concept-terms.md`
 - `notes/related-work-map.md`
 - `notes/reviewer-model.md`
+- `contracts/`
+- `manuscript/writing-profile.yml`
 - `review/feedback/`
 - `review/rounds/`
 - `review/responses/`
@@ -42,6 +46,8 @@ Writer に生の card ontology を直接渡さない。本文生成の前に、�
 ## paper_ir phase
 
 `paper_ir` は生成一時物であり、手書き正本ではない。`claims/`、`evidence/`、`review/`、`requests/` と `notes/views/` から、Writer に渡す最小 context を section ごとに作る。
+
+各 section は、対応する `contracts/<section>.yml` を読む。`manuscript/writing-profile.yml` に paper type、投稿先、分野別要求があれば契約へ overlay する。生成した section plan は必要な場合だけ `.paperops/cache/section-plan-<section>.yml` に置き、Git 管理しない。
 
 各 IR item には、必要な範囲で次を含める。
 
@@ -61,13 +67,19 @@ Writer に生の card ontology を直接渡さない。本文生成の前に、�
 
 `compile-results` は、結果を実施順や保有情報順ではなく、読者の疑問順に並べる。各 subsection は `reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence` の順にする。caveat は主張の意味を変える場合だけ置く。
 
+Results の subsection plan は、`reader_question`、`answer`、`evidence`、`scope`、`consequence` を必ず持つ。run inventory、解析を実施した順の列挙、同じ limitation の反復を topic sentence にしない。
+
 ### compile-discussion
 
 `compile-discussion` は、claim を `observation`、`inference`、`mechanism_hypothesis`、`alternative_explanation`、`implication`、`prediction`、`limitation` に分ける。Discussion では新しい実験事実を増やさず、観察から解釈命題、機構、含意、識別可能な予測へ進める。
 
+`observation` には直接 evidence を要求する。`mechanism_hypothesis`、`implication`、`prediction` は Discussion で扱えるが、根拠、確信度、どの limitation がどの claim を弱めるかを明示する。
+
 ### compile-methods
 
 `compile-methods` は、method unit ごとに本文 / supplement / code の配分を決める。非標準か、結果がその選択に敏感か、読者が再実装するために必要か、引用で代替できるかを見て、bookkeeping と物理モデル説明を混同しない。
+
+結果の解釈を変える情報は本文、独立再現に必要だが読み筋を止める情報は supplement、実行ログや file format、乱数台帳は code / manifest へ送る。境界条件、状態量、推定量、収束や検証は `writing-profile.yml` の paper type overlay と照合する。
 
 ## From-scratch lane
 

@@ -1,0 +1,37 @@
+schema_version: 1
+
+paper_type: computational_modeling
+
+overlays:
+  computational_modeling:
+    method_requirements:
+      - geometry_and_boundary_conditions
+      - state_variables_and_update_law
+      - initial_and_forcing_conditions
+      - numerical_discretization
+      - estimator_definition
+      - verification_or_convergence
+      - validity_domain
+      - reproducibility_pointer
+    result_requirements:
+      - estimand_and_unit_of_analysis
+      - denominator_or_case_count
+      - comparison_definition
+      - figure_or_table_reference
+      - scope_statement
+    discussion_requirements:
+      - mechanism_hypothesis
+      - alternative_explanation
+      - validity_domain
+      - observable_or_experimental_discriminator
+
+venue_overlay:
+  name: 未記入
+  checked_at: 未記入
+  special_requirements: []
+
+author_preferences:
+  preferred_source_language: ja
+  method_detail_bias: interpretation_relevant_first
+  results_order_bias: claim_dependency_order
+  discussion_bias: interpretation_with_scope
