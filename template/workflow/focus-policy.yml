@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "priority_order": [
+    "content",
+    "evidence",
+    "prose",
+    "submission",
+    "harness"
+  ],
+  "intents": {
+    "content": {
+      "meaning": "storyline, Results hierarchy, Discussion functions, claim scope, figure story, major review blocker を進める。",
+      "allowed_before_structure_accepted": true
+    },
+    "evidence": {
+      "meaning": "quantity denominator, unit of analysis, assumption approval, analysis request, figure obligation を直す。",
+      "allowed_before_structure_accepted": true
+    },
+    "prose": {
+      "meaning": "claim scope を変えず、段落流れ、terminology、mirror、readability を直す。",
+      "allowed_before_structure_accepted": true
+    },
+    "submission": {
+      "meaning": "author metadata, license, venue formatting, cover letter, pre-submit など投稿前 hygiene を直す。",
+      "allowed_before_structure_accepted": false,
+      "requires": [
+        "STRUCTURE_ACCEPTED"
+      ]
+    },
+    "harness": {
+      "meaning": "readiness-check, Makefile, workflow, skill, template script など再利用可能なハーネスを直す。",
+      "allowed_before_structure_accepted": false,
+      "downstream_route": "feedback-paper-harness"
+    }
+  },
+  "self_critique": {
+    "start": [
+      "highest_priority_content_blocker",
+      "why_next_action_reduces_that_blocker",
+      "submission_hygiene_deferred_until_structure_accepted"
+    ],
+    "progress": [
+      "course_change_reason",
+      "whether_new_action_reduces_manuscript_content_blocker",
+      "harness_gap_routed_to_feedback_when_downstream"
+    ],
+    "finish": [
+      "structure_accepted_or_defer_reason",
+      "open_blocking_or_major_concerns",
+      "checks_that_match_changed_artifacts"
+    ]
+  }
+}

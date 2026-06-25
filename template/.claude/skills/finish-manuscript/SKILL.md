@@ -1,6 +1,6 @@
 ---
 name: finish-manuscript
-description: Use when /goal or a long-running task asks Claude Code to finish an academic manuscript from scratch or by revising an existing draft with human, peer-review, or editor feedback until submission-ready.
+description: Use when /goal or a long-running task asks Claude Code to finish an academic manuscript from scratch or by revising an existing draft without losing manuscript-content priorities.
 argument-hint: "[from-scratch|revision|response] [manuscript-or-feedback-path]"
 allowed-tools: Read, Edit, Write, Glob, Grep, WebSearch, Bash
 ---

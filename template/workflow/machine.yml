@@ -58,7 +58,7 @@
     },
     "story_loop": {
       "route_to": "STORY_LOCKED",
-      "meaning": "中心主張、figure story、結果階層、主図と補足図の切り分けが揺れている。"
+      "meaning": "中心主張、storyline、figure story、結果階層、主図と補足図の切り分けが揺れている。"
     },
     "section_loop": {
       "route_to": "SECTION_PLANNED",
@@ -70,7 +70,7 @@
     },
     "submission_loop": {
       "route_to": "SUBMISSION_READY",
-      "meaning": "引用、開示、投稿先形式、bibliography、Data availability など最終提出面を直す。"
+      "meaning": "STRUCTURE_ACCEPTED 後にだけ、引用、開示、投稿先形式、bibliography、Data availability など最終提出面を直す。"
     }
   },
   "artifact_routes": {
@@ -91,6 +91,7 @@
     ],
     "STORY_LOCKED": [
       "core_claims_ordered",
+      "storyline_architecture_approved",
       "figure_story_fixed",
       "figure_candidate_inventory_complete",
       "visual_obligations_satisfied",
@@ -101,6 +102,8 @@
     ],
     "SECTION_PLANNED": [
       "reader_questions_defined",
+      "results_hierarchy_defined",
+      "discussion_functions_defined",
       "figure_order_fixed",
       "main_text_supplement_cut_decided",
       "discussion_claim_types_defined",
@@ -133,6 +136,12 @@
       "venue_requirements_checked",
       "ai_disclosure_checked",
       "response_or_cover_letter_ready_if_needed"
+    ],
+    "CONTENT_FIRST": [
+      "highest_priority_content_blocker_declared",
+      "next_action_reduces_content_blocker",
+      "submission_hygiene_deferred_until_structure_accepted",
+      "harness_gap_routed_to_feedback"
     ]
   },
   "loop_policy": {

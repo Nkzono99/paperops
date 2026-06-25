@@ -1,0 +1,71 @@
+section: storyline
+purpose: >
+  論文全体の読者約束、証拠の階段、Results hierarchy、Discussion functions を、
+  個別 section contract より上位で固定する。
+
+reader_question: この論文は読者をどの順番で納得させるか
+
+story_spine:
+  reader_promise: 読者が title / abstract / introduction から期待する持ち帰り
+  central_claim: Abstract / Results / Discussion / Conclusion を通じて保存する中心主張
+  evidence_ladder:
+    - primary_anchor
+    - mechanism_or_boundary
+    - robustness_or_scope
+    - negative_or_null_case
+  scope_boundary: title / abstract / conclusion が越えてはいけない射程
+  reader_payoff: Discussion で読者が何を考え直すか
+
+section_depth_contract:
+  results_hierarchy:
+    required_functions:
+      - primary_result_answer
+      - quantity_and_unit_of_analysis
+      - comparison_or_boundary
+      - figure_or_table_role
+      - consequence_for_next_question
+  discussion_functions:
+    required_functions:
+      - principal_finding
+      - mechanism_warrant
+      - prior_work_delta
+      - alternative_or_boundary
+      - implication
+      - decisive_next_test
+
+inputs:
+  - notes/views/storyline.md
+  - notes/views/argument-map.md
+  - notes/views/result-pattern-map.md
+  - notes/views/claim-evidence-map.md
+  - notes/views/scientific-gate.md
+  - notes/related-work-map.md
+  - notes/reviewer-model.md
+  - claims/claims/
+  - claims/arguments/
+  - evidence/results/
+  - evidence/figures/
+  - contracts/results.yml
+  - contracts/discussion.yml
+  - manuscript/writing-profile.yml
+
+outputs:
+  - reader_promise is explicit before drafting or major revision
+  - evidence_ladder separates core evidence, boundary, robustness, and null cases
+  - Results hierarchy is planned before writing the Results section
+  - Discussion functions are planned before writing the Discussion section
+  - title, abstract, Results, Discussion, and Conclusion preserve the same scope boundary
+
+hard_rules:
+  - Do not start section drafting while the story_spine is placeholder-only.
+  - Do not treat a list of available results as a Results hierarchy.
+  - Do not treat limitations alone as Discussion functions.
+  - Do not move to Submission hygiene while Results hierarchy or Discussion functions are unresolved.
+  - Do not edit downstream harness scripts to compensate for a manuscript-content blocker.
+
+audit_questions:
+  - Can a reader state the paper's promise after the introduction?
+  - Does each Results subsection answer a different reader question?
+  - Does Discussion explain mechanism, relation to prior work, and a decisive next test?
+  - Is every quantity in the story tied to a denominator and unit of analysis?
+  - Are submission-format tasks deferred until manuscript structure is accepted?

@@ -50,6 +50,7 @@ description: Use when reviewing a manuscript as a strict peer reviewer before su
 - `Rendered figure readability`: PDF または生成済み figure image を実際に見て、first figure、axis、caption、standard visualization が読めるか
 - `Source-of-truth language`: bilingual repo では source-of-truth language と mirror language の両方で、人間が書いた論文として自然か
 - `Anti-defensive prose`: limitation と review-response 由来の防御的説明を分け、Abstract / Conclusion / caption が claim-first になっているか
+- `Storyline / editorial architect`: storyline、Results hierarchy、Discussion functions、section-depth が読者体験として成立しているか
 
 ユーザーが点数を求めた場合だけ、0-100 などの score を併記する。点数は診断の補助であり、コメントの根拠を置き換えない。
 
@@ -68,6 +69,7 @@ description: Use when reviewing a manuscript as a strict peer reviewer before su
 通常の scientific review とは別に、次の gate を明示する:
 
 - line-level public readability reviewer: block ID ごとに rewrite-now / move-to-notes / define-denominator / open-research-request を出す。
+- editorial architect reviewer: story spine、Results hierarchy、Discussion functions、section-depth を見て、原稿改善より先に Submission hygiene へ逃げていないかを出す。
 - source-of-truth language reviewer: JA source-of-truth と EN mirror の両方を読み、英語だけでは見えない不自然さを拾う。
 - rendered figure reviewer: figure image または PDF を見た場合だけ pass にする。読めない場合は `not inspected` と書き、caption 推測で通さない。
 - anti-defensive prose reviewer: `not evidence`、`not used for ranking`、`does not prove` 型の文を、必要な limitation か defensive prose かに分ける。
@@ -124,6 +126,7 @@ Concern matrix を作る:
 - `Meta-review`: consensus、共通懸念、固有懸念、採否リスク
 - `Concern matrix`: concern ID、severity、raised by、route
 - `Readability / figure gates`: line-level public readability、source-of-truth language、rendered figure、anti-defensive prose の結果
+- `Storyline gates`: editorial architect、Results hierarchy、Discussion functions、section-depth の結果
 - `Revision priorities`: now / next / later
 - `Routing`: 後段 skill と更新先 notes
 - `Confidentiality / AI-use note`: AI review 利用時の開示・ポリシー確認メモ
@@ -140,5 +143,6 @@ Concern matrix を作る:
 
 - PDF が入力された場合はテキスト抽出し、抽出不能なら停止してユーザーへ知らせる。
 - public-only review と repo-aware routing を混ぜない。
+- Results hierarchy や Discussion functions が薄い場合は、metadata / readiness / Submission hygiene より上位の blocking concern として扱う。
 - 独立 reviewer の指摘を平均化しすぎず、少数意見でも blocking concern なら残す。
 - repo-aware に記録する場合は、まず `review/feedback/` の feedback card に公開可能な要約と対応 ID を残す。反映まで進む場合は `/integrate-writing-feedback` に渡す。raw confidential text は `_handoff/` かローカル入力に留める。

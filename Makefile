@@ -1,4 +1,4 @@
-.PHONY: venv smoke cli-smoke scaffold-package-boundary-check lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
+.PHONY: venv smoke cli-smoke scaffold-package-boundary-check lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check storyline-check quantity-integrity-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
 PYTHON_BOOTSTRAP ?= python
@@ -7,7 +7,7 @@ venv:
 	$(PYTHON_BOOTSTRAP) -m venv .venv
 	@if [ -x .venv/bin/python ]; then .venv/bin/python -m pip install --upgrade pip; else .venv/Scripts/python.exe -m pip install --upgrade pip; fi
 
-smoke: cli-smoke lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
+smoke: cli-smoke lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check storyline-check quantity-integrity-check content-first-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
 
 cli-smoke:
 	$(PYTHON) -m compileall src
@@ -36,6 +36,18 @@ concept-term-check:
 
 argument-focus-check:
 	$(PYTHON) template/scripts/check-argument-focus.py --root template
+
+storyline-check:
+	$(PYTHON) template/scripts/check-storyline.py --root template
+
+quantity-integrity-check:
+	$(PYTHON) template/scripts/check-quantity-integrity.py --root template
+
+content-first-check:
+	$(PYTHON) template/scripts/check-content-first.py --root template --phase start --intent content
+
+finish-manuscript-check: storyline-check quantity-integrity-check figure-obligation-check claim-evidence-check workflow-check
+	$(PYTHON) template/scripts/check-content-first.py --root template --phase finish --intent content --strict
 
 figure-reference-check:
 	$(PYTHON) template/scripts/check-figure-references.py --root template

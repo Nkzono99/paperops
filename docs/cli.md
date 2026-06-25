@@ -18,8 +18,9 @@ uvx --from paper-harness-cli pops doctor
 下流の Makefile は、確認を三つの profile に分ける。
 
 - `make ci`: 構造、引用、mirror、公開語彙、カード層、link、build fallback など、壊れていると作業を続けにくい項目を確認する。
-- `make audit`: argument focus、concept-term compression、main-text figure reference、figure obligation、claim evidence、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
-- `make pre-submit`: `ci` と `audit` に加え、concept term、figure reference、figure obligation、research request handoff、external import、readiness を投稿前 profile として厳しめに確認する。
+- `make audit`: argument focus、concept-term compression、content-first intent、main-text figure reference、figure obligation、claim evidence、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
+- `make finish-manuscript-check`: STRUCTURE_ACCEPTED 前に `/goal` を完了扱いしないための content-first finish gate。`make pre-submit` とは別に、原稿本文 blocker が閉じているかを確認する。
+- `make pre-submit`: `ci` と `audit`、`finish-manuscript-check` に加え、concept term、figure reference、figure obligation、research request handoff、external import、readiness を投稿前 profile として厳しめに確認する。
 
 ## コマンド一覧
 
@@ -108,6 +109,8 @@ uvx --from paper-harness-cli pops workflow route-review --issue-class story-loop
 ```
 
 `workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`workflow/current-state.yml` は現在状態と section の `depends_on` を持つ。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
+
+`submission_loop` は STRUCTURE_ACCEPTED 後の route である。`pops workflow route-review --issue-class submission-loop --apply` は、storyline / section / structure guard が未達なら拒否される。原稿完成作業中に author metadata、license、readiness-check、Makefile、script、skill 改修へ逸れそうな場合は、`make content-first-check` または `scripts/check-content-first.py --phase progress --intent <intent> --strict` で進路を確認する。
 
 ## Scratch Archives
 

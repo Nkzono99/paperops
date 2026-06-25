@@ -21,8 +21,8 @@
 
 - `manuscript/`: 日英原稿、ミラー制御、投稿先情報
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX
-- `contracts/`: Introduction / Methods / Results / Discussion / Conclusion の入出力契約
-- `workflow/`: 階層型状態機械、現在状態、review round summary、人間判断
+- `contracts/`: Storyline と Introduction / Methods / Results / Discussion / Conclusion / Figure story の入出力契約
+- `workflow/`: 階層型状態機械、現在状態、review round summary、人間判断、subagent roster
 - `refs/`: 文献サマリー、関連研究調査、外部 source、外部 project link、外部 bundle import state
 - `_handoff/`: 人間から AI へ渡す未整理ファイル
 - `_archives/`: 過去稿を sealed split bundle として封印する scratch archive
@@ -43,18 +43,18 @@
 | `review/` | 人間レビュー、模擬査読、実査読 response を管理する | 正本 | `/integrate-writing-feedback`, `/peer-review-manuscript`, `/respond-to-peer-review` |
 | `requests/` | 追加解析や改稿依頼を管理する | 正本 | `/integrate-writing-feedback`, runops handoff |
 | `notes/views/` の pure overview view | 正本カードを俯瞰する | 派生 view | 該当 card 更新後に手動または半自動で更新 |
-| `notes/views/` の controlled authoring view | 本文での呼び方、条件名、概念語、読者向け語彙を統制する | 編集可能な統制 view | `/public-terminology-pass`, `/contextualize-conditions`, `/polish-ai-draft` |
+| `notes/views/` の controlled authoring view | 本文での呼び方、条件名、概念語、読者向け語彙、story spine を統制する | 編集可能な統制 view | `/design-paper-storyline`, `/public-terminology-pass`, `/contextualize-conditions`, `/polish-ai-draft` |
 | `paper_ir` | card / view から Writer に渡す材料を section ごとにまとめる | 生成一時物 | `finish-manuscript` の section compiler phase |
-| `contracts/` | section ごとの読者質問、入力、出力、禁止構造と figure story 契約を定める | 既定契約 | `finish-manuscript` の plan-section / `plan-figure-story` / audit-section |
+| `contracts/` | story spine、section ごとの読者質問、入力、出力、禁止構造と figure story 契約を定める | 既定契約 | `finish-manuscript` の `design-paper-storyline` / plan-section / `plan-figure-story` / audit-section |
 | `manuscript/writing-profile.yml` | 論文種別、投稿先、分野別要求を section 契約へ重ねる | プロジェクト設定 | 初期 setup、投稿先変更時 |
-| `workflow/` | 全体状態、section 状態、issue class、stale 伝播を管理する | 状態正本 | `pops workflow`, `finish-manuscript` の Issue Router |
+| `workflow/` | 全体状態、section 状態、issue class、stale 伝播、content-first focus policy、subagent role roster を管理する | 状態正本 | `pops workflow`, `finish-manuscript` の Issue Router / orchestrator |
 | `.paperops/cache/` | section plan や一時 IR を置く | Git 管理しない生成物 | `finish-manuscript` の plan-section |
 | `manuscript/` | 読者へ出す本文 | 成果物 | Writer / editor pass |
 | `submission/` | 投稿先に合わせた提出版 | 派生成果物 | `prepare-submission` 相当の投稿前作業 |
 | `_handoff/` | 未整理入力の一時置き場 | Git 管理しない | 人間入力、raw file intake |
 | `_archives/` | sealed scratch archive | 通常読まない封印物 | `pops scratch archive/restore` |
 
-`notes/views/concept-terms.md` と `notes/views/condition-context-map.md` は controlled authoring view として扱う。ここには「カード正本から見える意味」を本文語彙へ変換するときの判断を書く。
+`notes/views/storyline.md`、`notes/views/concept-terms.md`、`notes/views/condition-context-map.md` は controlled authoring view として扱う。ここには「カード正本から見える意味」を、本文の story spine、語彙、条件名へ変換するときの判断を書く。
 各 `notes/views/*.md` は `view_type` と `source_of_truth` の front matter を持つ。`pure_overview` は総覧であり判断の正本はカードへ戻す。`controlled_authoring` は本文語彙、条件名、読者順序の統制判断を置く編集可能な view である。
 
 ## 情報フロー
@@ -64,21 +64,25 @@
 3. Abstract、Conclusion、主要図表に使う claim は `claims/gates/` で readiness を確認する。
 4. 本文に出る強い名詞句は `notes/views/concept-terms.md` で確認し、accepted term、普通の文へほどく語、avoid 語を分ける。
 5. `pops workflow status` と `pops workflow next` で、全体状態、stale section、次に通す guard を確認する。
-6. `contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ねて、section が答える読者質問と必要出力を確認する。
-7. 本文生成前に `plan-figure-story` で中心 claim から visual obligation を作り、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図の欠落を確認する。
-8. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
-9. section compiler が Methods / Results / Discussion それぞれの reader question、answer、evidence、figure、caveat location、sentence budget を決める。
-10. Writer は `paper_ir` と承認済み claim package を使って本文を書く。Writer に生の card ontology を直接渡しすぎない。
-11. Review 後は `pops workflow route-review` で evidence / story / section / prose / submission loop のどこへ戻るかを決め、上流 artifact が変わったら `pops workflow invalidate <artifact-id>` で依存 section を stale にする。
-12. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
-13. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
-14. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
+6. `workflow/focus-policy.yml` と `make content-first-check` で、次の作業が本文 blocker を減らす intent かを確認する。
+7. subagent を使う場合は `workflow/subagent-roster.yml` を読み、main agent / orchestrator が role brief、privacy、`subagent_report`、integration decision を管理する。
+8. `contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ねて、section が答える読者質問と必要出力を確認する。
+9. 本文生成前に `design-paper-storyline` で story spine、Results hierarchy、Discussion functions を固定する。
+10. 本文生成前に `plan-figure-story` で中心 claim から visual obligation を作り、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図の欠落を確認する。
+11. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
+12. section compiler が Methods / Results / Discussion それぞれの reader question、answer、evidence、figure、caveat location、sentence budget を決める。
+13. Writer は `paper_ir` と承認済み claim package を使って本文を書く。Writer に生の card ontology を直接渡しすぎない。
+14. Review 後は `pops workflow route-review` で evidence / story / section / prose / submission loop のどこへ戻るかを決め、上流 artifact が変わったら `pops workflow invalidate <artifact-id>` で依存 section を stale にする。
+15. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
+16. Submission hygiene は STRUCTURE_ACCEPTED 後に扱う。著者 metadata、license、Open Research DOI、readiness-check 改修は、Results hierarchy や Discussion functions の blocker より優先しない。`submission_loop --apply` も STRUCTURE_ACCEPTED 系 guard が未達なら拒否される。
+17. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
+18. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
 
 ## paper_ir と section compiler
 
 `paper_ir` は、既存 card と controlled view から作る生成一時物である。新しい手書き正本にはしない。目的は、研究 integrity 層と文章層の間に、読者向けの変換契約を置くことである。
 
-`contracts/` は文章テンプレートではなく、section ごとの入出力契約である。Introduction は `problem -> unresolved tension -> precise gap -> approach -> contribution -> scope` のような論理機能を持ち、Methods / Results / Discussion はそれぞれ情報配置、subsection 契約、推論型を明示する。`manuscript/writing-profile.yml` は `paper_type: computational_modeling` のような論文種別 overlay と投稿先要求を重ねる。`finish-manuscript` は `plan-section -> draft-section -> audit-section` の順で使い、plan は必要なら `.paperops/cache/section-plan-<section>.yml` に置く。
+`contracts/` は文章テンプレートではなく、storyline と section ごとの入出力契約である。`contracts/storyline.yml` は reader_promise、central_claim、evidence_ladder、Results hierarchy、Discussion functions を個別 section より上位で固定する。Introduction は `problem -> unresolved tension -> precise gap -> approach -> contribution -> scope` のような論理機能を持ち、Methods / Results / Discussion はそれぞれ情報配置、subsection 契約、推論型を明示する。`manuscript/writing-profile.yml` は `paper_type: computational_modeling` のような論文種別 overlay と投稿先要求を重ねる。`finish-manuscript` は `design-paper-storyline -> plan-section -> draft-section -> audit-section` の順で使い、plan は必要なら `.paperops/cache/section-plan-<section>.yml` に置く。
 
 `contracts/figures.yml` は figure story 契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
 
@@ -112,7 +116,7 @@ section compiler は、`finish-manuscript` の中で Writer の前に走る段�
 
 各 section は `UNPLANNED`、`PLANNED`、`DRAFTED`、`AUDITED`、`ACCEPTED`、`STALE` の局所状態を持つ。claim、result、figure、contract などの upstream artifact が変わった場合は、過去状態へ機械的に戻すのではなく、依存 section を `STALE` にする。`pops workflow invalidate CLM-0003` は、`depends_on` に `CLM-0003@...` を持つ section だけを stale にし、artifact 種別に応じた loop route を付ける。
 
-`workflow/machine.yml` は状態、transition、guard、loop policy の既定規約であり、`workflow/current-state.yml` は現在状態である。逐次ログ、stale map、context pack は `.paperops/cache/` に置き、Git 管理しない。
+`workflow/machine.yml` は状態、transition、guard、loop policy の既定規約であり、`workflow/current-state.yml` は現在状態である。`workflow/focus-policy.yml` は content / evidence / prose / submission / harness intent の優先順位と許可条件を持つ。`workflow/subagent-roster.yml` は orchestrator が subagent の role、allowed inputs、output、integration decision を管理する契約である。`finish-manuscript` は作業開始時、進路変更時、完了前に content-first self-critique を行い、`check-content-first.py` は本文 blocker 未解決のまま Submission hygiene や downstream harness だけに進む差分を検出する。逐次ログ、stale map、context pack は `.paperops/cache/` に置き、Git 管理しない。
 
 ## 設計原則
 

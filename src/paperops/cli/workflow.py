@@ -227,6 +227,11 @@ def workflow_route_review(
     print(f"issue class: {issue_class}")
     print(f"route to: {route_to}")
     if apply:
+        blockers = route_application_blockers(machine, current, issue_class)
+        if blockers:
+            for blocker in blockers:
+                print(blocker)
+            return 1
         current.setdefault("overall", {})["state"] = route_to
         current.setdefault("review", {})["last_issue_class"] = issue_class
         counters = current.setdefault("loop_counters", {})
@@ -238,6 +243,31 @@ def workflow_route_review(
             print(f"escalate: {issue_class} exceeded {max_rounds} autonomous rounds")
             return 1
     return 0
+
+
+def route_application_blockers(
+    machine: dict[str, Any],
+    current: dict[str, Any],
+    issue_class: str,
+) -> list[str]:
+    if issue_class != "submission_loop":
+        return []
+    checked_states = ["STORY_LOCKED", "SECTION_PLANNED", "STRUCTURE_ACCEPTED"]
+    failures = {
+        state: guard_failures(machine, current, state)
+        for state in checked_states
+    }
+    if not any(failures.values()):
+        return []
+    blockers = [
+        "submission_loop is blocked until STRUCTURE_ACCEPTED manuscript-content guards pass."
+    ]
+    for state, state_failures in failures.items():
+        if state_failures:
+            preview = ", ".join(state_failures[:4])
+            suffix = " ..." if len(state_failures) > 4 else ""
+            blockers.append(f"- {state}: {preview}{suffix}")
+    return blockers
 
 
 def guard_failures(machine: dict[str, Any], current: dict[str, Any], target: str) -> list[str]:

@@ -7,6 +7,7 @@ artifact_refs: []
 unit_of_analysis: ""
 estimand: ""
 metrics: []
+quantity_contracts: []
 comparison: ""
 depends_on: []
 claim_links: []
@@ -28,6 +29,23 @@ updated: YYYY-MM-DD
 - unit of analysis:
 - denominator:
 - independence risk:
+
+## Quantity contracts
+
+本文、Abstract、Conclusion、table、caption に出す count / fraction / maximum は、必要に応じて `quantity_contracts` に機械可読で登録する。
+
+```yaml
+quantity_contracts:
+  - id: QTY-0001
+    value: ""
+    denominator: ""
+    unit_of_analysis: ""
+    estimand: ""
+    aggregation: ""
+    independence: ""
+    source_artifact: ""
+    manuscript_blocks: []
+```
 
 ## 主比較
 

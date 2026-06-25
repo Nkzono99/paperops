@@ -9,6 +9,8 @@ description: Use when reviewing public manuscript text for reader assumptions an
 
 通常の scientific review に加えて、一般研究者・隣接分野査読者・再現性重視の読者として、ローカル語、実装語、暗黙前提が公開原稿だけで理解できるかを検査する。
 
+投稿前 review では editorial architect として、storyline、Results hierarchy、Discussion functions、section-depth を明示的に見る。Results が図表列挙、Discussion が limitation 列挙だけなら、Submission hygiene より先の blocking gap として返す。
+
 ユーザーが reviewer 2、major/minor comments、accept/reject recommendation、meta-review のような査読票形式を求めている場合は `/peer-review-manuscript` を使う。実際に返ってきた査読コメントへの返答案や revision plan が目的なら `/respond-to-peer-review` を使う。
 
 ## 入力
@@ -34,6 +36,7 @@ description: Use when reviewing public manuscript text for reader assumptions an
 - `local-terminology`: run label、directory name、script name、simulator flag、analysis artifact name を探す。
 - `condition-context`: `2/12`、`0/8`、case、condition、series などの denominator が読者に意味を持つ文脈へ翻訳されているかを探す。
 - `public-reproducibility`: data availability、case count、diagnostic assumptions、figure/table label から再現性ギャップを探す。
+- `editorial-architect`: storyline、Results hierarchy、Discussion functions、section-depth を探す。
 
 ## 読んではいけないもの
 
@@ -68,8 +71,13 @@ description: Use when reviewing public manuscript text for reader assumptions an
    - 外部データ、前処理、除外条件、uncertainty
    - time averaging、final frame、smoothing / interpolation、units / normalization
    - figure titles、legends、axis labels、table headers に残る internal labels
-6. 追加解析候補を High / Medium / Low に分類する。
-7. 対応を以下に分解する:
+6. editorial architect として、Results hierarchy と Discussion functions を確認する:
+   - Results の各 subsection が reader question、answer、quantity、figure/table、consequence を持つか
+   - Discussion が mechanism_warrant、prior_work_delta、alternative_or_boundary、implication、decisive_next_test を持つか
+   - storyline が title / abstract / conclusion で保存されているか
+   - section-depth 不足を Submission hygiene と混同していないか
+7. 追加解析候補を High / Medium / Low に分類する。
+8. 対応を以下に分解する:
    - 原稿修正
    - 図表追加または図注修正
    - methods / data availability 追記
@@ -96,6 +104,7 @@ repo-aware editor と public-only reviewer を同じ判断に混ぜない。publ
 - `Minor revisions`: 表記、定義、参照、図注の改善
 - `Figure/table cleanup`: title、legend、axis、caption、table header の置換候補
 - `Data availability additions`: 公開データ、選別基準、diagnostic の追記候補
+- `Storyline / editorial architect`: Results hierarchy、Discussion functions、section-depth の不足
 - `Additional analyses`: High / Medium / Low の追加解析候補
 - `Rewrite patch plan`: file / block ID 単位の修正計画
 - `Action checklist`: 原稿、図表、methods/data availability、将来課題に分けた対応リスト
@@ -105,6 +114,7 @@ repo-aware editor と public-only reviewer を同じ判断に混ぜない。publ
 - 内部ノートから補完せず、原稿に書かれていないことは「読者には見えない」と扱う。
 - 原稿の科学的主張を強める提案と、単なる文言修正を分ける。
 - レビュー結果は厳しめでよいが、投稿前に実行可能な単位へ分解する。
+- 原稿内容の blocker が残る場合、author metadata、license、Open Research DOI などの Submission hygiene を主 blocker として前面化しない。
 - 科学的判断そのものを置き換えず、読者に必要な前提、語彙、選別基準を指摘する。
 - 原稿修正に進む場合は `manuscript/ja/` の source-of-truth と `% block: ...` ID を尊重し、EN mirror は `sync-ja-en` の方針で同期する。
 

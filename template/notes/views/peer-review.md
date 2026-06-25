@@ -14,15 +14,15 @@ authoritative_for:
 
 ## Review rounds
 
-| round ID | card | scope | status | blocking concerns | next route |
-| --- | --- | --- | --- | --- | --- |
-| RVW-0001 | `review/rounds/RVW-0001.md` | section / weekly / pre-submit / peer-review / editor-response | draft | 未記入 | `/integrate-writing-feedback` |
+| round ID | card | scope | status | blocking concerns | Editorial architecture audit | Subagent delegation ledger | highest-priority route |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| RVW-0001 | `review/rounds/RVW-0001.md` | section / weekly / pre-submit / peer-review / editor-response | draft | 未記入 | story spine / Results hierarchy / Discussion functions | delegated_role / subagent_report / integration decision / orchestrator | `/integrate-writing-feedback` |
 
 ## Feedback matrix
 
 | feedback ID | source | target | issue type | severity | upstream route | status |
 | --- | --- | --- | --- | --- | --- | --- |
-| FB-0001 | human / reviewer | manuscript block / claim / figure | overclaim / evidence-gap / clarity / refs-needed | major | claim_scope_change / scientific_gate_reopen / analysis_request / manuscript_only | open |
+| FB-0001 | human / reviewer | manuscript block / claim / figure | overclaim / evidence-gap / clarity / refs-needed | major | storyline_change / section_depth_blocker / results_hierarchy_gap / discussion_function_gap / claim_scope_change / scientific_gate_reopen / analysis_request / submission_hygiene_only / manuscript_only | open |
 
 ## Response matrix
 

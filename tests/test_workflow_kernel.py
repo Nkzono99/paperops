@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.helpers import ROOT, run_cli, run_python_script
+from tests.helpers import ROOT, copy_template, run_cli, run_python_script
 
 
 class WorkflowKernelTest(unittest.TestCase):
@@ -52,6 +52,55 @@ class WorkflowKernelTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("workflow-check", result.stdout)
         self.assertIn("workflow state is valid", result.stdout)
+
+    def test_workflow_check_validates_subagent_roster_schema(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = copy_template(tmp)
+            roster_path = root / "workflow" / "subagent-roster.yml"
+            roster = json.loads(roster_path.read_text(encoding="utf-8"))
+            del roster["roles"][0]["outputs"]
+            roster_path.write_text(
+                json.dumps(roster, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+            result = run_python_script(
+                root / "scripts" / "check-workflow-state.py",
+                "--root",
+                root,
+                encoding="utf-8",
+                errors="replace",
+            )
+
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("workflow-check", result.stdout)
+            self.assertIn("subagent-roster.yml", result.stdout)
+            self.assertIn("role `story_architect` outputs is missing", result.stdout)
+
+    def test_workflow_check_rejects_public_reader_private_manuscript_inputs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = copy_template(tmp)
+            roster_path = root / "workflow" / "subagent-roster.yml"
+            roster = json.loads(roster_path.read_text(encoding="utf-8"))
+            public_reader = next(role for role in roster["roles"] if role["id"] == "public_reader")
+            public_reader["allowed_inputs"].append("manuscript/ja/")
+            roster_path.write_text(
+                json.dumps(roster, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+            result = run_python_script(
+                root / "scripts" / "check-workflow-state.py",
+                "--root",
+                root,
+                encoding="utf-8",
+                errors="replace",
+            )
+
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("workflow-check", result.stdout)
+            self.assertIn("public_reader", result.stdout)
+            self.assertIn("public-only", result.stdout)
 
     def test_pops_workflow_status_next_and_advance_with_guards(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -118,6 +167,24 @@ class WorkflowKernelTest(unittest.TestCase):
             state = json.loads((target / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
             self.assertEqual(state["overall"]["state"], "SECTION_PLANNED")
             self.assertEqual(state["loop_counters"]["section_loop"], 1)
+
+    def test_pops_workflow_route_review_blocks_submission_loop_before_structure_acceptance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+
+            code, out, err = run_cli(
+                ["workflow", "route-review", "--issue-class", "submission-loop", "--apply", str(target)]
+            )
+
+            self.assertEqual(code, 1)
+            self.assertEqual(err, "")
+            self.assertIn("submission_loop is blocked", out)
+            self.assertIn("STRUCTURE_ACCEPTED", out)
+            state = json.loads((target / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
+            self.assertEqual(state["overall"]["state"], "SCOPED")
+            self.assertNotIn("submission_loop", state["loop_counters"])
 
     def test_workflow_kernel_is_documented_and_connected_to_finish_manuscript(self) -> None:
         architecture = (ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")

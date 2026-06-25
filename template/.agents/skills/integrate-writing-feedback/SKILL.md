@@ -36,10 +36,15 @@ raw confidential text は `_handoff/` やローカル入力に留め、tracked c
 2. `review/feedback/feedback-card-template.md` の front matter を使い、`target`、`issue_type`、`severity`、`upstream_routes` を埋める。
 3. 本文だけで済むか、上流へ戻すべきかを判定する。
    - overclaim、主張の順序、caveat の格上げ/格下げ: `claim_scope_change`、必要なら `scientific_gate_reopen`
+   - story spine、reader promise、claim order、Abstract / Results / Discussion / Conclusion の scope ずれ: `storyline_change`
+   - Results が図表・条件・実施順の列挙になっている: `results_hierarchy_gap`
+   - Discussion が limitation 羅列で、機構・先行研究差分・次の検証がない: `discussion_function_gap`
+   - Results / Discussion の薄さが段落修正では済まない: `section_depth_blocker`
    - 数値、分母、条件名、図表の読み: `result_card_update` または `figure_card_update`
    - 関連研究、反論、引用不足: `source_card_update`
    - 追加解析、再計算、感度分析: `analysis_request`
    - block 単位の改稿: `writing_request`
+   - 投稿前 metadata / license / venue formatting だけ: `submission_hygiene_only`。STRUCTURE_ACCEPTED 前は主作業にしない。
    - 誤字、語調、読みやすさだけ: `manuscript_only`
 4. `upstream_routes` の順に更新する。本文編集は最後に行う。
 5. claim / gate / evidence を更新した場合は、対応する `notes/views/` も更新する。旧 `notes/*.md` は互換ビューなので、正本として新規情報を書き込まない。
@@ -61,6 +66,8 @@ raw confidential text は `_handoff/` やローカル入力に留め、tracked c
 ## 注意
 
 - 人間の「ここを直して」という指示を、本文だけの局所修正に固定しない。
+- `storyline_change`、`section_depth_blocker`、`results_hierarchy_gap`、`discussion_function_gap` は `manuscript_only` より上位に扱う。
+- `submission_hygiene_only` は content blocker が閉じた後だけ本文完了作業として扱う。
 - `analysis-needed` や `assumption-blocked` の claim を、文体だけで `ready-to-write` に見せない。
 - feedback card には raw confidential comment を長く貼らず、要約と ID を残す。
 - 人間承認が必要な assumption は AI が勝手に受容しない。

@@ -1,0 +1,245 @@
+#!/usr/bin/env python3
+"""Detect manuscript-finishing work that drifts away from content blockers."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+
+CONTENT_GUARD_STATES = ["EVIDENCE_READY", "STORY_LOCKED", "SECTION_PLANNED", "STRUCTURE_ACCEPTED"]
+SUBMISSION_INTENTS = {"submission"}
+HARNESS_INTENTS = {"harness"}
+
+HYGIENE_PATHS = (
+    "submission/",
+    "manuscript/publication-metadata.toml",
+    "manuscript/venue.md",
+    "notes/ai-use.md",
+)
+HARNESS_PATHS = (
+    "scripts/",
+    "Makefile",
+    ".agents/skills/",
+    ".claude/skills/",
+    "workflow/machine.yml",
+    "workflow/focus-policy.yml",
+)
+CONTENT_PATHS = (
+    "manuscript/ja/",
+    "manuscript/en/",
+    "claims/",
+    "evidence/",
+    "figures/",
+    "notes/views/storyline.md",
+    "notes/views/claim-evidence-map.md",
+    "notes/views/result-pattern-map.md",
+    "notes/reviewer-model.md",
+    "review/",
+    "requests/",
+    "workflow/current-state.yml",
+    "workflow/round-summary.yml",
+)
+SUBAGENT_REPORT_PATHS = (
+    "review/rounds/subagent-report-",
+    "review/rounds/subagent-reports/",
+)
+
+
+@dataclass
+class Finding:
+    severity: str
+    message: str
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="finish-manuscript が本文 blocker より submission/harness 作業へ逸れていないか確認する。"
+    )
+    parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--phase", choices=["start", "progress", "finish"], default="progress")
+    parser.add_argument(
+        "--intent",
+        choices=["content", "evidence", "prose", "submission", "harness"],
+        default="content",
+    )
+    parser.add_argument("--changed-file", action="append", default=[])
+    parser.add_argument("--since", default="HEAD")
+    parser.add_argument("--strict", action="store_true")
+    args = parser.parse_args()
+
+    root = args.root.resolve()
+    findings = check(
+        root=root,
+        phase=args.phase,
+        intent=args.intent,
+        changed_files=list(args.changed_file) or changed_files_from_git(root, args.since),
+        strict=args.strict,
+    )
+    errors = [finding for finding in findings if finding.severity == "error"]
+    warnings = [finding for finding in findings if finding.severity == "warning"]
+
+    print("# content-first-check")
+    print("")
+    if errors:
+        print("## Errors")
+        for finding in errors:
+            print(f"- {finding.message}")
+        print("")
+    if warnings:
+        print("## Warnings")
+        for finding in warnings:
+            print(f"- {finding.message}")
+        print("")
+    if not findings:
+        print("content intent is aligned with the current manuscript content blocker.")
+    return 1 if errors else 0
+
+
+def check(root: Path, phase: str, intent: str, changed_files: list[str], strict: bool) -> list[Finding]:
+    findings: list[Finding] = []
+    current = load_mapping(root / "workflow" / "current-state.yml")
+    missing = missing_content_guards(current)
+    structure_ready = not missing.get("STRUCTURE_ACCEPTED")
+    content_blocker_open = any(missing.get(state) for state in CONTENT_GUARD_STATES)
+    changed_kinds = classify_changed_files(changed_files)
+
+    if phase == "finish":
+        unfinished_states = [state for state in CONTENT_GUARD_STATES if missing.get(state)]
+        if unfinished_states:
+            findings.append(
+                Finding(
+                    "error" if strict else "warning",
+                    "finish-manuscript cannot complete before content guards pass: "
+                    + ", ".join(unfinished_states)
+                    + ".",
+                )
+            )
+
+    if content_blocker_open and intent in SUBMISSION_INTENTS:
+        findings.append(
+            Finding(
+                "error" if strict else "warning",
+                "Submission hygiene is blocked until STRUCTURE_ACCEPTED; resolve manuscript content blocker first.",
+            )
+        )
+
+    if content_blocker_open and intent in HARNESS_INTENTS:
+        findings.append(
+            Finding(
+                "error" if strict else "warning",
+                "downstream harness work is blocked during a manuscript goal; summarize it for feedback-paper-harness and return to manuscript content.",
+            )
+        )
+
+    if phase == "progress" and content_blocker_open and changed_files:
+        if changed_kinds <= {"subagent_report"}:
+            findings.append(
+                Finding(
+                    "error" if strict else "warning",
+                    "subagent reports are not manuscript edits; convert the subagent_report into feedback cards, claim/evidence updates, or section plans before treating it as progress on a manuscript content blocker.",
+                )
+            )
+        if changed_kinds <= {"hygiene"}:
+            findings.append(
+                Finding(
+                    "error" if strict else "warning",
+                    "Only Submission hygiene files changed while manuscript content blocker remains open.",
+                )
+            )
+        if changed_kinds <= {"harness"}:
+            findings.append(
+                Finding(
+                    "error" if strict else "warning",
+                    "Only downstream harness files changed while manuscript content blocker remains open; route the gap to feedback-paper-harness.",
+                )
+            )
+        if changed_kinds <= {"hygiene", "harness"} and "content" not in changed_kinds:
+            findings.append(
+                Finding(
+                    "error" if strict else "warning",
+                    "No content artifact changed while Results/Discussion/storyline guards are still unresolved.",
+                )
+            )
+
+    if not findings and content_blocker_open:
+        # Positive output keeps the check useful as a self-critique prompt.
+        return []
+    return findings
+
+
+def missing_content_guards(current: dict[str, Any]) -> dict[str, list[str]]:
+    guards = current.get("guards", {})
+    if not isinstance(guards, dict):
+        return {state: ["guards mapping missing"] for state in CONTENT_GUARD_STATES}
+    missing: dict[str, list[str]] = {}
+    for state in CONTENT_GUARD_STATES:
+        values = guards.get(state, {})
+        if not isinstance(values, dict):
+            missing[state] = ["guard values missing"]
+            continue
+        missing[state] = [str(key) for key, value in values.items() if value is not True]
+    return missing
+
+
+def classify_changed_files(paths: list[str]) -> set[str]:
+    kinds: set[str] = set()
+    for raw_path in paths:
+        path = raw_path.strip().lstrip("./")
+        if not path:
+            continue
+        if matches_any(path, SUBAGENT_REPORT_PATHS):
+            kinds.add("subagent_report")
+        elif matches_any(path, HYGIENE_PATHS):
+            kinds.add("hygiene")
+        elif matches_any(path, HARNESS_PATHS):
+            kinds.add("harness")
+        elif matches_any(path, CONTENT_PATHS):
+            kinds.add("content")
+        else:
+            kinds.add("other")
+    return kinds
+
+
+def matches_any(path: str, patterns: tuple[str, ...]) -> bool:
+    return any(path == pattern.rstrip("/") or path.startswith(pattern) for pattern in patterns)
+
+
+def changed_files_from_git(root: Path, since: str) -> list[str]:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "diff", "--name-only", since],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except OSError:
+        return []
+    if result.returncode != 0:
+        return []
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def load_mapping(path: Path) -> dict[str, Any]:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return {}
+    try:
+        import yaml  # type: ignore[import-not-found]
+
+        data = yaml.safe_load(text)
+    except Exception:
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError:
+            return {}
+    return data if isinstance(data, dict) else {}
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -36,11 +36,12 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `map-result-patterns`: raw result や figure data を evidence card へ束ねる。
 - `scientific-gate`: 中心主張を Abstract / Conclusion / main figure に出してよいか、中心仮定や claim upgrade blocker も含めて判定する。
 - `design-manuscript-claims`: 作業報告型の原稿を主張中心に再設計し、`paper_ir` の seed を作る。
+- `design-paper-storyline`: 論文全体の story spine、Results hierarchy、Discussion functions を editorial architect 視点で固定し、Submission hygiene へ逃げる前に原稿内容の blocker を検出する。
 - `plan-figure-story`: 本文生成前に中心 claim から visual obligation を作り、Figure 1、主図、補足図、missing figure を設計する。
 
 ### 原稿完成
 
-- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。Writer の前に `workflow/`、`contracts/`、`writing-profile.yml`、`plan-figure-story`、`paper_ir`、section compiler を通す。
+- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。content-first で、Start self-critique / Course-correction checkpoint / Completion self-critique を使い、main agent は orchestrator として `workflow/subagent-roster.yml` の role brief、subagent report、integration decision を管理し、Writer の前に `workflow/`、`focus-policy.yml`、`contracts/storyline.yml`、`notes/views/storyline.md`、`writing-profile.yml`、`design-paper-storyline`、`plan-figure-story`、`paper_ir`、section compiler を通す。
 - `audit-ai-draft`: AI 初稿をそのまま磨かず、claim / evidence / section compiler へ戻す routing skill として使う。
 
 ### レビュー・査読
@@ -88,7 +89,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 原稿編集では `make concept-term-check` と `notes/views/concept-terms.md` も使う。AI 初稿で起きやすい concept-term compression、つまり強い英語名詞句への単語化は、claim / argument / evidence card の意味を本文へ写すときの語彙問題として扱い、必要なら普通の文へほどく。
 
-Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は、`contracts/` の section 入出力契約、`contracts/figures.yml`、`manuscript/writing-profile.yml` の paper type overlay を確認し、`plan-figure-story` で visual obligation を本文生成前に固定する。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results`、`compile-discussion`、`compile-methods` の section compiler を通してから本文生成へ進む。
+Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は、`workflow/focus-policy.yml` と `make content-first-check` で次の作業が本文 blocker を減らすことを確認し、subagent を使う場合は `workflow/subagent-roster.yml` に従って story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分ける。main agent / orchestrator は subagent report を `review/rounds/` の integration decision と feedback card へ統合し、`contracts/storyline.yml` と `notes/views/storyline.md` で story spine、Results hierarchy、Discussion functions を固定し、`contracts/` の section 入出力契約、`contracts/figures.yml`、`manuscript/writing-profile.yml` の paper type overlay を確認し、`plan-figure-story` で visual obligation を本文生成前に固定する。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results`、`compile-discussion`、`compile-methods` の section compiler を通してから本文生成へ進む。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
 
 ## 重要な境界
 
@@ -99,8 +100,10 @@ Writer には card 正本や gate 語彙を直接読み込ませすぎない。`
 - `paper_ir` は生成一時物であり、手書き正本にはしない。
 - `contracts/` は文章テンプレートではなく section 入出力契約である。
 - `contracts/figures.yml` は figure story の契約であり、missing figure を本文生成前に見つけるための visual obligation を定義する。
+- `contracts/storyline.yml` は個別 section より上位の story 契約であり、reader_promise、evidence_ladder、Results hierarchy、Discussion functions を定義する。
 - `manuscript/writing-profile.yml` は論文種別・投稿先ごとの overlay である。
 - `workflow/` は階層型状態機械と stale 伝播の状態正本である。review 後は Issue Router で戻る深さを決める。
+- `workflow/focus-policy.yml` と `check-content-first.py` は、本文 blocker 未解決のまま Submission hygiene や downstream harness だけへ逸れる作業を検出する。
 - 作業用ドキュメントは原則日本語で書く。
 - raw correspondence、未整理ファイル、個人環境の実パスは tracked file へ混ぜない。
 - `_archives/` は sealed scratch archive。通常の skill は読まず、明示的な restore / inspect / compare 指示がある場合だけ扱う。

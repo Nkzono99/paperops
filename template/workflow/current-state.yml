@@ -15,6 +15,7 @@
     },
     "STORY_LOCKED": {
       "core_claims_ordered": false,
+      "storyline_architecture_approved": false,
       "figure_story_fixed": false,
       "figure_candidate_inventory_complete": false,
       "visual_obligations_satisfied": false,
@@ -25,6 +26,8 @@
     },
     "SECTION_PLANNED": {
       "reader_questions_defined": false,
+      "results_hierarchy_defined": false,
+      "discussion_functions_defined": false,
       "figure_order_fixed": false,
       "main_text_supplement_cut_decided": false,
       "discussion_claim_types_defined": false,
@@ -57,6 +60,12 @@
       "venue_requirements_checked": false,
       "ai_disclosure_checked": false,
       "response_or_cover_letter_ready_if_needed": false
+    },
+    "CONTENT_FIRST": {
+      "highest_priority_content_blocker_declared": false,
+      "next_action_reduces_content_blocker": false,
+      "submission_hygiene_deferred_until_structure_accepted": false,
+      "harness_gap_routed_to_feedback": false
     }
   },
   "sections": {

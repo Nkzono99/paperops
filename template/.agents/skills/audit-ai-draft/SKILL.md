@@ -30,6 +30,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 ## 目的
 
 - 節ごとに一つずつ言及するだけの均等な構成を避け、中心主張、機構、証拠、境界条件の階層を作る。
+- `design-paper-storyline` の editorial architect 視点で、storyline、Results hierarchy、Discussion functions、section-depth の不足を本文 polish より先に検出する。
 - `12 条件中 2 条件`、`8 条件中 0 条件`、保存時刻数、run 数のようなローカル結果を、そのまま本文の主張にせず、論文内での意味へ抽象化する。
 - `これは直接証明ではない`、`主張しない`、`screening である` のような防御的記述を、必要な場所へ集約する。
 - 内部 provenance 語、local run label、directory name、artifact name を公開語へ置換する。
@@ -48,6 +49,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - 読者が理解できる中心主張
 - 読者が迷う主張
 - 節構成が列挙型に見える箇所
+- storyline が未固定で、Results hierarchy や Discussion functions が薄い箇所
 - 面白い結果なのに埋もれている箇所
 - 防御的記述が主張を弱めている箇所
 
@@ -87,13 +89,18 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 ユーザーが明示的に本文編集を求めるまでは、原稿を直接書き換えない。まず以下を出す:
 
 - 一文の中心主張
+- story spine / storyline
 - Section-level reorder / compression plan
+- Results hierarchy
+- Discussion functions
 - Figure story
 - Keep / compress / move / cut
 - block ID 単位の rewrite plan
 - `notes/views/claim-evidence-map.md` と `notes/views/argument-map.md` の更新案
 - 関連研究・反論文献の整理が必要なら `notes/related-work-map.md` の更新案
 - scientific gate で止めるべき claim と、polish だけで直してよい段落
+
+Results が図表や条件の列挙に見える、または Discussion が limitation の列挙だけに見える場合は、`paragraph-surgery` や Submission hygiene へ進まず `design-paper-storyline` へ戻す。これは section-depth blocker である。
 
 ## チェック
 
@@ -120,5 +127,6 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - PDF が入力された場合は、可能ならテキスト抽出と数ページの視覚確認を行う。
 - サブエージェントを使える場合は、public-only reviewer と repo-aware harness designer を分ける。
 - `refs/` と `notes/` の作業用ドキュメントは日本語で書く。
+- editorial architect として Results hierarchy / Discussion functions を先に診断し、薄い章を文体問題にしない。
 - 本文に戻す文言は、ローカル条件数ではなく、物理的意味、機構、境界条件、読者の持ち帰りを主語にする。
 - AI 初稿の定型臭だけを直す場合も、`notes/ai-use.md` の AI 利用開示を消さない。

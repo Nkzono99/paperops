@@ -27,6 +27,23 @@ REQUIRED_ISSUE_CLASSES = {
     "prose_loop",
     "submission_loop",
 }
+REQUIRED_SUBAGENT_ROLES = {
+    "story_architect",
+    "evidence_auditor",
+    "results_structure_reviewer",
+    "discussion_function_reviewer",
+    "figure_story_reviewer",
+    "public_reader",
+    "reviewer_panel",
+    "submission_hygienist",
+}
+REQUIRED_SUBAGENT_ROLE_FIELDS = {
+    "purpose",
+    "entry_condition",
+    "allowed_inputs",
+    "outputs",
+    "route_bias",
+}
 
 
 def main() -> int:
@@ -40,10 +57,13 @@ def main() -> int:
     current = load_mapping(root / "workflow" / "current-state.yml", findings)
     load_mapping(root / "workflow" / "decisions.yml", findings)
     load_mapping(root / "workflow" / "round-summary.yml", findings)
+    subagent_roster = load_mapping(root / "workflow" / "subagent-roster.yml", findings)
 
     if machine and current:
         validate_machine(machine, findings)
         validate_current(machine, current, findings)
+    if subagent_roster:
+        validate_subagent_roster(subagent_roster, findings)
 
     print("# workflow-check")
     print("")
@@ -138,6 +158,63 @@ def validate_current(
             for ref in refs:
                 if "@" not in str(ref):
                     findings.append(f"section `{name}` dependency `{ref}` should include @version")
+
+
+def validate_subagent_roster(roster: dict[str, Any], findings: list[str]) -> None:
+    if roster.get("schema_version") != 1:
+        findings.append("subagent-roster.yml schema_version must be 1")
+    if roster.get("mode") != "orchestrated_manuscript_writing":
+        findings.append("subagent-roster.yml mode must be orchestrated_manuscript_writing")
+
+    for field in ["orchestrator", "delegation_contract", "integration_contract", "roles"]:
+        if field not in roster:
+            findings.append(f"subagent-roster.yml {field} is missing")
+
+    roles = roster.get("roles", [])
+    if not isinstance(roles, list):
+        findings.append("subagent-roster.yml roles must be a list")
+        return
+
+    role_by_id: dict[str, dict[str, Any]] = {}
+    for index, role in enumerate(roles):
+        if not isinstance(role, dict):
+            findings.append(f"subagent-roster.yml role at index {index} must be a mapping")
+            continue
+        role_id = role.get("id")
+        if not isinstance(role_id, str) or not role_id:
+            findings.append(f"subagent-roster.yml role at index {index} id is missing")
+            continue
+        role_by_id[role_id] = role
+        for field in REQUIRED_SUBAGENT_ROLE_FIELDS:
+            if field not in role:
+                findings.append(f"subagent-roster.yml role `{role_id}` {field} is missing")
+        for list_field in ["allowed_inputs", "outputs"]:
+            if list_field in role and not isinstance(role[list_field], list):
+                findings.append(f"subagent-roster.yml role `{role_id}` {list_field} must be a list")
+
+    missing_roles = REQUIRED_SUBAGENT_ROLES - set(role_by_id)
+    if missing_roles:
+        findings.append(
+            "subagent-roster.yml roles is missing: " + ", ".join(sorted(missing_roles))
+        )
+
+    submission_role = role_by_id.get("submission_hygienist", {})
+    entry_condition = submission_role.get("entry_condition")
+    if isinstance(entry_condition, str) and "STRUCTURE_ACCEPTED" not in entry_condition:
+        findings.append(
+            "subagent-roster.yml role `submission_hygienist` entry_condition must include STRUCTURE_ACCEPTED"
+        )
+
+    public_reader = role_by_id.get("public_reader", {})
+    public_inputs = public_reader.get("allowed_inputs", [])
+    if isinstance(public_inputs, list):
+        for item in public_inputs:
+            text = str(item)
+            if "public" not in text and "sanitized" not in text:
+                findings.append(
+                    "subagent-roster.yml role `public_reader` allowed_inputs must stay public-only"
+                )
+                break
 
 
 def load_mapping(path: Path, findings: list[str]) -> dict[str, Any]:
