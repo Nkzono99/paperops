@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.7.0 - 2026-06-25
+
 - `workflow/` と `pops workflow` を追加し、論文執筆プロセスを固定の階層型状態機械と section 依存グラフとして扱えるようにした。全体状態、section 状態、Issue Router、transition guard、loop policy、stale 伝播を `workflow/machine.yml` と `workflow/current-state.yml` に持たせ、`workflow-check` と `finish-manuscript` に接続した。
 - `contracts/` と `manuscript/writing-profile.yml` を scaffold に追加した。章ごとの文章テンプレートではなく、Introduction / Methods / Results / Discussion / Conclusion の読者質問、入力、出力、禁止構造を定める入出力契約として扱い、論文種別・投稿先 overlay を重ねてから `plan-section -> draft-section -> audit-section` へ進める。生成した section plan は `.paperops/cache/` に置き、Git 管理しない。
 - `paper_ir` と section compiler の仕様を追加した。card 正本と controlled authoring view から Writer 用 context を生成一時物として作り、Results / Discussion / Methods の読者向け構造へ変換してから本文を書く方針を docs、downstream AGENTS / CLAUDE、`finish-manuscript` に反映した。あわせて `make ci` を構造確認、`make audit` を advisory authoring checks、`make pre-submit` を投稿前 profile として分離し、template Makefile の Python fallback を Windows-safe にした。
