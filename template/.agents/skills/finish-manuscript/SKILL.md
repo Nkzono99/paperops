@@ -25,6 +25,7 @@ description: Use when /goal asks Codex to finish a manuscript from scratch or re
 - `notes/views/scientific-gate.md`
 - `notes/views/claim-evidence-map.md`
 - `notes/views/result-pattern-map.md`
+- `notes/views/concept-terms.md`
 - `notes/related-work-map.md`
 - `notes/reviewer-model.md`
 - `review/feedback/`
@@ -47,7 +48,7 @@ description: Use when /goal asks Codex to finish a manuscript from scratch or re
 5. `design-manuscript-claims` で core claim、essential results、keep / compress / move / cut を決める。
 6. human approval が必要な assumption、claim scope、投稿先 fit を明示し、承認なしに中心主張へ昇格しない。
 7. `manuscript/ja/` を source-of-truth として draft し、必要に応じて `paragraph-surgery` と `polish-ai-draft` で整える。
-8. `sync-ja-en`、`figure-story-audit`、`public-terminology-pass`、`ai-disclosure-check` を必要範囲で通す。
+8. `sync-ja-en`、`figure-story-audit`、`public-terminology-pass`、`concept-term-check`、`ai-disclosure-check` を必要範囲で通す。
 
 ## Revision lane
 
@@ -95,6 +96,7 @@ subagent を使える場合でも、confidential な reviewer text、未公開�
 - human approval が必要な assumption、投稿先、claim scope、response stance が未承認のまま残っていない。
 - `review/feedback/` と reviewer loop に blocking / major の open item が残っていない。残す場合は defer 理由と本文での scope limit がある。
 - 図表、caption、本文参照、claim-evidence map、related work、AI disclosure、reproducibility の不整合が解消されている。
+- 概念語ビューで accepted / plain-language / avoid が整理され、表記揺れや過剰な concept-term compression が残っていない。
 - 実査読改訂では、comment inventory、response matrix、本文変更、response letter が対応している。
 - 原稿本文、mirror、引用、figure reference、layer card、submission drift など、変更範囲に応じたチェックを通している。
 - 最終 PDF / TeX / response letter のどれを成果物とするかを明示し、最終 commit または共有すべき artifact を記録している。
@@ -102,7 +104,7 @@ subagent を使える場合でも、confidential な reviewer text、未公開�
 ## Codex 実行メモ
 
 - `/goal` 中は、今の blocker、次の 1-3 手、Finish criteria の未達項目を短く更新する。
-- 原稿を編集したら `make mirror-check` を実行する。引用や bibliography に触れたら `make citation-check`、図表に触れたら `make figure-reference-check`、claim / evidence / layer card に触れたら `make claim-evidence-check` と `make paper-layer-card-check` を実行する。
+- 原稿を編集したら `make mirror-check` を実行する。引用や bibliography に触れたら `make citation-check`、概念語に触れたら `make concept-term-check`、図表に触れたら `make figure-reference-check`、claim / evidence / layer card に触れたら `make claim-evidence-check` と `make paper-layer-card-check` を実行する。
 - 投稿直前または大きな改稿後は `make pre-submit` を目標にする。テンプレート初期状態や未設定項目で通らない場合は、失敗理由を完成 blocker として残す。
 - AI が本文、レビュー、response draft に関与した場合は `ai-disclosure-check` を通す。
 - 文章を磨くために evidence の弱さを隠さない。`analysis-needed` や `assumption-blocked` は文体ではなく upstream route で処理する。

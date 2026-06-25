@@ -18,6 +18,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - `notes/views/result-pattern-map.md`
 - `notes/views/claim-evidence-map.md`
 - `notes/views/argument-map.md`
+- `notes/views/concept-terms.md`
 - `notes/reviewer-model.md`
 - `notes/ai-draft-polish.md`
 - `notes/reproducibility.md`
@@ -32,6 +33,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - `12 条件中 2 条件`、`8 条件中 0 条件`、保存時刻数、run 数のようなローカル結果を、そのまま本文の主張にせず、論文内での意味へ抽象化する。
 - `これは直接証明ではない`、`主張しない`、`screening である` のような防御的記述を、必要な場所へ集約する。
 - 内部 provenance 語、local run label、directory name、artifact name を公開語へ置換する。
+- `surface-element charge update` や `code/reproducibility package` のような concept-term compression を検出し、claim / argument / evidence card の意味を本文語彙へ圧縮しすぎていないか判断する。
 - `notes/views/argument-map.md` と `notes/views/claim-evidence-map.md` を更新する改稿計画を出す。
 - 関連研究の位置づけが未整理な場合は、本文を磨く前に `notes/related-work-map.md` または `/research-related-work` へ戻す。
 - 中心主張や Abstract / Conclusion に入る claim が `scientific-gate` で未承認なら、文体修正ではなく `/scientific-gate` へ戻す。
@@ -58,6 +60,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - `主張しない`、`証明ではない`、`限定される` が各節で繰り返される箇所
 - run label、export 名、directory 名、script 名、artifact 名
 - 図の caption が「何を示すか」ではなく「何を計算したか」だけを述べる箇所
+- hyphen / slash compound や 3 語前後の強い英語名詞句が一文に集中する箇所。必要なら `notes/views/concept-terms.md` に記録し、accepted、plain-language、avoid を分ける。
 
 ### 3. Local-to-claim abstraction を作る
 
@@ -95,6 +98,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 ## チェック
 
 - `make argument-focus-check`
+- `make concept-term-check`
 - 本文を編集した場合は `make mirror-check`
 - 公開語彙を変えた場合は `make public-terms-check`
 - 投稿前なら `make pre-submit`

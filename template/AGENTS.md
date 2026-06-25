@@ -25,6 +25,7 @@ uvx --from paper-harness-cli pops links check
 make ci
 make pre-submit
 make paper-layer-card-check
+make concept-term-check
 make figure-reference-check
 ```
 
@@ -37,10 +38,11 @@ make figure-reference-check
 3. 必要なら `/map-result-patterns` で raw result や figure data を evidence card にする。
 4. 外部 export bundle を使う場合は `refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-6. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
-7. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
-8. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映する。
-9. 共有前に `make ci`、投稿前に `make pre-submit` を実行する。
+6. 強い英語名詞句や hyphen / slash compound は `notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
+7. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
+8. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
+9. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映する。
+10. 共有前に `make ci`、投稿前に `make pre-submit` を実行する。
 
 ## スキル入口
 

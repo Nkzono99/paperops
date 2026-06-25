@@ -30,16 +30,17 @@
 - `requests/`: analysis / writing request card
 - `notes/`: project brief、読者モデル、AI 利用、再現性、`notes/views/`
 
-`evidence/`、`claims/`、`review/`、`requests/` がカード正本で、`notes/views/` は人間が俯瞰するビューである。旧 `notes/*.md` の一部は互換ビューとして残す。
+`evidence/`、`claims/`、`review/`、`requests/` がカード正本で、`notes/views/` は人間が俯瞰するビューである。`notes/views/concept-terms.md` は、claim / argument / evidence card の意味を本文の語彙へ圧縮するときの概念語ビューとして扱い、単語化された表現を採用・展開・禁止へ分ける。旧 `notes/*.md` の一部は互換ビューとして残す。
 
 ## 情報フロー
 
 1. 人間は主に原稿レビュー、自然文の指示、判断を出す。
 2. Agent は必要に応じて feedback / evidence / claim / request card を更新する。
 3. Abstract、Conclusion、主要図表に使う claim は `claims/gates/` で readiness を確認する。
-4. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
-5. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
-6. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
+4. 本文に出る強い名詞句は `notes/views/concept-terms.md` で確認し、accepted term、普通の文へほどく語、avoid 語を分ける。
+5. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
+6. 外部 project や runops の成果物は `refs/links.toml`、`refs/local/locations.toml`、`refs/imports/` で link、実パス、import state を分ける。
+7. 1から書き直す評価では、`pops scratch archive` で現行層を `_archives/` に封印し、`pops scratch reset` で作業層だけを初期化する。通常の Agent workflow は `_archives/` を読まない。
 
 ## 設計原則
 

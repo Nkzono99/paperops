@@ -15,7 +15,7 @@ uvx --from paper-harness-cli pops doctor
 
 `pops init` / `pops setup` は `.pops/manifest.toml` を作成するが、CLI 用の project-local `.venv` は作らない。`.venv` は論文プロジェクト用の Python 環境が必要な場合に `make venv` で作る。
 
-下流の `make ci` には、argument focus、main-text figure reference、claim evidence、外部 bundle import state、research request handoff、カード層などの advisory checks も含まれる。
+下流の `make ci` には、argument focus、concept-term compression、main-text figure reference、claim evidence、外部 bundle import state、research request handoff、カード層などの advisory checks も含まれる。
 
 ## コマンド一覧
 

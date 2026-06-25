@@ -1,4 +1,4 @@
-.PHONY: venv smoke cli-smoke scaffold-package-boundary-check lint-bib citation-check mirror-check mirror-freshness-check public-terms-check argument-focus-check figure-reference-check claim-evidence-check paper-layer-card-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
+.PHONY: venv smoke cli-smoke scaffold-package-boundary-check lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check figure-reference-check claim-evidence-check paper-layer-card-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
 PYTHON_BOOTSTRAP ?= python
@@ -7,7 +7,7 @@ venv:
 	$(PYTHON_BOOTSTRAP) -m venv .venv
 	@if [ -x .venv/bin/python ]; then .venv/bin/python -m pip install --upgrade pip; else .venv/Scripts/python.exe -m pip install --upgrade pip; fi
 
-smoke: cli-smoke lint-bib citation-check mirror-check mirror-freshness-check public-terms-check argument-focus-check figure-reference-check claim-evidence-check paper-layer-card-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
+smoke: cli-smoke lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check figure-reference-check claim-evidence-check paper-layer-card-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
 
 cli-smoke:
 	$(PYTHON) -m compileall src
@@ -30,6 +30,9 @@ mirror-freshness-check:
 
 public-terms-check:
 	$(PYTHON) template/scripts/check-public-terms.py --root template
+
+concept-term-check:
+	$(PYTHON) template/scripts/check-concept-terms.py --root template
 
 argument-focus-check:
 	$(PYTHON) template/scripts/check-argument-focus.py --root template

@@ -9,6 +9,7 @@
 - `pops scratch archive/reset/restore/list/inspect` を追加し、同じ論文 repo 内で現行の `manuscript/`、`notes/`、`refs/`、カード層などを `_archives/` の split bundle に封印してから1から書き直せるようにした。archive part は既定で 48 MiB に分割し、通常の AI 執筆では `_archives/` を読まないルールと `archive-seal-check` を追加した。
 - `research-request-handoff-check` を追加し、paper 側の open analysis request と linked runops project の `paper_request_queue` の drift を warning できるようにした。`runops_id = draft:*`、queue 未登録、local path 未解決、status mismatch を検出し、`pre-submit` では strict に確認する。
 - repo-local の HOPS 関連 skill vendor copy を削除し、HarnessOps plugin から参照する方針へ寄せた。
+- `concept-term-check` と `notes/views/concept-terms.md` を追加した。AI 初稿で起きやすい hyphen / slash compound や強い英語名詞句への単語化を、claim / argument / evidence card の意味を本文語彙へ圧縮する問題として扱い、頻度、表記揺れ、一文内の詰め込み、accepted / plain-language / avoid の判断を確認できるようにした。
 
 ## 0.6.0 - 2026-06-24
 

@@ -15,6 +15,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 - `notes/views/scientific-gate.md`
 - `notes/views/claim-evidence-map.md`
 - `notes/views/argument-map.md`
+- `notes/views/concept-terms.md`
 - `notes/reviewer-model.md`
 - `notes/ai-draft-polish.md`
 - `notes/ai-use.md`
@@ -41,6 +42,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 - 曖昧な主語、曖昧な出典、`先行研究では` だけの文がある。
 - figure caption が「計算したこと」だけを述べ、「読ませたい対比」を述べない。
 - 結論が一般的な前向き文で終わり、論文固有の持ち帰りが弱い。
+- concept-term compression が多い。強い hyphen / slash compound や英語名詞句が、説明なしに概念名として並ぶ。
 
 ## 手順
 
@@ -60,6 +62,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 - overclaim
 - underclaim
 - local provenance term
+- concept-term compression
 - weak stress position
 
 必要なら `notes/ai-draft-polish.md` の `AI 初稿 smell inventory` に要約する。
@@ -72,6 +75,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 - 文末と段落末に、その段落で読者に残したい情報を置く。
 - 一般論ではなく、claim に対する evidence、warrant、boundary を主語にする。
 - caveat は分散させず、必要な位置へまとめる。
+- `notes/views/concept-terms.md` で accepted ではない概念語は、普通の文へほどく。accepted の場合も表記を一つに固定し、頻出させすぎない。
 - つなぎ語を増やさず、論理関係を文の配置で示す。
 - 日本語原稿では、硬い論文語を保ちながらも、無内容な名詞句を削る。
 - 英語原稿では、AI らしい promotional phrase、過剰な em dash、空疎な metadiscourse を減らす。
@@ -92,6 +96,6 @@ rewrite 後に、元の claim / evidence / scope から逸脱していないか�
 
 ## Codex 実行メモ
 
-- 本文を編集した場合は `make mirror-check`、公開語を変えた場合は `make public-terms-check` を実行する。
+- 本文を編集した場合は `make mirror-check`、概念語を変えた場合は `make concept-term-check`、公開語を変えた場合は `make public-terms-check` を実行する。
 - 原稿構造や claim strength を変える必要がある場合は、`/paragraph-surgery`、`/calibrate-claims`、`/scientific-gate` へ戻す。
 - `notes/ai-use.md` の AI 利用ログや開示文案を消さない。

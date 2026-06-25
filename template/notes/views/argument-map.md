@@ -22,6 +22,14 @@
 - public wording:
 - route:
 
+## 概念語と普通の文への展開
+
+強い英語名詞句や hyphen / slash compound は `notes/views/concept-terms.md` に記録し、本文で強調語として残すか、普通の文へほどくかを決める。
+
+- accepted concept term:
+- plain-language expansion:
+- avoid / unstable wording:
+
 ## Defense budget
 
 防御的 caveat、not claiming、limitation を本文のどこに置くかを決める。

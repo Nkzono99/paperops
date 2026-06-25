@@ -44,6 +44,8 @@
 - `public-terminology-pass`: 内部語や未定義略語を公開語へ置換する。
 - `audit-ai-draft`: AI 初稿を論旨設計へ戻して診断する。
 
+原稿編集では `make concept-term-check` と `notes/views/concept-terms.md` も使う。AI 初稿で起きやすい concept-term compression、つまり強い英語名詞句への単語化は、claim / argument / evidence card の意味を本文へ写すときの語彙問題として扱い、必要なら普通の文へほどく。
+
 ### レビュー
 
 - `review-public-manuscript`: 公開原稿だけを外部読者視点で読む。
@@ -69,6 +71,7 @@
 
 - カード正本は `evidence/`、`claims/`、`review/`、`requests/`。
 - `notes/views/` は俯瞰ビュー。旧 `notes/*.md` の一部は互換ビュー。
+- `notes/views/concept-terms.md` は概念語ビューであり、claim / argument / evidence card の意味と本文語彙の対応を記録する。
 - 作業用ドキュメントは原則日本語で書く。
 - raw correspondence、未整理ファイル、個人環境の実パスは tracked file へ混ぜない。
 - `_archives/` は sealed scratch archive。通常の skill は読まず、明示的な restore / inspect / compare 指示がある場合だけ扱う。
