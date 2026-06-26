@@ -13,6 +13,11 @@ except ModuleNotFoundError:
 
 PLACEHOLDER_RE = re.compile(r"(未記入|記入|public scientific term|internal_run_label|local_directory_name|TBD|TODO)")
 TERM_STATUS_RE = re.compile(r"^(public|needs_definition|internal_only|forbidden)$")
+DEFINITION_CUE_RE = re.compile(
+    r"\b(refers to|is defined as|defined here as|is a|is an|denotes|means|we define)\b"
+    r"|とは|を意味する|と定義|定義する|指す|である",
+    re.IGNORECASE,
+)
 
 
 @dataclass
@@ -137,6 +142,15 @@ def term_values(term: dict) -> list[str]:
     return values
 
 
+def definition_term_values(term: dict) -> list[str]:
+    values: list[str] = []
+    for key in ["ja", "en_public"]:
+        value = term.get(key)
+        if isinstance(value, str) and not is_placeholder(value):
+            values.append(value)
+    return values
+
+
 def find_occurrences(root: Path, needles: list[str]) -> list[str]:
     occurrences: list[str] = []
     if not needles:
@@ -151,7 +165,57 @@ def find_occurrences(root: Path, needles: list[str]) -> list[str]:
     return occurrences
 
 
-def check_terms(root: Path, terms: list[dict]) -> list[Finding]:
+def definition_location_path(root: Path, value: str) -> Path | None:
+    location = value.strip().strip("`")
+    if not location:
+        return None
+    path_part = location.split("#", 1)[0]
+    line_match = re.match(r"^(.*):\d+$", path_part)
+    if line_match:
+        path_part = line_match.group(1)
+    if not path_part:
+        return None
+    path = root / path_part
+    if path.exists() and path.is_file():
+        return path
+    return None
+
+
+def has_definition_sentence(text: str, needles: list[str]) -> bool:
+    if not needles:
+        return False
+    for line in text.splitlines():
+        if any(needle in line for needle in needles) and DEFINITION_CUE_RE.search(line):
+            return True
+    return False
+
+
+def check_definition_location(root: Path, term: dict, strict: bool) -> Finding | None:
+    term_id = str(term.get("id", "unknown"))
+    location = str(term.get("first_definition_location", "")).strip()
+    needles = definition_term_values(term)
+    path = definition_location_path(root, location)
+    finding_severity = "error" if strict else "warning"
+    if path is None:
+        return Finding(
+            finding_severity,
+            f"`{term_id}` の first_definition_location `{location}` が公開原稿内のファイルとして見つかりません",
+        )
+    text = path.read_text(encoding="utf-8", errors="replace")
+    if not any(needle in text for needle in needles):
+        return Finding(
+            finding_severity,
+            f"`{term_id}` の first_definition_location `{path.relative_to(root).as_posix()}` に用語が見つかりません",
+        )
+    if not has_definition_sentence(text, needles):
+        return Finding(
+            finding_severity,
+            f"`{term_id}` の first_definition_location `{path.relative_to(root).as_posix()}` に definition sentence が見つかりません",
+        )
+    return None
+
+
+def check_terms(root: Path, terms: list[dict], strict: bool = False) -> list[Finding]:
     findings: list[Finding] = []
     for term in terms:
         term_id = str(term.get("id", "unknown"))
@@ -191,16 +255,21 @@ def check_terms(root: Path, terms: list[dict]) -> list[Finding]:
             ):
                 findings.append(
                     Finding(
-                        "warning",
+                        "error" if strict else "warning",
                         f"`{term_id}` は定義が必要ですが、first_definition_location が未記入です",
                     )
                 )
+            elif normalize_bool(term.get("first_definition_required", False)):
+                definition_finding = check_definition_location(root, term, strict=strict)
+                if definition_finding is not None:
+                    findings.append(definition_finding)
     return findings
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="公開原稿に内部語・禁止語・未定義用語が残っていないか確認する。")
     parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--strict", action="store_true")
     args = parser.parse_args()
 
     root = args.root.resolve()
@@ -210,7 +279,7 @@ def main() -> int:
         print("- `manuscript/mirror/terminology.yml` が見つかりません")
         return 1
 
-    findings = check_terms(root, load_terminology(terminology_path))
+    findings = check_terms(root, load_terminology(terminology_path), strict=args.strict)
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]
 
