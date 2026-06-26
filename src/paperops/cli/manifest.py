@@ -126,6 +126,32 @@ def record_detached_file(root: Path, rel: str, *, reason: str) -> None:
     manifest_path.write_text(dumps_manifest_toml(merged), encoding="utf-8")
 
 
+def remove_detached_file(root: Path, rel: str) -> bool:
+    manifest_path = root / ".pops" / "manifest.toml"
+    existing = read_manifest(manifest_path)
+    normalized = normalize_manifest_path(rel)
+
+    detached = as_table(existing.get("detached"))
+    raw_paths = detached.get("paths")
+    paths = [normalize_manifest_path(item) for item in raw_paths if isinstance(item, str)] if isinstance(raw_paths, list) else []
+    if normalized not in paths:
+        return False
+    detached["paths"] = sorted(path for path in paths if path != normalized)
+
+    for key in ("reasons", "source_versions", "timestamps"):
+        table = as_table(detached.get(key))
+        for table_key in list(table):
+            if isinstance(table_key, str) and normalize_manifest_path(table_key) == normalized:
+                table.pop(table_key, None)
+        detached[key] = table
+
+    merged = dict(existing)
+    merged["detached"] = detached
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+    return True
+
+
 def cli_manifest_table(
     existing: object,
     *,

@@ -21,6 +21,7 @@ from paperops.cli.manifest import (
     applied_scaffold_version,
     detached_records,
     record_detached_file,
+    remove_detached_file,
     write_cli_metadata,
     write_manifest,
 )
@@ -250,6 +251,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Why this managed file is intentionally forked.",
     )
     detach_parser.set_defaults(func=cmd_detach)
+
+    reattach_parser = subcommands.add_parser(
+        "reattach",
+        help="Remove a managed paperops file from the detached fork manifest.",
+    )
+    reattach_parser.add_argument("managed_path", help="Managed file path.")
+    reattach_parser.add_argument("path", nargs="?", type=Path, help="Project directory.")
+    reattach_parser.set_defaults(func=cmd_reattach)
 
     add_workflow_parser(subcommands)
     add_scratch_parser(subcommands)
@@ -580,6 +589,24 @@ def cmd_detach(args: argparse.Namespace) -> int:
     record_detached_file(root, rel, reason=reason)
     print(f"Detached managed file: {rel}")
     print("Future update-paperops runs will report it as a detached fork.")
+    return 0
+
+
+def cmd_reattach(args: argparse.Namespace) -> int:
+    rel = args.managed_path.strip().strip("/").replace("\\", "/")
+    root = find_project_root(args.path or Path.cwd())
+    if root is None:
+        print("error: this does not look like a paper harness project.", file=sys.stderr)
+        return 2
+    if not is_managed_update(rel):
+        print(f"error: not a managed paperops file: {rel}", file=sys.stderr)
+        return 2
+    removed = remove_detached_file(root, rel)
+    if removed:
+        print(f"Reattached managed file: {rel}")
+        print("Future update-paperops runs will include it in managed update plans.")
+    else:
+        print(f"Managed file is already attached: {rel}")
     return 0
 
 

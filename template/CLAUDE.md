@@ -9,7 +9,7 @@
 - `pops` は `uvx --from paper-harness-cli pops ...` で実行する。
 - `CLAUDE.md` は paperops-managed core である。論文固有の恒久指示は `CLAUDE.project.md` に置き、標準ハーネス改善として汎用化できるものは `/feedback-paper-harness` で upstream へ戻す。
 - project 固有の tracked Make target は `Makefile.project`、個人環境だけの target や変数は ignored な `Makefile.local` に置く。
-- managed core file をどうしても project fork にする場合は、編集理由を `pops detach <path> . --reason "<reason>"` で `.pops/manifest.toml` に登録する。detached file は `update-paperops` の自動更新候補から外れ、手動 rebase が必要になる。
+- managed core file をどうしても project fork にする場合は、編集理由を `pops detach <path> . --reason "<reason>"` で `.pops/manifest.toml` に登録する。detached file は `update-paperops` の自動更新候補から外れ、手動 rebase 後に `pops reattach <path> .` で管理対象へ戻す。
 - 人間は主に原稿レビュー、自然文の指示、story seed の判断を出す。Agent は必要に応じて `/integrate-writing-feedback` で `_paperops/review/` の feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
 - `story/` は人間向けの構想層である。研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を書く。
 - `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` はカード正本である。

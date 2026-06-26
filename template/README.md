@@ -93,4 +93,4 @@
 - `scripts/`: 検証、ビルド、レビュー回収、ミラー確認
 - `TROUBLESHOOTING.md`: nested repo や Windows safe.directory などの注意
 
-paperops-managed core を project 固有に fork する必要がある場合は、まず `AGENTS.project.md`、`CLAUDE.project.md`、`Makefile.project`、project skill、または `_paperops/contracts/` / `_paperops/workflow/` overlay で吸収する。標準 file 自体を fork する場合だけ `pops detach <path> . --reason "<reason>"` で manifest に登録し、以後の `update-paperops` では手動 rebase 対象として扱う。
+paperops-managed core を project 固有に fork する必要がある場合は、まず `AGENTS.project.md`、`CLAUDE.project.md`、`Makefile.project`、project skill、または `_paperops/contracts/` / `_paperops/workflow/` overlay で吸収する。標準 file 自体を fork する場合だけ `pops detach <path> . --reason "<reason>"` で manifest に登録し、以後の `update-paperops` では手動 rebase 対象として扱う。rebase 後に managed update 対象へ戻す場合は `pops reattach <path> .` を使う。

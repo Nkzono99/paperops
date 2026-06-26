@@ -27,7 +27,7 @@ uvx --from paper-harness-cli pops update-paperops --apply
 uvx --from paper-harness-cli pops update-paperops --plan
 ```
 
-`update-paperops` は `AGENTS.md`、`CLAUDE.md`、`Makefile`、`_paperops/defaults/contracts/`、`_paperops/defaults/workflow/`、`scripts/`、`.agents/`、`.claude/`、`.github/ISSUE_TEMPLATE/` などのハーネス管理面だけを扱う。`story/`、原稿、投稿先成果物、`_paperops/contracts/`、`_paperops/workflow/` の project state / overlay、`_paperops/notes/`、`_paperops/refs/`、カード層、`manuscript/writing-profile.yml` は下流固有内容として自動上書きしない。managed core file を project fork にする場合は `pops detach <path> --reason <reason>` で manifest に登録し、`update-paperops` の自動更新候補から外す。
+`update-paperops` は `AGENTS.md`、`CLAUDE.md`、`Makefile`、`_paperops/defaults/contracts/`、`_paperops/defaults/workflow/`、`scripts/`、`.agents/`、`.claude/`、`.github/ISSUE_TEMPLATE/` などのハーネス管理面だけを扱う。`story/`、原稿、投稿先成果物、`_paperops/contracts/`、`_paperops/workflow/` の project state / overlay、`_paperops/notes/`、`_paperops/refs/`、カード層、`manuscript/writing-profile.yml` は下流固有内容として自動上書きしない。managed core file を project fork にする場合は `pops detach <path> --reason <reason>` で manifest に登録し、`update-paperops` の自動更新候補から外す。手動 rebase 後に管理対象へ戻す場合は `pops reattach <path>` を使う。
 
 ## PyPI
 
