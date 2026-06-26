@@ -57,13 +57,62 @@ def load_profile(root: Path) -> dict[str, Any]:
     path = root / "manuscript" / "writing-profile.yml"
     if not path.exists():
         return {}
+    text = read_text(path)
     try:
         import yaml  # type: ignore[import-not-found]
 
-        data = yaml.safe_load(read_text(path))
+        data = yaml.safe_load(text)
     except Exception:
-        return {}
+        data = parse_minimal_mapping_yaml(text)
     return data if isinstance(data, dict) else {}
+
+
+def parse_minimal_mapping_yaml(text: str) -> dict[str, Any]:
+    data: dict[str, Any] = {}
+    stack: list[tuple[int, dict[str, Any]]] = []
+    for raw_line in text.splitlines():
+        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+            continue
+        stripped = raw_line.strip()
+        if stripped.startswith("- ") or ":" not in stripped:
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        key, value = stripped.split(":", 1)
+        key = key.strip()
+        value = clean_yaml_scalar(value)
+        while stack and indent <= stack[-1][0]:
+            stack.pop()
+        parent = stack[-1][1] if stack else data
+        if value == "":
+            child: dict[str, Any] = {}
+            parent[key] = child
+            stack.append((indent, child))
+        else:
+            parent[key] = parse_yaml_scalar(value)
+    return data
+
+
+def clean_yaml_scalar(value: str) -> str:
+    value = value.strip()
+    if " #" in value:
+        value = value.split(" #", 1)[0].rstrip()
+    if (value.startswith('"') and value.endswith('"')) or (
+        value.startswith("'") and value.endswith("'")
+    ):
+        value = value[1:-1]
+    return value.strip()
+
+
+def parse_yaml_scalar(value: str) -> Any:
+    lower = value.lower()
+    if lower in {"true", "yes"}:
+        return True
+    if lower in {"false", "no"}:
+        return False
+    try:
+        return int(value)
+    except ValueError:
+        return value
 
 
 def section_depth_config(root: Path) -> dict[str, Any]:

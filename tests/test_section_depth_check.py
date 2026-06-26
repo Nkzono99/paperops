@@ -18,8 +18,8 @@ class SectionDepthCheckTest(unittest.TestCase):
                 "Makefile",
                 "template/Makefile",
                 "template/manuscript/writing-profile.yml",
-                "template/contracts/results.yml",
-                "template/contracts/discussion.yml",
+                "template/_paperops/defaults/contracts/results.yml",
+                "template/_paperops/defaults/contracts/discussion.yml",
                 "template/.agents/skills/finish-manuscript/SKILL.md",
                 "template/.agents/skills/review-public-manuscript/SKILL.md",
                 "docs/architecture.md",
@@ -120,8 +120,14 @@ class SectionDepthCheckTest(unittest.TestCase):
 
 def write_profile(target, section_depth: str) -> None:
     profile = target / "manuscript" / "writing-profile.yml"
+    text = profile.read_text(encoding="utf-8")
+    marker = "\nsection_depth:\n"
+    if marker in text:
+        text = text.split(marker, 1)[0].rstrip() + "\n\n"
+    else:
+        text = text.rstrip() + "\n\n"
     profile.write_text(
-        profile.read_text(encoding="utf-8") + "\n" + textwrap.dedent(section_depth).lstrip(),
+        text + textwrap.dedent(section_depth).lstrip(),
         encoding="utf-8",
     )
 
