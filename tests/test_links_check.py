@@ -14,7 +14,7 @@ class LinksCheckTest(unittest.TestCase):
             code, _out, err = run_cli(["init", str(target)])
             self.assertEqual(code, 0, err)
 
-            links_path = target / "refs" / "links.toml"
+            links_path = target / "_paperops" / "refs" / "links.toml"
             links_path.write_text(
                 links_path.read_text(encoding="utf-8").replace(
                     'kind = "runops_project"',

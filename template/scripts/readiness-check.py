@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
+from paperops_paths import display_path, internal_path
+
 try:
     import tomllib
 except ModuleNotFoundError:
@@ -33,19 +35,19 @@ def add(finding_list: list[Finding], severity: str, message: str) -> None:
 
 
 def require_file(root: Path, rel_path: str, findings: list[Finding]) -> Path | None:
-    path = root / rel_path
+    path = internal_path(root, rel_path)
     if not path.exists():
-        add(findings, "error", f"`{rel_path}` が見つかりません")
+        add(findings, "error", f"`{display_path(root, path)}` が見つかりません")
         return None
     return path
 
 
 def require_any_file(root: Path, rel_paths: list[str], findings: list[Finding]) -> tuple[str, Path] | None:
     for rel_path in rel_paths:
-        path = root / rel_path
+        path = internal_path(root, rel_path)
         if path.exists():
-            return rel_path, path
-    add(findings, "error", f"`{rel_paths[0]}` が見つかりません（旧互換: `{rel_paths[-1]}`）")
+            return display_path(root, path), path
+    add(findings, "error", f"`{display_path(root, internal_path(root, rel_paths[0]))}` が見つかりません（旧互換: `{rel_paths[-1]}`）")
     return None
 
 
@@ -60,9 +62,10 @@ def check_placeholders(
         path = require_file(root, rel_path, findings)
         if path is None:
             continue
+        display_rel_path = display_path(root, path)
         for number, line in enumerate(read_text(path).splitlines(), start=1):
             if PLACEHOLDER_RE.search(line):
-                add(findings, severity, f"`{rel_path}:{number}` にスターター用プレースホルダーが残っています")
+                add(findings, severity, f"`{display_rel_path}:{number}` にスターター用プレースホルダーが残っています")
 
 
 def get_nested(data: dict, dotted_key: str):
@@ -261,12 +264,13 @@ def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeho
 
     ai_use_path = require_file(root, "notes/ai-use.md", findings)
     if ai_use_path is not None:
+        ai_use_rel_path = display_path(root, ai_use_path)
         text = read_text(ai_use_path)
         disclosure_headings = ["投稿時の開示文案", "Submission disclosure draft"]
         if not any(f"## {heading}" in text for heading in disclosure_headings):
-            add(findings, "error", "`notes/ai-use.md` に投稿時の開示文案セクションがありません")
+            add(findings, "error", f"`{ai_use_rel_path}` に投稿時の開示文案セクションがありません")
         if not has_filled_section(text, disclosure_headings):
-            add(findings, severity, "`notes/ai-use.md` の投稿時の開示文案が未記入です")
+            add(findings, severity, f"`{ai_use_rel_path}` の投稿時の開示文案が未記入です")
 
     venue_path = require_file(root, "manuscript/venue.md", findings)
     if venue_path is not None:
@@ -279,6 +283,7 @@ def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeho
 
     reproducibility_path = require_file(root, "notes/reproducibility.md", findings)
     if reproducibility_path is not None:
+        reproducibility_rel_path = display_path(root, reproducibility_path)
         text = read_text(reproducibility_path)
         required_sections = {
             "公開データと入力": "Data availability",
@@ -287,7 +292,7 @@ def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeho
         }
         for heading, label in required_sections.items():
             if f"## {heading}" not in text:
-                add(findings, "error", f"`notes/reproducibility.md` に {label} セクションがありません")
+                add(findings, "error", f"`{reproducibility_rel_path}` に {label} セクションがありません")
 
     require_file(root, "notes/decision-log.md", findings)
 

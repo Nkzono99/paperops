@@ -4,6 +4,8 @@ import argparse
 from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_paths import display_path, internal_path
+
 
 @dataclass
 class Finding:
@@ -100,35 +102,35 @@ def read_text(path: Path) -> str:
 
 def check_required_files(root: Path, findings: list[Finding]) -> None:
     for rel_path in REQUIRED_FILES:
-        path = root / rel_path
+        path = internal_path(root, rel_path)
         if not path.exists():
-            findings.append(Finding("error", f"`{rel_path}` が見つかりません"))
+            findings.append(Finding("error", f"`{display_path(root, path)}` が見つかりません"))
 
 
 def check_frontmatter_tokens(root: Path, findings: list[Finding]) -> None:
     requirements = FRONTMATTER_REQUIREMENTS | VIEW_FRONTMATTER_REQUIREMENTS
     for rel_path, tokens in requirements.items():
-        path = root / rel_path
+        path = internal_path(root, rel_path)
         if not path.exists():
             continue
         text = read_text(path)
         for token in tokens:
             if token not in text:
-                findings.append(Finding("error", f"`{rel_path}` に `{token}` がありません"))
+                findings.append(Finding("error", f"`{display_path(root, path)}` に `{token}` がありません"))
 
 
 def check_legacy_views(root: Path, findings: list[Finding]) -> None:
     for rel_path in LEGACY_VIEW_FILES:
-        path = root / rel_path
+        path = internal_path(root, rel_path)
         if not path.exists():
-            findings.append(Finding("error", f"`{rel_path}` が見つかりません"))
+            findings.append(Finding("error", f"`{display_path(root, path)}` が見つかりません"))
             continue
         text = read_text(path)
         if "互換ビュー" not in text or "notes/views/" not in text:
             findings.append(
                 Finding(
                     "warning",
-                    f"`{rel_path}` は互換ビューとして `notes/views/` を案内してください",
+                    f"`{display_path(root, path)}` は互換ビューとして `_paperops/notes/views/` を案内してください",
                 )
             )
 

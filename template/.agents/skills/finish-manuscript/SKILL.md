@@ -9,21 +9,21 @@ description: Use when /goal asks Codex to finish a manuscript from scratch or re
 
 この skill は **content-first** で動く。ここでの「投稿可能」は、まず原稿本文の story spine、Results hierarchy、Discussion functions、claim scope、figure story、major review blocker が閉じていることを意味する。著者 metadata、license、Open Research DOI、cover letter、投稿先形式などの **Submission hygiene** は最後の hygiene であり、原稿の中身の blocker を解決しない。
 
-この skill は監督役であり、既存の専門 skill を置き換えない。本文だけを局所修正せず、必要な指摘を `review/feedback/`、`claims/`、`evidence/`、`refs/`、`requests/`、`manuscript/` へ遡って反映する。
+この skill は監督役であり、既存の専門 skill を置き換えない。本文だけを局所修正せず、必要な指摘を `_paperops/review/feedback/`、`_paperops/claims/`、`_paperops/evidence/`、`_paperops/refs/`、`_paperops/requests/`、`manuscript/` へ遡って反映する。
 
-Writer に生の card ontology を直接渡さない。本文生成の前に `design-paper-storyline` で editorial architect として `notes/views/storyline.md` を確認し、必要な card と controlled authoring view から `paper_ir` を作り、section compiler で Methods / Results / Discussion の読者向け契約へ変換する。
+Writer に生の card ontology を直接渡さない。本文生成の前に `design-paper-storyline` で editorial architect として `_paperops/notes/views/storyline.md` を確認し、必要な card と controlled authoring view から `paper_ir` を作り、section compiler で Methods / Results / Discussion の読者向け契約へ変換する。
 
-section contract は文章テンプレートではなく入出力契約として扱う。`contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ね、`plan-section -> draft-section -> audit-section` の順で、読者質問、入力、出力、禁止構造、論文種別 overlay を確認する。
+section contract は文章テンプレートではなく入出力契約として扱う。`_paperops/contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ね、`plan-section -> draft-section -> audit-section` の順で、読者質問、入力、出力、禁止構造、論文種別 overlay を確認する。
 
 Results / Discussion では `manuscript/writing-profile.yml` の `section_depth` を確認する。`ja_chars` は日本語原稿の TeX noise を除いた文字数、`en_words` は英語原稿の TeX noise を除いた word count として扱う。これは length floor であって target ではない。短い場合は水増しせず、missing evidence、comparison、mechanism warrant、boundary、implication、next test を特定して section plan へ戻る。
 
-図表は本文生成後の飾りとして扱わない。本文生成前に `plan-figure-story` で claim から visual obligation を作り、`contracts/figures.yml` と `manuscript/writing-profile.yml` の figure requirement を確認し、`figure-obligation-check` で missing figure を検出する。
+図表は本文生成後の飾りとして扱わない。本文生成前に `plan-figure-story` で claim から visual obligation を作り、`_paperops/contracts/figures.yml` と `manuscript/writing-profile.yml` の figure requirement を確認し、`figure-obligation-check` で missing figure を検出する。
 
 workflow は直列パイプラインではなく階層型状態機械として扱う。本文編集前に `pops workflow status` と `pops workflow next` を確認し、`UNDER_REVIEW` 後は Issue Router で evidence / story / section / prose / submission loop のどこへ戻るかを決める。
 
 ## Orchestrator/subagent mode
 
-subagent を使える環境では、main agent は writer ではなく **orchestrator** として動く。`workflow/subagent-roster.yml` を読み、今の blocker に効く role だけを選んで短い brief を渡す。subagent reports are not manuscript edits: subagent の出力は `subagent_report`、feedback card 案、route recommendation、claim/evidence/section plan 更新案であり、同じ manuscript block を複数 agent に直接編集させない。
+subagent を使える環境では、main agent は writer ではなく **orchestrator** として動く。`_paperops/workflow/subagent-roster.yml` を読み、今の blocker に効く role だけを選んで短い brief を渡す。subagent reports are not manuscript edits: subagent の出力は `subagent_report`、feedback card 案、route recommendation、claim/evidence/section plan 更新案であり、同じ manuscript block を複数 agent に直接編集させない。
 
 標準 role は次の通り。
 
@@ -36,7 +36,7 @@ subagent を使える環境では、main agent は writer ではなく **orchest
 - `reviewer_panel`: major / minor / meta-review を分け、blocking concern を feedback loop に戻す。
 - `submission_hygienist`: STRUCTURE_ACCEPTED 後にだけ author metadata、license、venue formatting、cover letter、`make pre-submit` を扱う。
 
-main agent は各 `subagent_report` を読んで重複をまとめ、`review/rounds/` の Subagent delegation ledger に delegated_role、target、route recommendation、integration decision を記録する。受理した指摘は `review/feedback/`、`claims/`、`evidence/`、`requests/`、`notes/views/storyline.md`、section plan のどれかへ先に反映し、その後に本文を編集する。`integration decision` は `accepted_to_feedback_card`、`accepted_to_claim_or_evidence_update`、`accepted_to_section_plan`、`deferred_with_reason`、`rejected_with_reason`、`requires_human_decision` のいずれかを使う。
+main agent は各 `subagent_report` を読んで重複をまとめ、`_paperops/review/rounds/` の Subagent delegation ledger に delegated_role、target、route recommendation、integration decision を記録する。受理した指摘は `_paperops/review/feedback/`、`_paperops/claims/`、`_paperops/evidence/`、`_paperops/requests/`、`_paperops/notes/views/storyline.md`、section plan のどれかへ先に反映し、その後に本文を編集する。`integration decision` は `accepted_to_feedback_card`、`accepted_to_claim_or_evidence_update`、`accepted_to_section_plan`、`deferred_with_reason`、`rejected_with_reason`、`requires_human_decision` のいずれかを使う。
 
 subagent brief には role、target artifact、allowed inputs、forbidden inputs、expected output path、route question、completion signal を入れる。raw confidential reviewer text、未公開データ、個人情報、ローカル絶対パスは、許可と範囲が明示されるまで渡さない。
 
@@ -62,7 +62,7 @@ subagent brief には role、target artifact、allowed inputs、forbidden inputs
 - `deferred_hygiene`: 今は扱わない Submission hygiene / downstream harness 作業。
 - `route`: story_loop / section_loop / evidence_loop / prose_loop / submission_loop のどれか。
 
-`workflow/current-state.yml` の `CONTENT_FIRST.next_action_reduces_content_blocker` を満たせない場合、本文編集や Submission hygiene に入らず、`design-paper-storyline`、`integrate-writing-feedback`、または evidence / claim repair へ戻る。
+`_paperops/workflow/current-state.yml` の `CONTENT_FIRST.next_action_reduces_content_blocker` を満たせない場合、本文編集や Submission hygiene に入らず、`design-paper-storyline`、`integrate-writing-feedback`、または evidence / claim repair へ戻る。
 
 ### Course-correction checkpoint
 
@@ -90,28 +90,28 @@ subagent brief には role、target artifact、allowed inputs、forbidden inputs
 最初に読む:
 
 - `manuscript/mirror/status.md`
-- `notes/project-brief.md`
+- `_paperops/notes/project-brief.md`
 - `manuscript/venue.md`
-- `notes/views/scientific-gate.md`
-- `notes/views/storyline.md`
-- `contracts/storyline.yml`
-- `notes/views/claim-evidence-map.md`
-- `notes/views/result-pattern-map.md`
-- `notes/views/concept-terms.md`
-- `notes/related-work-map.md`
-- `notes/reviewer-model.md`
-- `contracts/`
-- `contracts/figures.yml`
-- `workflow/machine.yml`
-- `workflow/current-state.yml`
-- `workflow/subagent-roster.yml`
-- `workflow/round-summary.yml`
-- `workflow/decisions.yml`
+- `_paperops/notes/views/scientific-gate.md`
+- `_paperops/notes/views/storyline.md`
+- `_paperops/contracts/storyline.yml`
+- `_paperops/notes/views/claim-evidence-map.md`
+- `_paperops/notes/views/result-pattern-map.md`
+- `_paperops/notes/views/concept-terms.md`
+- `_paperops/notes/related-work-map.md`
+- `_paperops/notes/reviewer-model.md`
+- `_paperops/contracts/`
+- `_paperops/contracts/figures.yml`
+- `_paperops/workflow/machine.yml`
+- `_paperops/workflow/current-state.yml`
+- `_paperops/workflow/subagent-roster.yml`
+- `_paperops/workflow/round-summary.yml`
+- `_paperops/workflow/decisions.yml`
 - `manuscript/writing-profile.yml`
-- `review/feedback/`
-- `review/rounds/`
-- `review/responses/`
-- `requests/`
+- `_paperops/review/feedback/`
+- `_paperops/review/rounds/`
+- `_paperops/review/responses/`
+- `_paperops/requests/`
 
 対象原稿が repo 外にある場合は、先に `import-manuscript` で取り込む。raw confidential reviewer text や雑多な人間入力は `_handoff/` に置き、tracked card には要約、ID、route だけを残す。
 
@@ -119,13 +119,13 @@ subagent brief には role、target artifact、allowed inputs、forbidden inputs
 
 ## Workflow phase
 
-まず `pops workflow status` と `pops workflow next` を実行する。`workflow/current-state.yml` に stale section がある場合、全文改稿へ進まず、該当 section の route を確認する。claim、result、figure、section contract を更新した場合は `pops workflow invalidate <artifact-id>` を実行し、依存 section を `STALE` にする。
+まず `pops workflow status` と `pops workflow next` を実行する。`_paperops/workflow/current-state.yml` に stale section がある場合、全文改稿へ進まず、該当 section の route を確認する。claim、result、figure、section contract を更新した場合は `pops workflow invalidate <artifact-id>` を実行し、依存 section を `STALE` にする。
 
-全体状態は `SCOPED`、`EVIDENCE_READY`、`STORY_LOCKED`、`SECTION_PLANNED`、`DRAFTED`、`UNDER_REVIEW`、`STRUCTURE_ACCEPTED`、`POLISHED`、`SUBMISSION_READY` を使う。`pops workflow advance <state>` は guard が満たされたときだけ使う。guard を満たさない場合は、文章だけで完了扱いにしない。
+全体状態は `SCOPED`、`STORY_SEEDED`、`EVIDENCE_PLANNED`、`EVIDENCE_READY`、`STORY_RECONCILED`、`ARCHITECTURE_LOCKED`、`SECTION_PLANNED`、`DRAFTED`、`UNDER_REVIEW`、`STRUCTURE_ACCEPTED`、`POLISHED`、`SUBMISSION_READY` を使う。`pops workflow advance <state>` は guard が満たされたときだけ使う。guard を満たさない場合は、文章だけで完了扱いにしない。
 
 ### Issue Router
 
-Review 後は、Reviewer にそのまま改稿させない。`review/feedback/` の指摘を見て、まず Issue Router として次のどれかに分類する。
+Review 後は、Reviewer にそのまま改稿させない。`_paperops/review/feedback/` の指摘を見て、まず Issue Router として次のどれかに分類する。
 
 - `evidence_loop`: 数値、比較、収束、対照、artifact provenance が不足している。
 - `story_loop`: 中心主張、figure story、結果階層、主図と補足図の切り分けが揺れている。
@@ -139,11 +139,11 @@ Review 後は、Reviewer にそのまま改稿させない。`review/feedback/` 
 
 ## paper_ir phase
 
-`paper_ir` は生成一時物であり、手書き正本ではない。`claims/`、`evidence/`、`review/`、`requests/` と `notes/views/` から、Writer に渡す最小 context を section ごとに作る。
+`paper_ir` は生成一時物であり、手書き正本ではない。`_paperops/claims/`、`_paperops/evidence/`、`_paperops/review/`、`_paperops/requests/` と `_paperops/notes/views/` から、Writer に渡す最小 context を section ごとに作る。
 
 `paper_ir` の前に `design-paper-storyline` を使い、editorial architect として `reader_promise`、`central_claim`、`evidence_ladder`、`scope_boundary`、Results hierarchy、Discussion functions を確認する。これが未記入なら、section draft ではなく story_loop / section_loop へ戻す。
 
-各 section は、対応する `contracts/<section>.yml` を読む。`manuscript/writing-profile.yml` に paper type、投稿先、分野別要求があれば契約へ overlay する。生成した section plan は必要な場合だけ `.paperops/cache/section-plan-<section>.yml` に置き、Git 管理しない。
+各 section は、対応する `_paperops/contracts/<section>.yml` を読む。`manuscript/writing-profile.yml` に paper type、投稿先、分野別要求があれば契約へ overlay する。生成した section plan は必要な場合だけ `.paperops/cache/section-plan-<section>.yml` に置き、Git 管理しない。
 
 各 IR item には、必要な範囲で次を含める。
 
@@ -165,7 +165,7 @@ Review 後は、Reviewer にそのまま改稿させない。`review/feedback/` 
 
 Results の subsection plan は、`reader_question`、`answer`、`evidence`、`scope`、`consequence` を必ず持つ。run inventory、解析を実施した順の列挙、同じ limitation の反復を topic sentence にしない。
 
-Results hierarchy は、`notes/views/storyline.md` の `Section depth map` と `Results hierarchy` に対応する。図表を並べるだけ、代表値だけを置く、境界条件と感度解析を一段落へ圧縮する場合は section-depth blocker として扱う。
+Results hierarchy は、`_paperops/notes/views/storyline.md` の `Section depth map` と `Results hierarchy` に対応する。図表を並べるだけ、代表値だけを置く、境界条件と感度解析を一段落へ圧縮する場合は section-depth blocker として扱う。
 
 `section-depth-check` が Results を short と判定した場合は、subsection を増やすこと自体を目的にしない。reader question、answer、quantitative evidence、comparison、scope、consequence のどれが欠けているかを特定し、one-paragraph subsections は統合するか、読者質問に答えるだけの内容を加える。
 
@@ -191,7 +191,7 @@ Discussion functions は、少なくとも `principal_finding`、`mechanism_warr
 
 1から書く場合は、文章生成へ急がず、先に論文としての骨格を作る。
 
-1. `notes/project-brief.md`、`manuscript/venue.md`、`notes/reviewer-model.md` を更新する。
+1. `_paperops/notes/project-brief.md`、`manuscript/venue.md`、`_paperops/notes/reviewer-model.md` を更新する。
 2. 関連研究が弱い場合は `research-related-work` で source cluster と debate matrix を作る。
 3. raw result がある場合は `map-result-patterns` で result pattern / evidence packet にする。
 4. 中心主張、Abstract、Conclusion、main figure caption の前に `scientific-gate` を通す。
@@ -244,16 +244,16 @@ subagent を使える場合でも、confidential な reviewer text、未公開�
 - `discussion_function_gap`: Discussion が limitation 羅列で、mechanism_warrant、prior_work_delta、decisive_next_test がない。
 - `submission_hygiene_only`: 投稿前 hygiene だけの問題。STRUCTURE_ACCEPTED 後にだけ扱う。
 
-この判定をせずに本文だけを直すと、次の review loop で同じ問題が戻る。`refs/` と `notes/` に作る作業ドキュメントは日本語で書く。
+この判定をせずに本文だけを直すと、次の review loop で同じ問題が戻る。`_paperops/refs/` と `_paperops/notes/` に作る作業ドキュメントは日本語で書く。
 
 ## Finish criteria
 
 次を満たすまで `/goal` を完了にしない。
 
 - 中心主張、Abstract、Conclusion、main figure caption の claim が `scientific-gate` で `ready-to-write` または人間が明示承認した scope になっている。
-- `notes/views/storyline.md` が埋まり、`storyline_architecture_approved`、Results hierarchy、Discussion functions が確認されている。
+- `_paperops/notes/views/storyline.md` が埋まり、`storyline_architecture_approved`、Results hierarchy、Discussion functions が確認されている。
 - human approval が必要な assumption、投稿先、claim scope、response stance が未承認のまま残っていない。
-- `review/feedback/` と reviewer loop に blocking / major の open item が残っていない。残す場合は defer 理由と本文での scope limit がある。
+- `_paperops/review/feedback/` と reviewer loop に blocking / major の open item が残っていない。残す場合は defer 理由と本文での scope limit がある。
 - 図表、caption、本文参照、claim-evidence map、related work、AI disclosure、reproducibility の不整合が解消されている。
 - Results / Discussion が `section_depth` の soft floor を満たすか、short_article profile または人間承認済みの例外として記録されている。
 - 概念語ビューで accepted / plain-language / avoid が整理され、表記揺れや過剰な concept-term compression が残っていない。

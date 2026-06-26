@@ -5,7 +5,7 @@ description: Use when routing manuscript, human, reviewer, or PDF feedback back 
 
 # integrate-writing-feedback
 
-人間は原稿レベルのレビューや自然文の指示だけを出せばよい。この skill は、その指示を `review/feedback/` の feedback card に変換し、必要な上流カードを更新してから本文へ反映する。
+人間は原稿レベルのレビューや自然文の指示だけを出せばよい。この skill は、その指示を `_paperops/review/feedback/` の feedback card に変換し、必要な上流カードを更新してから本文へ反映する。
 
 ## 入力
 
@@ -22,18 +22,18 @@ raw confidential text は `_handoff/` やローカル入力に留め、tracked c
 
 1. `manuscript/mirror/status.md`
 2. 対象の `manuscript/ja/` または `manuscript/en/` block
-3. `review/README.md`
-4. `review/feedback/`
-5. `notes/views/claim-evidence-map.md`
-6. `notes/views/scientific-gate.md`
-7. 必要に応じて `claims/claims/`、`claims/gates/`、`evidence/`、`requests/`
+3. `_paperops/review/README.md`
+4. `_paperops/review/feedback/`
+5. `_paperops/notes/views/claim-evidence-map.md`
+6. `_paperops/notes/views/scientific-gate.md`
+7. 必要に応じて `_paperops/claims/claims/`、`_paperops/claims/gates/`、`_paperops/evidence/`、`_paperops/requests/`
 
-旧下流で `notes/views/` がまだ無い場合だけ、旧互換の `notes/claim-evidence-map.md`、`notes/scientific-gate.md`、`notes/result-pattern-map.md` を読む。
+旧下流で `_paperops/notes/views/` がまだ無い場合だけ、旧互換の `_paperops/notes/claim-evidence-map.md`、`_paperops/notes/scientific-gate.md`、`_paperops/notes/result-pattern-map.md` を読む。
 
 ## 手順
 
-1. 指摘を 1 論点 1 feedback card に分ける。ファイル名は `review/feedback/FB-YYYYMMDD-short-slug.md` など、衝突しないものにする。
-2. `review/feedback/feedback-card-template.md` の front matter を使い、`target`、`issue_type`、`severity`、`upstream_routes` を埋める。
+1. 指摘を 1 論点 1 feedback card に分ける。ファイル名は `_paperops/review/feedback/FB-YYYYMMDD-short-slug.md` など、衝突しないものにする。
+2. `_paperops/review/feedback/feedback-card-template.md` の front matter を使い、`target`、`issue_type`、`severity`、`upstream_routes` を埋める。
 3. 本文だけで済むか、上流へ戻すべきかを判定する。
    - overclaim、主張の順序、caveat の格上げ/格下げ: `claim_scope_change`、必要なら `scientific_gate_reopen`
    - story spine、reader promise、claim order、Abstract / Results / Discussion / Conclusion の scope ずれ: `storyline_change`
@@ -47,8 +47,8 @@ raw confidential text は `_handoff/` やローカル入力に留め、tracked c
    - 投稿前 metadata / license / venue formatting だけ: `submission_hygiene_only`。STRUCTURE_ACCEPTED 前は主作業にしない。
    - 誤字、語調、読みやすさだけ: `manuscript_only`
 4. `upstream_routes` の順に更新する。本文編集は最後に行う。
-5. claim / gate / evidence を更新した場合は、対応する `notes/views/` も更新する。旧 `notes/*.md` は互換ビューなので、正本として新規情報を書き込まない。
-6. 追加作業が必要なら `requests/analysis/` または `requests/writing/` に request card を作る。
+5. claim / gate / evidence を更新した場合は、対応する `_paperops/notes/views/` も更新する。旧 `_paperops/notes/*.md` は互換ビューなので、正本として新規情報を書き込まない。
+6. 追加作業が必要なら `_paperops/requests/analysis/` または `_paperops/requests/writing/` に request card を作る。
 7. 原稿を直す場合は `manuscript/mirror/status.md` の source-of-truth 言語を尊重し、`% block:` ID を保持する。
 8. route/status label は field として保持してよいが、隣に prose explanation を書く。何を前提に、どの evidence / claim / figure に遡り、本文 claim へどう影響するかを一文で説明する。
 9. 解決済み feedback card は `status: resolved` にし、反映ログへ更新 card、本文 block、検証コマンドを書く。未解決なら `status: open` のまま route と closure blocker を明確にする。
@@ -58,7 +58,7 @@ raw confidential text は `_handoff/` やローカル入力に留め、tracked c
 - `Feedback cards`: 作成/更新した card
 - `Upstream changes`: claim / gate / evidence / request の更新
 - `Manuscript edits`: 編集した block
-- `Views updated`: 更新した `notes/views/`
+- `Views updated`: 更新した `_paperops/notes/views/`
 - `Validation`: 実行したコマンド
 - `Remaining open feedback`: 未解決の card と理由
 - `Route explanations`: route/status label と prose explanation

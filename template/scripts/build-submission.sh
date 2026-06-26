@@ -53,12 +53,12 @@ run_with_runner() {
 
 submission_tex_paths() {
   export TEXINPUTS=".///:style//:../../manuscript/en//:../../manuscript/shared/style//:${TEXINPUTS:-}"
-  export BIBINPUTS=".///:../../manuscript/shared/bib//:../../refs/bib/curated//:../../refs/bib/imported//:${BIBINPUTS:-}"
+  export BIBINPUTS=".///:../../manuscript/shared/bib//:../../_paperops/refs/bib/curated//:../../_paperops/refs/bib/imported//:../../refs/bib/curated//:../../refs/bib/imported//:${BIBINPUTS:-}"
   export BSTINPUTS=".///:style//:../../manuscript/shared/style//:${BSTINPUTS:-}"
 }
 
 submission_bibtex_paths() {
-  export BIBINPUTS="$SLOT_DIR//:$SLOT_DIR/style//:$ROOT/manuscript/shared/bib//:$ROOT/refs/bib/curated//:$ROOT/refs/bib/imported//:${BIBINPUTS:-}"
+  export BIBINPUTS="$SLOT_DIR//:$SLOT_DIR/style//:$ROOT/manuscript/shared/bib//:$ROOT/_paperops/refs/bib/curated//:$ROOT/_paperops/refs/bib/imported//:$ROOT/refs/bib/curated//:$ROOT/refs/bib/imported//:${BIBINPUTS:-}"
   export BSTINPUTS="$SLOT_DIR//:$SLOT_DIR/style//:$ROOT/manuscript/shared/style//:${BSTINPUTS:-}"
 }
 
@@ -154,7 +154,7 @@ if [[ "${PAPER_TEMPLATE_RUN_LATEX:-0}" == "1" ]]; then
     docker run --rm -v "$ROOT:/work" -w "/work/submission/$VENUE" \
       "$TEX_DOCKER_IMAGE" \
       env TEXINPUTS=".///:style//:../../manuscript/en//:../../manuscript/shared/style//:" \
-          BIBINPUTS=".///:../../manuscript/shared/bib//:../../refs/bib/curated//:../../refs/bib/imported//:" \
+          BIBINPUTS=".///:../../manuscript/shared/bib//:../../_paperops/refs/bib/curated//:../../_paperops/refs/bib/imported//:../../refs/bib/curated//:../../refs/bib/imported//:" \
           BSTINPUTS=".///:style//:../../manuscript/shared/style//:" \
       "${LATEXMK_ARGS[@]}"
     audit_build_log

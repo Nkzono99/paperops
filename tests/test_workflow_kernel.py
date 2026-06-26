@@ -10,7 +10,7 @@ from tests.helpers import ROOT, copy_template, run_cli, run_python_script
 
 class WorkflowKernelTest(unittest.TestCase):
     def test_template_defines_workflow_kernel_and_make_target(self) -> None:
-        workflow_root = ROOT / "template" / "workflow"
+        workflow_root = ROOT / "template" / "_paperops" / "workflow"
         for name in ["README.md", "machine.yml", "current-state.yml", "decisions.yml", "round-summary.yml"]:
             with self.subTest(name=name):
                 self.assertTrue((workflow_root / name).is_file())
@@ -20,8 +20,11 @@ class WorkflowKernelTest(unittest.TestCase):
         makefile = (ROOT / "template" / "Makefile").read_text(encoding="utf-8")
 
         for required in [
+            "STORY_SEEDED",
+            "EVIDENCE_PLANNED",
             "EVIDENCE_READY",
-            "STORY_LOCKED",
+            "STORY_RECONCILED",
+            "ARCHITECTURE_LOCKED",
             "SECTION_PLANNED",
             "UNDER_REVIEW",
             "evidence_loop",
@@ -56,7 +59,7 @@ class WorkflowKernelTest(unittest.TestCase):
     def test_workflow_check_validates_subagent_roster_schema(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)
-            roster_path = root / "workflow" / "subagent-roster.yml"
+            roster_path = root / "_paperops" / "workflow" / "subagent-roster.yml"
             roster = json.loads(roster_path.read_text(encoding="utf-8"))
             del roster["roles"][0]["outputs"]
             roster_path.write_text(
@@ -80,7 +83,7 @@ class WorkflowKernelTest(unittest.TestCase):
     def test_workflow_check_rejects_public_reader_private_manuscript_inputs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)
-            roster_path = root / "workflow" / "subagent-roster.yml"
+            roster_path = root / "_paperops" / "workflow" / "subagent-roster.yml"
             roster = json.loads(roster_path.read_text(encoding="utf-8"))
             public_reader = next(role for role in roster["roles"] if role["id"] == "public_reader")
             public_reader["allowed_inputs"].append("manuscript/ja/")
@@ -114,25 +117,25 @@ class WorkflowKernelTest(unittest.TestCase):
 
             code, out, err = run_cli(["workflow", "next", str(target)])
             self.assertEqual(code, 0, err)
-            self.assertIn("next overall state: EVIDENCE_READY", out)
+            self.assertIn("next overall state: STORY_SEEDED", out)
             self.assertIn("guard blocked", out)
 
-            state_path = target / "workflow" / "current-state.yml"
+            state_path = target / "_paperops" / "workflow" / "current-state.yml"
             state = json.loads(state_path.read_text(encoding="utf-8"))
-            state["guards"]["EVIDENCE_READY"] = {
-                key: True for key in state["guards"]["EVIDENCE_READY"]
+            state["guards"]["STORY_SEEDED"] = {
+                key: True for key in state["guards"]["STORY_SEEDED"]
             }
             state_path.write_text(
                 json.dumps(state, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
             )
 
-            code, out, err = run_cli(["workflow", "advance", "evidence-ready", str(target)])
+            code, out, err = run_cli(["workflow", "advance", "story-seeded", str(target)])
             self.assertEqual(code, 0, err)
-            self.assertIn("advanced: SCOPED -> EVIDENCE_READY", out)
+            self.assertIn("advanced: SCOPED -> STORY_SEEDED", out)
             self.assertEqual(
                 json.loads(state_path.read_text(encoding="utf-8"))["overall"]["state"],
-                "EVIDENCE_READY",
+                "STORY_SEEDED",
             )
 
     def test_pops_workflow_invalidate_marks_dependent_sections_stale(self) -> None:
@@ -146,7 +149,7 @@ class WorkflowKernelTest(unittest.TestCase):
             self.assertIn("stale: results.core_relaxation", out)
             self.assertIn("stale: discussion.mechanism", out)
 
-            state = json.loads((target / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
+            state = json.loads((target / "_paperops" / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
             self.assertEqual(state["sections"]["results.core_relaxation"]["state"], "STALE")
             self.assertEqual(state["sections"]["results.core_relaxation"]["route"], "story_loop")
             self.assertEqual(state["sections"]["discussion.mechanism"]["state"], "STALE")
@@ -164,7 +167,7 @@ class WorkflowKernelTest(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertIn("issue class: section_loop", out)
             self.assertIn("route to: SECTION_PLANNED", out)
-            state = json.loads((target / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
+            state = json.loads((target / "_paperops" / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
             self.assertEqual(state["overall"]["state"], "SECTION_PLANNED")
             self.assertEqual(state["loop_counters"]["section_loop"], 1)
 
@@ -182,7 +185,7 @@ class WorkflowKernelTest(unittest.TestCase):
             self.assertEqual(err, "")
             self.assertIn("submission_loop is blocked", out)
             self.assertIn("STRUCTURE_ACCEPTED", out)
-            state = json.loads((target / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
+            state = json.loads((target / "_paperops" / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
             self.assertEqual(state["overall"]["state"], "SCOPED")
             self.assertNotIn("submission_loop", state["loop_counters"])
 
@@ -194,7 +197,7 @@ class WorkflowKernelTest(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         for required in [
-            "workflow/",
+            "_paperops/workflow/",
             "階層型状態機械",
             "stale",
             "pops workflow",

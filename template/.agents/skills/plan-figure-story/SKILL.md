@@ -1,6 +1,6 @@
 ---
 name: plan-figure-story
-description: Use before drafting Results or locking STORY_LOCKED, to design required figures and detect missing visual obligations from claims and available artifacts.
+description: Use before drafting Results or locking ARCHITECTURE_LOCKED, to design required figures and detect missing visual obligations from claims and available artifacts.
 ---
 
 # plan-figure-story
@@ -9,31 +9,31 @@ description: Use before drafting Results or locking STORY_LOCKED, to design requ
 
 ## 最初に読むファイル
 
-- `contracts/figures.yml`
+- `_paperops/contracts/figures.yml`
 - `manuscript/writing-profile.yml`
-- `claims/claims/`
-- `claims/gates/`
-- `evidence/results/`
-- `evidence/figures/`
-- `refs/links.toml`
-- `refs/imports/`
-- `notes/views/result-pattern-map.md`
-- `notes/views/claim-evidence-map.md`
-- `notes/views/condition-context-map.md`
-- `notes/reproducibility.md`
+- `_paperops/claims/claims/`
+- `_paperops/claims/gates/`
+- `_paperops/evidence/results/`
+- `_paperops/evidence/figures/`
+- `_paperops/refs/links.toml`
+- `_paperops/refs/imports/`
+- `_paperops/notes/views/result-pattern-map.md`
+- `_paperops/notes/views/claim-evidence-map.md`
+- `_paperops/notes/views/condition-context-map.md`
+- `_paperops/notes/reproducibility.md`
 - 既存の `manuscript/*/sections/*results*.tex` と caption
 
 ## 手順
 
 1. 中心 claim ごとに、文章だけでは読者が理解できない要素を `visual_obligations` として列挙する。
-2. `contracts/figures.yml` と `manuscript/writing-profile.yml` を重ね、paper type が要求する role を確認する。
+2. `_paperops/contracts/figures.yml` と `manuscript/writing-profile.yml` を重ね、paper type が要求する role を確認する。
 3. computational modeling では、空間分解された状態量が新規性の入口なら `model_or_state_visualization`、経路依存推定量や threshold が claim を支えるなら `estimator_or_decision_criterion` を原則 required にする。
 4. 利用可能な result、figure data、linked artifact、既存 plot script を確認し、採用候補を `.paperops/cache/figure-candidates.yml` に一時整理する。生成物なので Git 管理しない。
-5. 採用する図だけを `evidence/figures/` の figure card に昇格し、`satisfies_visual_obligations` に対応する `VO-*` ID を記録する。
+5. 採用する図だけを `_paperops/evidence/figures/` の figure card に昇格し、`satisfies_visual_obligations` に対応する `VO-*` ID を記録する。
 6. claim card には `visual_obligations` を残す。図が不要な claim は `no_figure_reason` を明示する。
 7. 主図と補足図の切り分けを決める。sensitivity / screening 図は、中心 claim を読むための前提でなければ supplement を既定にする。
 8. Figure 1 は、paper type 契約と reader question に照らして決める。model/state が新規性の入口なら、heterogeneous screening summary を Figure 1 にしない。
-9. `make figure-obligation-check` を実行し、`STORY_LOCKED` の前に `visual_obligations_satisfied` の根拠を作る。
+9. `make figure-obligation-check` を実行し、`ARCHITECTURE_LOCKED` の前に `visual_obligations_satisfied` の根拠を作る。
 
 ## Visual obligation の最小形
 

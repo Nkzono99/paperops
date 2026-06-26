@@ -5,6 +5,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_paths import display_path, internal_path
+
 
 OBLIGATION_RE = re.compile(r"\bVO-[A-Za-z0-9_.-]+\b")
 
@@ -86,7 +88,7 @@ def meaningful_reason(value: str) -> bool:
 
 def claim_cards(root: Path) -> list[ClaimCard]:
     cards: list[ClaimCard] = []
-    for path in sorted((root / "claims" / "claims").glob("*.md")):
+    for path in sorted(internal_path(root, "claims", "claims").glob("*.md")):
         if path.name.endswith("-template.md"):
             continue
         front = frontmatter(read_text(path))
@@ -107,7 +109,7 @@ def claim_cards(root: Path) -> list[ClaimCard]:
 
 def figure_cards(root: Path) -> list[FigureCard]:
     cards: list[FigureCard] = []
-    for path in sorted((root / "evidence" / "figures").glob("*.md")):
+    for path in sorted(internal_path(root, "evidence", "figures").glob("*.md")):
         if path.name.endswith("-template.md"):
             continue
         front = frontmatter(read_text(path))
@@ -128,10 +130,7 @@ def figure_cards(root: Path) -> list[FigureCard]:
 
 
 def rel(path: Path, root: Path) -> str:
-    try:
-        return path.relative_to(root).as_posix()
-    except ValueError:
-        return path.as_posix()
+    return display_path(root, path)
 
 
 def check(root: Path, strict: bool) -> list[Finding]:
@@ -153,7 +152,7 @@ def check(root: Path, strict: bool) -> list[Finding]:
                         Finding(
                             "error",
                             f"`{rel(claim.path, root)}` の figure obligation `{obligation_id}` は、"
-                            "`evidence/figures/` の `satisfies_visual_obligations` から満たされていません。",
+                            "`_paperops/evidence/figures/` の `satisfies_visual_obligations` から満たされていません。",
                         )
                     )
         elif strict and (
@@ -172,7 +171,7 @@ def check(root: Path, strict: bool) -> list[Finding]:
         findings.append(
             Finding(
                 "warning",
-                "`claims/claims/` に claim card がありません。figure obligation は claim 作成後に確認してください。",
+                "`_paperops/claims/claims/` に claim card がありません。figure obligation は claim 作成後に確認してください。",
             )
         )
     return findings

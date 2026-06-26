@@ -13,7 +13,7 @@ def read_template(path: str) -> str:
 
 class IssueGuardTemplateTest(unittest.TestCase):
     def test_scientific_gate_covers_assumptions_stress_and_external_gates(self) -> None:
-        card = read_template("template/claims/gates/scientific-gate-card-template.md")
+        card = read_template("template/_paperops/claims/gates/scientific-gate-card-template.md")
         skill = read_template("template/.agents/skills/scientific-gate/SKILL.md")
         combined = card + "\n" + skill
 
@@ -33,7 +33,7 @@ class IssueGuardTemplateTest(unittest.TestCase):
                 self.assertIn(required, combined)
 
     def test_figure_card_and_audit_cover_denominator_path_and_state_visualization(self) -> None:
-        card = read_template("template/evidence/figures/figure-card-template.md")
+        card = read_template("template/_paperops/evidence/figures/figure-card-template.md")
         skill = read_template("template/.agents/skills/figure-story-audit/SKILL.md")
         combined = card + "\n" + skill
 
@@ -54,8 +54,8 @@ class IssueGuardTemplateTest(unittest.TestCase):
                 self.assertIn(required, combined)
 
     def test_peer_review_response_and_notes_require_closure_and_prose_explanations(self) -> None:
-        response_card = read_template("template/review/responses/response-card-template.md")
-        peer_view = read_template("template/notes/views/peer-review.md")
+        response_card = read_template("template/_paperops/review/responses/response-card-template.md")
+        peer_view = read_template("template/_paperops/notes/views/peer-review.md")
         peer_skill = read_template("template/.agents/skills/peer-review-manuscript/SKILL.md")
         respond_skill = read_template("template/.agents/skills/respond-to-peer-review/SKILL.md")
         collect_skill = read_template("template/.agents/skills/collect-manuscript-review/SKILL.md")

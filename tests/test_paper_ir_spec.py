@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class PaperIrSpecTest(unittest.TestCase):
     def test_architecture_documents_paper_ir_and_controlled_views(self) -> None:
         architecture = (ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
-        views_readme = (ROOT / "template" / "notes" / "views" / "README.md").read_text(
+        views_readme = (ROOT / "template" / "_paperops" / "notes" / "views" / "README.md").read_text(
             encoding="utf-8"
         )
 
@@ -61,7 +61,7 @@ class PaperIrSpecTest(unittest.TestCase):
                 self.assertIn(required, skill)
 
     def test_section_contracts_define_io_not_prose_templates(self) -> None:
-        contracts_root = ROOT / "template" / "contracts"
+        contracts_root = ROOT / "template" / "_paperops" / "contracts"
         expected_files = [
             "README.md",
             "introduction.yml",

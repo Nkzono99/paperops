@@ -42,8 +42,8 @@ description: Use when reviewing public manuscript text for reader assumptions an
 
 レビューの独立性を保つため、ユーザーが明示しない限り以下は読まない:
 
-- `notes/`
-- `refs/local/`
+- `_paperops/notes/`
+- `_paperops/refs/local/`
 - ローカル run 名、working output、未公開解析ノート
 - 原稿に反映されていない内部モデル説明
 - private run inventory や filesystem 上の解析 artifact
@@ -89,7 +89,7 @@ description: Use when reviewing public manuscript text for reader assumptions an
 
 ユーザーが独立 subagent や別文脈レビューを明示的に許可した場合は、公開アーティファクトだけを渡し、repo 文脈を fork しない設定でレビューさせる。許可がない場合は、自分で公開入力だけに注意を限定してレビューする。
 
-Codex で subagent を使う場合、main agent は repo-aware editor として修正方針を統合し、subagent は `fork_context=false` 相当で一般研究者 reviewer として読む。subagent には `notes/`、private refs、run output を渡さない。
+Codex で subagent を使う場合、main agent は repo-aware editor として修正方針を統合し、subagent は `fork_context=false` 相当で一般研究者 reviewer として読む。subagent には `_paperops/notes/`、private refs、run output を渡さない。
 
 repo-aware editor と public-only reviewer を同じ判断に混ぜない。public-only reviewer は読者が詰まる箇所を検出する役割に留め、修正実装や内部台帳への反映は repo-aware editor が行う。
 
@@ -122,7 +122,7 @@ repo-aware editor と public-only reviewer を同じ判断に混ぜない。publ
 
 ## Codex 実行メモ
 
-- PDF または公開原稿だけをレビュー入力とし、`notes/`、`refs/local/`、working output は読まない。
+- PDF または公開原稿だけをレビュー入力とし、`_paperops/notes/`、`_paperops/refs/local/`、working output は読まない。
 - 1 節を書いた直後は `section`、週次では Abstract + Introduction + title candidates + figure/table captions の `weekly`、投稿前は PDF/投稿対象 TeX 全体の `pre-submit` として扱う。
 - モード指定がない場合は入力粒度から推定し、出力冒頭で `Review mode` を明記する。
 - ユーザーが独立 subagent を明示的に許可した場合だけ、公開アーティファクトのみを渡して別文脈レビューを依頼する。

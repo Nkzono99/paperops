@@ -7,6 +7,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_paths import display_path, internal_path
+
 
 PLACEHOLDER_RE = re.compile(r"(未記入|TBD|TODO|置き換えてください)")
 COUNT_OF_RE = re.compile(r"\b(\d+)\s+of\s+(\d+)\b")
@@ -57,7 +59,7 @@ def frontmatter(text: str) -> str:
 
 
 def result_cards(root: Path) -> list[Path]:
-    result_dir = root / "evidence" / "results"
+    result_dir = internal_path(root, "evidence", "results")
     if not result_dir.exists():
         return []
     return [
@@ -123,10 +125,7 @@ def public_manuscript_text(root: Path) -> str:
 
 
 def rel(path: Path, root: Path) -> str:
-    try:
-        return path.relative_to(root).as_posix()
-    except ValueError:
-        return path.as_posix()
+    return display_path(root, path)
 
 
 def check(root: Path, strict: bool) -> list[Finding]:
@@ -157,14 +156,14 @@ def check(root: Path, strict: bool) -> list[Finding]:
                 Finding(
                     "error" if strict else "warning",
                     f"未登録の数量表現 `{value} of {denominator}` が manuscript にあります。"
-                    "`evidence/results/` の quantity_contracts に value / denominator / unit_of_analysis を登録してください。",
+                    "`_paperops/evidence/results/` の quantity_contracts に value / denominator / unit_of_analysis を登録してください。",
                 )
             )
     if strict and seen_pairs and not contracts:
         findings.append(
             Finding(
                 "error",
-                "manuscript に count fraction がありますが `evidence/results/` に quantity_contracts がありません",
+                "manuscript に count fraction がありますが `_paperops/evidence/results/` に quantity_contracts がありません",
             )
         )
     return findings

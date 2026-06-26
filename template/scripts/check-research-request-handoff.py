@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from paperops_paths import display_path, internal_path
+
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover
@@ -14,6 +16,7 @@ except ModuleNotFoundError:  # pragma: no cover
 
 LINKS_REL_PATH = "refs/links.toml"
 LOCAL_LOCATIONS_REL_PATH = "refs/local/locations.toml"
+LINKS_DISPLAY_PATH = "_paperops/refs/links.toml"
 REQUEST_VIEW_PATHS = [
     "notes/views/research-requests.md",
     "notes/research-requests.md",
@@ -39,6 +42,7 @@ PLACEHOLDER_VALUES = {
     "tbd",
     "todo",
     "refs/links.toml",
+    "_paperops/refs/links.toml",
 }
 
 
@@ -127,23 +131,23 @@ def is_placeholder_request(request: PaperRequest) -> bool:
 
 
 def load_links(root: Path, findings: list[Finding]) -> list[dict[str, Any]]:
-    path = root / LINKS_REL_PATH
+    path = internal_path(root, LINKS_REL_PATH)
     if not path.exists():
         return []
     try:
         raw = read_toml(path)
     except Exception as exc:
-        findings.append(Finding("error", f"`{LINKS_REL_PATH}` を TOML として読めません: {exc}"))
+        findings.append(Finding("error", f"`{display_path(root, path)}` を TOML として読めません: {exc}"))
         return []
     links = raw.get("links", [])
     if not isinstance(links, list):
-        findings.append(Finding("error", f"`{LINKS_REL_PATH}` の `links` は配列にしてください"))
+        findings.append(Finding("error", f"`{display_path(root, path)}` の `links` は配列にしてください"))
         return []
     return [link for link in links if isinstance(link, dict)]
 
 
 def load_local_locations(root: Path) -> dict[str, dict[str, Any]]:
-    path = root / LOCAL_LOCATIONS_REL_PATH
+    path = internal_path(root, LOCAL_LOCATIONS_REL_PATH)
     if not path.exists():
         return {}
     raw = read_toml(path)
@@ -167,7 +171,7 @@ def resolve_local_path(root: Path, link: dict[str, Any], local_locations: dict[s
 
 
 def request_cards(root: Path) -> list[PaperRequest]:
-    base = root / "requests" / "analysis"
+    base = internal_path(root, "requests", "analysis")
     if not base.exists():
         return []
     requests: list[PaperRequest] = []
@@ -179,7 +183,7 @@ def request_cards(root: Path) -> list[PaperRequest]:
         status = normalize(fields.get("status")) or "open"
         request = PaperRequest(
             request_id=request_id,
-            source=path.relative_to(root).as_posix(),
+            source=display_path(root, path),
             status=status,
             target_link=normalize(fields.get("target_project_link")),
             runops_id=normalize(fields.get("runops_id")),
@@ -192,7 +196,7 @@ def request_cards(root: Path) -> list[PaperRequest]:
 def table_requests(root: Path) -> list[PaperRequest]:
     requests: list[PaperRequest] = []
     for rel_path in REQUEST_VIEW_PATHS:
-        path = root / rel_path
+        path = internal_path(root, rel_path)
         if not path.exists():
             continue
         lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -217,7 +221,7 @@ def table_requests(root: Path) -> list[PaperRequest]:
             status = normalize(row.get("status")) or "open"
             request = PaperRequest(
                 request_id=request_id,
-                source=rel_path,
+                source=display_path(root, path),
                 status=status,
                 target_link=normalize(row.get("target link")),
                 runops_id=normalize(row.get("runops_id")),

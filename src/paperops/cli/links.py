@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from paperops.cli.paths import internal_file
+
 if sys.version_info >= (3, 11):
     import tomllib
 else:  # pragma: no cover - package requires 3.11+, kept for clearer import errors
@@ -17,6 +19,9 @@ TomlDecodeError = tomllib.TOMLDecodeError if tomllib is not None else ValueError
 LINKS_REL_PATH = "refs/links.toml"
 LOCAL_LOCATIONS_REL_PATH = "refs/local/locations.toml"
 EXAMPLE_LOCATIONS_REL_PATH = "refs/local/locations.example.toml"
+LINKS_DISPLAY_PATH = "_paperops/refs/links.toml"
+LOCAL_LOCATIONS_DISPLAY_PATH = "_paperops/refs/local/locations.toml"
+EXAMPLE_LOCATIONS_DISPLAY_PATH = "_paperops/refs/local/locations.example.toml"
 
 ALLOWED_LINK_KINDS = {
     "runops_project",
@@ -63,7 +68,7 @@ def _paths_table(path: Path) -> dict[str, dict[str, Any]]:
 
 
 def load_link_registry(root: Path) -> LinkRegistry | None:
-    path = root / LINKS_REL_PATH
+    path = internal_file(root, LINKS_REL_PATH)
     if not path.exists():
         return None
     raw = _read_toml(path)
@@ -79,7 +84,7 @@ def load_link_registry(root: Path) -> LinkRegistry | None:
 
 def validate_link_registry(root: Path, *, strict_local: bool = False) -> list[LinkFinding]:
     findings: list[LinkFinding] = []
-    registry_path = root / LINKS_REL_PATH
+    registry_path = internal_file(root, LINKS_REL_PATH)
     if not registry_path.exists():
         return findings
 
@@ -87,7 +92,7 @@ def validate_link_registry(root: Path, *, strict_local: bool = False) -> list[Li
         raw = _read_toml(registry_path)
     except (OSError, TomlDecodeError) as exc:
         return [
-            LinkFinding("error", f"`{LINKS_REL_PATH}` を TOML として読めません: {exc}")
+            LinkFinding("error", f"`{LINKS_DISPLAY_PATH}` を TOML として読めません: {exc}")
         ]
 
     schema_version = raw.get("schema_version")
@@ -95,17 +100,17 @@ def validate_link_registry(root: Path, *, strict_local: bool = False) -> list[Li
         findings.append(
             LinkFinding(
                 "error",
-                f"`{LINKS_REL_PATH}` の `schema_version` は 1 である必要があります",
+                f"`{LINKS_DISPLAY_PATH}` の `schema_version` は 1 である必要があります",
             )
         )
 
     raw_links = raw.get("links", [])
     if not isinstance(raw_links, list):
-        findings.append(LinkFinding("error", f"`{LINKS_REL_PATH}` の `links` は配列にしてください"))
+        findings.append(LinkFinding("error", f"`{LINKS_DISPLAY_PATH}` の `links` は配列にしてください"))
         raw_links = []
 
-    local_locations = _paths_table(root / LOCAL_LOCATIONS_REL_PATH)
-    example_locations = _paths_table(root / EXAMPLE_LOCATIONS_REL_PATH)
+    local_locations = _paths_table(internal_file(root, LOCAL_LOCATIONS_REL_PATH))
+    example_locations = _paths_table(internal_file(root, EXAMPLE_LOCATIONS_REL_PATH))
     has_local_locations = bool(local_locations)
 
     seen_ids: set[str] = set()
@@ -122,7 +127,7 @@ def validate_link_registry(root: Path, *, strict_local: bool = False) -> list[Li
         if not link_id:
             findings.append(LinkFinding("error", f"`links[{index}]` に `id` がありません"))
         elif link_id in seen_ids:
-            findings.append(LinkFinding("error", f"`{LINKS_REL_PATH}` の link id `{link_id}` が重複しています"))
+            findings.append(LinkFinding("error", f"`{LINKS_DISPLAY_PATH}` の link id `{link_id}` が重複しています"))
         else:
             seen_ids.add(link_id)
 
@@ -150,14 +155,14 @@ def validate_link_registry(root: Path, *, strict_local: bool = False) -> list[Li
             findings.append(
                 LinkFinding(
                     "warning",
-                    f"`{link_id or location_ref}` の location_ref `{location_ref}` が `refs/local/locations.example.toml` にありません",
+                    f"`{link_id or location_ref}` の location_ref `{location_ref}` が `{EXAMPLE_LOCATIONS_DISPLAY_PATH}` にありません",
                 )
             )
         if has_local_locations and location_ref not in local_locations:
             findings.append(
                 LinkFinding(
                     "warning",
-                    f"`{link_id or location_ref}` の location_ref `{location_ref}` が `refs/local/locations.toml` にありません",
+                    f"`{link_id or location_ref}` の location_ref `{location_ref}` が `{LOCAL_LOCATIONS_DISPLAY_PATH}` にありません",
                 )
             )
 
@@ -165,7 +170,7 @@ def validate_link_registry(root: Path, *, strict_local: bool = False) -> list[Li
         findings.append(
             LinkFinding(
                 "warning",
-                "`refs/local/locations.toml` がないため link の実パスは解決できません",
+                f"`{LOCAL_LOCATIONS_DISPLAY_PATH}` がないため link の実パスは解決できません",
             )
         )
 
@@ -176,7 +181,7 @@ def iter_links(root: Path, *, resolve_local: bool = False) -> list[dict[str, Any
     registry = load_link_registry(root)
     if registry is None:
         return []
-    local_locations = _paths_table(root / LOCAL_LOCATIONS_REL_PATH) if resolve_local else {}
+    local_locations = _paths_table(internal_file(root, LOCAL_LOCATIONS_REL_PATH)) if resolve_local else {}
     rows: list[dict[str, Any]] = []
     for link in registry.links:
         row = dict(link)

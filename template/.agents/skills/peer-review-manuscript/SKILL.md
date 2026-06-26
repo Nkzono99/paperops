@@ -17,14 +17,14 @@ description: Use when reviewing a manuscript as a strict peer reviewer before su
 
 - PDF、投稿用 TeX、公開原稿、図表、補足資料。
 - `manuscript/mirror/status.md` は source-of-truth 言語確認に限って読んでよい。
-- repo-aware routing に進む場合だけ、`manuscript/venue.md`、`notes/reviewer-model.md`、`claims/`、`evidence/`、`review/`、`notes/views/claim-evidence-map.md`、`notes/related-work-map.md`、`notes/reproducibility.md`、`notes/views/peer-review.md` を読む。
-- claim readiness を判定する必要がある場合は `notes/views/scientific-gate.md`、追加の外部 source が必要な場合は `notes/source-reach.md` も読む。
+- repo-aware routing に進む場合だけ、`manuscript/venue.md`、`_paperops/notes/reviewer-model.md`、`_paperops/claims/`、`_paperops/evidence/`、`_paperops/review/`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/related-work-map.md`、`_paperops/notes/reproducibility.md`、`_paperops/notes/views/peer-review.md` を読む。
+- claim readiness を判定する必要がある場合は `_paperops/notes/views/scientific-gate.md`、追加の外部 source が必要な場合は `_paperops/notes/source-reach.md` も読む。
 
 ## 手順
 
 ### 1. Public-only 査読
 
-最初は公開されるアーティファクトだけを読む。`notes/`、`refs/local/`、run output、未公開解析ノートで不足説明を補完しない。
+最初は公開されるアーティファクトだけを読む。`_paperops/notes/`、`_paperops/refs/local/`、run output、未公開解析ノートで不足説明を補完しない。
 
 以下を原稿から再構成する:
 
@@ -108,13 +108,13 @@ Concern matrix を作る:
 
 ユーザーが記録や修正を求めた場合だけ、repo 内部文脈を読んで対応先を決める。
 
-- claim / evidence の問題: `claims/claims/`、`evidence/`、`notes/views/claim-evidence-map.md`
-- claim readiness / assumption の問題: `claims/gates/`、`notes/views/scientific-gate.md`
-- result や figure data の問題: `evidence/results/`、`evidence/figures/`、`requests/analysis/`
-- 関連研究・比較対象: `notes/related-work-map.md`、`notes/source-reach.md`、`refs/summaries/`
-- 読者・投稿先 fit: `notes/reviewer-model.md`、`manuscript/venue.md`
-- 再現性: `notes/reproducibility.md`
-- 模擬査読の台帳: `review/feedback/`、`review/rounds/`、`notes/views/peer-review.md`
+- claim / evidence の問題: `_paperops/claims/claims/`、`_paperops/evidence/`、`_paperops/notes/views/claim-evidence-map.md`
+- claim readiness / assumption の問題: `_paperops/claims/gates/`、`_paperops/notes/views/scientific-gate.md`
+- result や figure data の問題: `_paperops/evidence/results/`、`_paperops/evidence/figures/`、`_paperops/requests/analysis/`
+- 関連研究・比較対象: `_paperops/notes/related-work-map.md`、`_paperops/notes/source-reach.md`、`_paperops/refs/summaries/`
+- 読者・投稿先 fit: `_paperops/notes/reviewer-model.md`、`manuscript/venue.md`
+- 再現性: `_paperops/notes/reproducibility.md`
+- 模擬査読の台帳: `_paperops/review/feedback/`、`_paperops/review/rounds/`、`_paperops/notes/views/peer-review.md`
 
 本文はユーザーが明示的に改稿を求めた場合だけ編集する。改稿する場合は `manuscript/ja/` の source-of-truth と `% block: ...` ID を尊重し、EN mirror は `/sync-ja-en` の方針に従う。
 
@@ -137,7 +137,7 @@ Concern matrix を作る:
 - accept / reject recommendation は練習用であり、実際の採否予測として扱わない。
 - confidential な第三者原稿や査読依頼を、許可なく AI に読ませない。
 - 長い本文引用や review report の丸写しを tracked notes に残さない。
-- AI が review に関与した場合は、必要に応じて `/ai-disclosure-check` で `notes/ai-use.md` を更新する。
+- AI が review に関与した場合は、必要に応じて `/ai-disclosure-check` で `_paperops/notes/ai-use.md` を更新する。
 
 ## Codex 実行メモ
 
@@ -145,4 +145,4 @@ Concern matrix を作る:
 - public-only review と repo-aware routing を混ぜない。
 - Results hierarchy や Discussion functions が薄い場合は、metadata / readiness / Submission hygiene より上位の blocking concern として扱う。
 - 独立 reviewer の指摘を平均化しすぎず、少数意見でも blocking concern なら残す。
-- repo-aware に記録する場合は、まず `review/feedback/` の feedback card に公開可能な要約と対応 ID を残す。反映まで進む場合は `/integrate-writing-feedback` に渡す。raw confidential text は `_handoff/` かローカル入力に留める。
+- repo-aware に記録する場合は、まず `_paperops/review/feedback/` の feedback card に公開可能な要約と対応 ID を残す。反映まで進む場合は `/integrate-writing-feedback` に渡す。raw confidential text は `_handoff/` かローカル入力に留める。

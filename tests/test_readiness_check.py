@@ -16,12 +16,12 @@ class ReadinessCheckTest(unittest.TestCase):
     def test_requires_decision_log(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)
-            (target / "notes" / "decision-log.md").unlink()
+            (target / "_paperops" / "notes" / "decision-log.md").unlink()
 
             result = run_python_script(SCRIPT, "--root", target, "--allow-placeholders")
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("`notes/decision-log.md` が見つかりません", result.stdout)
+        self.assertIn("`_paperops/notes/decision-log.md` が見つかりません", result.stdout)
 
     def test_warns_when_public_bibliography_includes_mypapers(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

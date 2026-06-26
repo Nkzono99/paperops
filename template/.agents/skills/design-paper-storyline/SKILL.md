@@ -17,14 +17,14 @@ description: Use when a manuscript needs a top-level story spine, Results hierar
 
 ## 最初に読む
 
-- `contracts/storyline.yml`
-- `notes/views/storyline.md`
-- `notes/views/argument-map.md`
-- `notes/views/result-pattern-map.md`
-- `notes/views/claim-evidence-map.md`
-- `notes/views/scientific-gate.md`
-- `notes/related-work-map.md`
-- `notes/reviewer-model.md`
+- `_paperops/contracts/storyline.yml`
+- `_paperops/notes/views/storyline.md`
+- `_paperops/notes/views/argument-map.md`
+- `_paperops/notes/views/result-pattern-map.md`
+- `_paperops/notes/views/claim-evidence-map.md`
+- `_paperops/notes/views/scientific-gate.md`
+- `_paperops/notes/related-work-map.md`
+- `_paperops/notes/reviewer-model.md`
 - title / abstract / introduction / Results / Discussion / Conclusion
 - figure captions and table captions
 
@@ -34,7 +34,7 @@ description: Use when a manuscript needs a top-level story spine, Results hierar
 2. Repo-aware editor として、claim / evidence / result-pattern map から evidence_ladder を作る。
 3. Results hierarchy を作る。各 subsection は `reader question -> one-sentence answer -> quantity and unit of analysis -> figure/table role -> consequence` を持つ。
 4. Discussion functions を作る。最低限 `principal_finding`、`mechanism_warrant`、`prior_work_delta`、`alternative_or_boundary`、`implication`、`decisive_next_test` を分ける。
-5. `notes/views/storyline.md` を更新する場合は、`Section depth map` の function と manuscript block を埋める。block が未作成なら `draft` のままにし、本文生成前の blocker として扱う。
+5. `_paperops/notes/views/storyline.md` を更新する場合は、`Section depth map` の function と manuscript block を埋める。block が未作成なら `draft` のままにし、本文生成前の blocker として扱う。
 6. `scripts/check-storyline.py --root . --strict` が通るまで、STRUCTURE_ACCEPTED や Submission hygiene へ進めない。
 
 ## Editorial architect gate
@@ -76,4 +76,4 @@ Submission hygiene は最終提出面であり、manuscript content blocker を�
 
 - `finish-manuscript` の before-drafting gate として使う。
 - `audit-ai-draft`、`peer-review-manuscript`、`review-public-manuscript` で Results / Discussion の薄さを見つけたら、この skill へ戻す。
-- `notes/views/storyline.md` は controlled authoring view なので、更新したら `make storyline-check` を実行する。
+- `_paperops/notes/views/storyline.md` は controlled authoring view なので、更新したら `make storyline-check` を実行する。

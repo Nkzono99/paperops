@@ -10,8 +10,8 @@ description: manuscript/venue.md と投稿先・読者モデルに照らして�
 ## 最初に読むファイル
 
 - `manuscript/venue.md`
-- `notes/reviewer-model.md`
-- `notes/views/claim-evidence-map.md`
+- `_paperops/notes/reviewer-model.md`
+- `_paperops/notes/views/claim-evidence-map.md`
 - title / abstract / introduction / conclusion
 - `submission/<venue>/README.md` があれば読む
 
@@ -21,7 +21,7 @@ description: manuscript/venue.md と投稿先・読者モデルに照らして�
 2. title / abstract / introduction が target reader に約束する contribution を確認する。
 3. Methods / Results / Discussion の重心が venue expectation に合うか確認する。
 4. 不足する required section、Data/Code availability、AI disclosure、supplement 方針を列挙する。
-5. `manuscript/venue.md` と `notes/reviewer-model.md` を更新する。
+5. `manuscript/venue.md` と `_paperops/notes/reviewer-model.md` を更新する。
 
 ## 注意
 
@@ -37,6 +37,6 @@ description: manuscript/venue.md と投稿先・読者モデルに照らして�
 
 ## Codex 実行メモ
 
-- `manuscript/venue.md`、`notes/reviewer-model.md`、`notes/views/claim-evidence-map.md` を読む。
+- `manuscript/venue.md`、`_paperops/notes/reviewer-model.md`、`_paperops/notes/views/claim-evidence-map.md` を読む。
 - 最新投稿規定は推測せず、公式 URL/PDF が必要なら確認する。
-- 必要なら `manuscript/venue.md` と `notes/reviewer-model.md` を更新する。
+- 必要なら `manuscript/venue.md` と `_paperops/notes/reviewer-model.md` を更新する。

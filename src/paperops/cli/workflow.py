@@ -12,9 +12,14 @@ from typing import Any
 from paperops.cli.project import find_project_root
 
 
-MACHINE_REL = Path("workflow") / "machine.yml"
-CURRENT_REL = Path("workflow") / "current-state.yml"
-ROUND_REL = Path("workflow") / "round-summary.yml"
+WORKFLOW_REL = Path("_paperops") / "workflow"
+LEGACY_WORKFLOW_REL = Path("workflow")
+MACHINE_REL = WORKFLOW_REL / "machine.yml"
+CURRENT_REL = WORKFLOW_REL / "current-state.yml"
+ROUND_REL = WORKFLOW_REL / "round-summary.yml"
+LEGACY_MACHINE_REL = LEGACY_WORKFLOW_REL / "machine.yml"
+LEGACY_CURRENT_REL = LEGACY_WORKFLOW_REL / "current-state.yml"
+LEGACY_ROUND_REL = LEGACY_WORKFLOW_REL / "round-summary.yml"
 
 
 def add_workflow_parser(
@@ -76,8 +81,8 @@ def cmd_workflow(args: argparse.Namespace) -> int:
     args.project_root = root
 
     try:
-        machine = load_mapping(root / MACHINE_REL)
-        current = load_mapping(root / CURRENT_REL)
+        machine = load_mapping(workflow_file(root, MACHINE_REL, LEGACY_MACHINE_REL))
+        current = load_mapping(workflow_file(root, CURRENT_REL, LEGACY_CURRENT_REL))
     except WorkflowError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -114,6 +119,16 @@ def workflow_status(current: dict[str, Any]) -> int:
     print(f"blocking concerns: {len(blockers) if isinstance(blockers, list) else 0}")
     print(f"major concerns: {len(majors) if isinstance(majors, list) else 0}")
     return 0
+
+
+def workflow_file(root: Path, modern_rel: Path, legacy_rel: Path) -> Path:
+    modern = root / modern_rel
+    if modern.exists():
+        return modern
+    legacy = root / legacy_rel
+    if legacy.exists():
+        return legacy
+    return modern
 
 
 def workflow_next(machine: dict[str, Any], current: dict[str, Any]) -> int:
@@ -160,7 +175,7 @@ def workflow_advance(
         return 1
     current.setdefault("overall", {})["state"] = target
     current["overall"]["previous_state"] = source
-    write_mapping(root / CURRENT_REL, current)
+    write_mapping(workflow_file(root, CURRENT_REL, LEGACY_CURRENT_REL), current)
     print(f"advanced: {source} -> {target}")
     return 0
 
@@ -192,7 +207,7 @@ def workflow_invalidate(
             section["previous_state"] = previous
             changed.append(str(name))
     if changed:
-        write_mapping(root / CURRENT_REL, current)
+        write_mapping(workflow_file(root, CURRENT_REL, LEGACY_CURRENT_REL), current)
         for name in changed:
             print(f"stale: {name} -> {route}")
     else:
@@ -211,7 +226,7 @@ def workflow_route_review(
     issue_class = normalize_issue_class(raw_issue_class)
     if not issue_class:
         try:
-            round_summary = load_mapping(root / ROUND_REL)
+            round_summary = load_mapping(workflow_file(root, ROUND_REL, LEGACY_ROUND_REL))
         except WorkflowError:
             round_summary = {}
         issue_class = normalize_issue_class(str(round_summary.get("issue_class", "")))
@@ -236,7 +251,7 @@ def workflow_route_review(
         current.setdefault("review", {})["last_issue_class"] = issue_class
         counters = current.setdefault("loop_counters", {})
         counters[issue_class] = int(counters.get(issue_class, 0)) + 1
-        write_mapping(root / CURRENT_REL, current)
+        write_mapping(workflow_file(root, CURRENT_REL, LEGACY_CURRENT_REL), current)
         print(f"applied route: {route_to}")
         max_rounds = int(machine.get("loop_policy", {}).get("max_autonomous_rounds_per_issue", 2))
         if counters[issue_class] > max_rounds:
@@ -252,7 +267,7 @@ def route_application_blockers(
 ) -> list[str]:
     if issue_class != "submission_loop":
         return []
-    checked_states = ["STORY_LOCKED", "SECTION_PLANNED", "STRUCTURE_ACCEPTED"]
+    checked_states = ["STORY_SEEDED", "STORY_RECONCILED", "ARCHITECTURE_LOCKED", "SECTION_PLANNED", "STRUCTURE_ACCEPTED"]
     failures = {
         state: guard_failures(machine, current, state)
         for state in checked_states

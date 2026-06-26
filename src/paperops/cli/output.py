@@ -15,9 +15,9 @@ def managed_update_surface(rel: str) -> str:
         return "make workflow"
     if rel == "TROUBLESHOOTING.md":
         return "operator docs"
-    if rel.startswith("contracts/"):
+    if rel.startswith("_paperops/contracts/") or rel.startswith("contracts/"):
         return "section contract"
-    if rel.startswith("workflow/"):
+    if rel.startswith("_paperops/workflow/") or rel.startswith("workflow/"):
         return "workflow state machine"
     if rel.startswith("scripts/"):
         return "validation/build script"
@@ -81,6 +81,6 @@ def print_update_plan(plan: CopyPlan) -> None:
             )
             print("    narrow review with --only <path-or-prefix> when useful.")
         print(
-            "    project content remains outside this plan: README.md, notes/, "
-            "manuscript/, refs/, submission/."
+            "    project content remains outside this plan: README.md, story/, "
+            "manuscript/, submission/, and non-managed _paperops/ state."
         )

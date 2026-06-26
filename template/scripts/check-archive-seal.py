@@ -16,6 +16,7 @@ EXPANDED_LAYER_NAMES = {
     "claims",
     "review",
     "requests",
+    "_paperops",
     "_handoff",
 }
 TOP_LEVEL_ALLOWED_FILES = {"AGENTS.md", "README.md", ".gitkeep"}

@@ -5,6 +5,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_paths import display_path, internal_path
+
 
 PLACEHOLDER_RE = re.compile(r"(未記入|TBD|TODO|置き換えてください)")
 
@@ -25,9 +27,9 @@ def resolve_view_path(root: Path) -> tuple[str, Path] | None:
         "notes/claim-evidence-map.md",
     ]
     for rel_path in candidates:
-        path = root / rel_path
+        path = internal_path(root, rel_path)
         if path.exists():
-            return rel_path, path
+            return display_path(root, path), path
     return None
 
 
@@ -135,7 +137,7 @@ def main() -> int:
     resolved = resolve_view_path(root)
     if resolved is None:
         print("claim-evidence-check に失敗しました")
-        print("- `notes/views/claim-evidence-map.md` が見つかりません（旧互換: `notes/claim-evidence-map.md`）")
+        print("- `_paperops/notes/views/claim-evidence-map.md` が見つかりません（旧互換: `notes/views/claim-evidence-map.md`, `notes/claim-evidence-map.md`）")
         return 1
     rel_path, path = resolved
 

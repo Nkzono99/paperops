@@ -5,6 +5,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_paths import internal_path
+
 
 TEX_EXTENSIONS = ["", ".tex"]
 GRAPHIC_EXTENSIONS = ["", ".pdf", ".png", ".jpg", ".jpeg", ".eps", ".svg"]
@@ -112,8 +114,8 @@ def resolve_bib(root: Path, current_file: Path, target: str) -> Path | None:
     search_dirs = [
         current_file.parent,
         root / "manuscript" / "shared" / "bib",
-        root / "refs" / "bib" / "curated",
-        root / "refs" / "bib" / "imported",
+        internal_path(root, "refs", "bib", "curated"),
+        internal_path(root, "refs", "bib", "imported"),
     ]
     for directory in search_dirs:
         found = resolve_existing(directory, target, ["", ".bib"])

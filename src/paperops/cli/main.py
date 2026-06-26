@@ -24,6 +24,7 @@ from paperops.cli.manifest import (
 )
 from paperops.cli.notices import maybe_print_update_notice, warn_ignored_bootstrap_options
 from paperops.cli.output import print_copy_summary, print_next_steps, print_update_plan
+from paperops.cli.paths import internal_file
 from paperops.cli.project import (
     detect_template_ref,
     find_project_root,
@@ -207,12 +208,12 @@ def build_parser() -> argparse.ArgumentParser:
     links_parser.add_argument(
         "--resolve-local",
         action="store_true",
-        help="Show local paths from refs/local/locations.toml when listing.",
+        help="Show local paths from _paperops/refs/local/locations.toml when listing.",
     )
     links_parser.add_argument(
         "--strict-local",
         action="store_true",
-        help="Warn when refs/local/locations.toml is missing.",
+        help="Warn when _paperops/refs/local/locations.toml is missing.",
     )
     links_parser.set_defaults(func=cmd_links)
 
@@ -358,7 +359,8 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     print(f"Python: {sys.version.split()[0]}")
     check_path(root, "Makefile", errors)
     check_path(root, "manuscript", errors)
-    check_path(root, "notes", errors)
+    check_path(root, "_paperops", errors)
+    check_path(root, "story", warnings)
     check_path(root, "scripts", errors)
     check_path(root, ".pops/manifest.toml", warnings)
     check_uvx_available(warnings)
@@ -372,11 +374,11 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         else:
             warnings.append(finding.message)
 
-    local_locations = root / "refs" / "local" / "locations.toml"
+    local_locations = internal_file(root, "refs/local/locations.toml")
     if not local_locations.exists():
         warnings.append(
-            "refs/local/locations.toml is missing; copy "
-            "refs/local/locations.example.toml when local paths are needed."
+            "_paperops/refs/local/locations.toml is missing; copy "
+            "_paperops/refs/local/locations.example.toml when local paths are needed."
         )
 
     for item in errors:

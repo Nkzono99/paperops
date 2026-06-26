@@ -52,7 +52,7 @@ class ScratchArchiveTest(unittest.TestCase):
 
             intro = target / "manuscript" / "ja" / "sections" / "10_intro.tex"
             intro.write_text(intro.read_text(encoding="utf-8") + "\n% CUSTOM-DRAFT\n", encoding="utf-8")
-            summary = target / "refs" / "summaries" / "custom.md"
+            summary = target / "_paperops" / "refs" / "summaries" / "custom.md"
             summary.parent.mkdir(parents=True, exist_ok=True)
             summary.write_text("# CUSTOM REF\n", encoding="utf-8")
             handoff_secret = target / "_handoff" / "secret.txt"
@@ -111,12 +111,12 @@ class ScratchArchiveTest(unittest.TestCase):
             added_files = [
                 target / "manuscript" / "ja" / "sections" / "custom.tex",
                 target / "submission" / "demo-venue" / "main.tex",
-                target / "notes" / "sessions" / "custom-session.md",
-                target / "refs" / "summaries" / "custom-source.md",
-                target / "evidence" / "results" / "RES-CUSTOM.md",
-                target / "claims" / "claims" / "CLM-CUSTOM.md",
-                target / "review" / "feedback" / "FB-CUSTOM.md",
-                target / "requests" / "analysis" / "AREQ-CUSTOM.md",
+                target / "_paperops" / "notes" / "sessions" / "custom-session.md",
+                target / "_paperops" / "refs" / "summaries" / "custom-source.md",
+                target / "_paperops" / "evidence" / "results" / "RES-CUSTOM.md",
+                target / "_paperops" / "claims" / "claims" / "CLM-CUSTOM.md",
+                target / "_paperops" / "review" / "feedback" / "FB-CUSTOM.md",
+                target / "_paperops" / "requests" / "analysis" / "AREQ-CUSTOM.md",
                 target / "_handoff" / "secret.txt",
             ]
             for path in added_files:
@@ -154,7 +154,7 @@ class ScratchArchiveTest(unittest.TestCase):
     def test_scratch_reset_excludes_generated_scaffold_artifacts(self) -> None:
         generated_rels = [
             Path("manuscript/mirror/reports/smoke-check.md"),
-            Path("notes/session-context.generated.md"),
+            Path("_paperops/notes/session-context.generated.md"),
             Path("_handoff/source-payload.txt"),
         ]
         source_paths = [ROOT / "template" / rel for rel in generated_rels]

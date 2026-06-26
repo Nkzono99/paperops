@@ -85,8 +85,8 @@ class TemplateBuildFallbackTest(unittest.TestCase):
         self.assertGreaterEqual(commands.count("xelatex "), 3)
         self.assertIn("bibtex main", commands)
         self.assertIn("latexmk が見つからないため", result.stdout)
-        self.assertIn(f"BIBINPUTS={target / 'manuscript' / 'shared' / 'bib'}//:", commands)
-        self.assertIn(f"BSTINPUTS={target / 'manuscript' / 'shared' / 'style'}//:", commands)
+        self.assertIn(f"BIBINPUTS={self.to_bash_path(target / 'manuscript' / 'shared' / 'bib')}//:", commands)
+        self.assertIn(f"BSTINPUTS={self.to_bash_path(target / 'manuscript' / 'shared' / 'style')}//:", commands)
 
     def test_runner_prefix_wraps_direct_engine_build(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -183,10 +183,11 @@ class TemplateBuildFallbackTest(unittest.TestCase):
             self.assertTrue((submission / "build" / "main.pdf").exists())
         self.assertIn("runner lualatex", commands)
         self.assertIn("submission/demo-venue/build/main.pdf", result.stdout)
-        self.assertIn(f"BIBINPUTS={target / 'submission' / 'demo-venue'}//:", commands)
-        self.assertIn(f"{target / 'manuscript' / 'shared' / 'bib'}//:", commands)
-        self.assertIn(f"BSTINPUTS={target / 'submission' / 'demo-venue'}//:", commands)
-        self.assertIn(f"{target / 'manuscript' / 'shared' / 'style'}//:", commands)
+        self.assertIn(f"BIBINPUTS={self.to_bash_path(target / 'submission' / 'demo-venue')}//:", commands)
+        self.assertIn(f"{self.to_bash_path(target / 'manuscript' / 'shared' / 'bib')}//:", commands)
+        self.assertIn(f"{self.to_bash_path(target / '_paperops' / 'refs' / 'bib' / 'curated')}//:", commands)
+        self.assertIn(f"BSTINPUTS={self.to_bash_path(target / 'submission' / 'demo-venue')}//:", commands)
+        self.assertIn(f"{self.to_bash_path(target / 'manuscript' / 'shared' / 'style')}//:", commands)
 
     @staticmethod
     def to_bash_path(path: Path) -> str:

@@ -26,6 +26,7 @@ EXCLUDED_SCAFFOLD_PATTERNS = (
     "harness-lab/*",
     ".claude/settings.local.json",
     "_handoff/*",
+    "_paperops/notes/session-context.generated.md",
     "notes/session-context.generated.md",
     "manuscript/mirror/reports/latest.md",
     "manuscript/mirror/reports/smoke-check.md",
@@ -33,7 +34,12 @@ EXCLUDED_SCAFFOLD_PATTERNS = (
     "manuscript/shared/build/en/*",
     "manuscript/shared/build/ja",
     "manuscript/shared/build/ja/*",
+    "_paperops/refs/local/locations.toml",
     "refs/local/locations.toml",
+    "_paperops/refs/source-reach/**/raw",
+    "_paperops/refs/source-reach/**/raw/**",
+    "_paperops/refs/source-reach/**/doctor.generated.*",
+    "_paperops/refs/source-reach/**/capture.generated.*",
     "refs/source-reach/**/raw",
     "refs/source-reach/**/raw/**",
     "refs/source-reach/**/doctor.generated.*",
@@ -52,6 +58,8 @@ MANAGED_UPDATE_PATTERNS = (
     "CLAUDE.md",
     "Makefile",
     "TROUBLESHOOTING.md",
+    "_paperops/contracts/*",
+    "_paperops/workflow/*",
     "contracts/*",
     "workflow/*",
     "scripts/*",
@@ -63,7 +71,7 @@ MANAGED_UPDATE_PATTERNS = (
 
 PROJECT_MARKERS = (
     "manuscript",
-    "notes",
+    "_paperops",
     "scripts",
     "Makefile",
 )

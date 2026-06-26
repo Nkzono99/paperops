@@ -90,7 +90,7 @@ external-import-check:
 	$(PYTHON) template/scripts/check-external-imports.py --root template
 
 collect-context:
-	$(PYTHON) template/scripts/collect-note-context.py --root template --output template/notes/session-context.generated.md
+	$(PYTHON) template/scripts/collect-note-context.py --root template --output template/_paperops/notes/session-context.generated.md
 
 template-readiness-check:
 	$(PYTHON) template/scripts/readiness-check.py --root template --allow-placeholders

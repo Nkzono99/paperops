@@ -11,7 +11,8 @@ SCRIPT = ROOT / "template" / "scripts" / "check-research-request-handoff.py"
 
 
 def write_locations(project: Path, runops_dir: Path) -> None:
-    locations = project / "refs" / "local" / "locations.toml"
+    locations = project / "_paperops" / "refs" / "local" / "locations.toml"
+    locations.parent.mkdir(parents=True, exist_ok=True)
     locations.write_text(
         "\n".join(
             [
@@ -34,7 +35,8 @@ def write_request_card(
     target_link: str = "runops-main",
     runops_id: str = "draft:PAPER-REQ-0008",
 ) -> None:
-    card = project / "requests" / "analysis" / f"{request_id}.md"
+    card = project / "_paperops" / "requests" / "analysis" / f"{request_id}.md"
+    card.parent.mkdir(parents=True, exist_ok=True)
     card.write_text(
         "\n".join(
             [
@@ -123,13 +125,13 @@ class ResearchRequestHandoffCheckTest(unittest.TestCase):
             runops_dir = Path(tmp) / "runops"
             write_locations(project, runops_dir)
             write_queue(runops_dir, "schema_version = 1\n")
-            view = project / "notes" / "views" / "research-requests.md"
+            view = project / "_paperops" / "notes" / "views" / "research-requests.md"
             text = view.read_text(encoding="utf-8")
             view.write_text(
                 text.replace(
-                    "| AREQ-0001 | `requests/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | draft |",
-                    "| AREQ-0001 | `requests/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | draft |\n"
-                    "| RR-0008 | `requests/analysis/RR-0008.md` | FB-0001 | CLM-0001 | runops-main | verification table | convergence | blank | open |",
+                    "| AREQ-0001 | `_paperops/requests/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | draft |",
+                    "| AREQ-0001 | `_paperops/requests/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | draft |\n"
+                    "| RR-0008 | `_paperops/requests/analysis/RR-0008.md` | FB-0001 | CLM-0001 | runops-main | verification table | convergence | blank | open |",
                 ),
                 encoding="utf-8",
             )

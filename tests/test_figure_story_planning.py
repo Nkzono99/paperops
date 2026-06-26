@@ -13,11 +13,11 @@ def read_template(path: str) -> str:
 
 class FigureStoryPlanningTemplateTest(unittest.TestCase):
     def test_template_has_figure_contract_and_story_planning_skill(self) -> None:
-        contract = read_template("template/contracts/figures.yml")
+        contract = read_template("template/_paperops/contracts/figures.yml")
         skill = read_template("template/.agents/skills/plan-figure-story/SKILL.md")
         profile = read_template("template/manuscript/writing-profile.yml")
-        machine = read_template("template/workflow/machine.yml")
-        current_state = read_template("template/workflow/current-state.yml")
+        machine = read_template("template/_paperops/workflow/machine.yml")
+        current_state = read_template("template/_paperops/workflow/current-state.yml")
         makefile = read_template("template/Makefile")
 
         for required in [
@@ -45,8 +45,8 @@ class FigureStoryPlanningTemplateTest(unittest.TestCase):
         self.assertIn("scripts/check-figure-obligations.py --root .", makefile)
 
     def test_claim_and_figure_templates_expose_visual_obligation_crosswalk(self) -> None:
-        claim = read_template("template/claims/claims/claim-card-template.md")
-        figure = read_template("template/evidence/figures/figure-card-template.md")
+        claim = read_template("template/_paperops/claims/claims/claim-card-template.md")
+        figure = read_template("template/_paperops/evidence/figures/figure-card-template.md")
 
         for required in [
             "visual_obligations",

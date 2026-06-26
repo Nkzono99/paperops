@@ -12,15 +12,15 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 ## 入力
 
 - `manuscript/mirror/status.md`
-- `notes/project-brief.md`
-- `notes/contribution-claims.md`
-- `claims/`
-- `evidence/`
-- `notes/views/scientific-gate.md`
-- `notes/related-work-map.md`
-- `notes/views/result-pattern-map.md`
-- `notes/views/claim-evidence-map.md`
-- `notes/reviewer-model.md`
+- `_paperops/notes/project-brief.md`
+- `_paperops/notes/contribution-claims.md`
+- `_paperops/claims/`
+- `_paperops/evidence/`
+- `_paperops/notes/views/scientific-gate.md`
+- `_paperops/notes/related-work-map.md`
+- `_paperops/notes/views/result-pattern-map.md`
+- `_paperops/notes/views/claim-evidence-map.md`
+- `_paperops/notes/reviewer-model.md`
 - `manuscript/ja/sections/*.tex`（原則として source of truth）
 - 必要に応じて `manuscript/en/sections/*.tex`
 - figure captions、section headings、abstract、conclusion
@@ -32,7 +32,7 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 - Essential results を 3-5 項目に絞る。
 - 主張、必須証拠、補助証拠、対照、限界、将来課題を分ける。
 - 本文に残すもの、Supplement/Appendix に逃がすもの、notes に provenance だけ残すもの、削るものを判断する。
-- run label、export 名、directory 名、script 名、artifact 名などの内部 provenance 語を本文の主張材料にせず、必要な場合は `notes/` や `refs/` に残す。
+- run label、export 名、directory 名、script 名、artifact 名などの内部 provenance 語を本文の主張材料にせず、必要な場合は `_paperops/notes/` や `_paperops/refs/` に残す。
 - ユーザーが明示した場合だけ、JA source of truth の rewrite に進む。
 
 ## 手順
@@ -46,12 +46,12 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 3. conclusion
 4. section headings
 5. figure captions
-6. `notes/contribution-claims.md`
-7. `notes/related-work-map.md`
-8. `notes/views/result-pattern-map.md`
-9. `notes/views/claim-evidence-map.md`
-10. `notes/views/scientific-gate.md`
-11. `notes/reviewer-model.md`
+6. `_paperops/notes/contribution-claims.md`
+7. `_paperops/notes/related-work-map.md`
+8. `_paperops/notes/views/result-pattern-map.md`
+9. `_paperops/notes/views/claim-evidence-map.md`
+10. `_paperops/notes/views/scientific-gate.md`
+11. `_paperops/notes/reviewer-model.md`
 12. `manuscript/mirror/status.md`
 
 この段階で、原稿が読者に約束している主張を仮説として書き出す。
@@ -70,11 +70,11 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 
 ### 3. 主張と証拠を棚卸しする
 
-`notes/views/result-pattern-map.md` に result pattern / evidence packet がある場合は、まず observed contrast、effect direction、negative/null cases、candidate interpretation を確認する。raw result、run inventory、case count を直接 claim に昇格しない。
+`_paperops/notes/views/result-pattern-map.md` に result pattern / evidence packet がある場合は、まず observed contrast、effect direction、negative/null cases、candidate interpretation を確認する。raw result、run inventory、case count を直接 claim に昇格しない。
 
-Abstract、Conclusion、主要図表、中心 claim に入れる候補は、`notes/views/scientific-gate.md` の gate status を確認する。`analysis-needed`、`assumption-blocked`、`supplement-only`、`defer` の claim は、claim hierarchy では前面化せず、必要な route を示す。
+Abstract、Conclusion、主要図表、中心 claim に入れる候補は、`_paperops/notes/views/scientific-gate.md` の gate status を確認する。`analysis-needed`、`assumption-blocked`、`supplement-only`、`defer` の claim は、claim hierarchy では前面化せず、必要な route を示す。
 
-`notes/related-work-map.md` に source cluster や debate matrix がある場合は、各 claim が先行研究との差分、比較対象、反論文献、読者が期待する文献文脈のどれに接続しているかも確認する。関連研究が未整理なら、claim の射程を広げる前に `/research-related-work` へ戻す候補として扱う。
+`_paperops/notes/related-work-map.md` に source cluster や debate matrix がある場合は、各 claim が先行研究との差分、比較対象、反論文献、読者が期待する文献文脈のどれに接続しているかも確認する。関連研究が未整理なら、claim の射程を広げる前に `/research-related-work` へ戻す候補として扱う。
 
 各候補主張について、以下の表を作る:
 
@@ -82,17 +82,17 @@ Abstract、Conclusion、主要図表、中心 claim に入れる候補は、`not
 |-------|--------------------|---------------------|----------|--------|----------------|
 
 `Current blocks` には `% block: ...` ID または section file を入れる。block ID がない範囲は section と近い見出しで示す。
-設計後、ユーザーが了承した claim / evidence / scope / limitation は `claims/claims/` の claim card と `notes/views/claim-evidence-map.md` に反映する。
+設計後、ユーザーが了承した claim / evidence / scope / limitation は `_paperops/claims/claims/` の claim card と `_paperops/notes/views/claim-evidence-map.md` に反映する。
 
 ### 3.5 条件数を論文コンテキストへ抽象化する
 
 `12 条件中 2 条件`、`8 条件中 0 条件`、保存時刻数、run 数、screening 条件は、そのまま `Essential results` に入れない。まず `/contextualize-conditions` の方針で、各結果を `mechanism`、`contrast`、`boundary`、`robustness`、`exception`、`provenance-only` のどれかへ分類する。
 
 - 条件数は claim ではなく evidence metadata として扱う。
-- result pattern は claim ではなく観察単位として扱い、claim に昇格するものだけ `claims/claims/` と `notes/views/claim-evidence-map.md` へ移す。
+- result pattern は claim ではなく観察単位として扱い、claim に昇格するものだけ `_paperops/claims/claims/` と `_paperops/notes/views/claim-evidence-map.md` へ移す。
 - 0 条件は「失敗」ではなく、negative evidence、boundary、insufficient coverage のどれかへ分類する。
-- `notes/views/condition-context-map.md` に denominator の意味、公開条件名、本文での言い方を残す。
-- `claims/claims/` と `notes/views/claim-evidence-map.md` には `condition role` と `public scope` を反映する。
+- `_paperops/notes/views/condition-context-map.md` に denominator の意味、公開条件名、本文での言い方を残す。
+- `_paperops/claims/claims/` と `_paperops/notes/views/claim-evidence-map.md` には `condition role` と `public scope` を反映する。
 
 ### 4. 本文の配置を決める
 
@@ -104,7 +104,7 @@ Abstract、Conclusion、主要図表、中心 claim に入れる候補は、`not
 - Keep in notes/provenance: 執筆判断や解析履歴としては重要だが、公開本文には不要
 - Cut: 重複または主張に寄与しない
 
-詳細を本文から削る場合も、必要なら `notes/decision-log.md` や supplement 候補として provenance を残す提案をする。
+詳細を本文から削る場合も、必要なら `_paperops/notes/decision-log.md` や supplement 候補として provenance を残す提案をする。
 本文に残す必要がある解析由来の情報は、runops project、publication export bundle、raw run directory、run label のような内部語ではなく、analysis workflow、analysis dataset、figure-data package、simulation condition、selection criterion など公開読者に通じる語へ置き換える。新しい置換ルールは `manuscript/mirror/terminology.yml` に追加する。
 
 ### 5. claim-centered outline を提案する
@@ -146,16 +146,16 @@ Abstract、Conclusion、主要図表、中心 claim に入れる候補は、`not
 
 - 主張を増やすのではなく、主張の数を減らして階層を見えるようにする。
 - 補助解析や対照実験は、主張を支える役割として配置する。
-- 内部 provenance 語は公開本文へ持ち込まない。作業履歴として必要な場合は `refs/` と `notes/` に日本語で記録する。
+- 内部 provenance 語は公開本文へ持ち込まない。作業履歴として必要な場合は `_paperops/refs/` と `_paperops/notes/` に日本語で記録する。
 - 科学的判断を template に固定しない。分野固有の判断はユーザーに確認する。
 - ミラー整合性を壊さない。JA source of truth と block ID を尊重する。
 - `scientific-gate` で止まっている主張を、outline 上の見栄えのために中心主張へ昇格しない。
 
 ## Codex 実行メモ
 
-- `review-public-manuscript` とは分けて使う。この skill は `notes/project-brief.md`、`notes/contribution-claims.md`、`notes/views/scientific-gate.md`、`notes/related-work-map.md`、`notes/views/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/mirror/status.md`、JA source of truth を読んで、主張と証拠の階層を設計する。
-- 設計した claim / evidence / scope / limitation は、ユーザーが了承した範囲で `claims/claims/` の claim card と `notes/views/claim-evidence-map.md` に反映する。
+- `review-public-manuscript` とは分けて使う。この skill は `_paperops/notes/project-brief.md`、`_paperops/notes/contribution-claims.md`、`_paperops/notes/views/scientific-gate.md`、`_paperops/notes/related-work-map.md`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/reviewer-model.md`、`manuscript/mirror/status.md`、JA source of truth を読んで、主張と証拠の階層を設計する。
+- 設計した claim / evidence / scope / limitation は、ユーザーが了承した範囲で `_paperops/claims/claims/` の claim card と `_paperops/notes/views/claim-evidence-map.md` に反映する。
 - 先に abstract、introduction、conclusion、section headings、figure captions を読み、Core claim と Essential results を圧縮する。
 - 作業報告 smell、keep/compress/move/cut、over-claiming risk、block ID 単位の rewrite plan を出す。
-- run label、export 名、directory 名、script 名、artifact 名が本文に残る場合は、公開語へ置換するか `notes/` / `refs/` 側の provenance に退避する。
+- run label、export 名、directory 名、script 名、artifact 名が本文に残る場合は、公開語へ置換するか `_paperops/notes/` / `_paperops/refs/` 側の provenance に退避する。
 - ユーザーが rewrite を明示した場合だけ `manuscript/ja/` を編集する。`% block: ...` ID を保持し、EN mirror は `sync-ja-en` の方針で同期する。

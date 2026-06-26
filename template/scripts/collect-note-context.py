@@ -3,6 +3,8 @@
 import argparse
 from pathlib import Path
 
+from paperops_paths import internal_path
+
 
 SECTIONS = [
     ("プロジェクト概要", "notes/project-brief.md"),
@@ -34,7 +36,7 @@ SECTIONS = [
 def read_section(root, rel_path):
     rel_paths = rel_path if isinstance(rel_path, list) else [rel_path]
     for candidate in rel_paths:
-        path = root / candidate
+        path = internal_path(root, candidate)
         if path.exists():
             return path.read_text(encoding="utf-8").strip()
     return "_不存在_"

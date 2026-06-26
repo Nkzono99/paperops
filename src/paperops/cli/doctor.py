@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
+from paperops.cli.paths import internal_file
 from paperops.cli.runtime import project_venv_python, uvx_pops_command
 
 
@@ -25,10 +26,10 @@ def check_project_venv_if_present(root: Path, warnings: list[str]) -> None:
 
 
 def print_manual_setup_hints(root: Path) -> None:
-    if not (root / "refs" / "local" / "locations.toml").exists():
+    if not internal_file(root, "refs/local/locations.toml").exists():
         print(
-            "Manual: copy refs/local/locations.example.toml to "
-            "refs/local/locations.toml when local paths are needed."
+            "Manual: copy _paperops/refs/local/locations.example.toml to "
+            "_paperops/refs/local/locations.toml when local paths are needed."
         )
     if not (root / "tex-env.toml").exists() and (root / "tex-env.example.toml").exists():
         print(

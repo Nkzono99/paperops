@@ -15,7 +15,7 @@ description: Use when starting a human PDF or TeX manuscript review session.
 2. `git remote -v`
 3. `git status --short --branch`
 4. `manuscript/mirror/status.md`
-5. 必要に応じて `notes/handoff.md` と `notes/todo.md`
+5. 必要に応じて `_paperops/notes/handoff.md` と `_paperops/notes/todo.md`
 
 ## Branch 方針
 
@@ -40,7 +40,7 @@ description: Use when starting a human PDF or TeX manuscript review session.
   - `% KEEP?: この段落いる？`
   - `% TODO-PAPER: 追加すべき根拠`
 - 投稿先公式テンプレート側の `submission/<venue>/` を直接 source of truth にしない。
-- レビュー終了後は `/collect-manuscript-review` を実行して、diff と inline comment を `notes/reviews/review-YYYY-MM-DD.md` に回収する。
+- レビュー終了後は `/collect-manuscript-review` を実行して、diff と inline comment を `_paperops/notes/reviews/review-YYYY-MM-DD.md` に回収する。
 
 ## 推奨する開始時出力
 

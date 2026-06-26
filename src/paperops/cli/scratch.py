@@ -23,8 +23,15 @@ from paperops.cli.scaffold import scaffold_source
 ARCHIVE_ROOT = "_archives"
 DEFAULT_PART_SIZE_BYTES = 48 * 1024 * 1024
 SCRATCH_ARCHIVE_PATHS = (
+    "story",
     "manuscript",
     "submission",
+    "_paperops/notes",
+    "_paperops/refs",
+    "_paperops/evidence",
+    "_paperops/claims",
+    "_paperops/review",
+    "_paperops/requests",
     "notes",
     "refs",
     "evidence",
@@ -34,14 +41,23 @@ SCRATCH_ARCHIVE_PATHS = (
 )
 SCRATCH_RESET_PATHS = SCRATCH_ARCHIVE_PATHS + ("_handoff",)
 ARCHIVE_EXCLUDED_PATTERNS = (
+    "_paperops/notes/session-context.generated.md",
     "notes/session-context.generated.md",
     "manuscript/mirror/reports/latest.md",
     "manuscript/mirror/reports/smoke-check.md",
     "manuscript/shared/build/**",
     "submission/**/build/**",
     "submission/**/.tools/**",
+    "_paperops/refs/local/locations.toml",
     "refs/local/locations.toml",
+    "_paperops/refs/papers/**",
     "refs/papers/**",
+    "_paperops/refs/research/**/results/**",
+    "_paperops/refs/research/**/report.generated.md",
+    "_paperops/refs/research/**/raw-findings.*",
+    "_paperops/refs/source-reach/**/raw/**",
+    "_paperops/refs/source-reach/**/doctor.generated.*",
+    "_paperops/refs/source-reach/**/capture.generated.*",
     "refs/research/**/results/**",
     "refs/research/**/report.generated.md",
     "refs/research/**/raw-findings.*",
@@ -466,8 +482,8 @@ def validate_zip_members(bundle: Path, root: Path) -> None:
     resolved_root = root.resolve()
     with zipfile.ZipFile(bundle) as archive:
         for member in archive.infolist():
-            parts = PurePosixPath(member.filename).parts
-            if not parts or parts[0] not in SCRATCH_RESET_PATHS:
+            rel = PurePosixPath(member.filename).as_posix()
+            if not rel or not is_scratch_member_path(rel):
                 raise ValueError(f"unsafe archive member: {member.filename}")
             target = (root / member.filename).resolve()
             if not is_relative_to(target, resolved_root):
@@ -490,6 +506,14 @@ def should_exclude_from_archive(rel: str) -> bool:
     if rel.endswith(".pdf") and not rel.startswith("manuscript/shared/figures/"):
         return True
     return any(fnmatch(rel, pattern) for pattern in ARCHIVE_EXCLUDED_PATTERNS)
+
+
+def is_scratch_member_path(rel: str) -> bool:
+    normalized = PurePosixPath(rel).as_posix()
+    return any(
+        normalized == root or normalized.startswith(f"{root}/")
+        for root in SCRATCH_RESET_PATHS
+    )
 
 
 def should_exclude_from_scaffold_reset(rel: str) -> bool:

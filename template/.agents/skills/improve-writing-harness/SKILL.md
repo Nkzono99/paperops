@@ -18,8 +18,8 @@ description: 執筆ハーネスのプロジェクトローカルな摩擦を特�
 
 ## 確認すべき入力
 
-- `notes/writing-log.md`
-- `notes/open-questions.md`
+- `_paperops/notes/writing-log.md`
+- `_paperops/notes/open-questions.md`
 - `.agents/skills/`
 - `.claude/skills/`
 - `scripts/`

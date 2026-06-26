@@ -40,28 +40,28 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "_handoff" / "README.md").is_file())
             self.assertTrue((target / "_archives" / "AGENTS.md").is_file())
             self.assertTrue((target / "_archives" / "README.md").is_file())
-            self.assertTrue((target / "contracts" / "results.yml").is_file())
-            self.assertTrue((target / "contracts" / "methods.yml").is_file())
-            self.assertTrue((target / "contracts" / "figures.yml").is_file())
-            self.assertTrue((target / "workflow" / "machine.yml").is_file())
-            self.assertTrue((target / "workflow" / "current-state.yml").is_file())
-            self.assertTrue((target / "workflow" / "decisions.yml").is_file())
-            self.assertTrue((target / "workflow" / "round-summary.yml").is_file())
+            self.assertTrue((target / "_paperops" / "contracts" / "results.yml").is_file())
+            self.assertTrue((target / "_paperops" / "contracts" / "methods.yml").is_file())
+            self.assertTrue((target / "_paperops" / "contracts" / "figures.yml").is_file())
+            self.assertTrue((target / "_paperops" / "workflow" / "machine.yml").is_file())
+            self.assertTrue((target / "_paperops" / "workflow" / "current-state.yml").is_file())
+            self.assertTrue((target / "_paperops" / "workflow" / "decisions.yml").is_file())
+            self.assertTrue((target / "_paperops" / "workflow" / "round-summary.yml").is_file())
             self.assertTrue((target / "manuscript" / "writing-profile.yml").is_file())
             troubleshooting = (target / "TROUBLESHOOTING.md").read_text(encoding="utf-8")
             self.assertIn("Skill descriptions were shortened", troubleshooting)
             self.assertIn("通常執筆", troubleshooting)
-            self.assertTrue((target / "evidence" / "results" / "result-card-template.md").is_file())
-            self.assertTrue((target / "evidence" / "figures" / "figure-card-template.md").is_file())
-            self.assertTrue((target / "evidence" / "sources" / "source-card-template.md").is_file())
-            self.assertTrue((target / "claims" / "claims" / "claim-card-template.md").is_file())
-            self.assertTrue((target / "claims" / "gates" / "scientific-gate-card-template.md").is_file())
-            self.assertTrue((target / "claims" / "arguments" / "argument-card-template.md").is_file())
-            self.assertTrue((target / "review" / "feedback" / "feedback-card-template.md").is_file())
-            self.assertTrue((target / "review" / "rounds" / "review-round-template.md").is_file())
-            self.assertTrue((target / "review" / "responses" / "response-card-template.md").is_file())
-            self.assertTrue((target / "requests" / "analysis" / "analysis-request-template.md").is_file())
-            self.assertTrue((target / "requests" / "writing" / "writing-request-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "evidence" / "results" / "result-card-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "evidence" / "figures" / "figure-card-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "evidence" / "sources" / "source-card-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "claims" / "claims" / "claim-card-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "claims" / "gates" / "scientific-gate-card-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "claims" / "arguments" / "argument-card-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "review" / "feedback" / "feedback-card-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "review" / "rounds" / "review-round-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "review" / "responses" / "response-card-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "requests" / "analysis" / "analysis-request-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "requests" / "writing" / "writing-request-template.md").is_file())
             self.assertTrue((target / "scripts" / "check-figure-obligations.py").is_file())
             self.assertTrue(
                 (target / ".agents" / "skills" / "plan-figure-story" / "SKILL.md").is_file()
@@ -69,17 +69,18 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue(
                 (target / ".claude" / "skills" / "plan-figure-story" / "SKILL.md").is_file()
             )
-            self.assertTrue((target / "notes" / "views" / "claim-evidence-map.md").is_file())
+            self.assertTrue((target / "_paperops" / "notes" / "views" / "claim-evidence-map.md").is_file())
+            self.assertTrue((target / "story" / "story-seed.md").is_file())
             self.assertTrue((target / "manuscript").is_dir())
-            self.assertTrue((target / "refs" / "links.toml").is_file())
-            self.assertTrue((target / "refs" / "imports" / "README.md").is_file())
-            self.assertTrue((target / "refs" / "imports" / "import-state-template.toml").is_file())
-            self.assertTrue((target / "refs" / "source-reach" / "README.md").is_file())
-            self.assertTrue((target / "notes" / "source-reach.md").is_file())
-            self.assertTrue((target / "notes" / "scientific-gate.md").is_file())
-            self.assertTrue((target / "notes" / "ai-draft-polish.md").is_file())
+            self.assertTrue((target / "_paperops" / "refs" / "links.toml").is_file())
+            self.assertTrue((target / "_paperops" / "refs" / "imports" / "README.md").is_file())
+            self.assertTrue((target / "_paperops" / "refs" / "imports" / "import-state-template.toml").is_file())
+            self.assertTrue((target / "_paperops" / "refs" / "source-reach" / "README.md").is_file())
+            self.assertTrue((target / "_paperops" / "notes" / "source-reach.md").is_file())
+            self.assertTrue((target / "_paperops" / "notes" / "scientific-gate.md").is_file())
+            self.assertTrue((target / "_paperops" / "notes" / "ai-draft-polish.md").is_file())
             self.assertTrue((target / ".pops" / "manifest.toml").is_file())
-            self.assertFalse((target / "refs" / "local" / "locations.toml").exists())
+            self.assertFalse((target / "_paperops" / "refs" / "local" / "locations.toml").exists())
             for workflow in (target / ".github" / "workflows").glob("*.yml"):
                 workflow_text = workflow.read_text(encoding="utf-8")
                 self.assertNotIn("YOUR_ORG/paperops", workflow_text)
@@ -87,7 +88,7 @@ class PopsCliTest(unittest.TestCase):
             gitignore = (target / ".gitignore").read_text(encoding="utf-8")
             self.assertIn("_handoff/*", gitignore)
             self.assertIn(".paperops/cache/", gitignore)
-            self.assertIn("refs/source-reach/**/raw/**", gitignore)
+            self.assertIn("_paperops/refs/source-reach/**/raw/**", gitignore)
 
     def test_copy_scaffold_excludes_ignored_source_reach_and_handoff_payloads(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -97,7 +98,7 @@ class PopsCliTest(unittest.TestCase):
             (source / "_handoff" / ".gitkeep").write_text("\n", encoding="utf-8")
             (source / "_handoff" / "README.md").write_text("ok\n", encoding="utf-8")
             (source / "_handoff" / "secret.txt").write_text("no\n", encoding="utf-8")
-            source_reach = source / "refs" / "source-reach" / "topic"
+            source_reach = source / "_paperops" / "refs" / "source-reach" / "topic"
             (source_reach / "raw").mkdir(parents=True)
             (source_reach / "raw" / "cookie.txt").write_text("no\n", encoding="utf-8")
             (source_reach / "doctor.generated.json").write_text("no\n", encoding="utf-8")
@@ -123,21 +124,21 @@ class PopsCliTest(unittest.TestCase):
             )
             (source / "_archives" / "AGENTS.md").write_text("ok\n", encoding="utf-8")
             (source / "_archives" / "README.md").write_text("ok\n", encoding="utf-8")
-            (source / "notes").mkdir()
-            (source / "notes" / "source-reach.md").write_text("ok\n", encoding="utf-8")
+            (source / "_paperops" / "notes").mkdir(parents=True)
+            (source / "_paperops" / "notes" / "source-reach.md").write_text("ok\n", encoding="utf-8")
 
             plan = copy_scaffold(source, target, overwrite=False)
 
             self.assertTrue((target / "_handoff" / ".gitkeep").is_file())
             self.assertTrue((target / "_handoff" / "README.md").is_file())
-            self.assertTrue((target / "notes" / "source-reach.md").is_file())
+            self.assertTrue((target / "_paperops" / "notes" / "source-reach.md").is_file())
             self.assertFalse((target / "_handoff" / "secret.txt").exists())
-            self.assertFalse((target / "refs" / "source-reach" / "topic" / "raw").exists())
+            self.assertFalse((target / "_paperops" / "refs" / "source-reach" / "topic" / "raw").exists())
             self.assertFalse(
-                (target / "refs" / "source-reach" / "topic" / "doctor.generated.json").exists()
+                (target / "_paperops" / "refs" / "source-reach" / "topic" / "doctor.generated.json").exists()
             )
             self.assertFalse(
-                (target / "refs" / "source-reach" / "topic" / "capture.generated.json").exists()
+                (target / "_paperops" / "refs" / "source-reach" / "topic" / "capture.generated.json").exists()
             )
             self.assertFalse((target / "harness-feedback").exists())
             self.assertFalse((target / "harness-lab").exists())
@@ -147,8 +148,8 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "_archives" / "README.md").is_file())
             self.assertFalse((target / "_archives" / "old").exists())
             self.assertIn("_handoff/secret.txt", plan.excluded)
-            self.assertIn("refs/source-reach/topic/raw", plan.excluded)
-            self.assertIn("refs/source-reach/topic/raw/cookie.txt", plan.excluded)
+            self.assertIn("_paperops/refs/source-reach/topic/raw", plan.excluded)
+            self.assertIn("_paperops/refs/source-reach/topic/raw/cookie.txt", plan.excluded)
             self.assertIn("harness-feedback", plan.excluded)
             self.assertIn("harness-feedback/records/feedback.md", plan.excluded)
             self.assertIn("harness-lab", plan.excluded)
@@ -184,7 +185,7 @@ class PopsCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             run_cli(["init", str(target)])
-            (target / "refs" / "links.toml").write_text("not = [valid", encoding="utf-8")
+            (target / "_paperops" / "refs" / "links.toml").write_text("not = [valid", encoding="utf-8")
 
             code, out, _err = run_cli(["doctor", str(target)])
 
@@ -197,7 +198,7 @@ class PopsCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             run_cli(["init", str(target)])
-            (target / "refs" / "local" / "locations.toml").write_text(
+            (target / "_paperops" / "refs" / "local" / "locations.toml").write_text(
                 "\n".join(
                     [
                         "[paths.runops_main]",
@@ -233,41 +234,41 @@ class PopsCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             run_cli(["init", str(target)])
-            (target / "contracts" / "results.yml").unlink()
+            (target / "_paperops" / "contracts" / "results.yml").unlink()
 
             code, out, err = run_cli(
-                ["update-paperops", "--dry-run", "--only", "contracts/", str(target)]
+                ["update-paperops", "--dry-run", "--only", "_paperops/contracts/", str(target)]
             )
 
             self.assertEqual(code, 0, err)
-            self.assertIn("+ contracts/results.yml [section contract]", out)
+            self.assertIn("+ _paperops/contracts/results.yml [section contract]", out)
 
             code, _out, err = run_cli(
-                ["update-paperops", "--apply", "--only", "contracts/", str(target)]
+                ["update-paperops", "--apply", "--only", "_paperops/contracts/", str(target)]
             )
 
             self.assertEqual(code, 0, err)
-            self.assertTrue((target / "contracts" / "results.yml").is_file())
+            self.assertTrue((target / "_paperops" / "contracts" / "results.yml").is_file())
 
     def test_update_paperops_can_add_missing_workflow_kernel(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             run_cli(["init", str(target)])
-            (target / "workflow" / "machine.yml").unlink()
+            (target / "_paperops" / "workflow" / "machine.yml").unlink()
 
             code, out, err = run_cli(
-                ["update-paperops", "--dry-run", "--only", "workflow/", str(target)]
+                ["update-paperops", "--dry-run", "--only", "_paperops/workflow/", str(target)]
             )
 
             self.assertEqual(code, 0, err)
-            self.assertIn("+ workflow/machine.yml [workflow state machine]", out)
+            self.assertIn("+ _paperops/workflow/machine.yml [workflow state machine]", out)
 
             code, _out, err = run_cli(
-                ["update-paperops", "--apply", "--only", "workflow/", str(target)]
+                ["update-paperops", "--apply", "--only", "_paperops/workflow/", str(target)]
             )
 
             self.assertEqual(code, 0, err)
-            self.assertTrue((target / "workflow" / "machine.yml").is_file())
+            self.assertTrue((target / "_paperops" / "workflow" / "machine.yml").is_file())
 
     def test_update_paperops_explains_changed_managed_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

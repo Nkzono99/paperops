@@ -4,6 +4,8 @@ import argparse
 import re
 from pathlib import Path
 
+from paperops_paths import internal_path
+
 
 ENTRY_RE = re.compile(
     r"@(?P<entry_type>[A-Za-z]+)\s*\{\s*(?P<key>[^,\s]+)\s*,(?P<body>.*?)\n\}",
@@ -34,8 +36,8 @@ DEFAULT_CITE_COMMANDS = {
 def iter_bib_files(root):
     candidates = [
         root / "manuscript/shared/bib",
-        root / "refs/bib/imported",
-        root / "refs/bib/curated",
+        internal_path(root, "refs/bib/imported"),
+        internal_path(root, "refs/bib/curated"),
     ]
     files = []
     for directory in candidates:
@@ -136,7 +138,7 @@ def summary_matches_key(path: Path, key: str) -> bool:
 
 
 def has_summary(root: Path, key: str) -> bool:
-    summary_dir = root / "refs" / "summaries"
+    summary_dir = internal_path(root, "refs", "summaries")
     if not summary_dir.exists():
         return False
     for path in summary_dir.glob("*.md"):
@@ -193,7 +195,7 @@ def main() -> int:
             if key not in keys:
                 errors.append(f"本文が citation key `{key}` を参照していますが .bib にありません")
             elif not has_summary(root, key):
-                errors.append(f"引用 `{key}` に対応する `refs/summaries/` の検証サマリーがありません")
+                errors.append(f"引用 `{key}` に対応する `_paperops/refs/summaries/` の検証サマリーがありません")
 
     if errors:
         print("参考文献の lint に失敗しました")

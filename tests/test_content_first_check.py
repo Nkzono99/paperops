@@ -137,7 +137,7 @@ class ContentFirstCheckTest(unittest.TestCase):
     def test_finish_phase_requires_story_and_section_guards_even_if_structure_guard_is_true(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)
-            state_path = root / "workflow" / "current-state.yml"
+            state_path = root / "_paperops" / "workflow" / "current-state.yml"
             state = json.loads(state_path.read_text(encoding="utf-8"))
             state["guards"]["STRUCTURE_ACCEPTED"] = {
                 key: True for key in state["guards"]["STRUCTURE_ACCEPTED"]
@@ -161,12 +161,12 @@ class ContentFirstCheckTest(unittest.TestCase):
             )
 
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-            self.assertIn("STORY_LOCKED", result.stdout)
+            self.assertIn("ARCHITECTURE_LOCKED", result.stdout)
             self.assertIn("SECTION_PLANNED", result.stdout)
 
     def test_makefiles_and_template_define_content_first_gate(self) -> None:
         expected_paths = [
-            ROOT / "template" / "workflow" / "focus-policy.yml",
+            ROOT / "template" / "_paperops" / "workflow" / "focus-policy.yml",
             SCRIPT,
         ]
         for path in expected_paths:
@@ -175,7 +175,7 @@ class ContentFirstCheckTest(unittest.TestCase):
 
         template_makefile = (ROOT / "template" / "Makefile").read_text(encoding="utf-8")
         root_makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
-        state = json.loads((ROOT / "template" / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
+        state = json.loads((ROOT / "template" / "_paperops" / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
 
         for required in [
             "content-first-check",
@@ -192,9 +192,9 @@ class ContentFirstCheckTest(unittest.TestCase):
         combined = "\n".join(
             path.read_text(encoding="utf-8")
             for path in [
-                ROOT / "template" / "review" / "feedback" / "feedback-card-template.md",
-                ROOT / "template" / "review" / "rounds" / "review-round-template.md",
-                ROOT / "template" / "notes" / "views" / "peer-review.md",
+                ROOT / "template" / "_paperops" / "review" / "feedback" / "feedback-card-template.md",
+                ROOT / "template" / "_paperops" / "review" / "rounds" / "review-round-template.md",
+                ROOT / "template" / "_paperops" / "notes" / "views" / "peer-review.md",
                 ROOT / "template" / ".agents" / "skills" / "integrate-writing-feedback" / "SKILL.md",
             ]
         )

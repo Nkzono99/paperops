@@ -1,0 +1,64 @@
+section: methods
+purpose: >
+  読者が何を行ったか、どの仮定の下で結果を信頼できるか、どこを見れば再現できるかを理解できるようにする。
+
+reader_question: 何を行い、なぜ結果を信頼できるか
+
+logic_chain:
+  - model
+  - assumptions
+  - procedure
+  - estimand
+  - verification_or_convergence
+  - reproducibility_pointer
+  - validity_domain
+
+inputs:
+  - _paperops/evidence/results/
+  - _paperops/evidence/figures/
+  - _paperops/claims/gates/
+  - _paperops/notes/reproducibility.md
+  - _paperops/refs/imports/
+  - _paperops/refs/links.toml
+  - manuscript/writing-profile.yml
+
+outputs:
+  - reader can reconstruct the model boundary and state variables
+  - reader knows what estimand each result uses
+  - reader knows which details are in main text, supplement, or code package
+  - verification_or_convergence evidence is visible when it affects interpretation
+
+information_placement:
+  main_text:
+    - details that change result interpretation
+    - nonstandard assumptions
+    - estimand definitions
+    - geometry_and_boundary_conditions when they affect claims
+    - verification_or_convergence that gates a central claim
+  supplement:
+    - details needed for independent reproduction but too bulky for the reading path
+    - parameter tables
+    - extended sensitivity checks
+  citation:
+    - standard methods that can be compressed by a precise reference
+  code_or_manifest:
+    - execution logs
+    - file format bookkeeping
+    - random seed ledger
+    - implementation acceleration details
+    - environment manifests
+
+hard_rules:
+  - Do not describe Results ordering or interpretation plan as Methods.
+  - Define estimand, unit of analysis, and comparison before using them as evidence.
+  - Do not hide a claim-blocking assumption in supplement only.
+  - State what was verified, not only what was implemented.
+
+soft_rules:
+  - Prefer equations and state variables only where they reduce ambiguity.
+  - Move bookkeeping to reproducibility package unless it changes interpretation.
+
+audit_questions:
+  - Could a reader tell which modeling choices affect the main claim?
+  - Are boundary conditions and initial or forcing conditions visible enough for the paper type?
+  - Are numerical checks connected to the claims they protect?

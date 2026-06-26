@@ -10,6 +10,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from paperops_paths import display_path, internal_path
+
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover
@@ -19,6 +21,8 @@ except ModuleNotFoundError:  # pragma: no cover
 LINKS_REL_PATH = "refs/links.toml"
 LOCAL_LOCATIONS_REL_PATH = "refs/local/locations.toml"
 IMPORTS_REL_PATH = "refs/imports"
+LINKS_DISPLAY_PATH = "_paperops/refs/links.toml"
+IMPORTS_DISPLAY_PATH = "_paperops/refs/imports/"
 
 ALLOWED_STATES = {
     "script_only_candidate",
@@ -69,13 +73,13 @@ def add(findings: list[Finding], severity: str, message: str) -> None:
 
 
 def load_links(root: Path, findings: list[Finding]) -> dict[str, dict[str, Any]]:
-    path = root / LINKS_REL_PATH
+    path = internal_path(root, LINKS_REL_PATH)
     if not path.exists():
         return {}
     try:
         raw = read_toml(path)
     except Exception as exc:
-        add(findings, "error", f"`{LINKS_REL_PATH}` を TOML として読めません: {exc}")
+        add(findings, "error", f"`{display_path(root, path)}` を TOML として読めません: {exc}")
         return {}
     links = raw.get("links", [])
     if not isinstance(links, list):
@@ -90,7 +94,7 @@ def load_links(root: Path, findings: list[Finding]) -> dict[str, dict[str, Any]]
 
 
 def load_local_locations(root: Path) -> dict[str, dict[str, Any]]:
-    path = root / LOCAL_LOCATIONS_REL_PATH
+    path = internal_path(root, LOCAL_LOCATIONS_REL_PATH)
     if not path.exists():
         return {}
     raw = read_toml(path)
@@ -101,7 +105,7 @@ def load_local_locations(root: Path) -> dict[str, dict[str, Any]]:
 
 
 def import_record_paths(root: Path) -> list[Path]:
-    imports_dir = root / IMPORTS_REL_PATH
+    imports_dir = internal_path(root, IMPORTS_REL_PATH)
     if not imports_dir.exists():
         return []
     paths: list[Path] = []
@@ -303,7 +307,7 @@ def check_record(
         add(
             findings,
             "error",
-            f"`{record_label}` の link_id `{link_id}` は `{LINKS_REL_PATH}` にありません",
+            f"`{record_label}` の link_id `{link_id}` は `{LINKS_DISPLAY_PATH}` にありません",
         )
 
     if state not in ALLOWED_STATES:
@@ -423,7 +427,7 @@ def print_findings(findings: list[Finding], record_count: int) -> None:
             print(f"- {finding.message}")
         print("")
     if record_count == 0:
-        print("記録済み import state はありません。外部 bundle を使う前に `refs/imports/` へ state record を作成してください。")
+        print(f"記録済み import state はありません。外部 bundle を使う前に `{IMPORTS_DISPLAY_PATH}` へ state record を作成してください。")
     elif not findings:
         print("external import state に問題は見つかりませんでした。")
 

@@ -93,7 +93,7 @@ external-import-check:
 	$(PYTHON) scripts/check-external-imports.py --root .
 
 collect-context:
-	$(PYTHON) scripts/collect-note-context.py --root . --output notes/session-context.generated.md
+	$(PYTHON) scripts/collect-note-context.py --root . --output _paperops/notes/session-context.generated.md
 
 readiness-check:
 	$(PYTHON) scripts/readiness-check.py --root .

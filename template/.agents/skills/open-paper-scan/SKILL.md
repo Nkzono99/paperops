@@ -7,12 +7,12 @@ description: Use when broadly scanning a paper project for structural issues or 
 
 論文プロジェクト、公開原稿、執筆ハーネスを broad outside reviewer として眺め、まだ採用しない改善の種を出すために使う。
 
-この skill は発想のための open scan であり、管理や修正の workflow ではない。デフォルトでは本文編集、`notes/` や `refs/` への記録、Issue 作成、`pops feedback`、上流フィードバック作成を実行しない。ユーザーが記録・調査・実装を求めたら、出た idea のうち最大 1-2 件だけを後段 skill へ渡す。
+この skill は発想のための open scan であり、管理や修正の workflow ではない。デフォルトでは本文編集、`_paperops/notes/` や `_paperops/refs/` への記録、Issue 作成、`pops feedback`、上流フィードバック作成を実行しない。ユーザーが記録・調査・実装を求めたら、出た idea のうち最大 1-2 件だけを後段 skill へ渡す。
 
 ## 入力
 
 - ユーザーが指定した PDF、TeX、section、README、notes、または scope
-- scope が未指定なら、`README.md`、`AGENTS.md`、`CLAUDE.md`、`notes/project-brief.md`、`notes/views/scientific-gate.md`、`notes/related-work-map.md`、`notes/source-reach.md`、`notes/views/result-pattern-map.md`、`notes/views/claim-evidence-map.md`、`notes/reviewer-model.md`、`manuscript/ja/sections/`、`manuscript/en/sections/`、`.agents/skills/` を薄く横断する
+- scope が未指定なら、`README.md`、`AGENTS.md`、`CLAUDE.md`、`_paperops/notes/project-brief.md`、`_paperops/notes/views/scientific-gate.md`、`_paperops/notes/related-work-map.md`、`_paperops/notes/source-reach.md`、`_paperops/notes/views/result-pattern-map.md`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/reviewer-model.md`、`manuscript/ja/sections/`、`manuscript/en/sections/`、`.agents/skills/` を薄く横断する
 - 公開読者視点を保つ必要がある場合は、最初は公開原稿と図表 caption だけを読む
 
 `_archives/` は open scan の入力にしない。過去稿比較を明示された場合だけ別作業として扱う。
@@ -101,7 +101,7 @@ description: Use when broadly scanning a paper project for structural issues or 
 - `/respond-to-peer-review`: 実査読コメントを response matrix と revision plan へ整理する
 - `/improve-writing-harness`: project-local の摩擦を実装で直す
 - `/feedback-paper-harness`: 再利用可能な改善を上流へ戻す
-- `notes/views/scientific-gate.md`、`notes/source-reach.md`、`notes/ai-draft-polish.md`、`notes/related-work-map.md`、`notes/views/claim-evidence-map.md`、`notes/views/argument-map.md`、`notes/views/condition-context-map.md`、`notes/reviewer-model.md`、`notes/views/peer-review.md`: 記録が必要になった後の置き場所
+- `_paperops/notes/views/scientific-gate.md`、`_paperops/notes/source-reach.md`、`_paperops/notes/ai-draft-polish.md`、`_paperops/notes/related-work-map.md`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/views/argument-map.md`、`_paperops/notes/views/condition-context-map.md`、`_paperops/notes/reviewer-model.md`、`_paperops/notes/views/peer-review.md`: 記録が必要になった後の置き場所
 
 ## 出力形式
 
@@ -118,7 +118,7 @@ description: Use when broadly scanning a paper project for structural issues or 
 - 管理のためのチェックリストは gate として使い、generator にしない。
 - 「良さそう」だけで実装しない。実装や note 化は後段で evidence、evaluation、guard を持たせる。
 - privacy と external sharing を守る。未サニタイズ情報を web 検索語、Issue、PR、上流 feedback へ出さない。
-- `refs/` と `notes/` に後で作る作業用ドキュメントは日本語で書く。
+- `_paperops/refs/` と `_paperops/notes/` に後で作る作業用ドキュメントは日本語で書く。
 
 ## Codex 実行メモ
 

@@ -21,25 +21,25 @@ class PaperLayerCardsTest(unittest.TestCase):
     def test_missing_feedback_template_is_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)
-            feedback_template = target / "review" / "feedback" / "feedback-card-template.md"
+            feedback_template = target / "_paperops" / "review" / "feedback" / "feedback-card-template.md"
             if feedback_template.exists():
                 feedback_template.unlink()
 
             result = run_python_script(SCRIPT, "--root", target)
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("`review/feedback/feedback-card-template.md` が見つかりません", result.stdout)
+        self.assertIn("`_paperops/review/feedback/feedback-card-template.md` が見つかりません", result.stdout)
 
     def test_view_metadata_is_required(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)
-            view = target / "notes" / "views" / "result-pattern-map.md"
+            view = target / "_paperops" / "notes" / "views" / "result-pattern-map.md"
             view.write_text("# 結果パターンビュー\n", encoding="utf-8")
 
             result = run_python_script(SCRIPT, "--root", target)
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("`notes/views/result-pattern-map.md` に `view_type: pure_overview` がありません", result.stdout)
+        self.assertIn("`_paperops/notes/views/result-pattern-map.md` に `view_type: pure_overview` がありません", result.stdout)
 
 
 if __name__ == "__main__":

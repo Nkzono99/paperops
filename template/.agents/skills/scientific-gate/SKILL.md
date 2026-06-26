@@ -7,27 +7,27 @@ description: Use when judging claim readiness before Abstract, Conclusion, or ma
 
 本文を書く前に、書いてよい主張とまだ止めるべき主張を分ける。AI に原稿を生成させる前の claim package 監査として使う。
 
-Academic Research Skills の pipeline / integrity gate / material provenance の発想を参考にするが、paperops では `claims/`、`evidence/`、`notes/views/`、`refs/` にあるカードとビューへ接続する。外部スキルのテンプレートや文面をコピーしない。
+Academic Research Skills の pipeline / integrity gate / material provenance の発想を参考にするが、paperops では `_paperops/claims/`、`_paperops/evidence/`、`_paperops/notes/views/`、`_paperops/refs/` にあるカードとビューへ接続する。外部スキルのテンプレートや文面をコピーしない。
 
 ## 最初に読むファイル
 
-- `claims/README.md`
-- `claims/claims/`
-- `claims/gates/`
-- `evidence/`
-- `notes/views/scientific-gate.md`
-- `notes/views/result-pattern-map.md`
-- `notes/views/claim-evidence-map.md`
-- `notes/views/assumption-ledger.md`
-- `notes/views/claim-upgrade-gates.md`
-- `notes/related-work-map.md`
-- `notes/reviewer-model.md`
-- `notes/reproducibility.md`
-- `notes/views/research-requests.md`
-- `notes/source-reach.md`
-- `refs/links.toml`
-- `refs/imports/`
-- `refs/summaries/`
+- `_paperops/claims/README.md`
+- `_paperops/claims/claims/`
+- `_paperops/claims/gates/`
+- `_paperops/evidence/`
+- `_paperops/notes/views/scientific-gate.md`
+- `_paperops/notes/views/result-pattern-map.md`
+- `_paperops/notes/views/claim-evidence-map.md`
+- `_paperops/notes/views/assumption-ledger.md`
+- `_paperops/notes/views/claim-upgrade-gates.md`
+- `_paperops/notes/related-work-map.md`
+- `_paperops/notes/reviewer-model.md`
+- `_paperops/notes/reproducibility.md`
+- `_paperops/notes/views/research-requests.md`
+- `_paperops/notes/source-reach.md`
+- `_paperops/refs/links.toml`
+- `_paperops/refs/imports/`
+- `_paperops/refs/summaries/`
 - `manuscript/venue.md`
 - 必要に応じて対象の figure/table、Methods、Results、Abstract、Conclusion
 
@@ -45,7 +45,7 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 
 ## Claim package
 
-各 claim について、`claims/gates/` に gate card を作成または更新し、`notes/views/scientific-gate.md` の claim package 表を俯瞰用に更新する。
+各 claim について、`_paperops/claims/gates/` に gate card を作成または更新し、`_paperops/notes/views/scientific-gate.md` の claim package 表を俯瞰用に更新する。
 
 - claim ID と claim text
 - result pattern / evidence packet ID
@@ -75,14 +75,14 @@ method sanity、workflow QA、readiness table、overclaim consistency audit、co
 ## 手順
 
 1. 対象範囲を決める。Abstract / Conclusion / central claim / figure story / section claim のどれを gate するか明記する。
-2. `evidence/` と `notes/views/result-pattern-map.md` から claim に昇格しようとしている evidence packet を確認する。raw result を直接 claim にしない。
-3. `claims/claims/` と `notes/views/claim-evidence-map.md` の status と矛盾していないか確認する。
-4. `notes/reproducibility.md`、`refs/links.toml`、`refs/imports/`、`notes/source-reach.md` から provenance と再現可能性を確認する。外部 bundle 由来の evidence は `make external-import-check` の warning を確認する。
-5. `notes/related-work-map.md` と `refs/summaries/` から関連研究、反論、引用可能な support を確認する。
+2. `_paperops/evidence/` と `_paperops/notes/views/result-pattern-map.md` から claim に昇格しようとしている evidence packet を確認する。raw result を直接 claim にしない。
+3. `_paperops/claims/claims/` と `_paperops/notes/views/claim-evidence-map.md` の status と矛盾していないか確認する。
+4. `_paperops/notes/reproducibility.md`、`_paperops/refs/links.toml`、`_paperops/refs/imports/`、`_paperops/notes/source-reach.md` から provenance と再現可能性を確認する。外部 bundle 由来の evidence は `make external-import-check` の warning を確認する。
+5. `_paperops/notes/related-work-map.md` と `_paperops/refs/summaries/` から関連研究、反論、引用可能な support を確認する。
 6. 各 claim を gate status へ分類し、gate card に block reason と次の route を書く。
-7. central assumptions、claim stress tests、external validation gates がある場合は、`notes/views/assumption-ledger.md` と `notes/views/claim-upgrade-gates.md` にも俯瞰用の row を残す。
+7. central assumptions、claim stress tests、external validation gates がある場合は、`_paperops/notes/views/assumption-ledger.md` と `_paperops/notes/views/claim-upgrade-gates.md` にも俯瞰用の row を残す。
 8. `ready-to-write` の claim だけ、本文や caption で使える scope statement を作る。
-9. 人間承認が必要な assumption は、AI が勝手に受容せず gate card と `notes/views/scientific-gate.md` の approval log に残す。
+9. 人間承認が必要な assumption は、AI が勝手に受容せず gate card と `_paperops/notes/views/scientific-gate.md` の approval log に残す。
 
 ## Role pass
 
@@ -104,13 +104,13 @@ method sanity、workflow QA、readiness table、overclaim consistency audit、co
 - `Assumption ledger updates`
 - `Claim stress-test / external validation gate updates`
 - `Assumption approvals needed`
-- `Routes`: `/map-result-patterns`、`/research-related-work`、`/source-reach-scan`、`/calibrate-claims`、`/figure-story-audit`、`/peer-review-manuscript`、`requests/analysis/`
+- `Routes`: `/map-result-patterns`、`/research-related-work`、`/source-reach-scan`、`/calibrate-claims`、`/figure-story-audit`、`/peer-review-manuscript`、`_paperops/requests/analysis/`
 - `Files updated`
 - `Checks run`
 
 ## Codex 実行メモ
 
 - ユーザーが明示しない限り、本文を書き換えない。
-- `refs/` と `notes/` の作業用ドキュメントは日本語で書く。
+- `_paperops/refs/` と `_paperops/notes/` の作業用ドキュメントは日本語で書く。
 - 既存 source の DOI、metadata、投稿日、投稿先 policy、外部 repository の軽い確認は必要なら web で行い、出典リンクを残す。新規 source channel、credential、raw capture、SNS / 動画 / platform-specific source が絡む場合は先に `/source-reach-scan` へ戻す。
 - `assumption-blocked` を文章上の hedge だけで処理しない。承認または scope 変更へ戻す。

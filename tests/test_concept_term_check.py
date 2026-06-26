@@ -10,7 +10,7 @@ SCRIPT = ROOT / "template" / "scripts" / "check-concept-terms.py"
 
 
 def append_concept_row(project, row: str) -> None:
-    view = project / "notes" / "views" / "concept-terms.md"
+    view = project / "_paperops" / "notes" / "views" / "concept-terms.md"
     text = view.read_text(encoding="utf-8")
     marker = "| CT-0001 |"
     view.write_text(text.replace(marker, row + "\n" + marker), encoding="utf-8")
@@ -83,7 +83,7 @@ class ConceptTermCheckTest(unittest.TestCase):
     def test_missing_concept_term_view_is_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)
-            (target / "notes" / "views" / "concept-terms.md").unlink()
+            (target / "_paperops" / "notes" / "views" / "concept-terms.md").unlink()
 
             result = run_python_script(SCRIPT, "--root", target)
 
@@ -104,7 +104,7 @@ class ConceptTermCheckTest(unittest.TestCase):
             [
                 (ROOT / "docs" / "architecture.md").read_text(encoding="utf-8"),
                 (ROOT / "docs" / "skill-catalog.md").read_text(encoding="utf-8"),
-                (ROOT / "template" / "notes" / "views" / "README.md").read_text(encoding="utf-8"),
+                (ROOT / "template" / "_paperops" / "notes" / "views" / "README.md").read_text(encoding="utf-8"),
                 (ROOT / "template" / ".agents" / "skills" / "audit-ai-draft" / "SKILL.md").read_text(encoding="utf-8"),
                 (ROOT / "template" / ".agents" / "skills" / "polish-ai-draft" / "SKILL.md").read_text(encoding="utf-8"),
                 (ROOT / "template" / ".agents" / "skills" / "paragraph-surgery" / "SKILL.md").read_text(encoding="utf-8"),
@@ -113,7 +113,7 @@ class ConceptTermCheckTest(unittest.TestCase):
         )
 
         for required in [
-            "notes/views/concept-terms.md",
+            "_paperops/notes/views/concept-terms.md",
             "概念語ビュー",
             "claim / argument / evidence card",
             "concept-term-check",

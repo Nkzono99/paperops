@@ -210,7 +210,7 @@ def render_report(root: Path, review_date: str) -> str:
             "## 反映方針",
             "",
             "- [ ] source-of-truth 側の TeX に反映する項目を決める。",
-            "- [ ] 解決済み inline comment を削除し、未解決の論点はこの台帳または `notes/todo.md` に残す。",
+            "- [ ] 解決済み inline comment を削除し、未解決の論点はこの台帳または `_paperops/notes/todo.md` に残す。",
             "- [ ] `manuscript/en` へ同期が必要な block ID を列挙する。",
             "",
             "## Open questions",

@@ -12,15 +12,15 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 ## 最初に読むファイル
 
 - 対象の本文、段落、caption、response draft
-- `notes/views/scientific-gate.md`
-- `notes/views/claim-evidence-map.md`
-- `notes/views/argument-map.md`
-- `notes/views/concept-terms.md`
-- `notes/reviewer-model.md`
-- `notes/ai-draft-polish.md`
-- `notes/ai-use.md`
+- `_paperops/notes/views/scientific-gate.md`
+- `_paperops/notes/views/claim-evidence-map.md`
+- `_paperops/notes/views/argument-map.md`
+- `_paperops/notes/views/concept-terms.md`
+- `_paperops/notes/reviewer-model.md`
+- `_paperops/notes/ai-draft-polish.md`
+- `_paperops/notes/ai-use.md`
 - `manuscript/mirror/terminology.yml`
-- 必要に応じて `notes/related-work-map.md`、`refs/summaries/`
+- 必要に応じて `_paperops/notes/related-work-map.md`、`_paperops/refs/summaries/`
 
 ## 絶対ルール
 
@@ -48,7 +48,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 
 ### 1. Claim lock
 
-まず対象段落の claim、evidence、scope、limitation を `notes/views/claim-evidence-map.md` と `notes/views/scientific-gate.md` で固定する。未登録の主張がある場合は、文体修正ではなく `/scientific-gate` または `/calibrate-claims` へ戻す。
+まず対象段落の claim、evidence、scope、limitation を `_paperops/notes/views/claim-evidence-map.md` と `_paperops/notes/views/scientific-gate.md` で固定する。未登録の主張がある場合は、文体修正ではなく `/scientific-gate` または `/calibrate-claims` へ戻す。
 
 ### 2. Smell annotation
 
@@ -65,7 +65,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 - concept-term compression
 - weak stress position
 
-必要なら `notes/ai-draft-polish.md` の `AI 初稿 smell inventory` に要約する。
+必要なら `_paperops/notes/ai-draft-polish.md` の `AI 初稿 smell inventory` に要約する。
 
 ### 3. Rewrite
 
@@ -75,7 +75,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 - 文末と段落末に、その段落で読者に残したい情報を置く。
 - 一般論ではなく、claim に対する evidence、warrant、boundary を主語にする。
 - caveat は分散させず、必要な位置へまとめる。
-- `notes/views/concept-terms.md` で accepted ではない概念語は、普通の文へほどく。accepted の場合も表記を一つに固定し、頻出させすぎない。
+- `_paperops/notes/views/concept-terms.md` で accepted ではない概念語は、普通の文へほどく。accepted の場合も表記を一つに固定し、頻出させすぎない。
 - つなぎ語を増やさず、論理関係を文の配置で示す。
 - 日本語原稿では、硬い論文語を保ちながらも、無内容な名詞句を削る。
 - 英語原稿では、AI らしい promotional phrase、過剰な em dash、空疎な metadiscourse を減らす。
@@ -98,4 +98,4 @@ rewrite 後に、元の claim / evidence / scope から逸脱していないか�
 
 - 本文を編集した場合は `make mirror-check`、概念語を変えた場合は `make concept-term-check`、公開語を変えた場合は `make public-terms-check` を実行する。
 - 原稿構造や claim strength を変える必要がある場合は、`/paragraph-surgery`、`/calibrate-claims`、`/scientific-gate` へ戻す。
-- `notes/ai-use.md` の AI 利用ログや開示文案を消さない。
+- `_paperops/notes/ai-use.md` の AI 利用ログや開示文案を消さない。

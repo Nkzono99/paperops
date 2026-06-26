@@ -5,6 +5,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from paperops_paths import display_path, internal_path
+
 
 VIEW_REL_PATH = "notes/views/concept-terms.md"
 ALLOWED_STATUSES = {"accepted", "needs-review", "plain-language", "avoid"}
@@ -123,15 +125,15 @@ def parse_table_rows(text: str, heading: str) -> tuple[list[str], list[dict[str,
 
 
 def load_concept_terms(root: Path, findings: list[Finding]) -> dict[str, ConceptTerm]:
-    path = root / VIEW_REL_PATH
+    path = internal_path(root, VIEW_REL_PATH)
     if not path.exists():
-        findings.append(Finding("error", f"`{VIEW_REL_PATH}` が見つかりません"))
+        findings.append(Finding("error", f"`{display_path(root, path)}` が見つかりません"))
         return {}
     text = path.read_text(encoding="utf-8", errors="replace")
     required_sections = ["Concept term map", "Usage audit", "Plain-language expansion log"]
     for section in required_sections:
         if f"## {section}" not in text:
-            findings.append(Finding("error", f"`{VIEW_REL_PATH}` に `{section}` セクションがありません"))
+            findings.append(Finding("error", f"`{display_path(root, path)}` に `{section}` セクションがありません"))
 
     _, rows = parse_table_rows(text, "Concept term map")
     terms: dict[str, ConceptTerm] = {}
@@ -261,7 +263,7 @@ def check_terms(root: Path) -> list[Finding]:
                 Finding(
                     "warning",
                     f"未登録の概念語候補: `{primary}` ({len(grouped)} 回; {location_summary(grouped)})。"
-                    f"`{VIEW_REL_PATH}` で accepted / plain-language / avoid を判断してください",
+                    f"`{display_path(root, internal_path(root, VIEW_REL_PATH))}` で accepted / plain-language / avoid を判断してください",
                 )
             )
         elif registered_term is not None and registered_term.status == "avoid":
@@ -335,7 +337,7 @@ def main() -> int:
         for finding in warnings:
             print(f"- {finding.message}")
         print("")
-        print("概念語候補は `notes/views/concept-terms.md` に記録し、強調して残す語、普通の文へほどく語、本文から避ける語を分けてください。")
+        print("概念語候補は `_paperops/notes/views/concept-terms.md` に記録し、強調して残す語、普通の文へほどく語、本文から避ける語を分けてください。")
         print("")
     if not findings:
         print("本文の概念語化と表記揺れに明らかな問題は見つかりませんでした。")

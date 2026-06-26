@@ -9,21 +9,21 @@ description: 執筆セッション開始時に原稿の状態を要約し、ミ�
 
 ## 常時読む
 
-- `notes/handoff.md`
-- `notes/todo.md`
-- `notes/open-questions.md`
-- `notes/project-brief.md`
+- `_paperops/notes/handoff.md`
+- `_paperops/notes/todo.md`
+- `_paperops/notes/open-questions.md`
+- `_paperops/notes/project-brief.md`
 - `manuscript/mirror/status.md`
-- `review/feedback/`
-- `requests/`
+- `_paperops/review/feedback/`
+- `_paperops/requests/`
 
 ## 必要時に読む
 
-- claim / evidence の判断が必要: `claims/README.md`、`evidence/README.md`、`notes/views/claim-evidence-map.md`
-- scientific-gate で止まった claim を見る: `notes/views/scientific-gate.md`、`claims/gates/`
-- 関連研究や外部 source が次作業: `notes/related-work-map.md`、`notes/source-reach.md`、`refs/`
-- reviewer / feedback loop が次作業: `review/README.md`、`notes/views/peer-review.md`、`notes/reviewer-model.md`
-- AI draft や開示が関係する: `notes/ai-draft-polish.md`、`notes/ai-use.md`
+- claim / evidence の判断が必要: `_paperops/claims/README.md`、`_paperops/evidence/README.md`、`_paperops/notes/views/claim-evidence-map.md`
+- scientific-gate で止まった claim を見る: `_paperops/notes/views/scientific-gate.md`、`_paperops/claims/gates/`
+- 関連研究や外部 source が次作業: `_paperops/notes/related-work-map.md`、`_paperops/notes/source-reach.md`、`_paperops/refs/`
+- reviewer / feedback loop が次作業: `_paperops/review/README.md`、`_paperops/notes/views/peer-review.md`、`_paperops/notes/reviewer-model.md`
+- AI draft や開示が関係する: `_paperops/notes/ai-draft-polish.md`、`_paperops/notes/ai-use.md`
 
 ## 目的
 

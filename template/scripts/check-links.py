@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from paperops_paths import display_path, internal_path
+
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover
@@ -15,6 +17,9 @@ except ModuleNotFoundError:  # pragma: no cover
 LINKS_REL_PATH = "refs/links.toml"
 LOCAL_LOCATIONS_REL_PATH = "refs/local/locations.toml"
 EXAMPLE_LOCATIONS_REL_PATH = "refs/local/locations.example.toml"
+LINKS_DISPLAY_PATH = "_paperops/refs/links.toml"
+LOCAL_LOCATIONS_DISPLAY_PATH = "_paperops/refs/local/locations.toml"
+EXAMPLE_LOCATIONS_DISPLAY_PATH = "_paperops/refs/local/locations.example.toml"
 ALLOWED_LINK_KINDS = {
     "runops_project",
     "directory",
@@ -56,25 +61,25 @@ def add(findings: list[Finding], severity: str, message: str) -> None:
 
 def check_links(root: Path, *, strict_local: bool) -> list[Finding]:
     findings: list[Finding] = []
-    registry_path = root / LINKS_REL_PATH
+    registry_path = internal_path(root, LINKS_REL_PATH)
     if not registry_path.exists():
         return findings
 
     try:
         raw = read_toml(registry_path)
     except Exception as exc:
-        return [Finding("error", f"`{LINKS_REL_PATH}` を TOML として読めません: {exc}")]
+        return [Finding("error", f"`{display_path(root, registry_path)}` を TOML として読めません: {exc}")]
 
     if raw.get("schema_version") != 1:
-        add(findings, "error", f"`{LINKS_REL_PATH}` の `schema_version` は 1 である必要があります")
+        add(findings, "error", f"`{display_path(root, registry_path)}` の `schema_version` は 1 である必要があります")
 
     links = raw.get("links", [])
     if not isinstance(links, list):
-        add(findings, "error", f"`{LINKS_REL_PATH}` の `links` は配列にしてください")
+        add(findings, "error", f"`{display_path(root, registry_path)}` の `links` は配列にしてください")
         links = []
 
-    local_locations = paths_table(root / LOCAL_LOCATIONS_REL_PATH)
-    example_locations = paths_table(root / EXAMPLE_LOCATIONS_REL_PATH)
+    local_locations = paths_table(internal_path(root, LOCAL_LOCATIONS_REL_PATH))
+    example_locations = paths_table(internal_path(root, EXAMPLE_LOCATIONS_REL_PATH))
     has_local_locations = bool(local_locations)
     seen_ids: set[str] = set()
 
@@ -92,7 +97,7 @@ def check_links(root: Path, *, strict_local: bool) -> list[Finding]:
         if not link_id:
             add(findings, "error", f"`links[{index}]` に `id` がありません")
         elif link_id in seen_ids:
-            add(findings, "error", f"`{LINKS_REL_PATH}` の link id `{link_id}` が重複しています")
+            add(findings, "error", f"`{display_path(root, registry_path)}` の link id `{link_id}` が重複しています")
         else:
             seen_ids.add(link_id)
 
@@ -107,28 +112,28 @@ def check_links(root: Path, *, strict_local: bool) -> list[Finding]:
             add(
                 findings,
                 "warning",
-                f"`{label}` の location_ref `{location_ref}` が `refs/local/locations.example.toml` にありません",
+                f"`{label}` の location_ref `{location_ref}` が `{EXAMPLE_LOCATIONS_DISPLAY_PATH}` にありません",
             )
         if has_local_locations and location_ref not in local_locations:
             add(
                 findings,
                 "warning",
-                f"`{label}` の location_ref `{location_ref}` が `refs/local/locations.toml` にありません",
+                f"`{label}` の location_ref `{location_ref}` が `{LOCAL_LOCATIONS_DISPLAY_PATH}` にありません",
             )
 
     if strict_local and links and not has_local_locations:
-        add(findings, "warning", "`refs/local/locations.toml` がないため link の実パスは解決できません")
+        add(findings, "warning", f"`{LOCAL_LOCATIONS_DISPLAY_PATH}` がないため link の実パスは解決できません")
 
     return findings
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="refs/links.toml の link registry を検証する。")
+    parser = argparse.ArgumentParser(description="_paperops/refs/links.toml の link registry を検証する。")
     parser.add_argument("--root", type=Path, default=Path("."))
     parser.add_argument(
         "--strict-local",
         action="store_true",
-        help="refs/local/locations.toml がない場合に warning を出す。",
+        help="_paperops/refs/local/locations.toml がない場合に warning を出す。",
     )
     args = parser.parse_args()
 

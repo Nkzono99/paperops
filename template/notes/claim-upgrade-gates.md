@@ -1,3 +1,0 @@
-# Claim Upgrade Gates
-
-このファイルは旧パス互換のために残している互換ビューである。claim を強める前に止める external validation needs や claim stress-test の俯瞰は `notes/views/claim-upgrade-gates.md` に置き、正本は `claims/gates/` の gate card に置く。

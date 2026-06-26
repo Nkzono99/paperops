@@ -84,7 +84,7 @@ description: 既存の LaTeX 原稿をハーネス構造にインポートする
 ### 8. メタデータの自動補完
 
 main.tex から検出した情報で以下を更新:
-- `notes/project-brief.md`（title, author から）
+- `_paperops/notes/project-brief.md`（title, author から）
 - `manuscript/mirror/status.md`（ソースの言語をソースオブトゥルースとして記録）
 
 ### 9. 検証
@@ -99,7 +99,7 @@ make ci
 - セクションマッピングの結果
 - 付与したブロック ID の一覧
 - 手動確認が必要な項目（マッピング不明、パス解決不能等）
-- `notes/decision-log.md` へのインポート記録
+- `_paperops/notes/decision-log.md` へのインポート記録
 
 ## 注意事項
 

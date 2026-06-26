@@ -13,9 +13,9 @@ SCRIPT = ROOT / "template" / "scripts" / "check-external-imports.py"
 
 
 def write_minimal_links(root: Path) -> None:
-    (root / "refs" / "local").mkdir(parents=True, exist_ok=True)
-    (root / "refs" / "imports").mkdir(parents=True, exist_ok=True)
-    (root / "refs" / "links.toml").write_text(
+    (root / "_paperops" / "refs" / "local").mkdir(parents=True, exist_ok=True)
+    (root / "_paperops" / "refs" / "imports").mkdir(parents=True, exist_ok=True)
+    (root / "_paperops" / "refs" / "links.toml").write_text(
         textwrap.dedent(
             """\
             schema_version = 1
@@ -48,8 +48,8 @@ class ExternalImportCheckTest(unittest.TestCase):
     def test_tracked_export_without_index_integrity_or_claim_policy_warns(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)
-            (root / "refs" / "imports").mkdir(parents=True, exist_ok=True)
-            record = root / "refs" / "imports" / "runops-main.toml"
+            (root / "_paperops" / "refs" / "imports").mkdir(parents=True, exist_ok=True)
+            record = root / "_paperops" / "refs" / "imports" / "runops-main.toml"
             record.write_text(
                 textwrap.dedent(
                     """\
@@ -81,8 +81,8 @@ class ExternalImportCheckTest(unittest.TestCase):
             root = copy_template(tmp)
             export = Path(tmp) / "analysis-project" / "exports" / "paper"
             export.mkdir(parents=True)
-            (root / "refs" / "imports").mkdir(parents=True, exist_ok=True)
-            (root / "refs" / "local" / "locations.toml").write_text(
+            (root / "_paperops" / "refs" / "imports").mkdir(parents=True, exist_ok=True)
+            (root / "_paperops" / "refs" / "local" / "locations.toml").write_text(
                 textwrap.dedent(
                     f"""\
                     [paths.runops_main]
@@ -101,7 +101,7 @@ class ExternalImportCheckTest(unittest.TestCase):
                 "artifact,sha256\nfig-a,aaa\nfig-b,bbb\n",
                 encoding="utf-8",
             )
-            (root / "refs" / "imports" / "runops-main.toml").write_text(
+            (root / "_paperops" / "refs" / "imports" / "runops-main.toml").write_text(
                 textwrap.dedent(
                     """\
                     schema_version = 1
@@ -144,7 +144,7 @@ class ExternalImportCheckTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "paper-demo"
             write_minimal_links(root)
-            (root / "refs" / "imports" / "unknown.toml").write_text(
+            (root / "_paperops" / "refs" / "imports" / "unknown.toml").write_text(
                 textwrap.dedent(
                     """\
                     schema_version = 1

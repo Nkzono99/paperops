@@ -8,11 +8,16 @@ import json
 from pathlib import Path
 from typing import Any
 
+from paperops_paths import display_path, internal_path
+
 
 REQUIRED_OVERALL_STATES = {
     "SCOPED",
+    "STORY_SEEDED",
+    "EVIDENCE_PLANNED",
     "EVIDENCE_READY",
-    "STORY_LOCKED",
+    "STORY_RECONCILED",
+    "ARCHITECTURE_LOCKED",
     "SECTION_PLANNED",
     "DRAFTED",
     "UNDER_REVIEW",
@@ -53,11 +58,11 @@ def main() -> int:
 
     root = args.root.resolve()
     findings: list[str] = []
-    machine = load_mapping(root / "workflow" / "machine.yml", findings)
-    current = load_mapping(root / "workflow" / "current-state.yml", findings)
-    load_mapping(root / "workflow" / "decisions.yml", findings)
-    load_mapping(root / "workflow" / "round-summary.yml", findings)
-    subagent_roster = load_mapping(root / "workflow" / "subagent-roster.yml", findings)
+    machine = load_mapping(root, internal_path(root, "workflow", "machine.yml"), findings)
+    current = load_mapping(root, internal_path(root, "workflow", "current-state.yml"), findings)
+    load_mapping(root, internal_path(root, "workflow", "decisions.yml"), findings)
+    load_mapping(root, internal_path(root, "workflow", "round-summary.yml"), findings)
+    subagent_roster = load_mapping(root, internal_path(root, "workflow", "subagent-roster.yml"), findings)
 
     if machine and current:
         validate_machine(machine, findings)
@@ -217,9 +222,9 @@ def validate_subagent_roster(roster: dict[str, Any], findings: list[str]) -> Non
                 break
 
 
-def load_mapping(path: Path, findings: list[str]) -> dict[str, Any]:
+def load_mapping(root: Path, path: Path, findings: list[str]) -> dict[str, Any]:
     if not path.exists():
-        findings.append(f"`{path.relative_to(path.parents[1])}` is missing")
+        findings.append(f"`{display_path(root, path)}` is missing")
         return {}
     text = path.read_text(encoding="utf-8")
     try:
@@ -230,10 +235,10 @@ def load_mapping(path: Path, findings: list[str]) -> dict[str, Any]:
         try:
             data = json.loads(text)
         except json.JSONDecodeError as exc:
-            findings.append(f"`{path}` is not valid workflow YAML/JSON: {exc}")
+            findings.append(f"`{display_path(root, path)}` is not valid workflow YAML/JSON: {exc}")
             return {}
     if not isinstance(data, dict):
-        findings.append(f"`{path}` must contain a mapping")
+        findings.append(f"`{display_path(root, path)}` must contain a mapping")
         return {}
     return data
 

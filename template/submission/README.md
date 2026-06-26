@@ -38,6 +38,6 @@ submission/
 PAPER_TEMPLATE_RUN_LATEX=1 make build-submission VENUE=<venue>
 ```
 
-`scripts/build-submission.sh` は `submission/<venue>/build/` に出力し、`submission/<venue>/style/`、`manuscript/shared/style/`、`manuscript/shared/bib/`、`refs/bib/` を TeX/BibTeX の探索対象に加える。`latexmk` がなければ `PAPEROPS_SUBMISSION_DIRECT_ENGINE` または `lualatex -> xelatex -> pdflatex` の順で direct-engine fallback を試す。fallback 中の `bibtex main` は build directory から走るため、`BIBINPUTS` / `BSTINPUTS` は repository root からの絶対パスで設定される。HPC や CI で実行 prefix が必要な場合は `PAPEROPS_RUNNER_PREFIX` を使う。
+`scripts/build-submission.sh` は `submission/<venue>/build/` に出力し、`submission/<venue>/style/`、`manuscript/shared/style/`、`manuscript/shared/bib/`、`_paperops/refs/bib/` を TeX/BibTeX の探索対象に加える。旧 `refs/bib/` も互換探索する。`latexmk` がなければ `PAPEROPS_SUBMISSION_DIRECT_ENGINE` または `lualatex -> xelatex -> pdflatex` の順で direct-engine fallback を試す。fallback 中の `bibtex main` は build directory から走るため、`BIBINPUTS` / `BSTINPUTS` は repository root からの絶対パスで設定される。HPC や CI で実行 prefix が必要な場合は `PAPEROPS_RUNNER_PREFIX` を使う。
 
 PDF 生成後は `scripts/audit-build-log.py` が fatal error、undefined citation/reference、Missing character、BibTeX database error、empty bibliography を確認する。投稿先固有の `.cls` / `.sty` / `.bst` の由来は、このディレクトリの README に記録する。

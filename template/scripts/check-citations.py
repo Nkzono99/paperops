@@ -4,6 +4,8 @@ import argparse
 import re
 from pathlib import Path
 
+from paperops_paths import internal_path
+
 
 BIB_ENTRY_RE = re.compile(r"@(?P<entry_type>[A-Za-z]+)\s*\{\s*(?P<key>[^,\s]+)\s*,", re.DOTALL)
 DEFAULT_CITE_COMMANDS = {
@@ -30,8 +32,8 @@ DEFAULT_CITE_COMMANDS = {
 def iter_bib_files(root: Path):
     candidates = [
         root / "manuscript/shared/bib",
-        root / "refs/bib/imported",
-        root / "refs/bib/curated",
+        internal_path(root, "refs/bib/imported"),
+        internal_path(root, "refs/bib/curated"),
     ]
     for directory in candidates:
         if directory.exists():

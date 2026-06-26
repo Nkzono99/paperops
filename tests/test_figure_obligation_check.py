@@ -31,7 +31,7 @@ class FigureObligationCheckTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             write_card(
-                root / "claims" / "claims" / "CLM-0001.md",
+                root / "_paperops" / "claims" / "claims" / "CLM-0001.md",
                 """
                 ---
                 id: CLM-0001
@@ -57,7 +57,7 @@ class FigureObligationCheckTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             write_card(
-                root / "claims" / "claims" / "CLM-0001.md",
+                root / "_paperops" / "claims" / "claims" / "CLM-0001.md",
                 """
                 ---
                 id: CLM-0001
@@ -73,7 +73,7 @@ class FigureObligationCheckTest(unittest.TestCase):
                 """,
             )
             write_card(
-                root / "evidence" / "figures" / "FIG-0001.md",
+                root / "_paperops" / "evidence" / "figures" / "FIG-0001.md",
                 """
                 ---
                 id: FIG-0001
@@ -98,7 +98,7 @@ class FigureObligationCheckTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             write_card(
-                root / "claims" / "claims" / "CLM-0001.md",
+                root / "_paperops" / "claims" / "claims" / "CLM-0001.md",
                 """
                 ---
                 id: CLM-0001

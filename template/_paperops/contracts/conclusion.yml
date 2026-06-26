@@ -1,0 +1,37 @@
+section: conclusion
+purpose: >
+  読者が最終的に持ち帰る答え、決定的な証拠、適用範囲を短く固定する。
+
+reader_question: 最終的に何を持ち帰るべきか
+
+logic_chain:
+  - central_answer
+  - decisive_evidence
+  - applicability_boundary
+  - next_step
+
+inputs:
+  - _paperops/claims/claims/
+  - _paperops/claims/gates/
+  - _paperops/notes/views/claim-evidence-map.md
+  - _paperops/notes/views/scientific-gate.md
+  - manuscript/venue.md
+
+outputs:
+  - central answer is stated without introducing new evidence
+  - decisive evidence matches Results
+  - applicability boundary is visible
+  - final sentence points to a scoped implication or next step
+
+hard_rules:
+  - Do not introduce a new claim.
+  - Do not broaden scope beyond approved writing scope.
+  - Do not hide unresolved assumptions with generic optimism.
+
+soft_rules:
+  - Keep the conclusion shorter than the Discussion.
+  - Prefer one memorable answer over a full inventory.
+
+audit_questions:
+  - Does the conclusion match the Abstract and main Results?
+  - Is the boundary stated as scope rather than apology?

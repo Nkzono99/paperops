@@ -34,24 +34,24 @@ class ArgumentFocusCheckTest(unittest.TestCase):
     def test_missing_condition_context_map_is_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)
-            (target / "notes" / "views" / "condition-context-map.md").unlink()
-            (target / "notes" / "condition-context-map.md").unlink()
+            (target / "_paperops" / "notes" / "views" / "condition-context-map.md").unlink()
+            (target / "_paperops" / "notes" / "condition-context-map.md").unlink()
 
             result = run_python_script(SCRIPT, "--root", target)
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("`notes/views/condition-context-map.md` が見つかりません", result.stdout)
+        self.assertIn("`_paperops/notes/views/condition-context-map.md` が見つかりません", result.stdout)
 
     def test_missing_result_pattern_map_is_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)
-            (target / "notes" / "views" / "result-pattern-map.md").unlink()
-            (target / "notes" / "result-pattern-map.md").unlink()
+            (target / "_paperops" / "notes" / "views" / "result-pattern-map.md").unlink()
+            (target / "_paperops" / "notes" / "result-pattern-map.md").unlink()
 
             result = run_python_script(SCRIPT, "--root", target)
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("`notes/views/result-pattern-map.md` が見つかりません", result.stdout)
+        self.assertIn("`_paperops/notes/views/result-pattern-map.md` が見つかりません", result.stdout)
 
     def test_warns_on_comparator_and_equilibrium_overclaim_patterns(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -73,7 +73,7 @@ class ArgumentFocusCheckTest(unittest.TestCase):
     def test_warns_when_notes_compress_handoff_into_label_only_rows(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)
-            note = target / "notes" / "handoff.md"
+            note = target / "_paperops" / "notes" / "handoff.md"
             note.write_text(
                 note.read_text(encoding="utf-8")
                 + "\n- RR-0009 current-balance gap\n"

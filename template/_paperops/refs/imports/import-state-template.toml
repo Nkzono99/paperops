@@ -1,0 +1,46 @@
+# 外部 export bundle を figure / table / claim evidence に使う前に、
+# このファイルを _paperops/refs/imports/<link-id>-<bundle>.toml へコピーして埋める。
+
+schema_version = 1
+id = "IMP-0001"
+link_id = "runops-main"
+state = "script_only_candidate"
+bundle_label = "paper-export-name"
+last_triaged = "YYYY-MM-DD"
+
+# 人間が読める短い分類を書く。例:
+# - "物理 evidence"
+# - "authoring guard"
+# - "provenance QA"
+# - "transport implication; notes-only"
+artifact_category_summary = ""
+
+# supported-evidence / supplement-only / authoring-guard / provenance-only /
+# notes-only / needs-triage / do-not-use のいずれか。
+claim_evidence_policy = "needs-triage"
+must_not_claim = [
+  "未検証の物理 evidence として扱わない",
+]
+
+[source]
+commit = ""
+dirty = true
+
+[export]
+path = ""
+
+[source_index]
+path = ""
+rows = 0
+source_exists_false = 0
+
+[integrity_manifest]
+path = ""
+rows = 0
+
+[[artifacts]]
+name = ""
+category = ""
+state = "script_only_candidate"
+claim_role = ""
+must_not_claim = ""

@@ -11,14 +11,14 @@ runops project、publication export bundle、raw run directory、run label、cam
 ## 最初に読むファイル
 
 - `manuscript/mirror/terminology.yml`
-- `notes/views/concept-terms.md`
+- `_paperops/notes/views/concept-terms.md`
 - 対象の公開原稿 TeX
-- 必要に応じて `notes/reviewer-model.md`
+- 必要に応じて `_paperops/notes/reviewer-model.md`
 
 ## 手順
 
 1. local term、run label、script name、directory name、artifact name、未定義略語を抽出する。
-2. hyphen / slash compound や強い英語名詞句は concept-term compression として `notes/views/concept-terms.md` に分け、public terminology と混同しない。
+2. hyphen / slash compound や強い英語名詞句は concept-term compression として `_paperops/notes/views/concept-terms.md` に分け、public terminology と混同しない。
 3. 各語を `public` / `needs_definition` / `internal_only` / `forbidden` に分類する。
 4. `en_public`、first-definition sentence、figure label replacement を提案する。内部 provenance 語は analysis workflow、analysis dataset、figure-data package、regeneration manifest、exploratory check、simulation condition、localized physical region などへ置換する。
 5. `manuscript/mirror/terminology.yml` を更新する。
@@ -36,6 +36,6 @@ runops project、publication export bundle、raw run directory、run label、cam
 
 - `manuscript/mirror/terminology.yml` を gate として使う。
 - 本文、figure caption、section heading の local term を public term に置換する。
-- `refs/links.toml`、`refs/local/locations.toml`、export 名、run label、path は本文へ直書きしない。必要な provenance は `notes/reproducibility.md` や `refs/` の日本語作業メモに分離する。
-- concept term は `notes/views/concept-terms.md` で accepted / plain-language / avoid を分ける。
+- `_paperops/refs/links.toml`、`_paperops/refs/local/locations.toml`、export 名、run label、path は本文へ直書きしない。必要な provenance は `_paperops/notes/reproducibility.md` や `_paperops/refs/` の日本語作業メモに分離する。
+- concept term は `_paperops/notes/views/concept-terms.md` で accepted / plain-language / avoid を分ける。
 - 最後に `make public-terms-check` と `make concept-term-check` を実行する。

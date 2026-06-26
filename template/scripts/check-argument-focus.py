@@ -5,6 +5,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_paths import display_path, internal_path
+
 
 PLACEHOLDER_RE = re.compile(r"(未記入|TBD|TODO|置き換えてください)")
 LOCAL_COUNT_RE = re.compile(
@@ -68,13 +70,13 @@ def section_body(text: str, heading: str) -> str:
 
 
 def resolve_view_path(root: Path, preferred: str, legacy: str, findings: list[Finding]) -> tuple[str, Path] | None:
-    preferred_path = root / preferred
+    preferred_path = internal_path(root, preferred)
     if preferred_path.exists():
-        return preferred, preferred_path
-    legacy_path = root / legacy
+        return display_path(root, preferred_path), preferred_path
+    legacy_path = internal_path(root, legacy)
     if legacy_path.exists():
-        return legacy, legacy_path
-    findings.append(Finding("error", f"`{preferred}` が見つかりません（旧互換: `{legacy}`）"))
+        return display_path(root, legacy_path), legacy_path
+    findings.append(Finding("error", f"`{display_path(root, preferred_path)}` が見つかりません（旧互換: `{legacy}`）"))
     return None
 
 
@@ -126,7 +128,7 @@ def manuscript_files(root: Path) -> list[Path]:
 
 
 def note_files(root: Path) -> list[Path]:
-    notes = root / "notes"
+    notes = internal_path(root, "notes")
     if not notes.exists():
         return []
     return [
@@ -166,7 +168,7 @@ def check_manuscript_smells(root: Path, findings: list[Finding]) -> None:
                 findings.append(
                     Finding(
                         "warning",
-                        f"`{rel_path}:{number}` に内部 provenance 語があります。公開語へ置換するか notes/refs へ退避してください",
+                        f"`{rel_path}:{number}` に内部 provenance 語があります。公開語へ置換するか `_paperops/notes/` / `_paperops/refs/` へ退避してください",
                     )
                 )
             if COMPARATOR_OVERCLAIM_RE.search(stripped):
@@ -174,7 +176,7 @@ def check_manuscript_smells(root: Path, findings: list[Finding]) -> None:
                     Finding(
                         "warning",
                         f"`{rel_path}:{number}` に direct comparator 未確認の比較・方法新規性 claim らしい表現があります。"
-                        " matched comparator が無い場合は `not collapsed to ...` のような使用範囲表現に落とし、`requests/analysis/` に比較依頼を残してください",
+                        " matched comparator が無い場合は `not collapsed to ...` のような使用範囲表現に落とし、`_paperops/requests/analysis/` に比較依頼を残してください",
                     )
                 )
             if COMPLETION_WORD_RE.search(stripped) and EQUILIBRIUM_WORD_RE.search(stripped):
@@ -249,7 +251,7 @@ def main() -> int:
         for finding in warnings:
             print(f"- {finding.message}")
         print("")
-        print("AI 初稿を改稿する前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`、必要なら `/scientific-gate` で `evidence/`、`claims/`、`notes/views/` のカードとビューを更新してください。claim lock 後の文体 polish だけなら `/polish-ai-draft` を使ってください。")
+        print("AI 初稿を改稿する前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`、必要なら `/scientific-gate` で `_paperops/evidence/`、`_paperops/claims/`、`_paperops/notes/views/` のカードとビューを更新してください。claim lock 後の文体 polish だけなら `/polish-ai-draft` を使ってください。")
         print("")
     if not findings:
         print("論旨設計メモと本文の argument focus に明らかな問題は見つかりませんでした。")

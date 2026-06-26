@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "mode": "orchestrated_manuscript_writing",
+  "orchestrator": {
+    "owner": "main_agent",
+    "responsibilities": [
+      "declare the highest-priority manuscript content blocker before delegation",
+      "choose one to three subagent roles whose findings can reduce that blocker",
+      "protect confidential reviewer text, unpublished data, personal information, and local paths",
+      "convert subagent reports into feedback cards, claim/evidence updates, section plans, or manuscript edits",
+      "record the integration decision before marking a review round addressed"
+    ],
+    "must_not_delegate": [
+      "final acceptance of the central claim",
+      "human approval decisions",
+      "direct concurrent edits to the same manuscript block",
+      "Submission hygiene before STRUCTURE_ACCEPTED"
+    ]
+  },
+  "delegation_contract": {
+    "required_brief_fields": [
+      "role_id",
+      "target_artifact",
+      "allowed_inputs",
+      "forbidden_inputs",
+      "expected_output_path",
+      "route_question",
+      "completion_signal"
+    ],
+    "output_shape": [
+      "subagent_report",
+      "blocking_findings",
+      "route_recommendation",
+      "evidence_or_claim_updates_needed",
+      "proposed_feedback_cards",
+      "confidence_and_uncertainties"
+    ],
+    "privacy_rule": "Use summaries or public manuscript slices for subagents by default; raw confidential reviewer text or private data require explicit scope approval."
+  },
+  "integration_contract": {
+    "required_steps": [
+      "read each subagent_report",
+      "deduplicate findings by manuscript blocker",
+      "classify each finding with upstream_routes",
+      "update cards or section plans before prose edits",
+      "record integration decision in the review round",
+      "rerun the relevant checks for the changed layer"
+    ],
+    "default_decisions": [
+      "accepted_to_feedback_card",
+      "accepted_to_claim_or_evidence_update",
+      "accepted_to_section_plan",
+      "deferred_with_reason",
+      "rejected_with_reason",
+      "requires_human_decision"
+    ]
+  },
+  "roles": [
+    {
+      "id": "story_architect",
+      "purpose": "Audit the whole-paper story spine, reader promise, central claim order, and section-depth route.",
+      "entry_condition": "Before section drafting or whenever Results/Discussion feel thin.",
+      "allowed_inputs": [
+        "_paperops/notes/views/storyline.md",
+        "_paperops/contracts/storyline.yml",
+        "_paperops/notes/project-brief.md",
+        "manuscript/ja/ or public PDF slices"
+      ],
+      "outputs": [
+        "storyline gaps",
+        "section_depth_blocker findings",
+        "story_loop or section_loop recommendation"
+      ],
+      "route_bias": "story_loop"
+    },
+    {
+      "id": "evidence_auditor",
+      "purpose": "Check whether quantities, denominators, assumptions, and claim support are sufficient for the manuscript claims.",
+      "entry_condition": "Before claim-strengthening edits or when reviewer feedback questions evidence.",
+      "allowed_inputs": [
+        "_paperops/claims/",
+        "_paperops/evidence/",
+        "_paperops/notes/views/claim-evidence-map.md",
+        "_paperops/notes/views/result-pattern-map.md"
+      ],
+      "outputs": [
+        "unsupported claims",
+        "quantity or denominator gaps",
+        "analysis_request candidates"
+      ],
+      "route_bias": "evidence_loop"
+    },
+    {
+      "id": "results_structure_reviewer",
+      "purpose": "Read Results for reader-question order, quantitative evidence, figure linkage, and consequence.",
+      "entry_condition": "After Results plan or draft exists, before prose polish.",
+      "allowed_inputs": [
+        "_paperops/contracts/results.yml",
+        "_paperops/notes/views/storyline.md",
+        "manuscript/ja/sections/30_results.tex",
+        "_paperops/evidence/results/",
+        "_paperops/evidence/figures/"
+      ],
+      "outputs": [
+        "results_hierarchy_gap findings",
+        "missing subsection contract",
+        "figure or consequence gaps"
+      ],
+      "route_bias": "section_loop"
+    },
+    {
+      "id": "discussion_function_reviewer",
+      "purpose": "Read Discussion for mechanism warrant, prior-work delta, alternative boundaries, implication, and decisive next test.",
+      "entry_condition": "After Discussion plan or draft exists, before prose polish.",
+      "allowed_inputs": [
+        "_paperops/contracts/discussion.yml",
+        "_paperops/notes/views/storyline.md",
+        "manuscript/ja/sections/40_discussion.tex",
+        "_paperops/refs/summaries/",
+        "_paperops/claims/"
+      ],
+      "outputs": [
+        "discussion_function_gap findings",
+        "overclaim or underclaim points",
+        "prior-work or limitation placement gaps"
+      ],
+      "route_bias": "section_loop"
+    },
+    {
+      "id": "figure_story_reviewer",
+      "purpose": "Check whether the figure sequence satisfies visual obligations before final prose.",
+      "entry_condition": "Before main figure order is treated as fixed.",
+      "allowed_inputs": [
+        "_paperops/contracts/figures.yml",
+        "_paperops/claims/",
+        "_paperops/evidence/figures/",
+        "manuscript/shared/figures/",
+        "manuscript/ja/"
+      ],
+      "outputs": [
+        "missing visual obligation",
+        "caption or denominator gap",
+        "main/supplement split issue"
+      ],
+      "route_bias": "story_loop"
+    },
+    {
+      "id": "public_reader",
+      "purpose": "Read only what a public reader can see and report undefined terms, missing transitions, and reproducibility gaps.",
+      "entry_condition": "After a readable draft exists.",
+      "allowed_inputs": [
+        "public PDF",
+        "sanitized public manuscript slices",
+        "public figures",
+        "public data/code availability text"
+      ],
+      "outputs": [
+        "reader confusion points",
+        "public terminology issues",
+        "reproducibility gaps visible from the manuscript"
+      ],
+      "route_bias": "prose_loop"
+    },
+    {
+      "id": "reviewer_panel",
+      "purpose": "Simulate major reviewer profiles and separate blocking scientific concerns from prose-only issues.",
+      "entry_condition": "After DRAFTED and before STRUCTURE_ACCEPTED.",
+      "allowed_inputs": [
+        "public manuscript draft",
+        "figures",
+        "venue summary",
+        "_paperops/notes/reviewer-model.md"
+      ],
+      "outputs": [
+        "major concerns",
+        "minor comments",
+        "meta-review",
+        "route recommendation"
+      ],
+      "route_bias": "story_loop"
+    },
+    {
+      "id": "submission_hygienist",
+      "purpose": "Check venue formatting, author metadata, license, disclosure, bibliography, and cover letter only after manuscript structure is accepted.",
+      "entry_condition": "STRUCTURE_ACCEPTED is true and no story/section/evidence blocker remains.",
+      "allowed_inputs": [
+        "manuscript/publication-metadata.toml",
+        "manuscript/venue.md",
+        "submission/",
+        "references.bib",
+        "_paperops/notes/ai-use.md"
+      ],
+      "outputs": [
+        "submission_hygiene_only findings",
+        "pre-submit blockers",
+        "venue-format checklist"
+      ],
+      "route_bias": "submission_loop"
+    }
+  ]
+}

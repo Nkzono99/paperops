@@ -10,8 +10,18 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from paperops_paths import internal_path
 
-CONTENT_GUARD_STATES = ["EVIDENCE_READY", "STORY_LOCKED", "SECTION_PLANNED", "STRUCTURE_ACCEPTED"]
+
+CONTENT_GUARD_STATES = [
+    "STORY_SEEDED",
+    "EVIDENCE_PLANNED",
+    "EVIDENCE_READY",
+    "STORY_RECONCILED",
+    "ARCHITECTURE_LOCKED",
+    "SECTION_PLANNED",
+    "STRUCTURE_ACCEPTED",
+]
 SUBMISSION_INTENTS = {"submission"}
 HARNESS_INTENTS = {"harness"}
 
@@ -19,6 +29,7 @@ HYGIENE_PATHS = (
     "submission/",
     "manuscript/publication-metadata.toml",
     "manuscript/venue.md",
+    "_paperops/notes/ai-use.md",
     "notes/ai-use.md",
 )
 HARNESS_PATHS = (
@@ -26,12 +37,26 @@ HARNESS_PATHS = (
     "Makefile",
     ".agents/skills/",
     ".claude/skills/",
+    "_paperops/workflow/machine.yml",
+    "_paperops/workflow/focus-policy.yml",
     "workflow/machine.yml",
     "workflow/focus-policy.yml",
 )
 CONTENT_PATHS = (
     "manuscript/ja/",
     "manuscript/en/",
+    "story/",
+    "_paperops/claims/",
+    "_paperops/evidence/",
+    "_paperops/figures/",
+    "_paperops/notes/views/storyline.md",
+    "_paperops/notes/views/claim-evidence-map.md",
+    "_paperops/notes/views/result-pattern-map.md",
+    "_paperops/notes/reviewer-model.md",
+    "_paperops/review/",
+    "_paperops/requests/",
+    "_paperops/workflow/current-state.yml",
+    "_paperops/workflow/round-summary.yml",
     "claims/",
     "evidence/",
     "figures/",
@@ -102,7 +127,7 @@ def main() -> int:
 
 def check(root: Path, phase: str, intent: str, changed_files: list[str], strict: bool) -> list[Finding]:
     findings: list[Finding] = []
-    current = load_mapping(root / "workflow" / "current-state.yml")
+    current = load_mapping(internal_path(root, "workflow", "current-state.yml"))
     missing = missing_content_guards(current)
     structure_ready = not missing.get("STRUCTURE_ACCEPTED")
     content_blocker_open = any(missing.get(state) for state in CONTENT_GUARD_STATES)

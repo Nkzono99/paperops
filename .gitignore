@@ -14,14 +14,27 @@ template/manuscript/shared/build/*
 !template/manuscript/shared/build/README.md
 template/manuscript/mirror/reports/latest.md
 template/manuscript/mirror/reports/smoke-check.md
+template/_paperops/notes/session-context.generated.md
 template/notes/session-context.generated.md
+template/_paperops/refs/local/locations.toml
 template/refs/local/locations.toml
 template/.claude/settings.local.json
+template/_paperops/refs/papers/**
+!template/_paperops/refs/papers/.gitkeep
 template/refs/papers/**
 !template/refs/papers/.gitkeep
+template/_paperops/refs/research/**/results/**
+template/_paperops/refs/research/**/report.generated.md
+template/_paperops/refs/research/**/raw-findings.*
 template/refs/research/**/results/**
 template/refs/research/**/report.generated.md
 template/refs/research/**/raw-findings.*
+template/_paperops/refs/source-reach/**/raw/**
+template/_paperops/refs/source-reach/**/doctor.generated.*
+template/_paperops/refs/source-reach/**/capture.generated.*
+template/refs/source-reach/**/raw/**
+template/refs/source-reach/**/doctor.generated.*
+template/refs/source-reach/**/capture.generated.*
 template/**/*.pdf
 !template/manuscript/shared/figures/**/*.pdf
 

@@ -1,0 +1,60 @@
+section: results
+purpose: >
+  承認済み claim を観察結果によって答え、次に何を問うべきかを読者に渡す。
+
+reader_question: 何が分かったか
+
+subsection_contract:
+  reader_question: この節で答える一つの疑問
+  answer: 一文で答え
+  evidence: 数値、比較、図表、result card
+  scope: どこまで一般化できるか
+  consequence: 次に何を問う必要があるか
+
+paragraph_contract:
+  - result
+  - quantitative_evidence_or_figure
+  - comparison
+  - scientific_meaning
+
+inputs:
+  - _paperops/evidence/results/
+  - _paperops/evidence/figures/
+  - _paperops/claims/claims/
+  - _paperops/claims/gates/
+  - _paperops/notes/views/result-pattern-map.md
+  - _paperops/notes/views/claim-evidence-map.md
+  - _paperops/notes/views/condition-context-map.md
+  - manuscript/writing-profile.yml
+
+outputs:
+  - each major subsection answers one reader_question
+  - each quantitative claim points to evidence or figure
+  - subsection order follows claim dependency, not run order
+  - caveats are placed where they change the claim meaning
+
+hard_rules:
+  - Put the answer near the beginning of each subsection.
+  - Connect quantitative statements to evidence, figure, or result card.
+  - End major subsection with consequence or next question.
+  - Do not mix independent conclusions in one subsection.
+  - Do not use run_inventory_as_topic_sentence.
+
+soft_rules:
+  - Main Results usually have three to five major subsections.
+  - `section_depth` in `manuscript/writing-profile.yml` is a soft floor, not a target; expand only by adding missing results, comparisons, scope, or consequence.
+  - Subsections are allowed but not required. Avoid one-paragraph subsections; merge them or expand the reader question, answer, evidence, and consequence.
+  - Group repeated caveats in one place when they share the same scope.
+  - Move secondary sensitivity or inventory material to supplement unless it changes a central answer.
+
+forbidden_structures:
+  - run_inventory_as_topic_sentence
+  - execution_order_narrative
+  - repeated_limitation_in_every_paragraph
+  - resultless_significance_claim
+  - local_run_label_as_subject
+
+audit_questions:
+  - Can every subsection be rewritten as a question and one-sentence answer?
+  - Are primary figures introduced by the question they answer?
+  - Is the strongest result early enough for the reader to orient?

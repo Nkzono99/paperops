@@ -7,6 +7,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_paths import display_path, internal_path
+
 
 PLACEHOLDER_RE = re.compile(r"(未記入|TBD|TODO|置き換えてください)")
 BLOCK_RE = re.compile(r"%\s*block:\s*([A-Za-z0-9_.:-]+)")
@@ -39,9 +41,9 @@ def resolve_storyline_path(root: Path) -> tuple[str, Path] | None:
         "notes/storyline.md",
     ]
     for rel_path in candidates:
-        path = root / rel_path
+        path = internal_path(root, rel_path)
         if path.exists():
-            return rel_path, path
+            return display_path(root, path), path
     return None
 
 
@@ -157,7 +159,7 @@ def main() -> int:
         print("# storyline-check")
         print("")
         print("## Errors")
-        print("- `notes/views/storyline.md` が見つかりません（旧互換: `notes/storyline.md`）")
+        print("- `_paperops/notes/views/storyline.md` が見つかりません（旧互換: `notes/views/storyline.md`, `notes/storyline.md`）")
         return 1
     rel_path, path = resolved
     findings = check(root, read_text(path), rel_path, strict=args.strict)
