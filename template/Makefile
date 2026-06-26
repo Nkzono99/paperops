@@ -116,3 +116,6 @@ pre-submit: ci audit finish-manuscript-check lint-bib-pre-submit mirror-strict-c
 	$(PYTHON) scripts/check-external-imports.py --root . --strict
 	$(PYTHON) scripts/readiness-check.py --root . --require-submission
 	$(PYTHON) scripts/check-submission-drift.py --root .
+
+-include Makefile.project
+-include Makefile.local

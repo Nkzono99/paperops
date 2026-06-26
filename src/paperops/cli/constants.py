@@ -69,6 +69,17 @@ MANAGED_UPDATE_PATTERNS = (
     ".github/PULL_REQUEST_TEMPLATE.md",
 )
 
+PROJECT_EXTENSION_PATTERNS = (
+    "AGENTS.project.md",
+    "CLAUDE.project.md",
+    "Makefile.project",
+    "Makefile.local",
+    ".agents/skills/project-*",
+    ".agents/skills/project-*/*",
+    ".claude/skills/project-*",
+    ".claude/skills/project-*/*",
+)
+
 PROJECT_MARKERS = (
     "manuscript",
     "_paperops",

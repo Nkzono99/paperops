@@ -12,6 +12,7 @@ from pathlib import Path
 from paperops.cli.constants import (
     EXCLUDED_SCAFFOLD_PATTERNS,
     MANAGED_UPDATE_PATTERNS,
+    PROJECT_EXTENSION_PATTERNS,
     SCAFFOLD_INCLUDE_EXCEPTIONS,
 )
 from paperops.cli.manifest import write_manifest
@@ -135,6 +136,8 @@ def is_excluded(rel: str) -> bool:
 
 
 def is_managed_update(rel: str) -> bool:
+    if any(fnmatch.fnmatch(rel, pattern) for pattern in PROJECT_EXTENSION_PATTERNS):
+        return False
     return any(fnmatch.fnmatch(rel, pattern) for pattern in MANAGED_UPDATE_PATTERNS)
 
 

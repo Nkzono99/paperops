@@ -69,6 +69,16 @@ uvx --from paper-harness-cli pops doctor
 
 `README.md`、`story/`、`manuscript/`、`submission/`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/refs/`、`_paperops/notes/` はプロジェクト固有内容として自動更新しない。`manuscript/writing-profile.yml` は論文ごとの overlay なので、既存プロジェクトでは手動で追加・調整する。
 
+project repo で paperops-managed core を直接編集し続けると update 時に drift が増える。通常は次の project-owned extension point を使う。
+
+- `AGENTS.project.md`: Codex 向けの論文固有・チーム固有の恒久指示
+- `CLAUDE.project.md`: Claude Code 向けの追加指示
+- `Makefile.project`: Git 管理する project 固有 target
+- `Makefile.local`: 個人環境だけの target や変数。`.gitignore` 対象
+- `.agents/skills/project-*`, `.claude/skills/project-*`: project 固有 skill。`update-paperops` の managed update 判定から除外する
+
+汎用化できる改善は project overlay に留め続けず、`/feedback-paper-harness` または `pops feedback` で upstream へ戻す。どうしても managed core 自体を project fork にする場合は、今後の detached fork manifest で明示的に扱う。
+
 ## Upgrade Chain
 
 後方互換性を最新 `pops` に積み続けないため、scaffold 更新は checkpoint release を跨いで行える。

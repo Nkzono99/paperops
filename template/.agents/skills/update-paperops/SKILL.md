@@ -83,8 +83,8 @@ uvx --from paper-harness-cli pops migrate apply M0-0001 --dry-run
 | 設定 | `.claude/settings.json` | ローカルの allow/deny カスタマイズを保持しつつマージ |
 | スクリプト | `scripts/*.py`, `scripts/*.sh` | 上流を優先、ローカルパッチがあれば手動確認 |
 | ワークフロー | `.github/workflows/*.yml` | ローカルのリポジトリパス参照を保持 |
-| テンプレート | `CLAUDE.md`, `AGENTS.md` | 上流を優先、プロジェクト固有追記があれば手動マージ |
-| Makefile | `Makefile` | 上流を優先、ローカルターゲットがあれば追加 |
+| テンプレート | `CLAUDE.md`, `AGENTS.md` | 上流を優先、プロジェクト固有追記は `CLAUDE.project.md` / `AGENTS.project.md` へ移す |
+| Makefile | `Makefile` | 上流を優先、project target は `Makefile.project`、個人環境 target は `Makefile.local` へ移す |
 
 ### 4. 保護対象（上書きしない）
 
@@ -95,6 +95,12 @@ uvx --from paper-harness-cli pops migrate apply M0-0001 --dry-run
 - `_paperops/refs/` 配下すべて
 - `submission/` 配下すべて
 - `README.md`（プロジェクト固有）
+- `AGENTS.project.md`
+- `CLAUDE.project.md`
+- `Makefile.project`
+- `Makefile.local`
+- `.agents/skills/project-*`
+- `.claude/skills/project-*`
 - `.claude/settings.local.json`
 - `_paperops/refs/local/locations.toml`
 
@@ -105,9 +111,10 @@ uvx --from paper-harness-cli pops migrate apply M0-0001 --dry-run
 1. 複数 version を跨ぐ場合は `uvx --from paper-harness-cli pops update-paperops --apply-chain` で checkpoint ごとの `pops` を exact version で呼び替える。
 2. 単一 version 内では `uvx --from paper-harness-cli pops update-paperops --apply` で不足している管理対象ファイルを追加する。
 3. 変更済み管理対象ファイルは plan を確認し、必要なものだけ手動マージする。
-4. 差分を上流に完全置換してよいと判断できる場合のみ `uvx --from paper-harness-cli pops update-paperops --apply --force` を使う。
-5. release note または migration guide に migration item がある場合は、`pops migrate apply <id> --dry-run` で確認してから適用する。
-6. 変更内容を `_paperops/notes/decision-log.md` に記録する。
+4. `AGENTS.md`、`CLAUDE.md`、`Makefile` に project 固有追記がある場合は、上流ファイルを force する前に `AGENTS.project.md`、`CLAUDE.project.md`、`Makefile.project` または `Makefile.local` へ移す。
+5. 差分を上流に完全置換してよいと判断できる場合のみ `uvx --from paper-harness-cli pops update-paperops --apply --force` を使う。
+6. release note または migration guide に migration item がある場合は、`pops migrate apply <id> --dry-run` で確認してから適用する。
+7. 変更内容を `_paperops/notes/decision-log.md` に記録する。
 
 ### 6. 検証
 
@@ -129,6 +136,7 @@ make ci
 - `pops` が更新通知を出した場合は、`uvx --from paper-harness-cli pops update-paperops --plan` で versioned upgrade chain を確認し、必要なら `--apply-chain` を使う。
 - 単一 version の管理対象ハーネス差分だけを確認する場合は、`uvx --from paper-harness-cli pops update-paperops --dry-run` を使う。
 - migration item がある場合は `uvx --from paper-harness-cli pops migrate list/show/apply` を使い、dry-run を省略しない。
+- project 固有の恒久指示や Make target は managed core へ直接追記せず、`AGENTS.project.md`、`CLAUDE.project.md`、`Makefile.project`、`Makefile.local` を使う。
 - `pops` は project-local `.venv` ではなく `uvx --from paper-harness-cli pops ...` で実行する。
 - 旧 CLI では `pops update-harness` が互換 alias として残るが、新規案内では `update-paperops` を使う。
 - 下流の原稿・notes・refs・submission のユーザー変更をテンプレート更新で上書きしない。

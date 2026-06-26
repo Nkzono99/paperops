@@ -22,6 +22,8 @@
 `template/` は個別論文リポジトリに展開される。主な層は次の通り。
 
 - `story/`: 人間が読む構想、story seed、ストーリーラインの入口
+- `AGENTS.project.md`, `CLAUDE.project.md`: project-owned の恒久指示
+- `Makefile.project`: project-owned の tracked Make target
 - `manuscript/`: 日英原稿、ミラー制御、投稿先情報
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX
 - `_paperops/`: AI とハーネスが使う内部状態
@@ -46,6 +48,8 @@
 | 層 | 役割 | 正本性 | 主な更新入口 |
 | --- | --- | --- | --- |
 | `story/` | 人間が読む高次ストーリー、仮説、期待する evidence path、結果に応じた分岐 | 人間向け構想 | `/design-paper-storyline`, prompt での相談 |
+| `AGENTS.project.md`, `CLAUDE.project.md` | managed core を編集せず project 固有の恒久指示を置く | project overlay | 人間または Agent の明示更新 |
+| `Makefile.project` | project 固有の tracked target を置く | project overlay | 人間または Agent の明示更新 |
 | `_paperops/evidence/` | result / figure / source を論文上の証拠単位へ整理する | AI 内部正本 | `/map-result-patterns`, `/research-related-work` |
 | `_paperops/claims/` | claim、scientific gate、argument を管理する | AI 内部正本 | `/scientific-gate`, `/design-manuscript-claims` |
 | `_paperops/review/` | 人間レビュー、模擬査読、実査読 response を管理する | AI 内部正本 | `/integrate-writing-feedback`, `/peer-review-manuscript`, `/respond-to-peer-review` |

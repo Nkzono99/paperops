@@ -9,7 +9,7 @@ from tests.helpers import ROOT, run_cli
 
 from paperops import __version__  # noqa: E402
 from paperops.cli.main import write_manifest  # noqa: E402
-from paperops.cli.scaffold import copy_scaffold  # noqa: E402
+from paperops.cli.scaffold import copy_scaffold, is_managed_update  # noqa: E402
 
 
 def set_scaffold_version(root: Path, version: str) -> None:
@@ -78,6 +78,16 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue(
                 (target / ".claude" / "skills" / "plan-figure-story" / "SKILL.md").is_file()
             )
+            self.assertTrue((target / "AGENTS.project.md").is_file())
+            self.assertTrue((target / "CLAUDE.project.md").is_file())
+            self.assertTrue((target / "Makefile.project").is_file())
+            agents_guidance = (target / "AGENTS.md").read_text(encoding="utf-8")
+            claude_guidance = (target / "CLAUDE.md").read_text(encoding="utf-8")
+            makefile = (target / "Makefile").read_text(encoding="utf-8")
+            self.assertIn("AGENTS.project.md", agents_guidance)
+            self.assertIn("CLAUDE.project.md", claude_guidance)
+            self.assertIn("-include Makefile.project", makefile)
+            self.assertIn("-include Makefile.local", makefile)
             self.assertTrue((target / "_paperops" / "notes" / "views" / "claim-evidence-map.md").is_file())
             self.assertTrue((target / "story" / "story-seed.md").is_file())
             self.assertTrue((target / "manuscript").is_dir())
@@ -97,6 +107,7 @@ class PopsCliTest(unittest.TestCase):
             gitignore = (target / ".gitignore").read_text(encoding="utf-8")
             self.assertIn("_handoff/*", gitignore)
             self.assertIn(".paperops/cache/", gitignore)
+            self.assertIn("Makefile.local", gitignore)
             self.assertIn("_paperops/refs/source-reach/**/raw/**", gitignore)
 
     def test_copy_scaffold_excludes_ignored_source_reach_and_handoff_payloads(self) -> None:
@@ -381,6 +392,16 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("meaning: target file differs from the scaffold source", out)
             self.assertIn("! AGENTS.md [agent guidance]", out)
             self.assertIn("--apply --force only when local edits may be replaced", out)
+
+    def test_project_extension_skills_are_not_managed_update_paths(self) -> None:
+        self.assertFalse(is_managed_update("AGENTS.project.md"))
+        self.assertFalse(is_managed_update("CLAUDE.project.md"))
+        self.assertFalse(is_managed_update("Makefile.project"))
+        self.assertFalse(is_managed_update("Makefile.local"))
+        self.assertFalse(is_managed_update(".agents/skills/project-custom/SKILL.md"))
+        self.assertFalse(is_managed_update(".claude/skills/project-custom/SKILL.md"))
+        self.assertTrue(is_managed_update(".agents/skills/update-paperops/SKILL.md"))
+        self.assertTrue(is_managed_update(".claude/skills/update-paperops/SKILL.md"))
 
     def test_update_paperops_plans_versioned_upgrade_chain(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

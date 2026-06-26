@@ -1,0 +1,5 @@
+# Project-specific tracked Make targets live here.
+#
+# Keep the distributed Makefile managed by paperops. Add paper-specific checks,
+# exports, or local workflow glue in this file so `pops update-paperops` can
+# keep updating the managed harness.

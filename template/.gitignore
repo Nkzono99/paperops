@@ -3,6 +3,7 @@
 .tools/
 .paperops/cache/
 .claude/settings.local.json
+Makefile.local
 _handoff/*
 !_handoff/.gitkeep
 !_handoff/README.md

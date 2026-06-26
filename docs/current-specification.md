@@ -37,6 +37,9 @@
 
 ```text
 story/                         人間向けの構想、story seed、上位ストーリーライン
+AGENTS.project.md              Codex 向け project-owned 恒久指示
+CLAUDE.project.md              Claude Code 向け project-owned 恒久指示
+Makefile.project               project-owned tracked Make target
 manuscript/                    日英原稿、共有アセット、ミラー制御、投稿先情報
 submission/                    投稿先公式テンプレートと最終提出用 TeX
 _paperops/                     AI/ハーネス内部 state
@@ -314,6 +317,17 @@ section compiler:
 - `_paperops/requests/`
 - `_paperops/refs/`
 - `_paperops/notes/`
+
+project-owned extension point:
+
+- `AGENTS.project.md`: Codex 向けの論文固有指示
+- `CLAUDE.project.md`: Claude Code 向けの論文固有指示
+- `Makefile.project`: tracked project target
+- `Makefile.local`: ignored local target / local variable
+- `.agents/skills/project-*`
+- `.claude/skills/project-*`
+
+標準の `AGENTS.md`、`CLAUDE.md`、`Makefile`、配布 skill、scripts は managed core として更新される。下流での最適化は project-owned extension point に寄せ、汎用化できる改善は upstream feedback として戻す。将来の `_paperops/harness/` migration では、managed default contracts / workflow と project overlay contracts / workflow をさらに分離する。
 
 ## 10. 検証 scripts
 

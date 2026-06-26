@@ -40,4 +40,9 @@ uvx --from paper-harness-cli pops migrate apply M0-0001
 - 次 checkpoint 以降では、前 checkpoint の migration を chain 経由で踏むことを前提にし、最新 code から古い fallback を削る。
 - migration guide にない破壊的変更を推測で実行しない。
 
+## Planned Migration Candidates
+
+- `_paperops/contracts/` と `_paperops/workflow/` に混在している managed defaults と project overlay を、将来 checkpoint で `_paperops/harness/contracts/`、`_paperops/harness/workflow/` と project-owned overlay へ分離する。自動 migration では project 固有編集を削除せず、unmodified default だけを managed harness 側へ移す。
+- managed file を project fork として扱う detached fork manifest は、CLI と update policy が揃ってから migration item 化する。
+
 現在の migration item は [v0.md](v0.md) に置く。

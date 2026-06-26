@@ -7,6 +7,8 @@
 ## 基本ルール
 
 - `pops` は `uvx --from paper-harness-cli pops ...` で実行する。
+- `AGENTS.md` は paperops-managed core である。論文固有の恒久指示は `AGENTS.project.md` に置き、標準ハーネス改善として汎用化できるものは `/feedback-paper-harness` で upstream へ戻す。
+- project 固有の tracked Make target は `Makefile.project`、個人環境だけの target や変数は ignored な `Makefile.local` に置く。
 - 人間は主に原稿レビュー、自然文の指示、story seed の判断を出す。Agent は必要に応じて `/integrate-writing-feedback` で `_paperops/review/` の feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
 - `story/` は人間向けの構想層である。研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を書く。
 - `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` はカード正本である。
@@ -78,6 +80,8 @@ Codex では `.agents/skills/` の同名 skill を入口として使う。恒久
 
 ```text
 story/                         人間向けの構想、story seed、上位ストーリーライン
+AGENTS.project.md              project-owned の Codex 向け恒久指示
+Makefile.project               project-owned の tracked Make target
 manuscript/                    日英原稿、共有アセット、ミラー制御、投稿先情報
 submission/                    投稿先公式テンプレートと最終提出用 TeX
 _paperops/                     AI/ハーネス内部 state
