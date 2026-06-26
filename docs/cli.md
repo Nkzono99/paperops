@@ -37,7 +37,7 @@ uvx --from paper-harness-cli pops doctor
 - `pops update-harness`: `update-paperops` の互換 alias。
 - `pops migrate [path]`: 旧 scaffold に `.pops` 管理情報を追加する計画を表示する。
 - `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出す。
-- `pops links list [path]`: `refs/links.toml` の外部 link を表示する。
+- `pops links list [path]`: `_paperops/refs/links.toml` の外部 link を表示する。
 - `pops links check [path]`: link registry と local location の対応を検証する。
 - `pops workflow status [path]`: 論文全体と section の workflow state を表示する。
 - `pops workflow next [path]`: 次に進める全体状態と guard の未達項目を表示する。
@@ -55,15 +55,15 @@ uvx --from paper-harness-cli pops doctor
 - `CLAUDE.md`
 - `Makefile`
 - `TROUBLESHOOTING.md`
-- `contracts/`
-- `workflow/`
+- `_paperops/contracts/`
+- `_paperops/workflow/`
 - `scripts/`
 - `.agents/`
 - `.claude/`
 - `.github/ISSUE_TEMPLATE/`
 - `.github/PULL_REQUEST_TEMPLATE.md`
 
-`README.md`、`manuscript/`、`notes/`、`evidence/`、`claims/`、`review/`、`requests/`、`refs/`、`submission/` はプロジェクト固有内容として自動更新しない。`manuscript/writing-profile.yml` は論文ごとの overlay なので、既存プロジェクトでは手動で追加・調整する。
+`README.md`、`story/`、`manuscript/`、`submission/`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/refs/`、`_paperops/notes/` はプロジェクト固有内容として自動更新しない。`manuscript/writing-profile.yml` は論文ごとの overlay なので、既存プロジェクトでは手動で追加・調整する。
 
 ## Upgrade Chain
 
@@ -79,25 +79,25 @@ uvx --from paper-harness-cli pops update-paperops --target latest --allow-major 
 
 ## Link Registry
 
-共有可能な link intent は `refs/links.toml` に置き、個人環境の絶対パスは ignored な `refs/local/locations.toml` に置く。
+共有可能な link intent は `_paperops/refs/links.toml` に置き、個人環境の絶対パスは ignored な `_paperops/refs/local/locations.toml` に置く。
 
 ```sh
 uvx --from paper-harness-cli pops links list --resolve-local
 uvx --from paper-harness-cli pops links check
 ```
 
-`kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。追加解析や図表要望は `requests/analysis/` に切り出してから runops 側へ渡す。
+`kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。追加解析や図表要望は `_paperops/requests/analysis/` に切り出してから runops 側へ渡す。
 下流 skill としては `/resolve-local-paths` が runops ディレクトリリンクの入口であり、`pops links list --resolve-local` と `pops links check` で `runops-main` の共有 link と個人環境パスを分けて確認する。
 
 runops queue へ渡す予定の request は、下流 repo で `make research-request-handoff-check` または `make audit` を実行して確認する。通常は warning のみで、`python scripts/check-research-request-handoff.py --root . --strict` は投稿前や queue handoff の完了判定に使う。
 
-外部 export bundle を図表・表・claim evidence に使う場合は、`refs/imports/` に import state を記録し、`make external-import-check` または `make audit` を実行する。
+外部 export bundle を図表・表・claim evidence に使う場合は、`_paperops/refs/imports/` に import state を記録し、`make external-import-check` または `make audit` を実行する。
 
 ## paper_ir
 
-`paper_ir` は、card 正本と controlled authoring view から Writer に渡す context を作る生成一時物である。`pops` の永続管理対象ではなく、通常は skill が必要に応じて作る。手書き正本は `evidence/`、`claims/`、`review/`、`requests/` に置き、`paper_ir` は Methods / Results / Discussion の section compiler へ渡す一時的な変換結果として扱う。
+`paper_ir` は、card 正本と controlled authoring view から Writer に渡す context を作る生成一時物である。`pops` の永続管理対象ではなく、通常は skill が必要に応じて作る。手書き正本は `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` に置き、`paper_ir` は Methods / Results / Discussion の section compiler へ渡す一時的な変換結果として扱う。
 
-section compiler は、`contracts/<section>.yml` の入出力契約と `manuscript/writing-profile.yml` の paper type / venue overlay を重ねる。`plan-section` で作る一時 plan は必要なら `.paperops/cache/` に置き、Git 管理しない。
+section compiler は、`_paperops/contracts/<section>.yml` の入出力契約と `manuscript/writing-profile.yml` の paper type / venue overlay を重ねる。`plan-section` で作る一時 plan は必要なら `.paperops/cache/` に置き、Git 管理しない。
 
 ## Workflow
 
@@ -109,7 +109,7 @@ uvx --from paper-harness-cli pops workflow invalidate CLM-0003
 uvx --from paper-harness-cli pops workflow route-review --issue-class story-loop --apply
 ```
 
-`workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`workflow/current-state.yml` は現在状態と section の `depends_on` を持つ。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
+`_paperops/workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`_paperops/workflow/current-state.yml` は現在状態と section の `depends_on` を持つ。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
 
 `submission_loop` は STRUCTURE_ACCEPTED 後の route である。`pops workflow route-review --issue-class submission-loop --apply` は、storyline / section / structure guard が未達なら拒否される。原稿完成作業中に author metadata、license、readiness-check、Makefile、script、skill 改修へ逸れそうな場合は、`make content-first-check` または `scripts/check-content-first.py --phase progress --intent <intent> --strict` で進路を確認する。
 
@@ -122,7 +122,7 @@ uvx --from paper-harness-cli pops scratch reset --yes
 uvx --from paper-harness-cli pops scratch restore <archive-id> --yes
 ```
 
-`pops scratch archive` は `manuscript/`、`submission/`、`notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/` を `_archives/<id>/archive.zip.partNNNN` に分割保存する。既定の part size は 48 MiB で、GitHub の単一ファイル制限にかからないようにする。
+`pops scratch archive` は `story/`、`manuscript/`、`submission/` と `_paperops/notes/`、`_paperops/refs/`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` を `_archives/<id>/archive.zip.partNNNN` に分割保存する。既定の part size は 48 MiB で、GitHub の単一ファイル制限にかからないようにする。
 
 `pops scratch restart --yes` は archive 作成と reset を一操作で行う。`--include-handoff` を付けると `_handoff/` payload も封印してから starter 状態へ戻す。既存稿を残さず1から執筆へ戻したい場合は、`archive` と `reset` を別々に実行するより `restart` を使う。
 
