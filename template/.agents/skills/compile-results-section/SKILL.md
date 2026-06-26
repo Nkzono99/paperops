@@ -23,16 +23,18 @@ Results を実施順や保有情報順ではなく、読者の疑問順に変換
 
 ## Compile Rule
 
-`compile-results-section` は、各 subsection を `reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence` の順にする。caveat は主張の意味を変える場合だけ置く。
+`compile-results-section` は、各 subsection を `reader question -> one-sentence answer -> quantitative evidence -> figure -> baseline / comparator rationale -> consequence` の順にする。caveat は主張の意味を変える場合だけ置く。
 
-Results の subsection plan は、`reader_question`、`answer`、`evidence`、`scope`、`consequence` を必ず持つ。run inventory、解析を実施した順の列挙、同じ limitation の反復を topic sentence にしない。
+Results の subsection plan は、`reader_question`、`answer`、`evidence`、`baseline_or_comparator_rationale`、`scope`、`consequence` を必ず持つ。baseline、control、reference condition、comparator を使う場合は、それが何を隔離し、何を検証していないかを公開読者向けに書く。run inventory、解析を実施した順の列挙、同じ limitation の反復を topic sentence にしない。
 
-Results hierarchy は、`_paperops/notes/views/storyline.md` の `Section depth map` と `Results hierarchy` に対応する。図表を並べるだけ、代表値だけを置く、境界条件と感度解析を一段落へ圧縮する場合は section-depth blocker として扱う。
+Results hierarchy は、`_paperops/notes/views/storyline.md` の `Section depth map`、`Results hierarchy`、`Methods definition registry` に対応する。図表を並べるだけ、代表値だけを置く、baseline の科学的役割や判定基準を Methods に接続しない、境界条件と感度解析を一段落へ圧縮する場合は section-depth blocker として扱う。
 
 ## Section Depth
 
 `manuscript/writing-profile.yml` の `section_depth` を確認する。`ja_chars` は日本語原稿の TeX noise を除いた文字数、`en_words` は英語原稿の TeX noise を除いた word count として扱う。`length_is_floor_not_target` の原則に従い、短い場合も水増ししない。
 
-`section-depth-check` が Results を short と判定した場合は、subsection を増やすこと自体を目的にしない。reader question、answer、quantitative evidence、comparison、scope、consequence のどれが欠けているかを特定し、one-paragraph subsections は統合するか、読者質問に答えるだけの内容を加える。
+`section-depth-check` が Results を short と判定した場合は、subsection を増やすこと自体を目的にしない。reader question、answer、quantitative evidence、comparison、baseline/comparator rationale、scope、consequence のどれが欠けているかを特定し、one-paragraph subsections は統合するか、読者質問に答えるだけの内容を加える。
+
+`section-contract-check` が Results hierarchy や Methods definition registry の不足を返した場合は、文章の水増しではなく `_paperops/notes/views/storyline.md` と Methods / Results plan を更新してから本文へ戻る。
 
 生成した section plan は必要な場合だけ `.paperops/cache/section-plan-results.yml` に置き、Git 管理しない。

@@ -118,8 +118,9 @@ class FinishManuscriptSkillTest(unittest.TestCase):
             ],
             "compile-results-section": [
                 "paper_ir",
-                "reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence",
+                "reader question -> one-sentence answer -> quantitative evidence -> figure -> baseline / comparator rationale -> consequence",
                 "section-depth-check",
+                "section-contract-check",
                 "Results hierarchy",
                 "one-paragraph subsections",
             ],
@@ -134,6 +135,7 @@ class FinishManuscriptSkillTest(unittest.TestCase):
             "compile-methods-section": [
                 "paper_ir",
                 "method unit",
+                "Methods definition registry",
                 "main_text",
                 "supplement",
                 "code_or_manifest",

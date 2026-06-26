@@ -10,6 +10,7 @@ overlays:
       - initial_and_forcing_conditions
       - numerical_discretization
       - estimator_definition
+      - decision_criteria_definition
       - verification_or_convergence
       - validity_domain
       - reproducibility_pointer
@@ -17,6 +18,7 @@ overlays:
       - estimand_and_unit_of_analysis
       - denominator_or_case_count
       - comparison_definition
+      - baseline_or_comparator_rationale
       - figure_or_table_reference
       - scope_statement
     figure_requirements:

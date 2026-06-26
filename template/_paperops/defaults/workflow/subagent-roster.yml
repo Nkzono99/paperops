@@ -92,7 +92,7 @@
     },
     {
       "id": "results_structure_reviewer",
-      "purpose": "Read Results for reader-question order, quantitative evidence, figure linkage, and consequence.",
+      "purpose": "Read Results for reader-question order, quantitative evidence, figure linkage, baseline/comparator rationale, and consequence.",
       "entry_condition": "After Results plan or draft exists, before prose polish.",
       "allowed_inputs": [
         "_paperops/defaults/contracts/results.yml",
@@ -104,7 +104,44 @@
       "outputs": [
         "results_hierarchy_gap findings",
         "missing subsection contract",
+        "missing baseline or comparator rationale",
         "figure or consequence gaps"
+      ],
+      "route_bias": "section_loop"
+    },
+    {
+      "id": "baseline_skeptic",
+      "purpose": "Check whether each baseline, control, reference condition, or comparator has a public scientific role and a stated boundary.",
+      "entry_condition": "Whenever a baseline/control is central to the title, abstract, Results, Discussion, or captions.",
+      "allowed_inputs": [
+        "_paperops/defaults/contracts/storyline.yml",
+        "_paperops/defaults/contracts/results.yml",
+        "_paperops/defaults/contracts/discussion.yml",
+        "_paperops/notes/views/storyline.md",
+        "manuscript/ja/ or public PDF slices"
+      ],
+      "outputs": [
+        "baseline role gaps",
+        "overextended comparator interpretation",
+        "story_loop or section_loop recommendation"
+      ],
+      "route_bias": "section_loop"
+    },
+    {
+      "id": "methods_definition_auditor",
+      "purpose": "Check that Results and captions do not use estimands, baselines, decision criteria, thresholds, or verification claims before Methods defines them.",
+      "entry_condition": "After Methods/Results plans exist, before Results or captions are polished.",
+      "allowed_inputs": [
+        "_paperops/defaults/contracts/methods.yml",
+        "_paperops/notes/views/storyline.md",
+        "manuscript/ja/sections/20_method.tex",
+        "manuscript/ja/sections/30_results.tex",
+        "figure/table captions"
+      ],
+      "outputs": [
+        "methods definition registry gaps",
+        "undefined criterion or threshold findings",
+        "section_loop recommendation"
       ],
       "route_bias": "section_loop"
     },

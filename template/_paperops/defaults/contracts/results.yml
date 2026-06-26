@@ -8,6 +8,7 @@ subsection_contract:
   reader_question: この節で答える一つの疑問
   answer: 一文で答え
   evidence: 数値、比較、図表、result card
+  baseline_or_comparator_rationale: 対照条件・基準条件が何を隔離し、何を主張しないか
   scope: どこまで一般化できるか
   consequence: 次に何を問う必要があるか
 
@@ -15,6 +16,7 @@ paragraph_contract:
   - result
   - quantitative_evidence_or_figure
   - comparison
+  - baseline_or_comparator_rationale
   - scientific_meaning
 
 inputs:
@@ -36,6 +38,7 @@ outputs:
 hard_rules:
   - Put the answer near the beginning of each subsection.
   - Connect quantitative statements to evidence, figure, or result card.
+  - Define the scientific role of each baseline, control, reference condition, or comparator before using it as the main result frame.
   - End major subsection with consequence or next question.
   - Do not mix independent conclusions in one subsection.
   - Do not use run_inventory_as_topic_sentence.
@@ -56,5 +59,6 @@ forbidden_structures:
 
 audit_questions:
   - Can every subsection be rewritten as a question and one-sentence answer?
+  - For every baseline or comparator, does the text say what it isolates and what it does not test?
   - Are primary figures introduced by the question they answer?
   - Is the strongest result early enough for the reader to orient?

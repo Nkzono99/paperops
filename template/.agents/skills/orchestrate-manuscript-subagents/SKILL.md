@@ -17,7 +17,9 @@ raw confidential reviewer text、未公開データ、個人情報、ローカ�
 
 - `story_architect`: story spine、reader promise、Results hierarchy、Discussion functions を俯瞰し、story_loop / section_loop を判定する。
 - `evidence_auditor`: claim、quantity、denominator、assumption、analysis request の不足を evidence_loop へ戻す。
-- `results_structure_reviewer`: Results が reader question -> answer -> quantitative evidence -> figure -> consequence になっているかを見る。
+- `results_structure_reviewer`: Results が reader question -> answer -> quantitative evidence -> figure -> baseline/comparator rationale -> consequence になっているかを見る。
+- `baseline_skeptic`: baseline / control / reference condition / comparator が何を隔離し、何を主張しないかを見る。
+- `methods_definition_auditor`: Results や caption の estimand、baseline、decision criterion、threshold、verification が Methods で定義済みかを見る。
 - `discussion_function_reviewer`: Discussion が mechanism warrant、prior-work delta、alternative/boundary、implication、decisive next test を持つかを見る。
 - `figure_story_reviewer`: visual obligation、main / supplement split、caption と本文参照の欠落を見る。
 - `public_reader`: 公開原稿だけを読み、未定義語、読者遷移、再現性ギャップを出す。

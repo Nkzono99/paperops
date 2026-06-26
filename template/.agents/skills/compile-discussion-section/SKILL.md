@@ -28,10 +28,14 @@ Discussion に新しい実験事実を増やさない。新しい数値や図表
 
 Discussion functions は、少なくとも `principal_finding`、`mechanism_warrant`、`prior_work_delta`、`alternative_or_boundary`、`implication`、`decisive_next_test` を分ける。Discussion が limitation の列挙だけなら、polish ではなく section-depth blocker として `design-paper-storyline` へ戻す。
 
+baseline、control、reference condition、comparator を Results の中心に置いた場合、Discussion ではその control が支える解釈と支えない解釈を分ける。baseline 結果を real-world mechanism claim に拡張する場合は、足りない coupled process、boundary condition、decisive next test を明示する。
+
 ## Section Depth
 
 `manuscript/writing-profile.yml` の `section_depth` を確認する。`ja_chars` は日本語原稿の TeX noise を除いた文字数、`en_words` は英語原稿の TeX noise を除いた word count として扱う。`length_is_floor_not_target` の原則に従い、短い場合も文量だけを増やさない。
 
 `section-depth-check` が Discussion を short と判定した場合は、observation の繰り返し、generic limitation、曖昧な prior-work mention で埋めない。どの interpretive function が欠けているかを feedback card または section plan に戻す。
+
+`section-contract-check` が Discussion functions の不足を返した場合は、principal finding、mechanism warrant、prior-work delta、alternative/boundary、implication、decisive next test のどれが本文 block にないかを明示して section_loop に戻す。
 
 生成した section plan は必要な場合だけ `.paperops/cache/section-plan-discussion.yml` に置き、Git 管理しない。

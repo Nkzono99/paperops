@@ -25,6 +25,7 @@ inputs:
 outputs:
   - reader can reconstruct the model boundary and state variables
   - reader knows what estimand each result uses
+  - reader knows which baseline, comparator, and decision criterion each central result relies on
   - reader knows which details are in main text, supplement, or code package
   - verification_or_convergence evidence is visible when it affects interpretation
 
@@ -51,6 +52,8 @@ information_placement:
 hard_rules:
   - Do not describe Results ordering or interpretation plan as Methods.
   - Define estimand, unit of analysis, and comparison before using them as evidence.
+  - Define decision criteria, thresholds, and release gates before Results or captions rely on them.
+  - Explain what each baseline or control condition isolates and what it does not test.
   - Do not hide a claim-blocking assumption in supplement only.
   - State what was verified, not only what was implemented.
 
@@ -61,4 +64,5 @@ soft_rules:
 audit_questions:
   - Could a reader tell which modeling choices affect the main claim?
   - Are boundary conditions and initial or forcing conditions visible enough for the paper type?
+  - Are baseline/control conditions and decision criteria present in the Methods definition registry?
   - Are numerical checks connected to the claims they protect?

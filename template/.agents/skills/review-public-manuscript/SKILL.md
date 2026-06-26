@@ -35,6 +35,8 @@ description: Use when reviewing public manuscript text for reader assumptions an
 - `reader-assumptions`: 読者が本文だけから復元できない前提を探す。
 - `local-terminology`: run label、directory name、script name、simulator flag、analysis artifact name を探す。
 - `condition-context`: `2/12`、`0/8`、case、condition、series などの denominator が読者に意味を持つ文脈へ翻訳されているかを探す。
+- `baseline-rationale`: baseline、control、reference condition、comparator が、何を隔離し何を主張しないかを本文だけで説明しているかを探す。
+- `methods-definition`: Results や caption に出る推定量、判定基準、threshold、baseline 名が Methods または初出箇所で定義されているかを探す。
 - `public-reproducibility`: data availability、case count、diagnostic assumptions、figure/table label から再現性ギャップを探す。
 - `editorial-architect`: storyline、Results hierarchy、Discussion functions、section-depth を探す。
 
@@ -58,6 +60,7 @@ description: Use when reviewing public manuscript text for reader assumptions an
    - simulator-specific flag、namelist key、code option
    - filesystem 名、script 名、HDF5 等の artifact 名が scientific category と混ざっている箇所
    - 図中にだけ出る略語や変数名
+   - baseline、control、reference condition、comparator、decision criterion、threshold の未定義名
    - 本文と図表で表記が揺れている用語
 4. ローカル語を公開語に置き換える候補を作る:
    - local label から physical condition name へ
@@ -67,12 +70,16 @@ description: Use when reviewing public manuscript text for reader assumptions an
 5. 再現性ギャップを列挙する:
    - data product、期間、selection flow、sample size
    - case count、measurement count、levels / bins / points の内訳
+   - baseline / comparator の scientific role と、比較が隔離している要因
+   - decision criterion、threshold、release gate、static/dynamic start condition などの判定基準
    - fit 式、モデル式、座標系、統計指標
    - 外部データ、前処理、除外条件、uncertainty
    - time averaging、final frame、smoothing / interpolation、units / normalization
    - figure titles、legends、axis labels、table headers に残る internal labels
 6. editorial architect として、Results hierarchy と Discussion functions を確認する:
    - Results の各 subsection が reader question、answer、quantity、figure/table、consequence を持つか
+   - Results の baseline / comparator が何を隔離し、何を検証していないかを書いているか
+   - Methods definition registry 相当の定義が公開原稿に現れているか
    - Discussion が mechanism_warrant、prior_work_delta、alternative_or_boundary、implication、decisive_next_test を持つか
    - storyline が title / abstract / conclusion で保存されているか
    - `section_depth` の floor を、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words` として確認しているか
@@ -102,6 +109,7 @@ repo-aware editor と public-only reviewer を同じ判断に混ぜない。publ
 - `Local terminology`: local label / simulator term / artifact term と推奨 public term の表
 - `Count-led claims`: 条件数や case count が主語になっている箇所
 - `Missing paper context`: denominator の意味や claim role が本文だけでは分からない箇所
+- `Baseline / criteria gaps`: baseline、comparator、decision criterion、threshold の読者向け定義や科学的役割が不足する箇所
 - `Major revisions`: 説明不足や図表不足
 - `Minor revisions`: 表記、定義、参照、図注の改善
 - `Figure/table cleanup`: title、legend、axis、caption、table header の置換候補
@@ -128,6 +136,7 @@ repo-aware editor と public-only reviewer を同じ判断に混ぜない。publ
 - ユーザーが独立 subagent を明示的に許可した場合だけ、公開アーティファクトのみを渡して別文脈レビューを依頼する。
 - `general-researcher`、`reader-assumptions`、`local-terminology`、`public-reproducibility` の観点を明示された場合は、通常の scientific review と別枠で出力する。
 - run label、directory name、simulator flag、analysis artifact name、figure label が公開読者に通じる physical condition / public data product として説明されているか確認する。
+- baseline、control、reference condition、comparator、decision criterion、threshold が公開読者に通じる形で定義され、Results の主張範囲を広げすぎていないか確認する。
 - runops project、publication export bundle、raw run directory、campaign、case、production run、smoke/feasibility check は、公開原稿では原則として内部 provenance 語として指摘する。
 - 未定義語、ローカル語、暗黙前提、再現性ギャップ、図表 cleanup、Data availability 追記、rewrite patch plan、対応チェックリストに分けて返す。
 - repo-aware editor と public-only reviewer を混ぜず、public-only review は読者が詰まる箇所の検出に限定する。修正実装や内部台帳反映は通常の repo 文脈で行う。

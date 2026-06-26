@@ -58,6 +58,7 @@ authoritative_for:
 - one-sentence answer:
 - quantitative evidence and unit of analysis:
 - figure / table role:
+- baseline / comparator rationale:
 - consequence:
 
 ## Discussion functions
@@ -68,6 +69,17 @@ authoritative_for:
 - alternative_or_boundary:
 - implication:
 - decisive_next_test:
+
+## Methods definition registry
+
+Results や figure caption に出る推定量、比較・baseline、判定基準、検証条件を、Methods か初出箇所で読者が復元できる形にする。
+
+| item | definition location | manuscript block | status |
+| --- | --- | --- | --- |
+| estimand_and_unit_of_analysis | 未記入 | 未記入 | draft |
+| comparison_or_baseline | 未記入 | 未記入 | draft |
+| decision_criteria | 未記入 | 未記入 | draft |
+| verification_or_convergence | 未記入 | 未記入 | draft |
 
 ## Submission hygiene boundary
 

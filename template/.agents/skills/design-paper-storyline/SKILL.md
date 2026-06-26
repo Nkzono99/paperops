@@ -33,10 +33,11 @@ description: Use when a manuscript needs a top-level story spine, Results hierar
 
 1. Public-reader として、本文だけから reader_promise、central_claim、scope_boundary を再構成する。
 2. Repo-aware editor として、claim / evidence / result-pattern map から evidence_ladder を作る。
-3. Results hierarchy を作る。各 subsection は `reader question -> one-sentence answer -> quantity and unit of analysis -> figure/table role -> consequence` を持つ。
+3. Results hierarchy を作る。各 subsection は `reader question -> one-sentence answer -> quantity and unit of analysis -> figure/table role -> baseline / comparator rationale -> consequence` を持つ。
 4. Discussion functions を作る。最低限 `principal_finding`、`mechanism_warrant`、`prior_work_delta`、`alternative_or_boundary`、`implication`、`decisive_next_test` を分ける。
-5. `_paperops/notes/views/storyline.md` を更新する場合は、`Section depth map` の function と manuscript block を埋める。block が未作成なら `draft` のままにし、本文生成前の blocker として扱う。
-6. `scripts/check-storyline.py --root . --strict` が通るまで、STRUCTURE_ACCEPTED や Submission hygiene へ進めない。
+5. Methods definition registry を作る。Results や caption に出る `estimand_and_unit_of_analysis`、`comparison_or_baseline`、`decision_criteria`、`verification_or_convergence` が Methods または初出箇所で定義されるようにする。
+6. `_paperops/notes/views/storyline.md` を更新する場合は、`Section depth map` の function と manuscript block を埋める。block が未作成なら `draft` のままにし、本文生成前の blocker として扱う。
+7. `scripts/check-storyline.py --root . --strict` と `scripts/check-section-contracts.py --root . --strict` が通るまで、STRUCTURE_ACCEPTED や Submission hygiene へ進めない。
 
 ## Editorial architect gate
 
@@ -68,8 +69,9 @@ Submission hygiene は最終提出面であり、manuscript content blocker を�
 
 - `Story spine`: reader_promise / central_claim / scope_boundary / reader_payoff
 - `Evidence ladder`: primary_anchor / mechanism_or_boundary / robustness_or_scope / negative_or_null_case
-- `Results hierarchy`: subsection ごとの reader question, answer, quantity, figure/table, consequence
+- `Results hierarchy`: subsection ごとの reader question, answer, quantity, figure/table, baseline/comparator rationale, consequence
 - `Discussion functions`: principal_finding, mechanism_warrant, prior_work_delta, alternative_or_boundary, implication, decisive_next_test
+- `Methods definition registry`: estimand, baseline/comparator, decision criteria, verification の定義位置
 - `Content blockers before Submission hygiene`
 - `Files to update`
 
@@ -77,4 +79,4 @@ Submission hygiene は最終提出面であり、manuscript content blocker を�
 
 - `finish-manuscript` の before-drafting gate として使う。
 - `audit-ai-draft`、`peer-review-manuscript`、`review-public-manuscript` で Results / Discussion の薄さを見つけたら、この skill へ戻す。
-- `_paperops/notes/views/storyline.md` は controlled authoring view なので、更新したら `make storyline-check` を実行する。
+- `_paperops/notes/views/storyline.md` は controlled authoring view なので、更新したら `make storyline-check` と `make section-contract-check` を実行する。

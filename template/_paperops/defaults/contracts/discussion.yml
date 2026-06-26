@@ -37,6 +37,7 @@ outputs:
   - reader knows how the result changes prior understanding
   - mechanism_hypothesis is distinguished from observation
   - alternative_explanation is named when relevant
+  - baseline or comparator interpretation is scoped to what the control actually isolates
   - implication and prediction are scoped, not overclaimed
   - limitations say which claim they weaken
 
@@ -44,6 +45,7 @@ hard_rules:
   - Do not repeat Results as the main Discussion structure.
   - Do not treat every interpretive sentence as forbidden new evidence.
   - Mark mechanism_hypothesis, implication, and prediction with scope and warrant.
+  - Do not use a baseline result as a real-world mechanism claim without naming the missing coupled process or boundary condition.
   - Attach limitations to affected claims.
   - Do not use hedge words as a substitute for scope.
 
@@ -57,5 +59,6 @@ soft_rules:
 audit_questions:
   - What does this paper make the reader think differently?
   - Which mechanism is most plausible, and why?
+  - Which part of the interpretation depends on a baseline or control condition?
   - What observation or experiment would distinguish the interpretation?
   - Which limitation weakens which claim?

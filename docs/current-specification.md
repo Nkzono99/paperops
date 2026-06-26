@@ -267,8 +267,10 @@ tracked file に個人環境の絶対パスを混ぜない。
 section compiler:
 
 - `compile-methods-section`: method unit ごとに本文 / supplement / code への配分、非標準性、結果感度、再実装情報を決める。
-- `compile-results-section`: reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence の順に結果を並べる。
+- `compile-results-section`: reader question -> one-sentence answer -> quantitative evidence -> figure -> baseline / comparator rationale -> consequence の順に結果を並べる。
 - `compile-discussion-section`: observation / inference / mechanism_hypothesis / alternative_explanation / implication / prediction / limitation を分ける。
+
+`check-section-contracts.py` は、`_paperops/notes/views/storyline.md` の controlled authoring view から Results hierarchy、Discussion functions、Methods definition registry を確認する。`audit` では warning として扱い、`finish-manuscript-check` では strict error として扱う。これは section-depth の文字数 floor とは別の semantic coverage gate であり、水増しではなく baseline rationale、decision criteria、mechanism warrant などの不足へ戻すための検査である。
 
 ## 9. CLI 仕様
 
@@ -335,8 +337,8 @@ project-owned extension point:
 主な検証 target:
 
 - `make ci`: 構造、引用、mirror、公開語彙、カード層、link、build fallback
-- `make audit`: argument focus、concept term、content-first、figure reference、figure obligation、claim evidence、external import、research request handoff
-- `make finish-manuscript-check`: 原稿完成 goal を閉じる前の content-first gate
+- `make audit`: argument focus、concept term、content-first、section contract、figure reference、figure obligation、claim evidence、external import、research request handoff
+- `make finish-manuscript-check`: 原稿完成 goal を閉じる前の content-first gate。strict public terms、section contract、section-depth も含む
 - `make pre-submit`: 投稿前 profile
 - `make smoke`: テンプレート管理 repo から `template/` を検証する smoke
 

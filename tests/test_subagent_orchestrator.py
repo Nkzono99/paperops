@@ -25,6 +25,8 @@ class SubagentOrchestratorTemplateTest(unittest.TestCase):
             "story_architect",
             "evidence_auditor",
             "results_structure_reviewer",
+            "baseline_skeptic",
+            "methods_definition_auditor",
             "discussion_function_reviewer",
             "figure_story_reviewer",
             "public_reader",

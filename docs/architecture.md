@@ -102,7 +102,7 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 6. `content-first-gate`、`_paperops/defaults/workflow/focus-policy.yml`、`make content-first-check` で、次の作業が本文 blocker を減らす intent かを確認する。
 7. subagent を使う場合は `orchestrate-manuscript-subagents` で `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay を読み、main agent / orchestrator が role brief、privacy、`subagent_report`、integration decision を管理する。
 8. `_paperops/defaults/contracts/<section>.yml`、必要な `_paperops/contracts/<section>.yml` overlay、`manuscript/writing-profile.yml` を重ねて、section が答える読者質問、必要出力、`section_depth` floor を確認する。
-9. 本文生成前に `design-paper-storyline` で story spine、Results hierarchy、Discussion functions を固定する。
+9. 本文生成前に `design-paper-storyline` で story spine、Results hierarchy、Discussion functions、Methods definition registry を固定する。
 10. 本文生成前に `plan-figure-story` で中心 claim から visual obligation を作り、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図の欠落を確認する。
 11. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
 12. section compiler が Methods / Results / Discussion それぞれの reader question、answer、evidence、figure、caveat location、sentence budget を決める。
@@ -119,10 +119,10 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 
 `_paperops/defaults/contracts/figures.yml` は figure story 標準契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。論文固有の figure contract は `_paperops/contracts/figures.yml` overlay へ置く。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
 
-section compiler は、`finish-manuscript` から呼ばれる専門 skill 群として Writer の前に走る。Results / Discussion は `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。
+section compiler は、`finish-manuscript` から呼ばれる専門 skill 群として Writer の前に走る。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry が読者質問、baseline/comparator rationale、判定基準定義を持つかを見る semantic coverage gate である。Results / Discussion はさらに `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。
 
 - `compile-methods-section`: method unit ごとに、本文 / supplement / code への配分、非標準性、結果感度、再実装に必要な情報を決める。
-- `compile-results-section`: reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence の順に、結果の読み順を作る。
+- `compile-results-section`: reader question -> one-sentence answer -> quantitative evidence -> figure -> baseline/comparator rationale -> consequence の順に、結果の読み順を作る。
 - `compile-discussion-section`: observation / inference / mechanism_hypothesis / alternative_explanation / implication / prediction / limitation を分ける。
 
 これにより、AI が持っている情報を均等に説明したり、内部 label を本文へ漏らしたり、limitation だけを過剰に複製したりする失敗を減らす。
