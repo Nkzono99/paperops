@@ -27,6 +27,15 @@ def future_minor_version(offset: int = 1) -> str:
     return f"{major}.{minor + offset}.0"
 
 
+def create_legacy_internal_layout(root: Path) -> None:
+    (root / "manuscript").mkdir(parents=True)
+    (root / "scripts").mkdir()
+    (root / "Makefile").write_text("ci:\n\t@echo ok\n", encoding="utf-8")
+    for directory in ["notes", "refs", "claims", "evidence", "workflow", "contracts", "review", "requests"]:
+        (root / directory).mkdir()
+        (root / directory / "legacy.md").write_text(f"# {directory}\n", encoding="utf-8")
+
+
 class PopsCliTest(unittest.TestCase):
     def test_init_creates_project_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -180,6 +189,89 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("make readiness-check", out)
             self.assertIn("Skill context budget warning", out)
             self.assertIn("TROUBLESHOOTING.md", out)
+
+    def test_migrate_list_and_show_registered_internal_layout_migration(self) -> None:
+        code, out, err = run_cli(["migrate", "list"])
+
+        self.assertEqual(code, 0, err)
+        self.assertIn("M0-0001", out)
+        self.assertIn("_paperops", out)
+
+        code, out, err = run_cli(["migrate", "show", "M0-0001"])
+
+        self.assertEqual(code, 0, err)
+        self.assertIn("Move legacy top-level paperops state into _paperops", out)
+        self.assertIn("v0 checkpoint", out)
+        self.assertIn("notes/ -> _paperops/notes/", out)
+
+    def test_migrate_legacy_apply_still_writes_manifest_without_moving_dirs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            before_path_project = Path(tmp) / "before-path"
+            before_path_project.mkdir()
+            create_legacy_internal_layout(before_path_project)
+
+            code, out, err = run_cli(["migrate", "--apply", str(before_path_project)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("Created .pops/manifest.toml", out)
+            self.assertTrue((before_path_project / ".pops" / "manifest.toml").is_file())
+            self.assertTrue((before_path_project / "notes" / "legacy.md").is_file())
+
+            after_path_project = Path(tmp) / "after-path"
+            after_path_project.mkdir()
+            create_legacy_internal_layout(after_path_project)
+
+            code, out, err = run_cli(["migrate", str(after_path_project), "--apply"])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("Created .pops/manifest.toml", out)
+            self.assertTrue((after_path_project / ".pops" / "manifest.toml").is_file())
+            self.assertTrue((after_path_project / "notes" / "legacy.md").is_file())
+
+    def test_migrate_internal_layout_dry_run_reports_moves_without_writing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "legacy-paper"
+            project.mkdir()
+            create_legacy_internal_layout(project)
+
+            code, out, err = run_cli(["migrate", "apply", "M0-0001", "--dry-run", str(project)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("DRY-RUN", out)
+            self.assertIn("notes/ -> _paperops/notes/", out)
+            self.assertTrue((project / "notes" / "legacy.md").is_file())
+            self.assertFalse((project / "_paperops").exists())
+
+    def test_migrate_internal_layout_apply_moves_legacy_dirs_and_writes_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "legacy-paper"
+            project.mkdir()
+            create_legacy_internal_layout(project)
+
+            code, out, err = run_cli(["migrate", "apply", "M0-0001", str(project)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("Applied migration M0-0001", out)
+            self.assertTrue((project / "_paperops" / "notes" / "legacy.md").is_file())
+            self.assertTrue((project / "_paperops" / "refs" / "legacy.md").is_file())
+            self.assertFalse((project / "notes").exists())
+            self.assertFalse((project / "refs").exists())
+            self.assertTrue((project / ".pops" / "manifest.toml").is_file())
+
+    def test_migrate_internal_layout_stops_on_conflict_without_deleting_source(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "legacy-paper"
+            project.mkdir()
+            create_legacy_internal_layout(project)
+            (project / "_paperops" / "notes").mkdir(parents=True)
+            (project / "_paperops" / "notes" / "modern.md").write_text("# modern\n", encoding="utf-8")
+
+            code, out, err = run_cli(["migrate", "apply", "M0-0001", str(project)])
+
+            self.assertEqual(code, 1)
+            self.assertIn("conflict", out + err)
+            self.assertTrue((project / "notes" / "legacy.md").is_file())
+            self.assertTrue((project / "_paperops" / "notes" / "modern.md").is_file())
 
     def test_doctor_rejects_invalid_link_registry(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -35,7 +35,11 @@ uvx --from paper-harness-cli pops doctor
 - `pops update-paperops --plan`: versioned upgrade chain を表示する。
 - `pops update-paperops --apply-chain`: checkpoint release ごとの `pops` を順に呼び替えて更新する。
 - `pops update-harness`: `update-paperops` の互換 alias。
-- `pops migrate [path]`: 旧 scaffold に `.pops` 管理情報を追加する計画を表示する。
+- `pops migrate list`: 登録済み project-state migration を表示する。
+- `pops migrate show <id>`: migration item の目的、checkpoint、移動内容を表示する。
+- `pops migrate apply <id> [path] --dry-run`: migration の file operation を事前確認する。
+- `pops migrate apply <id> [path]`: migration を適用する。
+- `pops migrate [path] --apply`: 旧 scaffold に `.pops` 管理情報を追加する互換導線。
 - `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出す。
 - `pops links list [path]`: `_paperops/refs/links.toml` の外部 link を表示する。
 - `pops links check [path]`: link registry と local location の対応を検証する。
@@ -76,6 +80,21 @@ uvx --from paper-harness-cli pops update-paperops --target latest --allow-major 
 ```
 
 詳しい保持方針は [upgrade-policy.md](upgrade-policy.md) を参照する。
+
+## Project-State Migrations
+
+`update-paperops --apply-chain` は管理対象ハーネスファイルを checkpoint ごとに更新する。下流 project state の破壊的な移動や schema 変更は `pops migrate` の migration item として扱う。
+
+たとえば `v1.1 -> v1.4` へ進む場合、`v1.2.x`、`v1.3.x`、`v1.4.x` を順に踏む。`v1.1 -> v1.2` の migration handler は `v1.2.x` が提供し、`v1.3.x` 以降へ無期限には持ち越さない。
+
+```sh
+uvx --from paper-harness-cli pops migrate list
+uvx --from paper-harness-cli pops migrate show M0-0001
+uvx --from paper-harness-cli pops migrate apply M0-0001 --dry-run
+uvx --from paper-harness-cli pops migrate apply M0-0001
+```
+
+現在の `M0-0001` は、旧 top-level の `contracts/`、`workflow/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` を `_paperops/` 配下へ移す。source と target の両方がある場合は conflict として停止し、ファイルは削除しない。migration item の正本は [migrations/v0.md](migrations/v0.md) を参照する。
 
 ## Link Registry
 

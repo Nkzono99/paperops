@@ -62,6 +62,16 @@ uvx --from paper-harness-cli pops update-paperops --dry-run
 
 旧 CLI を使っている場合のみ、互換 alias として `uvx --from paper-harness-cli pops update-harness --dry-run` が使える。
 
+Project-state migration が必要かも確認する:
+
+```sh
+uvx --from paper-harness-cli pops migrate list
+uvx --from paper-harness-cli pops migrate show M0-0001
+uvx --from paper-harness-cli pops migrate apply M0-0001 --dry-run
+```
+
+`update-paperops --apply-chain` は checkpoint release を順に踏む。`v1.1 -> v1.2` の migration は `v1.2.x` が持ち、`v1.3.x` 以降へ無期限に引き継がない。必要な migration は対象 checkpoint の `pops migrate apply <id>` で適用する。
+
 ### 3. 変更の特定
 
 以下のカテゴリごとに差分を確認する:
@@ -96,7 +106,8 @@ uvx --from paper-harness-cli pops update-paperops --dry-run
 2. 単一 version 内では `uvx --from paper-harness-cli pops update-paperops --apply` で不足している管理対象ファイルを追加する。
 3. 変更済み管理対象ファイルは plan を確認し、必要なものだけ手動マージする。
 4. 差分を上流に完全置換してよいと判断できる場合のみ `uvx --from paper-harness-cli pops update-paperops --apply --force` を使う。
-5. 変更内容を `_paperops/notes/decision-log.md` に記録する。
+5. release note または migration guide に migration item がある場合は、`pops migrate apply <id> --dry-run` で確認してから適用する。
+6. 変更内容を `_paperops/notes/decision-log.md` に記録する。
 
 ### 6. 検証
 
@@ -117,6 +128,7 @@ make ci
 
 - `pops` が更新通知を出した場合は、`uvx --from paper-harness-cli pops update-paperops --plan` で versioned upgrade chain を確認し、必要なら `--apply-chain` を使う。
 - 単一 version の管理対象ハーネス差分だけを確認する場合は、`uvx --from paper-harness-cli pops update-paperops --dry-run` を使う。
+- migration item がある場合は `uvx --from paper-harness-cli pops migrate list/show/apply` を使い、dry-run を省略しない。
 - `pops` は project-local `.venv` ではなく `uvx --from paper-harness-cli pops ...` で実行する。
 - 旧 CLI では `pops update-harness` が互換 alias として残るが、新規案内では `update-paperops` を使う。
 - 下流の原稿・notes・refs・submission のユーザー変更をテンプレート更新で上書きしない。

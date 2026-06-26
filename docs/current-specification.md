@@ -278,6 +278,8 @@ section compiler:
 - `pops update-paperops`: 管理対象ハーネスファイルの更新計画を表示する。
 - `pops update-paperops --apply`: 不足している管理対象ファイルだけ追加する。
 - `pops update-paperops --apply --force`: 差分がある管理対象ファイルも上書きする。
+- `pops update-paperops --apply-chain`: checkpoint release ごとの `pops` を exact version で呼び替える。
+- `pops migrate list/show/apply`: 下流 project state の migration item を確認・適用する。
 - `pops links list [path]`: `_paperops/refs/links.toml` の外部 link を表示する。
 - `pops links check [path]`: link registry と local location の対応を検証する。
 - `pops workflow status [path]`: 論文全体と section の workflow state を表示する。
@@ -400,6 +402,10 @@ notes/      -> _paperops/notes/
 scripts と CLI は互換期間中、modern path を優先し、なければ legacy path を読む。人間向け docs と新規 scaffold は `_paperops/` を正道として案内する。
 
 既存下流 repo は、管理対象ファイルを `pops update-paperops --plan` で確認し、必要なものだけ `--apply` または `--apply --force` で取り込む。プロジェクト固有の evidence、claim、review、request、refs、notes は自動上書きしない。
+
+破壊的な project-state 変更は migration item にする。`v1.1 -> v1.2` の migration は `v1.2.x` が提供し、`v1.3.x` 以降へ同じ handler を無期限に持ち越さない。`v1.1 -> v1.4` のように複数 checkpoint を跨ぐ場合は、`update-paperops --apply-chain` で中間 checkpoint を踏み、各 checkpoint の `pops migrate apply <id>` を dry-run 後に適用する。
+
+現在の `_paperops/` 移行は `M0-0001` として登録する。
 
 ## 16. 用語集
 
