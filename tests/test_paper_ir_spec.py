@@ -46,19 +46,27 @@ class PaperIrSpecTest(unittest.TestCase):
         self.assertIn("check-external-imports.py --root . --strict", makefile)
 
     def test_finish_manuscript_routes_writer_through_paper_ir(self) -> None:
-        skill = (
-            ROOT / "template" / ".agents" / "skills" / "finish-manuscript" / "SKILL.md"
-        ).read_text(encoding="utf-8")
+        combined = "\n".join(
+            (
+                ROOT / "template" / ".agents" / "skills" / name / "SKILL.md"
+            ).read_text(encoding="utf-8")
+            for name in [
+                "finish-manuscript",
+                "compile-results-section",
+                "compile-discussion-section",
+                "compile-methods-section",
+            ]
+        )
 
         for required in [
             "paper_ir",
-            "compile-results",
-            "compile-discussion",
-            "compile-methods",
+            "compile-results-section",
+            "compile-discussion-section",
+            "compile-methods-section",
             "Writer に生の card ontology を直接渡さない",
         ]:
             with self.subTest(required=required):
-                self.assertIn(required, skill)
+                self.assertIn(required, combined)
 
     def test_section_contracts_define_io_not_prose_templates(self) -> None:
         contracts_root = ROOT / "template" / "_paperops" / "defaults" / "contracts"

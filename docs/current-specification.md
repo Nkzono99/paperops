@@ -142,7 +142,7 @@ flowchart TD
   ClaimCards --> StoryReconcile["_paperops/notes/views/storyline.md"]
   StoryReconcile --> Contracts["_paperops/defaults/contracts/* + overlays"]
   Contracts --> PaperIR["paper_ir in .paperops/cache/"]
-  PaperIR --> SectionCompiler["compile-methods / compile-results / compile-discussion"]
+  PaperIR --> SectionCompiler["compile-methods-section / compile-results-section / compile-discussion-section"]
   SectionCompiler --> Manuscript["manuscript/ja and manuscript/en"]
   Manuscript --> Review["human review / peer review"]
   Review --> FeedbackCards["_paperops/review/* cards"]
@@ -266,9 +266,9 @@ tracked file に個人環境の絶対パスを混ぜない。
 
 section compiler:
 
-- `compile-methods`: method unit ごとに本文 / supplement / code への配分、非標準性、結果感度、再実装情報を決める。
-- `compile-results`: reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence の順に結果を並べる。
-- `compile-discussion`: observation / inference / mechanism_hypothesis / alternative_explanation / implication / prediction / limitation を分ける。
+- `compile-methods-section`: method unit ごとに本文 / supplement / code への配分、非標準性、結果感度、再実装情報を決める。
+- `compile-results-section`: reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence の順に結果を並べる。
+- `compile-discussion-section`: observation / inference / mechanism_hypothesis / alternative_explanation / implication / prediction / limitation を分ける。
 
 ## 9. CLI 仕様
 
@@ -357,6 +357,8 @@ project-owned extension point:
 
 `_paperops/defaults/workflow/subagent-roster.yml` は、main agent / orchestrator が subagent をどう使うかの標準契約である。論文固有に role や allowed input を変える場合だけ `_paperops/workflow/subagent-roster.yml` overlay を置く。
 
+実行時の詳細は `orchestrate-manuscript-subagents` に置き、`finish-manuscript` は必要時にそれを呼ぶ。content-first の自己点検は `content-first-gate`、review 後の戻り先分類は `route-manuscript-feedback`、完了前確認は `finalize-manuscript` が担当する。
+
 主な role:
 
 - `story_architect`
@@ -435,7 +437,7 @@ scripts と CLI は互換期間中、modern path を優先し、なければ leg
 | workflow state | 全体状態、section 状態、loop route、guard | `_paperops/workflow/` |
 | stale | 上流 artifact が変わり、依存 section の再確認が必要な状態 | `pops workflow invalidate` |
 | paper_ir | Writer に渡す前の生成一時中間表現 | `.paperops/cache/` |
-| section compiler | card / contract / view を Methods / Results / Discussion の読者向け構造へ変換する段階 | `finish-manuscript` |
+| section compiler | card / contract / view を Methods / Results / Discussion の読者向け構造へ変換する段階 | `compile-*-section` skills |
 | subagent roster | subagent role、allowed inputs、outputs、integration contract | `_paperops/defaults/workflow/subagent-roster.yml` + optional overlay |
 | detached fork | managed core file を project 固有に fork し、update-paperops から外す明示登録。`pops reattach` で managed update 対象へ戻す | `.pops/manifest.toml` `[detached]` |
 | link registry | 外部 project / directory への portable link intent | `_paperops/refs/links.toml` |

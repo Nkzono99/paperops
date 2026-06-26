@@ -58,13 +58,13 @@
 | `_paperops/requests/` | 追加解析や改稿依頼を管理する | AI 内部正本 | `/integrate-writing-feedback`, runops handoff |
 | `_paperops/notes/views/` の pure overview view | 正本カードを俯瞰する | 派生 view | 該当 card 更新後に手動または半自動で更新 |
 | `_paperops/notes/views/` の controlled authoring view | 本文での呼び方、条件名、概念語、読者向け語彙、story spine を統制する | 編集可能な統制 view | `/design-paper-storyline`, `/public-terminology-pass`, `/contextualize-conditions`, `/polish-ai-draft` |
-| `paper_ir` | card / view から Writer に渡す材料を section ごとにまとめる | 生成一時物 | `finish-manuscript` の section compiler phase |
-| `_paperops/defaults/contracts/` | story spine、section ごとの読者質問、入力、出力、禁止構造と figure story の標準契約を定める | managed default | `finish-manuscript` の `design-paper-storyline` / plan-section / `plan-figure-story` / audit-section |
+| `paper_ir` | card / view から Writer に渡す材料を section ごとにまとめる | 生成一時物 | `compile-results-section` / `compile-discussion-section` / `compile-methods-section` |
+| `_paperops/defaults/contracts/` | story spine、section ごとの読者質問、入力、出力、禁止構造と figure story の標準契約を定める | managed default | `design-paper-storyline` / section compiler / `plan-figure-story` / audit-section |
 | `_paperops/contracts/` | 標準契約から外れる論文固有の差分だけを同名 file で置く | project overlay | 人間または Agent の明示更新 |
 | `manuscript/writing-profile.yml` | 論文種別、投稿先、分野別要求を section 契約へ重ねる | プロジェクト設定 | 初期 setup、投稿先変更時 |
-| `_paperops/defaults/workflow/` | 状態機械、content-first focus policy、subagent role roster の標準規約を管理する | managed default | `pops workflow`, `finish-manuscript` の Issue Router / orchestrator |
+| `_paperops/defaults/workflow/` | 状態機械、content-first focus policy、subagent role roster の標準規約を管理する | managed default | `pops workflow`, `content-first-gate`, `route-manuscript-feedback`, `orchestrate-manuscript-subagents` |
 | `_paperops/workflow/` | 現在状態、section 状態、review loop、stale 伝播、人間判断、任意の workflow overlay を管理する | project state | `pops workflow`, review loop |
-| `.paperops/cache/` | section plan や一時 IR を置く | Git 管理しない生成物 | `finish-manuscript` の plan-section |
+| `.paperops/cache/` | section plan や一時 IR を置く | Git 管理しない生成物 | section compiler |
 | `manuscript/` | 読者へ出す本文 | 成果物 | Writer / editor pass |
 | `submission/` | 投稿先に合わせた提出版 | 派生成果物 | `prepare-submission` 相当の投稿前作業 |
 | `_handoff/` | 未整理入力の一時置き場 | Git 管理しない | 人間入力、raw file intake |
@@ -99,15 +99,15 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 3. Abstract、Conclusion、主要図表に使う claim は `_paperops/claims/gates/` で readiness を確認する。
 4. 本文に出る強い名詞句は `_paperops/notes/views/concept-terms.md` で確認し、accepted term、普通の文へほどく語、avoid 語を分ける。
 5. `pops workflow status` と `pops workflow next` で、全体状態、stale section、次に通す guard を確認する。
-6. `_paperops/defaults/workflow/focus-policy.yml` と `make content-first-check` で、次の作業が本文 blocker を減らす intent かを確認する。
-7. subagent を使う場合は `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay を読み、main agent / orchestrator が role brief、privacy、`subagent_report`、integration decision を管理する。
+6. `content-first-gate`、`_paperops/defaults/workflow/focus-policy.yml`、`make content-first-check` で、次の作業が本文 blocker を減らす intent かを確認する。
+7. subagent を使う場合は `orchestrate-manuscript-subagents` で `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay を読み、main agent / orchestrator が role brief、privacy、`subagent_report`、integration decision を管理する。
 8. `_paperops/defaults/contracts/<section>.yml`、必要な `_paperops/contracts/<section>.yml` overlay、`manuscript/writing-profile.yml` を重ねて、section が答える読者質問、必要出力、`section_depth` floor を確認する。
 9. 本文生成前に `design-paper-storyline` で story spine、Results hierarchy、Discussion functions を固定する。
 10. 本文生成前に `plan-figure-story` で中心 claim から visual obligation を作り、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図の欠落を確認する。
 11. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
 12. section compiler が Methods / Results / Discussion それぞれの reader question、answer、evidence、figure、caveat location、sentence budget を決める。
 13. Writer は `paper_ir` と承認済み claim package を使って本文を書く。Writer に生の card ontology を直接渡しすぎない。
-14. Review 後は `pops workflow route-review` で evidence / story / section / prose / submission loop のどこへ戻るかを決め、上流 artifact が変わったら `pops workflow invalidate <artifact-id>` で依存 section を stale にする。
+14. Review 後は `route-manuscript-feedback` と `pops workflow route-review` で evidence / story / section / prose / submission loop のどこへ戻るかを決め、上流 artifact が変わったら `pops workflow invalidate <artifact-id>` で依存 section を stale にする。
 15. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
 16. Submission hygiene は STRUCTURE_ACCEPTED 後に扱う。著者 metadata、license、Open Research DOI、readiness-check 改修は、Results hierarchy や Discussion functions の blocker より優先しない。
 
@@ -119,11 +119,11 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 
 `_paperops/defaults/contracts/figures.yml` は figure story 標準契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。論文固有の figure contract は `_paperops/contracts/figures.yml` overlay へ置く。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
 
-section compiler は、`finish-manuscript` の中で Writer の前に走る段階として扱う。Results / Discussion は `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。
+section compiler は、`finish-manuscript` から呼ばれる専門 skill 群として Writer の前に走る。Results / Discussion は `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。
 
-- `compile-methods`: method unit ごとに、本文 / supplement / code への配分、非標準性、結果感度、再実装に必要な情報を決める。
-- `compile-results`: reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence の順に、結果の読み順を作る。
-- `compile-discussion`: observation / inference / mechanism_hypothesis / alternative_explanation / implication / prediction / limitation を分ける。
+- `compile-methods-section`: method unit ごとに、本文 / supplement / code への配分、非標準性、結果感度、再実装に必要な情報を決める。
+- `compile-results-section`: reader question -> one-sentence answer -> quantitative evidence -> figure -> consequence の順に、結果の読み順を作る。
+- `compile-discussion-section`: observation / inference / mechanism_hypothesis / alternative_explanation / implication / prediction / limitation を分ける。
 
 これにより、AI が持っている情報を均等に説明したり、内部 label を本文へ漏らしたり、limitation だけを過剰に複製したりする失敗を減らす。
 

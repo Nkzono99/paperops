@@ -42,8 +42,15 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 ### 原稿完成
 
-- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。content-first で、Start self-critique / Course-correction checkpoint / Completion self-critique を使い、main agent は orchestrator として `_paperops/defaults/workflow/subagent-roster.yml` の role brief、subagent report、integration decision を管理し、Writer の前に `story/`、`_paperops/defaults/workflow/`、`_paperops/defaults/workflow/focus-policy.yml`、`_paperops/defaults/contracts/storyline.yml`、必要な project overlay、`_paperops/notes/views/storyline.md`、`manuscript/writing-profile.yml`、`design-paper-storyline`、`plan-figure-story`、`paper_ir`、section compiler、`section-depth-check` を通す。
+- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める route-level skill。詳細な gate、subagent、feedback routing、section compiler、final checks は下記の専門 skill へ委譲する。
 - `audit-ai-draft`: AI 初稿をそのまま磨かず、claim / evidence / section compiler へ戻す routing skill として使う。
+- `content-first-gate`: 原稿本文 blocker が残る間に Submission hygiene や harness 改修へ逸れないか確認する。
+- `orchestrate-manuscript-subagents`: subagent roster、brief、privacy、subagent report、integration decision を管理する。
+- `route-manuscript-feedback`: Issue Router と Backward propagation で feedback を evidence / story / section / prose / submission loop へ戻す。
+- `compile-results-section`: `paper_ir` から Results の reader question、answer、quantitative evidence、figure、consequence を作る。
+- `compile-discussion-section`: `paper_ir` から Discussion functions、mechanism warrant、alternative、implication、decisive next test を作る。
+- `compile-methods-section`: `paper_ir` から Methods の method unit、main text / supplement / code 配分、再実装情報を作る。
+- `finalize-manuscript`: 完了宣言前に Finish criteria、review loop、mirror、引用、figure、AI disclosure、pre-submit を確認する。
 
 ### レビュー・査読
 
@@ -90,7 +97,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 原稿編集では `make concept-term-check` と `_paperops/notes/views/concept-terms.md` も使う。AI 初稿で起きやすい concept-term compression、つまり強い英語名詞句への単語化は、claim / argument / evidence card の意味を本文へ写すときの語彙問題として扱い、必要なら普通の文へほどく。
 
-Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は、`_paperops/defaults/workflow/focus-policy.yml` と `make content-first-check` で次の作業が本文 blocker を減らすことを確認し、subagent を使う場合は `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay に従って story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分ける。main agent / orchestrator は subagent report を `_paperops/review/rounds/` の integration decision と feedback card へ統合し、`story/` の high-level seed、`_paperops/defaults/contracts/storyline.yml`、必要な `_paperops/contracts/storyline.yml` overlay、`_paperops/notes/views/storyline.md` で story spine、Results hierarchy、Discussion functions を固定し、`_paperops/defaults/contracts/` の section 入出力契約、必要な `_paperops/contracts/` overlay、`_paperops/defaults/contracts/figures.yml`、`manuscript/writing-profile.yml` の paper type overlay と `section_depth` を確認し、`plan-figure-story` で visual obligation を本文生成前に固定する。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results`、`compile-discussion`、`compile-methods` の section compiler を通してから本文生成へ進む。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
+Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は薄い router として `content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`finalize-manuscript` を必要時に呼ぶ。story spine、Results hierarchy、Discussion functions は `design-paper-storyline` で固定し、`plan-figure-story` で visual obligation を本文生成前に固定する。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` を通してから本文生成へ進む。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
 
 ## 重要な境界
 

@@ -21,6 +21,8 @@ class SectionDepthCheckTest(unittest.TestCase):
                 "template/_paperops/defaults/contracts/results.yml",
                 "template/_paperops/defaults/contracts/discussion.yml",
                 "template/.agents/skills/finish-manuscript/SKILL.md",
+                "template/.agents/skills/compile-results-section/SKILL.md",
+                "template/.agents/skills/compile-discussion-section/SKILL.md",
                 "template/.agents/skills/review-public-manuscript/SKILL.md",
                 "docs/architecture.md",
                 "docs/skill-catalog.md",

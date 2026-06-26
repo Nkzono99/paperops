@@ -198,6 +198,8 @@ class WorkflowKernelTest(unittest.TestCase):
         cli_docs = (ROOT / "docs" / "cli.md").read_text(encoding="utf-8")
         skill = (
             ROOT / "template" / ".agents" / "skills" / "finish-manuscript" / "SKILL.md"
+        ).read_text(encoding="utf-8") + (
+            ROOT / "template" / ".agents" / "skills" / "route-manuscript-feedback" / "SKILL.md"
         ).read_text(encoding="utf-8")
 
         for required in [

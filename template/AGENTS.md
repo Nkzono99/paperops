@@ -16,7 +16,7 @@
 - `_paperops/notes/views/` は pure overview view と controlled authoring view を含む。`view_type` と `source_of_truth` を確認し、`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
 - `_paperops/defaults/contracts/` は paperops-managed の標準 section / figure story 契約であり、文章テンプレートではない。論文固有の契約差分だけ `_paperops/contracts/` に同名 overlay として置く。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
 - `_paperops/workflow/` は現在状態、review loop、stale 伝播、人間判断の状態正本である。標準の状態機械、focus policy、subagent roster は `_paperops/defaults/workflow/` にあり、本文編集前に `pops workflow status` を確認する。
-- subagent を使う執筆では `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay を読み、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
+- subagent を使う執筆では `orchestrate-manuscript-subagents` で `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay を読み、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
 - `_paperops/` の作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名は英語のままでよい。
 - raw PDF、未整理ファイル、個人環境の絶対パス、confidential reviewer correspondence は tracked file へ混ぜない。
 - `_handoff/` は人間から AI への一時受け取り箱であり、内容は Git 管理しない。
@@ -52,14 +52,14 @@ make figure-obligation-check
 3. 必要なら `/map-result-patterns` で raw result や figure data を `_paperops/evidence/` の card にする。
 4. 外部 export bundle を使う場合は `_paperops/refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-6. Writer の前に、`pops workflow status`、`_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、必要な `_paperops/contracts/` overlay、`manuscript/writing-profile.yml`、`/design-paper-storyline` を確認し、`make content-first-check` と `make section-depth-check` で次の作業が本文 blocker を減らすこと、Results / Discussion が薄すぎないことを確認する。`section_depth` は JA を `ja_chars`、EN を `en_words` で数える floor であり、水増し target にしない。
-7. subagent を使う場合は story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分け、orchestrator が `_paperops/review/rounds/` に integration decision を残す。
-8. `/plan-figure-story` で visual obligation と主図構成を決め、その後、必要な card と controlled authoring view から `paper_ir` を作り、Results / Discussion / Methods の section compiler で読者向け構造へ変換する。
+6. Writer の前に、`content-first-gate`、`pops workflow status`、`_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、必要な `_paperops/contracts/` overlay、`manuscript/writing-profile.yml`、`/design-paper-storyline` を確認し、`make content-first-check` と `make section-depth-check` で次の作業が本文 blocker を減らすこと、Results / Discussion が薄すぎないことを確認する。`section_depth` は JA を `ja_chars`、EN を `en_words` で数える floor であり、水増し target にしない。
+7. subagent を使う場合は `orchestrate-manuscript-subagents` で story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分け、orchestrator が `_paperops/review/rounds/` に integration decision を残す。
+8. `/plan-figure-story` で visual obligation と主図構成を決め、その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section` / `compile-discussion-section` / `compile-methods-section` で読者向け構造へ変換する。
 9. 強い英語名詞句や hyphen / slash compound は `_paperops/notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
 10. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
 11. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
-12. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映し、必要なら `pops workflow route-review` と `pops workflow invalidate <artifact-id>` で戻る深さと stale section を更新する。
-13. Submission hygiene は STRUCTURE_ACCEPTED 後にだけ主作業にする。完了前は `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `make pre-submit` を実行する。
+12. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映し、必要なら `route-manuscript-feedback`、`pops workflow route-review`、`pops workflow invalidate <artifact-id>` で戻る深さと stale section を更新する。
+13. Submission hygiene は STRUCTURE_ACCEPTED 後にだけ主作業にする。完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `make pre-submit` を実行する。
 
 ## スキル入口
 
@@ -71,6 +71,7 @@ make figure-obligation-check
 - 原稿調整: `/paragraph-surgery`, `/public-terminology-pass`, `/sync-ja-en`
 - 通読レビュー: `/start-manuscript-review`, `/collect-manuscript-review`, `/integrate-writing-feedback`
 - 査読: `/review-public-manuscript`, `/peer-review-manuscript`, `/respond-to-peer-review`
+- 原稿完成補助: `/finish-manuscript`, `/content-first-gate`, `/orchestrate-manuscript-subagents`, `/route-manuscript-feedback`, `/compile-results-section`, `/compile-discussion-section`, `/compile-methods-section`, `/finalize-manuscript`
 - 投稿前点検: `/plan-figure-story`, `/figure-story-audit`, `/venue-fit-review`, `/ai-disclosure-check`
 - アーカイブ・書き直し: `/archive-scratch`
 - 俯瞰・改善: `/open-paper-scan`, `/design-paper-storyline`, `/feedback-paper-harness`

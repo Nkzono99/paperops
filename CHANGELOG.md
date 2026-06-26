@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `finish-manuscript` を薄い route-level skill に整理し、詳細手順を `content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`compile-results-section`、`compile-discussion-section`、`compile-methods-section`、`finalize-manuscript` へ分割した。既存下流リポジトリで取り込む場合は、`.agents/skills/finish-manuscript` の更新、新規 skill と `.claude/skills/` wrapper、AGENTS / CLAUDE / README、skill catalog / architecture docs を同時に更新する必要がある。
 - `section-depth-check` と `manuscript/writing-profile.yml` の `section_depth` floor を追加し、Results / Discussion が短すぎる場合に manuscript content blocker として検出できるようにした。JA 原稿は TeX noise を除いた `ja_chars`、EN 原稿は TeX noise を除いた `en_words` で数え、長さは target ではなく floor として扱う。既存下流リポジトリで取り込む場合は、`scripts/check-section-depth.py`、Makefile の `section-depth-check` / `finish-manuscript-check` / `pre-submit` 接続、`manuscript/writing-profile.yml` の `section_depth`、Results / Discussion contract、AGENTS / CLAUDE / README、`finish-manuscript` / `review-public-manuscript` を更新する必要がある。
 - `check-section-depth.py` が PyYAML のない環境でも `manuscript/writing-profile.yml` の `section_depth` を読めるよう、最小限の YAML mapping fallback を追加した。
 - `AGENTS.project.md`、`CLAUDE.project.md`、`Makefile.project` を下流 scaffold に追加し、project 固有の恒久指示と tracked Make target を paperops-managed core から分離した。`Makefile.local` は ignored な個人環境用拡張として扱い、`.agents/skills/project-*` と `.claude/skills/project-*` は `update-paperops` の managed update 判定から除外する。
