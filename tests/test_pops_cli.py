@@ -420,6 +420,63 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("! AGENTS.md [agent guidance]", out)
             self.assertIn("--apply --force only when local edits may be replaced", out)
 
+    def test_detach_marks_managed_file_and_update_skips_it(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            agents = target / "AGENTS.md"
+            agents.write_text(
+                agents.read_text(encoding="utf-8") + "\nproject-specific fork\n",
+                encoding="utf-8",
+            )
+
+            code, out, err = run_cli(
+                ["detach", "AGENTS.md", str(target), "--reason", "project voice"]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("Detached managed file: AGENTS.md", out)
+            manifest = (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
+            self.assertIn("[detached]", manifest)
+            self.assertIn('paths = ["AGENTS.md"]', manifest)
+            self.assertIn("[detached.reasons]", manifest)
+            self.assertIn('"AGENTS.md" = "project voice"', manifest)
+
+            code, out, err = run_cli(
+                ["update-paperops", "--dry-run", "--only", "AGENTS.md", str(target)]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("detached managed files: 1", out)
+            self.assertIn("~ AGENTS.md [detached fork]", out)
+            self.assertIn("changed managed files: 0", out)
+
+    def test_detach_list_reports_registered_forks(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            run_cli(["detach", "AGENTS.md", str(target), "--reason", "project voice"])
+
+            code, out, err = run_cli(["detach", "list", str(target)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("Detached managed files:", out)
+            self.assertIn("AGENTS.md", out)
+            self.assertIn("project voice", out)
+
+    def test_detach_rejects_project_owned_extension_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+
+            code, out, err = run_cli(
+                ["detach", "AGENTS.project.md", str(target), "--reason", "not managed"]
+            )
+
+            self.assertEqual(code, 2)
+            self.assertIn("not a managed paperops file", err)
+            self.assertEqual("", out)
+
     def test_project_extension_skills_are_not_managed_update_paths(self) -> None:
         self.assertFalse(is_managed_update("AGENTS.project.md"))
         self.assertFalse(is_managed_update("CLAUDE.project.md"))

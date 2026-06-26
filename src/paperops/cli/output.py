@@ -77,8 +77,13 @@ def print_update_plan(plan: CopyPlan) -> None:
         print(f"    ! {rel} [{managed_update_surface(rel)}]")
     if len(plan.changed) > 20:
         print(f"    ... {len(plan.changed) - 20} more")
+    print(f"  detached managed files: {len(plan.detached)}")
+    for rel in plan.detached[:20]:
+        print(f"    ~ {rel} [detached fork]")
+    if len(plan.detached) > 20:
+        print(f"    ... {len(plan.detached) - 20} more")
     print(f"  unchanged managed files: {len(plan.unchanged)}")
-    if plan.missing or plan.changed:
+    if plan.missing or plan.changed or plan.detached:
         print("  update guidance:")
         if plan.missing:
             print("    + missing files can be added with --apply.")
@@ -88,6 +93,11 @@ def print_update_plan(plan: CopyPlan) -> None:
                 "only when local edits may be replaced."
             )
             print("    narrow review with --only <path-or-prefix> when useful.")
+        if plan.detached:
+            print(
+                "    ~ detached files are project forks; rebase them manually "
+                "when upstream changes matter."
+            )
         print(
             "    project content remains outside this plan: README.md, story/, "
             "manuscript/, submission/, and non-managed _paperops/ state."

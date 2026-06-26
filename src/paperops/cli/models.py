@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -11,6 +11,7 @@ class CopyPlan:
     changed: list[str]
     unchanged: list[str]
     excluded: list[str]
+    detached: list[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

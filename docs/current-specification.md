@@ -328,7 +328,7 @@ project-owned extension point:
 - `.agents/skills/project-*`
 - `.claude/skills/project-*`
 
-標準の `AGENTS.md`、`CLAUDE.md`、`Makefile`、配布 skill、scripts、`_paperops/defaults/` は managed core として更新される。下流での最適化は project-owned extension point と `_paperops/contracts/` / `_paperops/workflow/` overlay に寄せ、汎用化できる改善は upstream feedback として戻す。現在の defaults split では、managed default contracts / workflow と project overlay contracts / workflow を分離している。
+標準の `AGENTS.md`、`CLAUDE.md`、`Makefile`、配布 skill、scripts、`_paperops/defaults/` は managed core として更新される。下流での最適化は project-owned extension point と `_paperops/contracts/` / `_paperops/workflow/` overlay に寄せ、汎用化できる改善は upstream feedback として戻す。現在の defaults split では、managed default contracts / workflow と project overlay contracts / workflow を分離している。どうしても managed core file 自体を project fork にする場合は、`pops detach <path> --reason <reason>` で `.pops/manifest.toml` の `[detached]` に登録し、`update-paperops` の自動更新候補から外す。
 
 ## 10. 検証 scripts
 
@@ -437,6 +437,7 @@ scripts と CLI は互換期間中、modern path を優先し、なければ leg
 | paper_ir | Writer に渡す前の生成一時中間表現 | `.paperops/cache/` |
 | section compiler | card / contract / view を Methods / Results / Discussion の読者向け構造へ変換する段階 | `finish-manuscript` |
 | subagent roster | subagent role、allowed inputs、outputs、integration contract | `_paperops/defaults/workflow/subagent-roster.yml` + optional overlay |
+| detached fork | managed core file を project 固有に fork し、update-paperops から外す明示登録 | `.pops/manifest.toml` `[detached]` |
 | link registry | 外部 project / directory への portable link intent | `_paperops/refs/links.toml` |
 | local locations | 個人環境の実パスを ignored file へ分離する仕組み | `_paperops/refs/local/locations.toml` |
 | scratch archive | 過去稿を sealed split bundle として封印したもの | `_archives/` |

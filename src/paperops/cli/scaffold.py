@@ -15,7 +15,7 @@ from paperops.cli.constants import (
     PROJECT_EXTENSION_PATTERNS,
     SCAFFOLD_INCLUDE_EXCEPTIONS,
 )
-from paperops.cli.manifest import write_manifest
+from paperops.cli.manifest import detached_paths, write_manifest
 from paperops.cli.models import CopyPlan
 
 
@@ -82,6 +82,8 @@ def plan_managed_update(
     changed: list[str] = []
     unchanged: list[str] = []
     excluded: list[str] = []
+    detached = detached_paths(root)
+    detached_updates: list[str] = []
     for src in sorted(source.rglob("*")):
         rel = normalize_rel(src.relative_to(source))
         if src.is_dir():
@@ -93,6 +95,9 @@ def plan_managed_update(
         ):
             excluded.append(rel)
             continue
+        if rel in detached:
+            detached_updates.append(rel)
+            continue
         dst = root / rel
         if not dst.exists():
             missing.append(rel)
@@ -100,7 +105,13 @@ def plan_managed_update(
             unchanged.append(rel)
         else:
             changed.append(rel)
-    return CopyPlan(missing=missing, changed=changed, unchanged=unchanged, excluded=excluded)
+    return CopyPlan(
+        missing=missing,
+        changed=changed,
+        unchanged=unchanged,
+        excluded=excluded,
+        detached=detached_updates,
+    )
 
 
 def apply_managed_update(

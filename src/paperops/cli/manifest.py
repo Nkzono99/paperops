@@ -74,6 +74,58 @@ def write_cli_metadata(root: Path) -> None:
     manifest.write_text(dumps_manifest_toml(merged), encoding="utf-8")
 
 
+def detached_records(root: Path) -> dict[str, dict[str, str]]:
+    manifest = read_manifest(root / ".pops" / "manifest.toml")
+    detached = as_table(manifest.get("detached"))
+    raw_paths = detached.get("paths")
+    paths = [item for item in raw_paths if isinstance(item, str)] if isinstance(raw_paths, list) else []
+    reasons = as_table(detached.get("reasons"))
+    source_versions = as_table(detached.get("source_versions"))
+    timestamps = as_table(detached.get("timestamps"))
+    records: dict[str, dict[str, str]] = {}
+    for raw_path in paths:
+        rel = normalize_manifest_path(raw_path)
+        records[rel] = {
+            "reason": str(reasons.get(raw_path) or reasons.get(rel) or ""),
+            "source_version": str(source_versions.get(raw_path) or source_versions.get(rel) or ""),
+            "detached_at": str(timestamps.get(raw_path) or timestamps.get(rel) or ""),
+        }
+    return records
+
+
+def detached_paths(root: Path) -> set[str]:
+    return set(detached_records(root))
+
+
+def record_detached_file(root: Path, rel: str, *, reason: str) -> None:
+    manifest_path = root / ".pops" / "manifest.toml"
+    existing = read_manifest(manifest_path)
+    now = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    normalized = normalize_manifest_path(rel)
+
+    detached = as_table(existing.get("detached"))
+    raw_paths = detached.get("paths")
+    paths = [normalize_manifest_path(item) for item in raw_paths if isinstance(item, str)] if isinstance(raw_paths, list) else []
+    if normalized not in paths:
+        paths.append(normalized)
+    detached["paths"] = sorted(paths)
+
+    reasons = as_table(detached.get("reasons"))
+    source_versions = as_table(detached.get("source_versions"))
+    timestamps = as_table(detached.get("timestamps"))
+    reasons[normalized] = reason
+    source_versions[normalized] = package_version()
+    timestamps[normalized] = now
+    detached["reasons"] = reasons
+    detached["source_versions"] = source_versions
+    detached["timestamps"] = timestamps
+
+    merged = dict(existing)
+    merged["detached"] = detached
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+
+
 def cli_manifest_table(
     existing: object,
     *,
@@ -100,6 +152,10 @@ def upgrade_manifest_table(existing: object, *, now: str) -> dict[str, Any]:
     upgrade["chain_supported_since"] = UPGRADE_CHAIN_SUPPORTED_SINCE
     upgrade["updated_at"] = now
     return upgrade
+
+
+def normalize_manifest_path(path: str) -> str:
+    return path.strip().strip("/").replace("\\", "/")
 
 
 def read_manifest(path: Path) -> dict[str, Any]:

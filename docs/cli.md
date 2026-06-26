@@ -35,6 +35,8 @@ uvx --from paper-harness-cli pops doctor
 - `pops update-paperops --plan`: versioned upgrade chain を表示する。
 - `pops update-paperops --apply-chain`: checkpoint release ごとの `pops` を順に呼び替えて更新する。
 - `pops update-harness`: `update-paperops` の互換 alias。
+- `pops detach <managed-path> [path] --reason <reason>`: managed core file を project fork として manifest に登録する。
+- `pops detach list [path]`: detached fork と理由を表示する。
 - `pops migrate list`: 登録済み project-state migration を表示する。
 - `pops migrate show <id>`: migration item の目的、checkpoint、移動内容を表示する。
 - `pops migrate apply <id> [path] --dry-run`: migration の file operation を事前確認する。
@@ -77,7 +79,14 @@ project repo で paperops-managed core を直接編集し続けると update 時
 - `Makefile.local`: 個人環境だけの target や変数。`.gitignore` 対象
 - `.agents/skills/project-*`, `.claude/skills/project-*`: project 固有 skill。`update-paperops` の managed update 判定から除外する
 
-汎用化できる改善は project overlay に留め続けず、`/feedback-paper-harness` または `pops feedback` で upstream へ戻す。どうしても managed core 自体を project fork にする場合は、今後の detached fork manifest で明示的に扱う。
+汎用化できる改善は project overlay に留め続けず、`/feedback-paper-harness` または `pops feedback` で upstream へ戻す。どうしても managed core 自体を project fork にする場合は、`pops detach` で detached fork manifest に明示する。
+
+```sh
+uvx --from paper-harness-cli pops detach AGENTS.md . --reason "team-specific operator policy"
+uvx --from paper-harness-cli pops detach list
+```
+
+detached file は `.pops/manifest.toml` の `[detached]` に path、reason、source version、timestamp として記録される。`update-paperops` は detached file を missing / changed の更新候補から外し、`detached managed files` として報告する。upstream 側の更新を取り込みたい場合は、手動で rebase してから manifest から該当 path を外す。
 
 ## Upgrade Chain
 
