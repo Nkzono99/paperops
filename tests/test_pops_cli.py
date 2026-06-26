@@ -49,10 +49,13 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "_handoff" / "README.md").is_file())
             self.assertTrue((target / "_archives" / "AGENTS.md").is_file())
             self.assertTrue((target / "_archives" / "README.md").is_file())
-            self.assertTrue((target / "_paperops" / "contracts" / "results.yml").is_file())
-            self.assertTrue((target / "_paperops" / "contracts" / "methods.yml").is_file())
-            self.assertTrue((target / "_paperops" / "contracts" / "figures.yml").is_file())
-            self.assertTrue((target / "_paperops" / "workflow" / "machine.yml").is_file())
+            self.assertTrue((target / "_paperops" / "defaults" / "contracts" / "results.yml").is_file())
+            self.assertTrue((target / "_paperops" / "defaults" / "contracts" / "methods.yml").is_file())
+            self.assertTrue((target / "_paperops" / "defaults" / "contracts" / "figures.yml").is_file())
+            self.assertTrue((target / "_paperops" / "defaults" / "workflow" / "machine.yml").is_file())
+            self.assertTrue((target / "_paperops" / "defaults" / "workflow" / "focus-policy.yml").is_file())
+            self.assertTrue((target / "_paperops" / "defaults" / "workflow" / "subagent-roster.yml").is_file())
+            self.assertFalse((target / "_paperops" / "workflow" / "machine.yml").exists())
             self.assertTrue((target / "_paperops" / "workflow" / "current-state.yml").is_file())
             self.assertTrue((target / "_paperops" / "workflow" / "decisions.yml").is_file())
             self.assertTrue((target / "_paperops" / "workflow" / "round-summary.yml").is_file())
@@ -206,6 +209,7 @@ class PopsCliTest(unittest.TestCase):
 
         self.assertEqual(code, 0, err)
         self.assertIn("M0-0001", out)
+        self.assertIn("M0-0002", out)
         self.assertIn("_paperops", out)
 
         code, out, err = run_cli(["migrate", "show", "M0-0001"])
@@ -214,6 +218,29 @@ class PopsCliTest(unittest.TestCase):
         self.assertIn("Move legacy top-level paperops state into _paperops", out)
         self.assertIn("v0 checkpoint", out)
         self.assertIn("notes/ -> _paperops/notes/", out)
+
+        code, out, err = run_cli(["migrate", "show", "M0-0002"])
+
+        self.assertEqual(code, 0, err)
+        self.assertIn("Split managed defaults from project overlays", out)
+        self.assertIn("_paperops/defaults", out)
+        self.assertIn("No files are deleted or moved", out)
+
+    def test_migrate_defaults_split_is_guided_and_does_not_move_overlays(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "paper-demo"
+            run_cli(["init", str(project)])
+            overlay = project / "_paperops" / "contracts" / "results.yml"
+            overlay.parent.mkdir(parents=True, exist_ok=True)
+            overlay.write_text("project: overlay\n", encoding="utf-8")
+
+            code, out, err = run_cli(["migrate", "apply", "M0-0002", str(project)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("No file moves are planned.", out)
+            self.assertIn("Applied migration M0-0002", out)
+            self.assertTrue(overlay.is_file())
+            self.assertEqual("project: overlay\n", overlay.read_text(encoding="utf-8"))
 
     def test_migrate_legacy_apply_still_writes_manifest_without_moving_dirs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -337,41 +364,41 @@ class PopsCliTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             run_cli(["init", str(target)])
-            (target / "_paperops" / "contracts" / "results.yml").unlink()
+            (target / "_paperops" / "defaults" / "contracts" / "results.yml").unlink()
 
             code, out, err = run_cli(
-                ["update-paperops", "--dry-run", "--only", "_paperops/contracts/", str(target)]
+                ["update-paperops", "--dry-run", "--only", "_paperops/defaults/contracts/", str(target)]
             )
 
             self.assertEqual(code, 0, err)
-            self.assertIn("+ _paperops/contracts/results.yml [section contract]", out)
+            self.assertIn("+ _paperops/defaults/contracts/results.yml [section contract]", out)
 
             code, _out, err = run_cli(
-                ["update-paperops", "--apply", "--only", "_paperops/contracts/", str(target)]
+                ["update-paperops", "--apply", "--only", "_paperops/defaults/contracts/", str(target)]
             )
 
             self.assertEqual(code, 0, err)
-            self.assertTrue((target / "_paperops" / "contracts" / "results.yml").is_file())
+            self.assertTrue((target / "_paperops" / "defaults" / "contracts" / "results.yml").is_file())
 
     def test_update_paperops_can_add_missing_workflow_kernel(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             run_cli(["init", str(target)])
-            (target / "_paperops" / "workflow" / "machine.yml").unlink()
+            (target / "_paperops" / "defaults" / "workflow" / "machine.yml").unlink()
 
             code, out, err = run_cli(
-                ["update-paperops", "--dry-run", "--only", "_paperops/workflow/", str(target)]
+                ["update-paperops", "--dry-run", "--only", "_paperops/defaults/workflow/", str(target)]
             )
 
             self.assertEqual(code, 0, err)
-            self.assertIn("+ _paperops/workflow/machine.yml [workflow state machine]", out)
+            self.assertIn("+ _paperops/defaults/workflow/machine.yml [workflow state machine]", out)
 
             code, _out, err = run_cli(
-                ["update-paperops", "--apply", "--only", "_paperops/workflow/", str(target)]
+                ["update-paperops", "--apply", "--only", "_paperops/defaults/workflow/", str(target)]
             )
 
             self.assertEqual(code, 0, err)
-            self.assertTrue((target / "_paperops" / "workflow" / "machine.yml").is_file())
+            self.assertTrue((target / "_paperops" / "defaults" / "workflow" / "machine.yml").is_file())
 
     def test_update_paperops_explains_changed_managed_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

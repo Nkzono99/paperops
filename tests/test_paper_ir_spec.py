@@ -61,7 +61,7 @@ class PaperIrSpecTest(unittest.TestCase):
                 self.assertIn(required, skill)
 
     def test_section_contracts_define_io_not_prose_templates(self) -> None:
-        contracts_root = ROOT / "template" / "_paperops" / "contracts"
+        contracts_root = ROOT / "template" / "_paperops" / "defaults" / "contracts"
         expected_files = [
             "README.md",
             "introduction.yml",
@@ -73,6 +73,7 @@ class PaperIrSpecTest(unittest.TestCase):
         for name in expected_files:
             with self.subTest(name=name):
                 self.assertTrue((contracts_root / name).is_file())
+        self.assertTrue((ROOT / "template" / "_paperops" / "contracts" / "README.md").is_file())
 
         methods = (contracts_root / "methods.yml").read_text(encoding="utf-8")
         for required in [

@@ -59,15 +59,15 @@ uvx --from paper-harness-cli pops doctor
 - `CLAUDE.md`
 - `Makefile`
 - `TROUBLESHOOTING.md`
-- `_paperops/contracts/`
-- `_paperops/workflow/`
+- `_paperops/defaults/contracts/`
+- `_paperops/defaults/workflow/`
 - `scripts/`
 - `.agents/`
 - `.claude/`
 - `.github/ISSUE_TEMPLATE/`
 - `.github/PULL_REQUEST_TEMPLATE.md`
 
-`README.md`、`story/`、`manuscript/`、`submission/`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/refs/`、`_paperops/notes/` はプロジェクト固有内容として自動更新しない。`manuscript/writing-profile.yml` は論文ごとの overlay なので、既存プロジェクトでは手動で追加・調整する。
+`README.md`、`story/`、`manuscript/`、`submission/`、`_paperops/contracts/`、`_paperops/workflow/current-state.yml`、`_paperops/workflow/decisions.yml`、`_paperops/workflow/round-summary.yml`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/refs/`、`_paperops/notes/` はプロジェクト固有内容として自動更新しない。`manuscript/writing-profile.yml` は論文ごとの overlay なので、既存プロジェクトでは手動で追加・調整する。
 
 project repo で paperops-managed core を直接編集し続けると update 時に drift が増える。通常は次の project-owned extension point を使う。
 
@@ -102,9 +102,10 @@ uvx --from paper-harness-cli pops migrate list
 uvx --from paper-harness-cli pops migrate show M0-0001
 uvx --from paper-harness-cli pops migrate apply M0-0001 --dry-run
 uvx --from paper-harness-cli pops migrate apply M0-0001
+uvx --from paper-harness-cli pops migrate show M0-0002
 ```
 
-現在の `M0-0001` は、旧 top-level の `contracts/`、`workflow/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` を `_paperops/` 配下へ移す。source と target の両方がある場合は conflict として停止し、ファイルは削除しない。migration item の正本は [migrations/v0.md](migrations/v0.md) を参照する。
+現在の `M0-0001` は、旧 top-level の `contracts/`、`workflow/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`notes/` を `_paperops/` 配下へ移す。source と target の両方がある場合は conflict として停止し、ファイルは削除しない。`M0-0002` は `_paperops/defaults/` へ managed default を分離する guide-backed item で、既存 `_paperops/contracts/` や `_paperops/workflow/` の project overlay を自動削除しない。migration item の正本は [migrations/v0.md](migrations/v0.md) を参照する。
 
 ## Link Registry
 
@@ -126,7 +127,7 @@ runops queue へ渡す予定の request は、下流 repo で `make research-req
 
 `paper_ir` は、card 正本と controlled authoring view から Writer に渡す context を作る生成一時物である。`pops` の永続管理対象ではなく、通常は skill が必要に応じて作る。手書き正本は `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` に置き、`paper_ir` は Methods / Results / Discussion の section compiler へ渡す一時的な変換結果として扱う。
 
-section compiler は、`_paperops/contracts/<section>.yml` の入出力契約と `manuscript/writing-profile.yml` の paper type / venue overlay を重ねる。`plan-section` で作る一時 plan は必要なら `.paperops/cache/` に置き、Git 管理しない。
+section compiler は、`_paperops/defaults/contracts/<section>.yml` の入出力契約、必要な `_paperops/contracts/<section>.yml` project overlay、`manuscript/writing-profile.yml` の paper type / venue overlay を重ねる。`plan-section` で作る一時 plan は必要なら `.paperops/cache/` に置き、Git 管理しない。
 
 ## Workflow
 
@@ -138,7 +139,7 @@ uvx --from paper-harness-cli pops workflow invalidate CLM-0003
 uvx --from paper-harness-cli pops workflow route-review --issue-class story-loop --apply
 ```
 
-`_paperops/workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`_paperops/workflow/current-state.yml` は現在状態と section の `depends_on` を持つ。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
+`_paperops/defaults/workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`_paperops/workflow/machine.yml` があれば project overlay として優先する。`_paperops/workflow/current-state.yml` は現在状態と section の `depends_on` を持つ。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
 
 `submission_loop` は STRUCTURE_ACCEPTED 後の route である。`pops workflow route-review --issue-class submission-loop --apply` は、storyline / section / structure guard が未達なら拒否される。原稿完成作業中に author metadata、license、readiness-check、Makefile、script、skill 改修へ逸れそうな場合は、`make content-first-check` または `scripts/check-content-first.py --phase progress --intent <intent> --strict` で進路を確認する。
 

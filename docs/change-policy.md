@@ -7,7 +7,7 @@
 ## 判断ルール
 
 1. 構造的な書き換えよりも追加的な変更を優先する。
-2. `template/AGENTS.md`、`template/CLAUDE.md`、`template/story/`、`template/_paperops/contracts/`、`template/_paperops/workflow/`、`template/.claude/skills/`、`template/.agents/skills/`、`template/scripts/` はユーザー向けインターフェースとして扱う。
+2. `template/AGENTS.md`、`template/CLAUDE.md`、`template/story/`、`template/_paperops/defaults/`、`template/_paperops/contracts/`、`template/_paperops/workflow/`、`template/.claude/skills/`、`template/.agents/skills/`、`template/scripts/` はユーザー向けインターフェースとして扱う。
 3. 下流リポジトリにファイル名変更、ディレクトリ移動、フックの書き換えを強いる変更には、文書化されたマイグレーションノートが必要。
 4. チェックイン済みのスターターアーティファクトでない限り、生成されたコンテンツをバージョン管理に含めない。
 5. 下流プロジェクトの作成導線は `pops init` に統一する。

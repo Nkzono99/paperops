@@ -42,7 +42,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 ### 原稿完成
 
-- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。content-first で、Start self-critique / Course-correction checkpoint / Completion self-critique を使い、main agent は orchestrator として `_paperops/workflow/subagent-roster.yml` の role brief、subagent report、integration decision を管理し、Writer の前に `story/`、`_paperops/workflow/`、`_paperops/workflow/focus-policy.yml`、`_paperops/contracts/storyline.yml`、`_paperops/notes/views/storyline.md`、`manuscript/writing-profile.yml`、`design-paper-storyline`、`plan-figure-story`、`paper_ir`、section compiler、`section-depth-check` を通す。
+- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める。content-first で、Start self-critique / Course-correction checkpoint / Completion self-critique を使い、main agent は orchestrator として `_paperops/defaults/workflow/subagent-roster.yml` の role brief、subagent report、integration decision を管理し、Writer の前に `story/`、`_paperops/defaults/workflow/`、`_paperops/defaults/workflow/focus-policy.yml`、`_paperops/defaults/contracts/storyline.yml`、必要な project overlay、`_paperops/notes/views/storyline.md`、`manuscript/writing-profile.yml`、`design-paper-storyline`、`plan-figure-story`、`paper_ir`、section compiler、`section-depth-check` を通す。
 - `audit-ai-draft`: AI 初稿をそのまま磨かず、claim / evidence / section compiler へ戻す routing skill として使う。
 
 ### レビュー・査読
@@ -90,7 +90,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 原稿編集では `make concept-term-check` と `_paperops/notes/views/concept-terms.md` も使う。AI 初稿で起きやすい concept-term compression、つまり強い英語名詞句への単語化は、claim / argument / evidence card の意味を本文へ写すときの語彙問題として扱い、必要なら普通の文へほどく。
 
-Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は、`_paperops/workflow/focus-policy.yml` と `make content-first-check` で次の作業が本文 blocker を減らすことを確認し、subagent を使う場合は `_paperops/workflow/subagent-roster.yml` に従って story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分ける。main agent / orchestrator は subagent report を `_paperops/review/rounds/` の integration decision と feedback card へ統合し、`story/` の high-level seed、`_paperops/contracts/storyline.yml`、`_paperops/notes/views/storyline.md` で story spine、Results hierarchy、Discussion functions を固定し、`_paperops/contracts/` の section 入出力契約、`_paperops/contracts/figures.yml`、`manuscript/writing-profile.yml` の paper type overlay と `section_depth` を確認し、`plan-figure-story` で visual obligation を本文生成前に固定する。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results`、`compile-discussion`、`compile-methods` の section compiler を通してから本文生成へ進む。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
+Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は、`_paperops/defaults/workflow/focus-policy.yml` と `make content-first-check` で次の作業が本文 blocker を減らすことを確認し、subagent を使う場合は `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay に従って story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分ける。main agent / orchestrator は subagent report を `_paperops/review/rounds/` の integration decision と feedback card へ統合し、`story/` の high-level seed、`_paperops/defaults/contracts/storyline.yml`、必要な `_paperops/contracts/storyline.yml` overlay、`_paperops/notes/views/storyline.md` で story spine、Results hierarchy、Discussion functions を固定し、`_paperops/defaults/contracts/` の section 入出力契約、必要な `_paperops/contracts/` overlay、`_paperops/defaults/contracts/figures.yml`、`manuscript/writing-profile.yml` の paper type overlay と `section_depth` を確認し、`plan-figure-story` で visual obligation を本文生成前に固定する。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results`、`compile-discussion`、`compile-methods` の section compiler を通してから本文生成へ進む。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
 
 ## 重要な境界
 
@@ -100,12 +100,12 @@ Writer には card 正本や gate 語彙を直接読み込ませすぎない。`
 - `_paperops/notes/views/concept-terms.md` は概念語ビューであり、claim / argument / evidence card の意味と本文語彙の対応を記録する。
 - `_paperops/notes/views/*.md` は `view_type` と `source_of_truth` の front matter を持つ。`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
 - `paper_ir` は生成一時物であり、手書き正本にはしない。
-- `_paperops/contracts/` は文章テンプレートではなく section 入出力契約である。
-- `_paperops/contracts/figures.yml` は figure story の契約であり、missing figure を本文生成前に見つけるための visual obligation を定義する。
-- `_paperops/contracts/storyline.yml` は個別 section より上位の story 契約であり、reader_promise、evidence_ladder、Results hierarchy、Discussion functions を定義する。
+- `_paperops/defaults/contracts/` は文章テンプレートではなく paperops-managed の section 入出力契約である。論文固有差分は `_paperops/contracts/` overlay に置く。
+- `_paperops/defaults/contracts/figures.yml` は figure story の標準契約であり、missing figure を本文生成前に見つけるための visual obligation を定義する。
+- `_paperops/defaults/contracts/storyline.yml` は個別 section より上位の story 標準契約であり、reader_promise、evidence_ladder、Results hierarchy、Discussion functions を定義する。
 - `manuscript/writing-profile.yml` は論文種別・投稿先ごとの overlay であり、`section_depth` の soft floor も置く。
-- `_paperops/workflow/` は階層型状態機械と stale 伝播の状態正本である。review 後は Issue Router で戻る深さを決める。
-- `_paperops/workflow/focus-policy.yml` と `check-content-first.py` は、本文 blocker 未解決のまま Submission hygiene や downstream harness だけへ逸れる作業を検出する。
+- `_paperops/defaults/workflow/` は階層型状態機械、focus policy、subagent roster の標準規約である。`_paperops/workflow/` は現在状態、review loop、人間判断、任意の workflow overlay を置く。
+- `_paperops/defaults/workflow/focus-policy.yml` と `check-content-first.py` は、本文 blocker 未解決のまま Submission hygiene や downstream harness だけへ逸れる作業を検出する。
 - 作業用ドキュメントは原則日本語で書く。
 - raw correspondence、未整理ファイル、個人環境の実パスは tracked file へ混ぜない。
 - `_archives/` は sealed scratch archive。通常の skill は読まず、明示的な restore / inspect / compare 指示がある場合だけ扱う。

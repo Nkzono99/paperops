@@ -37,6 +37,8 @@ HARNESS_PATHS = (
     "Makefile",
     ".agents/skills/",
     ".claude/skills/",
+    "_paperops/defaults/workflow/machine.yml",
+    "_paperops/defaults/workflow/focus-policy.yml",
     "_paperops/workflow/machine.yml",
     "_paperops/workflow/focus-policy.yml",
     "workflow/machine.yml",

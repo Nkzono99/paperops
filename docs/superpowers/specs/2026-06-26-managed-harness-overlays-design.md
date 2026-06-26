@@ -30,7 +30,7 @@ The normal path is managed core plus project overlay. Detached fork is an escape
 Introduce a clearer split under `_paperops/`.
 
 ```text
-_paperops/harness/
+_paperops/defaults/
   contracts/          paperops-managed default contracts
   workflow/           paperops-managed default workflow machine and guard defaults
 
@@ -44,7 +44,7 @@ The first implementation slice may keep existing paths working, but new docs and
 
 Readers that need contracts or workflow configuration should load data in this order:
 
-1. Managed base from `_paperops/harness/<kind>/`.
+1. Managed base from `_paperops/defaults/<kind>/`.
 2. Project overlay from `_paperops/<kind>/`.
 3. Local ignored files only for machine-specific values where applicable.
 
@@ -79,7 +79,7 @@ Project repositories should customize through explicit extension points:
 When a project must edit a managed core file, the user should make that explicit. The future CLI shape can be:
 
 ```sh
-pops detach _paperops/harness/workflow/machine.yml --reason "venue-specific review loop"
+pops detach _paperops/defaults/workflow/machine.yml --reason "venue-specific review loop"
 pops detach list
 ```
 
@@ -87,10 +87,10 @@ Detached files should be recorded in `.pops/manifest.toml` with path, reason, so
 
 ## Migration Policy
 
-Moving managed defaults from `_paperops/contracts/` and `_paperops/workflow/` into `_paperops/harness/` is a breaking layout change and should be represented as a migration item. The migration must preserve project-specific content:
+Moving managed defaults from `_paperops/contracts/` and `_paperops/workflow/` into `_paperops/defaults/` is a breaking layout change and should be represented as a migration item. The migration must preserve project-specific content:
 
-- If a project has only unmodified scaffold defaults, move them to `_paperops/harness/`.
-- If a project has edited contract or workflow files, leave project files in `_paperops/contracts/` or `_paperops/workflow/` as overlays and install fresh managed defaults under `_paperops/harness/`.
+- Install fresh managed defaults under `_paperops/defaults/` through `update-paperops`.
+- Leave existing `_paperops/contracts/` or `_paperops/workflow/` files in place as project overlays until explicitly reviewed.
 - Never delete project content during automatic migration.
 
 This aligns with the checkpoint-based migration model: each release carries only the migration from the previous checkpoint to itself, and older migrations are reached by `update-paperops --apply-chain`.
@@ -113,4 +113,4 @@ The first slice should avoid a large rewrite. It should:
 2. Narrow managed update rules enough to protect project-owned extension files.
 3. Document the ownership model in `docs/cli.md`, `docs/current-specification.md`, and downstream guidance.
 4. Add tests for update boundaries and extension files.
-5. Add a migration note for the future `_paperops/harness/` move without forcing that move in the same change unless the implementation remains small.
+5. Add a migration note for the future `_paperops/defaults/` move without forcing that move in the same change unless the implementation remains small.

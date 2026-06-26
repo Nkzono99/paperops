@@ -45,7 +45,7 @@ class FinishManuscriptSkillTest(unittest.TestCase):
             "finish-manuscript-check",
             "next_action_reduces_content_blocker",
             "Orchestrator/subagent mode",
-            "workflow/subagent-roster.yml",
+            "_paperops/defaults/workflow/subagent-roster.yml",
             "main agent",
             "orchestrator",
             "story_architect",

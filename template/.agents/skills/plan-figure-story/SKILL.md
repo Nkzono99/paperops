@@ -9,7 +9,8 @@ description: Use before drafting Results or locking ARCHITECTURE_LOCKED, to desi
 
 ## 最初に読むファイル
 
-- `_paperops/contracts/figures.yml`
+- `_paperops/defaults/contracts/figures.yml`
+- `_paperops/contracts/figures.yml` if project overlay exists
 - `manuscript/writing-profile.yml`
 - `_paperops/claims/claims/`
 - `_paperops/claims/gates/`
@@ -26,7 +27,7 @@ description: Use before drafting Results or locking ARCHITECTURE_LOCKED, to desi
 ## 手順
 
 1. 中心 claim ごとに、文章だけでは読者が理解できない要素を `visual_obligations` として列挙する。
-2. `_paperops/contracts/figures.yml` と `manuscript/writing-profile.yml` を重ね、paper type が要求する role を確認する。
+2. `_paperops/defaults/contracts/figures.yml`、必要な `_paperops/contracts/figures.yml` overlay、`manuscript/writing-profile.yml` を重ね、paper type が要求する role を確認する。
 3. computational modeling では、空間分解された状態量が新規性の入口なら `model_or_state_visualization`、経路依存推定量や threshold が claim を支えるなら `estimator_or_decision_criterion` を原則 required にする。
 4. 利用可能な result、figure data、linked artifact、既存 plot script を確認し、採用候補を `.paperops/cache/figure-candidates.yml` に一時整理する。生成物なので Git 管理しない。
 5. 採用する図だけを `_paperops/evidence/figures/` の figure card に昇格し、`satisfies_visual_obligations` に対応する `VO-*` ID を記録する。

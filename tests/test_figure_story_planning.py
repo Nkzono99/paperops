@@ -13,10 +13,10 @@ def read_template(path: str) -> str:
 
 class FigureStoryPlanningTemplateTest(unittest.TestCase):
     def test_template_has_figure_contract_and_story_planning_skill(self) -> None:
-        contract = read_template("template/_paperops/contracts/figures.yml")
+        contract = read_template("template/_paperops/defaults/contracts/figures.yml")
         skill = read_template("template/.agents/skills/plan-figure-story/SKILL.md")
         profile = read_template("template/manuscript/writing-profile.yml")
-        machine = read_template("template/_paperops/workflow/machine.yml")
+        machine = read_template("template/_paperops/defaults/workflow/machine.yml")
         current_state = read_template("template/_paperops/workflow/current-state.yml")
         makefile = read_template("template/Makefile")
 

@@ -34,10 +34,10 @@ CANARY_RELS = (
     "refs/source-reach/canary/capture.generated.json",
 )
 REQUIRED_RELS = (
-    "workflow/machine.yml",
-    "workflow/current-state.yml",
-    "workflow/decisions.yml",
-    "workflow/round-summary.yml",
+    "_paperops/defaults/workflow/machine.yml",
+    "_paperops/workflow/current-state.yml",
+    "_paperops/workflow/decisions.yml",
+    "_paperops/workflow/round-summary.yml",
     "scripts/check-workflow-state.py",
 )
 

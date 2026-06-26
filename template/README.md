@@ -22,7 +22,7 @@
 1. `/resume-session` で前回の状態を読む。
 2. `story/story-seed.md` で、研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を確認する。
 3. `pops workflow status` と `pops workflow next` で、全体状態と stale section を確認する。
-4. 必要なら `_paperops/workflow/subagent-roster.yml`、`_paperops/contracts/`、`manuscript/writing-profile.yml` を重ね、`design-paper-storyline`、`make content-first-check`、`make section-depth-check` で story spine、Results hierarchy、Discussion functions、Results / Discussion の薄さ、次の作業が本文 blocker を減らすことを確認する。
+4. 必要なら `_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、project 固有の `_paperops/contracts/` overlay、`manuscript/writing-profile.yml` を重ね、`design-paper-storyline`、`make content-first-check`、`make section-depth-check` で story spine、Results hierarchy、Discussion functions、Results / Discussion の薄さ、次の作業が本文 blocker を減らすことを確認する。
 5. subagent を使う場合、main agent は orchestrator として role brief と integration decision を `_paperops/review/rounds/` に残す。
 6. `plan-figure-story` で本文生成前の visual obligation と主図構成を決め、`paper_ir` と section compiler で Results / Discussion / Methods の読者向け構造を作る。
 7. `manuscript/ja/` を中心に書く。
@@ -38,9 +38,10 @@
 - `_paperops/review/`: feedback / review round / response card の正本
 - `_paperops/requests/`: analysis / writing request card の正本
 - `_paperops/notes/views/`: `view_type` / `source_of_truth` つきの pure overview view と controlled authoring view
-- `_paperops/contracts/`: section と figure story の読者質問、入力、出力、禁止構造
-- `_paperops/workflow/`: 全体状態、section 状態、issue class、stale 伝播
-- `_paperops/workflow/subagent-roster.yml`: subagent role、delegation contract、orchestrator の integration decision 契約
+- `_paperops/defaults/contracts/`: paperops-managed の標準 section / figure story 契約
+- `_paperops/contracts/`: project 固有の contract overlay
+- `_paperops/workflow/`: 現在状態、section 状態、issue class、stale 伝播、人間判断
+- `_paperops/defaults/workflow/subagent-roster.yml`: subagent role、delegation contract、orchestrator の integration decision 契約
 - `manuscript/writing-profile.yml`: 論文種別・投稿先ごとの overlay と `section_depth` floor。JA は `ja_chars`、EN は `en_words` として数え、長さは target ではなく floor として扱う。
 
 `paper_ir` は card と controlled authoring view から Writer に渡す context を作る生成一時物であり、手書き正本にはしない。
@@ -65,7 +66,7 @@
 - `/source-reach-scan`, `/research-related-work`: 外部 source と関連研究を整理する。
 - `/map-result-patterns`, `/scientific-gate`: 結果を証拠カードにし、主張として書けるか判定する。
 - `/plan-figure-story`: 本文生成前に claim から visual obligation、Figure 1、主図/補足図、missing figure を設計する。
-- `/finish-manuscript`: `/goal` で原稿完成まで進め、Writer 前に `_paperops/workflow/subagent-roster.yml`、`plan-figure-story`、`paper_ir`、section compiler、`section-depth-check` を通す。main agent は orchestrator として subagent の review を統合する。
+- `/finish-manuscript`: `/goal` で原稿完成まで進め、Writer 前に `_paperops/defaults/workflow/subagent-roster.yml`、`plan-figure-story`、`paper_ir`、section compiler、`section-depth-check` を通す。main agent は orchestrator として subagent の review を統合する。
 - `/design-paper-storyline`: 原稿全体の story spine、Results hierarchy、Discussion functions を俯瞰し、Submission hygiene へ逸れる前に本文 blocker を固定する。
 - `/review-public-manuscript`, `/peer-review-manuscript`: 公開原稿や投稿前原稿を読者・査読者目線で読む。
 - `/respond-to-peer-review`: 実査読コメントへの返答を整理する。
@@ -80,8 +81,9 @@
 - `manuscript/`: 日英原稿、共有アセット、ミラー制御、投稿先情報
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX
 - `_paperops/`: AI/ハーネス内部 state
-- `_paperops/contracts/`: Introduction / Methods / Results / Discussion / Conclusion と figure story の入出力契約
-- `_paperops/workflow/`: 階層型状態機械、現在状態、review round summary、人間判断
+- `_paperops/defaults/`: paperops-managed の標準 contract と workflow kernel
+- `_paperops/contracts/`: Introduction / Methods / Results / Discussion / Conclusion と figure story の project overlay
+- `_paperops/workflow/`: 現在状態、review round summary、人間判断、任意の workflow overlay
 - `_paperops/refs/`: 文献、外部 source、外部 link、ローカルパス alias
 - `_paperops/evidence/`, `_paperops/claims/`, `_paperops/review/`, `_paperops/requests/`: 論文を書く前後のカード層
 - `_paperops/notes/`: AI 利用、再現性、handoff、decision log、controlled authoring view

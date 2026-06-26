@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class SubagentOrchestratorTemplateTest(unittest.TestCase):
     def test_template_defines_subagent_roster_contract(self) -> None:
-        roster_path = ROOT / "template" / "_paperops" / "workflow" / "subagent-roster.yml"
+        roster_path = ROOT / "template" / "_paperops" / "defaults" / "workflow" / "subagent-roster.yml"
         self.assertTrue(roster_path.exists(), "subagent roster contract is missing")
 
         roster = json.loads(roster_path.read_text(encoding="utf-8"))
@@ -91,7 +91,7 @@ class SubagentOrchestratorTemplateTest(unittest.TestCase):
         )
 
         for required in [
-            "_paperops/workflow/subagent-roster.yml",
+            "_paperops/defaults/workflow/subagent-roster.yml",
             "orchestrator",
             "subagent",
             "integration decision",

@@ -166,7 +166,7 @@ class ContentFirstCheckTest(unittest.TestCase):
 
     def test_makefiles_and_template_define_content_first_gate(self) -> None:
         expected_paths = [
-            ROOT / "template" / "_paperops" / "workflow" / "focus-policy.yml",
+            ROOT / "template" / "_paperops" / "defaults" / "workflow" / "focus-policy.yml",
             SCRIPT,
         ]
         for path in expected_paths:

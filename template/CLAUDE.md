@@ -13,9 +13,9 @@
 - `story/` は人間向けの構想層である。研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を書く。
 - `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` はカード正本である。
 - `_paperops/notes/views/` は pure overview view と controlled authoring view を含む。`view_type` と `source_of_truth` を確認し、`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
-- `_paperops/contracts/` は section と figure story の入出力契約であり、文章テンプレートではない。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
-- `_paperops/workflow/` は全体状態、section 状態、issue class、stale 伝播の状態正本である。本文編集前に `pops workflow status` を確認する。
-- subagent を使う執筆では `_paperops/workflow/subagent-roster.yml` を読み、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
+- `_paperops/defaults/contracts/` は paperops-managed の標準 section / figure story 契約であり、文章テンプレートではない。論文固有の契約差分だけ `_paperops/contracts/` に同名 overlay として置く。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
+- `_paperops/workflow/` は現在状態、review loop、stale 伝播、人間判断の状態正本である。標準の状態機械、focus policy、subagent roster は `_paperops/defaults/workflow/` にあり、本文編集前に `pops workflow status` を確認する。
+- subagent を使う執筆では `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay を読み、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
 - `_paperops/` の作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名は英語のままでよい。
 - raw PDF、未整理ファイル、個人環境の絶対パス、confidential reviewer correspondence は tracked file へ混ぜない。
 - `_handoff/` は人間から AI への一時受け取り箱であり、内容は Git 管理しない。
@@ -51,7 +51,7 @@ make figure-obligation-check
 3. 必要なら `/map-result-patterns` で raw result や figure data を `_paperops/evidence/` の card にする。
 4. 外部 export bundle を使う場合は `_paperops/refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-6. Writer の前に、`pops workflow status`、`_paperops/workflow/subagent-roster.yml`、`_paperops/contracts/`、`manuscript/writing-profile.yml`、`/design-paper-storyline` を確認し、`make content-first-check` と `make section-depth-check` で次の作業が本文 blocker を減らすこと、Results / Discussion が薄すぎないことを確認する。`section_depth` は JA を `ja_chars`、EN を `en_words` で数える floor であり、水増し target にしない。
+6. Writer の前に、`pops workflow status`、`_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、必要な `_paperops/contracts/` overlay、`manuscript/writing-profile.yml`、`/design-paper-storyline` を確認し、`make content-first-check` と `make section-depth-check` で次の作業が本文 blocker を減らすこと、Results / Discussion が薄すぎないことを確認する。`section_depth` は JA を `ja_chars`、EN を `en_words` で数える floor であり、水増し target にしない。
 7. subagent を使う場合は story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分け、orchestrator が `_paperops/review/rounds/` に integration decision を残す。
 8. `/plan-figure-story` で visual obligation と主図構成を決め、その後、必要な card と controlled authoring view から `paper_ir` を作り、Results / Discussion / Methods の section compiler で読者向け構造へ変換する。
 9. 強い英語名詞句や hyphen / slash compound は `_paperops/notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
@@ -85,8 +85,9 @@ Makefile.project               project-owned の tracked Make target
 manuscript/                    日英原稿、共有アセット、ミラー制御、投稿先情報
 submission/                    投稿先公式テンプレートと最終提出用 TeX
 _paperops/                     AI/ハーネス内部 state
-_paperops/contracts/           section と figure story の読者質問、入力、出力、禁止構造
-_paperops/workflow/            全体状態、section 状態、review loop、stale 伝播、subagent roster
+_paperops/defaults/            paperops-managed の標準 contract と workflow kernel
+_paperops/contracts/           project 固有の contract overlay
+_paperops/workflow/            現在状態、review loop、stale 伝播、人間判断、任意の workflow overlay
 _paperops/refs/                文献、外部 source、外部 link、import state、local path alias
 _paperops/evidence/            result / figure / source card
 _paperops/claims/              claim / scientific gate / argument card

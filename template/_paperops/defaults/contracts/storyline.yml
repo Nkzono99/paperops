@@ -45,8 +45,8 @@ inputs:
   - _paperops/claims/arguments/
   - _paperops/evidence/results/
   - _paperops/evidence/figures/
-  - _paperops/contracts/results.yml
-  - _paperops/contracts/discussion.yml
+  - _paperops/defaults/contracts/results.yml
+  - _paperops/defaults/contracts/discussion.yml
   - manuscript/writing-profile.yml
 
 outputs:

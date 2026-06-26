@@ -17,9 +17,10 @@ uvx --from paper-harness-cli pops migrate list
 uvx --from paper-harness-cli pops migrate show M0-0001
 uvx --from paper-harness-cli pops migrate apply M0-0001 --dry-run
 uvx --from paper-harness-cli pops migrate apply M0-0001
+uvx --from paper-harness-cli pops migrate show M0-0002
 ```
 
-`--dry-run` で移動対象と conflict を確認してから apply する。CLI-backed migration は同じ project に複数回実行しても壊れないことを前提にする。判断が必要な migration は CLI handler にせず、この guide と skill で扱う。
+`--dry-run` で移動対象と conflict を確認してから apply する。CLI-backed migration は同じ project に複数回実行しても壊れないことを前提にする。判断が必要な migration は destructive handler にせず、`show` で手順を確認できる guide-backed item として扱う。
 
 ## Migration Item Format
 
@@ -42,7 +43,6 @@ uvx --from paper-harness-cli pops migrate apply M0-0001
 
 ## Planned Migration Candidates
 
-- `_paperops/contracts/` と `_paperops/workflow/` に混在している managed defaults と project overlay を、将来 checkpoint で `_paperops/harness/contracts/`、`_paperops/harness/workflow/` と project-owned overlay へ分離する。自動 migration では project 固有編集を削除せず、unmodified default だけを managed harness 側へ移す。
 - managed file を project fork として扱う detached fork manifest は、CLI と update policy が揃ってから migration item 化する。
 
 現在の migration item は [v0.md](v0.md) に置く。

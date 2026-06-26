@@ -25,6 +25,7 @@ class Migration:
     checkpoint: str
     summary: str
     moves: tuple[tuple[str, str], ...]
+    notes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -46,9 +47,27 @@ INTERNAL_LAYOUT_MIGRATION = Migration(
     moves=tuple((f"{name}/", f"_paperops/{name}/") for name in LEGACY_INTERNAL_DIRS),
 )
 
+DEFAULTS_SPLIT_MIGRATION = Migration(
+    migration_id="M0-0002",
+    title="Split managed defaults from project overlays",
+    checkpoint="v0 checkpoint for _paperops/defaults",
+    summary=(
+        "Keeps project-specific contract and workflow edits as overlays while "
+        "installing paperops-managed defaults under _paperops/defaults via "
+        "update-paperops."
+    ),
+    moves=(),
+    notes=(
+        "Run `pops update-paperops --apply` to add missing _paperops/defaults files.",
+        "Leave existing _paperops/contracts/* and _paperops/workflow/machine.yml "
+        "as project overlays until you explicitly review them.",
+        "No files are deleted or moved by this migration item.",
+    ),
+)
+
 
 def registered_migrations() -> tuple[Migration, ...]:
-    return (INTERNAL_LAYOUT_MIGRATION,)
+    return (INTERNAL_LAYOUT_MIGRATION, DEFAULTS_SPLIT_MIGRATION)
 
 
 def get_migration(migration_id: str) -> Migration | None:
@@ -79,9 +98,6 @@ def has_modern_or_legacy_project_markers(candidate: Path) -> bool:
 
 
 def plan_migration(root: Path, migration: Migration) -> MigrationPlan:
-    if migration.migration_id != INTERNAL_LAYOUT_MIGRATION.migration_id:
-        raise ValueError(f"unsupported migration: {migration.migration_id}")
-
     moves: list[tuple[str, str]] = []
     conflicts: list[tuple[str, str]] = []
     skipped: list[str] = []

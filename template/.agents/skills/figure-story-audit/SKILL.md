@@ -18,7 +18,8 @@ description: Use when checking whether figures support claims, evidence, caption
 - 対象の figure/table caption
 - caption を参照する本文 block
 - `_paperops/notes/reproducibility.md`
-- `_paperops/contracts/figures.yml`
+- `_paperops/defaults/contracts/figures.yml`
+- `_paperops/contracts/figures.yml` if project overlay exists
 
 ## 手順
 

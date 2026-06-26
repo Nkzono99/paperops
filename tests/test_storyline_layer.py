@@ -14,7 +14,7 @@ def read_template(path: str) -> str:
 class StorylineLayerTemplateTest(unittest.TestCase):
     def test_template_has_storyline_contract_skill_view_and_workflow_guards(self) -> None:
         expected_paths = [
-            "template/_paperops/contracts/storyline.yml",
+            "template/_paperops/defaults/contracts/storyline.yml",
             "template/_paperops/notes/views/storyline.md",
             "template/.agents/skills/design-paper-storyline/SKILL.md",
             "template/.claude/skills/design-paper-storyline/SKILL.md",
@@ -26,10 +26,10 @@ class StorylineLayerTemplateTest(unittest.TestCase):
         combined = "\n".join(
             read_template(path)
             for path in [
-                "template/_paperops/contracts/storyline.yml",
+                "template/_paperops/defaults/contracts/storyline.yml",
                 "template/_paperops/notes/views/storyline.md",
                 "template/.agents/skills/design-paper-storyline/SKILL.md",
-                "template/_paperops/workflow/machine.yml",
+                "template/_paperops/defaults/workflow/machine.yml",
                 "template/_paperops/workflow/current-state.yml",
                 "template/Makefile",
                 "Makefile",

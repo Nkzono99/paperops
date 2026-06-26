@@ -15,9 +15,17 @@ def managed_update_surface(rel: str) -> str:
         return "make workflow"
     if rel == "TROUBLESHOOTING.md":
         return "operator docs"
-    if rel.startswith("_paperops/contracts/") or rel.startswith("contracts/"):
+    if (
+        rel.startswith("_paperops/defaults/contracts/")
+        or rel.startswith("_paperops/contracts/")
+        or rel.startswith("contracts/")
+    ):
         return "section contract"
-    if rel.startswith("_paperops/workflow/") or rel.startswith("workflow/"):
+    if (
+        rel.startswith("_paperops/defaults/workflow/")
+        or rel.startswith("_paperops/workflow/")
+        or rel.startswith("workflow/")
+    ):
         return "workflow state machine"
     if rel.startswith("scripts/"):
         return "validation/build script"

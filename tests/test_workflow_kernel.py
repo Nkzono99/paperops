@@ -11,11 +11,15 @@ from tests.helpers import ROOT, copy_template, run_cli, run_python_script
 class WorkflowKernelTest(unittest.TestCase):
     def test_template_defines_workflow_kernel_and_make_target(self) -> None:
         workflow_root = ROOT / "template" / "_paperops" / "workflow"
-        for name in ["README.md", "machine.yml", "current-state.yml", "decisions.yml", "round-summary.yml"]:
+        defaults_root = ROOT / "template" / "_paperops" / "defaults" / "workflow"
+        for name in ["README.md", "current-state.yml", "decisions.yml", "round-summary.yml"]:
             with self.subTest(name=name):
                 self.assertTrue((workflow_root / name).is_file())
+        for name in ["README.md", "machine.yml", "focus-policy.yml", "subagent-roster.yml"]:
+            with self.subTest(name=name):
+                self.assertTrue((defaults_root / name).is_file())
 
-        machine = (workflow_root / "machine.yml").read_text(encoding="utf-8")
+        machine = (defaults_root / "machine.yml").read_text(encoding="utf-8")
         state = (workflow_root / "current-state.yml").read_text(encoding="utf-8")
         makefile = (ROOT / "template" / "Makefile").read_text(encoding="utf-8")
 
@@ -59,7 +63,7 @@ class WorkflowKernelTest(unittest.TestCase):
     def test_workflow_check_validates_subagent_roster_schema(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)
-            roster_path = root / "_paperops" / "workflow" / "subagent-roster.yml"
+            roster_path = root / "_paperops" / "defaults" / "workflow" / "subagent-roster.yml"
             roster = json.loads(roster_path.read_text(encoding="utf-8"))
             del roster["roles"][0]["outputs"]
             roster_path.write_text(
@@ -83,7 +87,7 @@ class WorkflowKernelTest(unittest.TestCase):
     def test_workflow_check_rejects_public_reader_private_manuscript_inputs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)
-            roster_path = root / "_paperops" / "workflow" / "subagent-roster.yml"
+            roster_path = root / "_paperops" / "defaults" / "workflow" / "subagent-roster.yml"
             roster = json.loads(roster_path.read_text(encoding="utf-8"))
             public_reader = next(role for role in roster["roles"] if role["id"] == "public_reader")
             public_reader["allowed_inputs"].append("manuscript/ja/")

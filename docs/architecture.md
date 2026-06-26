@@ -32,8 +32,10 @@
 
 `_paperops/` の内部は次のように分ける。
 
-- `_paperops/contracts/`: Storyline と Introduction / Methods / Results / Discussion / Conclusion / Figure story の入出力契約
-- `_paperops/workflow/`: 階層型状態機械、現在状態、review round summary、人間判断、subagent roster
+- `_paperops/defaults/contracts/`: paperops-managed の Storyline と Introduction / Methods / Results / Discussion / Conclusion / Figure story 標準契約
+- `_paperops/defaults/workflow/`: paperops-managed の状態機械、focus policy、subagent roster
+- `_paperops/contracts/`: 論文固有の contract overlay
+- `_paperops/workflow/`: 現在状態、review round summary、人間判断、任意の workflow overlay
 - `_paperops/refs/`: 文献サマリー、関連研究調査、外部 source、外部 project link、外部 bundle import state
 - `_paperops/evidence/`: result / figure / source card
 - `_paperops/claims/`: claim / scientific gate / argument card
@@ -57,9 +59,11 @@
 | `_paperops/notes/views/` の pure overview view | 正本カードを俯瞰する | 派生 view | 該当 card 更新後に手動または半自動で更新 |
 | `_paperops/notes/views/` の controlled authoring view | 本文での呼び方、条件名、概念語、読者向け語彙、story spine を統制する | 編集可能な統制 view | `/design-paper-storyline`, `/public-terminology-pass`, `/contextualize-conditions`, `/polish-ai-draft` |
 | `paper_ir` | card / view から Writer に渡す材料を section ごとにまとめる | 生成一時物 | `finish-manuscript` の section compiler phase |
-| `_paperops/contracts/` | story spine、section ごとの読者質問、入力、出力、禁止構造と figure story 契約を定める | 既定契約 | `finish-manuscript` の `design-paper-storyline` / plan-section / `plan-figure-story` / audit-section |
+| `_paperops/defaults/contracts/` | story spine、section ごとの読者質問、入力、出力、禁止構造と figure story の標準契約を定める | managed default | `finish-manuscript` の `design-paper-storyline` / plan-section / `plan-figure-story` / audit-section |
+| `_paperops/contracts/` | 標準契約から外れる論文固有の差分だけを同名 file で置く | project overlay | 人間または Agent の明示更新 |
 | `manuscript/writing-profile.yml` | 論文種別、投稿先、分野別要求を section 契約へ重ねる | プロジェクト設定 | 初期 setup、投稿先変更時 |
-| `_paperops/workflow/` | 全体状態、section 状態、issue class、stale 伝播、content-first focus policy、subagent role roster を管理する | 状態正本 | `pops workflow`, `finish-manuscript` の Issue Router / orchestrator |
+| `_paperops/defaults/workflow/` | 状態機械、content-first focus policy、subagent role roster の標準規約を管理する | managed default | `pops workflow`, `finish-manuscript` の Issue Router / orchestrator |
+| `_paperops/workflow/` | 現在状態、section 状態、review loop、stale 伝播、人間判断、任意の workflow overlay を管理する | project state | `pops workflow`, review loop |
 | `.paperops/cache/` | section plan や一時 IR を置く | Git 管理しない生成物 | `finish-manuscript` の plan-section |
 | `manuscript/` | 読者へ出す本文 | 成果物 | Writer / editor pass |
 | `submission/` | 投稿先に合わせた提出版 | 派生成果物 | `prepare-submission` 相当の投稿前作業 |
@@ -75,7 +79,7 @@
 原稿を書く前の story 設計は一段ではなく、次の三層に分ける。
 
 1. `story/` の story seed: 研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を書く。
-2. `_paperops/notes/views/storyline.md` と `_paperops/contracts/storyline.yml`: story seed を Results hierarchy、Discussion functions、section 契約へ落とす中間言語にする。
+2. `_paperops/notes/views/storyline.md`、`_paperops/defaults/contracts/storyline.yml`、必要な `_paperops/contracts/storyline.yml` overlay: story seed を Results hierarchy、Discussion functions、section 契約へ落とす中間言語にする。
 3. `manuscript/`: 実際の結果、図、解析、レビューを反映した読者向け本文を書く。
 
 workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDENCE_READY -> STORY_RECONCILED -> ARCHITECTURE_LOCKED -> SECTION_PLANNED -> ...` を採用する。
@@ -95,9 +99,9 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 3. Abstract、Conclusion、主要図表に使う claim は `_paperops/claims/gates/` で readiness を確認する。
 4. 本文に出る強い名詞句は `_paperops/notes/views/concept-terms.md` で確認し、accepted term、普通の文へほどく語、avoid 語を分ける。
 5. `pops workflow status` と `pops workflow next` で、全体状態、stale section、次に通す guard を確認する。
-6. `_paperops/workflow/focus-policy.yml` と `make content-first-check` で、次の作業が本文 blocker を減らす intent かを確認する。
-7. subagent を使う場合は `_paperops/workflow/subagent-roster.yml` を読み、main agent / orchestrator が role brief、privacy、`subagent_report`、integration decision を管理する。
-8. `_paperops/contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ねて、section が答える読者質問、必要出力、`section_depth` floor を確認する。
+6. `_paperops/defaults/workflow/focus-policy.yml` と `make content-first-check` で、次の作業が本文 blocker を減らす intent かを確認する。
+7. subagent を使う場合は `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay を読み、main agent / orchestrator が role brief、privacy、`subagent_report`、integration decision を管理する。
+8. `_paperops/defaults/contracts/<section>.yml`、必要な `_paperops/contracts/<section>.yml` overlay、`manuscript/writing-profile.yml` を重ねて、section が答える読者質問、必要出力、`section_depth` floor を確認する。
 9. 本文生成前に `design-paper-storyline` で story spine、Results hierarchy、Discussion functions を固定する。
 10. 本文生成前に `plan-figure-story` で中心 claim から visual obligation を作り、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図の欠落を確認する。
 11. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
@@ -111,9 +115,9 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 
 `paper_ir` は、既存 card と controlled authoring view から作る生成一時物である。新しい手書き正本にはしない。目的は、研究 integrity 層と文章層の間に、読者向けの変換契約を置くことである。
 
-`_paperops/contracts/` は文章テンプレートではなく、storyline と section ごとの入出力契約である。`_paperops/contracts/storyline.yml` は reader_promise、central_claim、evidence_ladder、Results hierarchy、Discussion functions を個別 section より上位で固定する。Introduction は `problem -> unresolved tension -> precise gap -> approach -> contribution -> scope` のような論理機能を持ち、Methods / Results / Discussion はそれぞれ情報配置、subsection 契約、推論型を明示する。`manuscript/writing-profile.yml` は `paper_type: computational_modeling` のような論文種別 overlay と投稿先要求を重ねる。
+`_paperops/defaults/contracts/` は文章テンプレートではなく、storyline と section ごとの入出力契約である。`_paperops/defaults/contracts/storyline.yml` は reader_promise、central_claim、evidence_ladder、Results hierarchy、Discussion functions を個別 section より上位で固定する。論文固有に変える場合だけ `_paperops/contracts/` に同名 overlay を置く。Introduction は `problem -> unresolved tension -> precise gap -> approach -> contribution -> scope` のような論理機能を持ち、Methods / Results / Discussion はそれぞれ情報配置、subsection 契約、推論型を明示する。`manuscript/writing-profile.yml` は `paper_type: computational_modeling` のような論文種別 overlay と投稿先要求を重ねる。
 
-`_paperops/contracts/figures.yml` は figure story 契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
+`_paperops/defaults/contracts/figures.yml` は figure story 標準契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。論文固有の figure contract は `_paperops/contracts/figures.yml` overlay へ置く。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
 
 section compiler は、`finish-manuscript` の中で Writer の前に走る段階として扱う。Results / Discussion は `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。
 
@@ -129,7 +133,7 @@ section compiler は、`finish-manuscript` の中で Writer の前に走る段�
 
 各 section は `UNPLANNED`、`PLANNED`、`DRAFTED`、`AUDITED`、`ACCEPTED`、`STALE` の局所状態を持つ。claim、result、figure、contract などの upstream artifact が変わった場合は、過去状態へ機械的に戻すのではなく、依存 section を `STALE` にする。`pops workflow invalidate CLM-0003` は、`depends_on` に `CLM-0003@...` を持つ section だけを stale にし、artifact 種別に応じた loop route を付ける。
 
-`_paperops/workflow/machine.yml` は状態、transition、guard、loop policy の既定規約であり、`_paperops/workflow/current-state.yml` は現在状態である。`_paperops/workflow/focus-policy.yml` は content / evidence / prose / submission / harness intent の優先順位と許可条件を持つ。`_paperops/workflow/subagent-roster.yml` は orchestrator が subagent の role、allowed inputs、output、integration decision を管理する契約である。
+`_paperops/defaults/workflow/machine.yml` は状態、transition、guard、loop policy の既定規約であり、`_paperops/workflow/current-state.yml` は現在状態である。`_paperops/defaults/workflow/focus-policy.yml` は content / evidence / prose / submission / harness intent の優先順位と許可条件を持つ。`_paperops/defaults/workflow/subagent-roster.yml` は orchestrator が subagent の role、allowed inputs、output、integration decision を管理する契約である。論文固有の workflow 差分が必要な場合だけ `_paperops/workflow/` に同名 overlay を置く。
 
 ## 設計原則
 

@@ -7,6 +7,7 @@ from pathlib import Path
 
 
 INTERNAL_ROOT = "_paperops"
+DEFAULTS_ROOT = "_paperops/defaults"
 LEGACY_INTERNAL_DIRS = {
     "claims",
     "contracts",
@@ -24,9 +25,12 @@ def internal_path(root: Path, *parts: str) -> Path:
 
     rel = _relative_path(*parts)
     modern = root / INTERNAL_ROOT / rel
+    defaults = root / DEFAULTS_ROOT / rel
     legacy = root / rel
     if modern.exists():
         return modern
+    if defaults.exists():
+        return defaults
     if legacy.exists():
         return legacy
     return modern
@@ -46,9 +50,13 @@ def internal_glob(root: Path, pattern: str) -> list[Path]:
 
     normalized = pattern.strip("/").replace("\\", "/")
     modern_root = root / INTERNAL_ROOT
+    defaults_root = root / DEFAULTS_ROOT
     modern_matches = sorted(modern_root.glob(normalized)) if modern_root.exists() else []
     if modern_matches:
         return modern_matches
+    defaults_matches = sorted(defaults_root.glob(normalized)) if defaults_root.exists() else []
+    if defaults_matches:
+        return defaults_matches
     return sorted(root.glob(normalized))
 
 

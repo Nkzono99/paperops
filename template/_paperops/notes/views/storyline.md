@@ -4,7 +4,7 @@ source_of_truth:
   - _paperops/claims/arguments/
   - _paperops/claims/claims/
   - _paperops/evidence/
-  - _paperops/contracts/storyline.yml
+  - _paperops/defaults/contracts/storyline.yml
 authoritative_for:
   - story_spine
   - reader_promise

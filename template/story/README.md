@@ -13,4 +13,4 @@
 - ここは result inventory ではない。
 - ここは Results section の詳細 outline ではない。
 - ここは `_paperops/evidence/` や `_paperops/claims/` の正本を置く場所ではない。
-- 詳細な Results hierarchy、Discussion functions、section plan は `_paperops/notes/views/storyline.md` と `_paperops/contracts/` 側で扱う。
+- 詳細な Results hierarchy、Discussion functions、section plan は `_paperops/notes/views/storyline.md`、`_paperops/defaults/contracts/`、必要な `_paperops/contracts/` overlay 側で扱う。

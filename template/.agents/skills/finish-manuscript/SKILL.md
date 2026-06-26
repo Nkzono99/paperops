@@ -13,17 +13,17 @@ description: Use when /goal asks Codex to finish a manuscript from scratch or re
 
 Writer に生の card ontology を直接渡さない。本文生成の前に `design-paper-storyline` で editorial architect として `_paperops/notes/views/storyline.md` を確認し、必要な card と controlled authoring view から `paper_ir` を作り、section compiler で Methods / Results / Discussion の読者向け契約へ変換する。
 
-section contract は文章テンプレートではなく入出力契約として扱う。`_paperops/contracts/<section>.yml` と `manuscript/writing-profile.yml` を重ね、`plan-section -> draft-section -> audit-section` の順で、読者質問、入力、出力、禁止構造、論文種別 overlay を確認する。
+section contract は文章テンプレートではなく入出力契約として扱う。`_paperops/defaults/contracts/<section>.yml` を標準契約とし、必要なら `_paperops/contracts/<section>.yml` overlay と `manuscript/writing-profile.yml` を重ね、`plan-section -> draft-section -> audit-section` の順で、読者質問、入力、出力、禁止構造、論文種別 overlay を確認する。
 
 Results / Discussion では `manuscript/writing-profile.yml` の `section_depth` を確認する。`ja_chars` は日本語原稿の TeX noise を除いた文字数、`en_words` は英語原稿の TeX noise を除いた word count として扱う。これは length floor であって target ではない。短い場合は水増しせず、missing evidence、comparison、mechanism warrant、boundary、implication、next test を特定して section plan へ戻る。
 
-図表は本文生成後の飾りとして扱わない。本文生成前に `plan-figure-story` で claim から visual obligation を作り、`_paperops/contracts/figures.yml` と `manuscript/writing-profile.yml` の figure requirement を確認し、`figure-obligation-check` で missing figure を検出する。
+図表は本文生成後の飾りとして扱わない。本文生成前に `plan-figure-story` で claim から visual obligation を作り、`_paperops/defaults/contracts/figures.yml`、必要な `_paperops/contracts/figures.yml` overlay、`manuscript/writing-profile.yml` の figure requirement を確認し、`figure-obligation-check` で missing figure を検出する。
 
 workflow は直列パイプラインではなく階層型状態機械として扱う。本文編集前に `pops workflow status` と `pops workflow next` を確認し、`UNDER_REVIEW` 後は Issue Router で evidence / story / section / prose / submission loop のどこへ戻るかを決める。
 
 ## Orchestrator/subagent mode
 
-subagent を使える環境では、main agent は writer ではなく **orchestrator** として動く。`_paperops/workflow/subagent-roster.yml` を読み、今の blocker に効く role だけを選んで短い brief を渡す。subagent reports are not manuscript edits: subagent の出力は `subagent_report`、feedback card 案、route recommendation、claim/evidence/section plan 更新案であり、同じ manuscript block を複数 agent に直接編集させない。
+subagent を使える環境では、main agent は writer ではなく **orchestrator** として動く。`_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay を読み、今の blocker に効く role だけを選んで短い brief を渡す。subagent reports are not manuscript edits: subagent の出力は `subagent_report`、feedback card 案、route recommendation、claim/evidence/section plan 更新案であり、同じ manuscript block を複数 agent に直接編集させない。
 
 標準 role は次の通り。
 
@@ -94,17 +94,22 @@ subagent brief には role、target artifact、allowed inputs、forbidden inputs
 - `manuscript/venue.md`
 - `_paperops/notes/views/scientific-gate.md`
 - `_paperops/notes/views/storyline.md`
-- `_paperops/contracts/storyline.yml`
+- `_paperops/defaults/contracts/storyline.yml`
+- `_paperops/contracts/storyline.yml` if project overlay exists
 - `_paperops/notes/views/claim-evidence-map.md`
 - `_paperops/notes/views/result-pattern-map.md`
 - `_paperops/notes/views/concept-terms.md`
 - `_paperops/notes/related-work-map.md`
 - `_paperops/notes/reviewer-model.md`
-- `_paperops/contracts/`
-- `_paperops/contracts/figures.yml`
-- `_paperops/workflow/machine.yml`
+- `_paperops/defaults/contracts/`
+- `_paperops/contracts/` if project overlays exist
+- `_paperops/defaults/contracts/figures.yml`
+- `_paperops/contracts/figures.yml` if project overlay exists
+- `_paperops/defaults/workflow/machine.yml`
+- `_paperops/workflow/machine.yml` if project overlay exists
 - `_paperops/workflow/current-state.yml`
-- `_paperops/workflow/subagent-roster.yml`
+- `_paperops/defaults/workflow/subagent-roster.yml`
+- `_paperops/workflow/subagent-roster.yml` if project overlay exists
 - `_paperops/workflow/round-summary.yml`
 - `_paperops/workflow/decisions.yml`
 - `manuscript/writing-profile.yml`
@@ -143,7 +148,7 @@ Review 後は、Reviewer にそのまま改稿させない。`_paperops/review/f
 
 `paper_ir` の前に `design-paper-storyline` を使い、editorial architect として `reader_promise`、`central_claim`、`evidence_ladder`、`scope_boundary`、Results hierarchy、Discussion functions を確認する。これが未記入なら、section draft ではなく story_loop / section_loop へ戻す。
 
-各 section は、対応する `_paperops/contracts/<section>.yml` を読む。`manuscript/writing-profile.yml` に paper type、投稿先、分野別要求があれば契約へ overlay する。生成した section plan は必要な場合だけ `.paperops/cache/section-plan-<section>.yml` に置き、Git 管理しない。
+各 section は、対応する `_paperops/defaults/contracts/<section>.yml` を標準契約として読み、同名の `_paperops/contracts/<section>.yml` があれば project overlay として重ねる。`manuscript/writing-profile.yml` に paper type、投稿先、分野別要求があれば契約へ overlay する。生成した section plan は必要な場合だけ `.paperops/cache/section-plan-<section>.yml` に置き、Git 管理しない。
 
 各 IR item には、必要な範囲で次を含める。
 

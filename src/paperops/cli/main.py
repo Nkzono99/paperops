@@ -536,8 +536,16 @@ def cmd_migrate_show(migration_id: str) -> int:
     print(f"- summary: {migration.summary}")
     print("")
     print("Moves:")
-    for source, target in migration.moves:
-        print(f"- {source} -> {target}")
+    if migration.moves:
+        for source, target in migration.moves:
+            print(f"- {source} -> {target}")
+    else:
+        print("- none")
+    if migration.notes:
+        print("")
+        print("Notes:")
+        for note in migration.notes:
+            print(f"- {note}")
     return 0
 
 
@@ -560,7 +568,9 @@ def cmd_migrate_apply(migration_id: str, path: Path, *, dry_run: bool) -> int:
         for source, target in plan.moves:
             print(f"- {source} -> {target}")
     else:
-        print("No legacy paths need moving.")
+        print("No file moves are planned.")
+        for note in migration.notes:
+            print(f"- {note}")
 
     if plan.conflicts:
         print("Migration conflict: target path already exists for these sources:", file=sys.stderr)

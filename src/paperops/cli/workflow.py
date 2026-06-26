@@ -13,8 +13,10 @@ from paperops.cli.project import find_project_root
 
 
 WORKFLOW_REL = Path("_paperops") / "workflow"
+DEFAULTS_WORKFLOW_REL = Path("_paperops") / "defaults" / "workflow"
 LEGACY_WORKFLOW_REL = Path("workflow")
 MACHINE_REL = WORKFLOW_REL / "machine.yml"
+DEFAULT_MACHINE_REL = DEFAULTS_WORKFLOW_REL / "machine.yml"
 CURRENT_REL = WORKFLOW_REL / "current-state.yml"
 ROUND_REL = WORKFLOW_REL / "round-summary.yml"
 LEGACY_MACHINE_REL = LEGACY_WORKFLOW_REL / "machine.yml"
@@ -81,7 +83,9 @@ def cmd_workflow(args: argparse.Namespace) -> int:
     args.project_root = root
 
     try:
-        machine = load_mapping(workflow_file(root, MACHINE_REL, LEGACY_MACHINE_REL))
+        machine = load_mapping(
+            workflow_file(root, MACHINE_REL, LEGACY_MACHINE_REL, DEFAULT_MACHINE_REL)
+        )
         current = load_mapping(workflow_file(root, CURRENT_REL, LEGACY_CURRENT_REL))
     except WorkflowError as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -121,10 +125,19 @@ def workflow_status(current: dict[str, Any]) -> int:
     return 0
 
 
-def workflow_file(root: Path, modern_rel: Path, legacy_rel: Path) -> Path:
+def workflow_file(
+    root: Path,
+    modern_rel: Path,
+    legacy_rel: Path,
+    default_rel: Path | None = None,
+) -> Path:
     modern = root / modern_rel
     if modern.exists():
         return modern
+    if default_rel is not None:
+        default = root / default_rel
+        if default.exists():
+            return default
     legacy = root / legacy_rel
     if legacy.exists():
         return legacy

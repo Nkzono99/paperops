@@ -43,8 +43,9 @@ Makefile.project               project-owned tracked Make target
 manuscript/                    日英原稿、共有アセット、ミラー制御、投稿先情報
 submission/                    投稿先公式テンプレートと最終提出用 TeX
 _paperops/                     AI/ハーネス内部 state
-_paperops/contracts/           section と figure story の入出力契約
-_paperops/workflow/            全体状態、section 状態、review loop、stale 伝播、subagent roster
+_paperops/defaults/            paperops-managed の標準 contract と workflow kernel
+_paperops/contracts/           project 固有の contract overlay
+_paperops/workflow/            現在状態、review loop、stale 伝播、人間判断、任意の workflow overlay
 _paperops/refs/                文献、外部 source、外部 link、import state、local path alias
 _paperops/evidence/            result / figure / source card
 _paperops/claims/              claim / scientific gate / argument card
@@ -139,7 +140,7 @@ flowchart TD
   Analysis --> EvidenceCards["_paperops/evidence/* cards"]
   EvidenceCards --> ClaimCards["_paperops/claims/* cards"]
   ClaimCards --> StoryReconcile["_paperops/notes/views/storyline.md"]
-  StoryReconcile --> Contracts["_paperops/contracts/*"]
+  StoryReconcile --> Contracts["_paperops/defaults/contracts/* + overlays"]
   Contracts --> PaperIR["paper_ir in .paperops/cache/"]
   PaperIR --> SectionCompiler["compile-methods / compile-results / compile-discussion"]
   SectionCompiler --> Manuscript["manuscript/ja and manuscript/en"]
@@ -229,7 +230,7 @@ tracked file に個人環境の絶対パスを混ぜない。
 
 ## 7. 契約の概念
 
-`_paperops/contracts/` は文章テンプレートではない。論文全体、section、figure story が、読者のどの疑問に答え、何を入力にし、どの出力を作り、何を禁止するかを定める契約である。
+`_paperops/defaults/contracts/` は文章テンプレートではない。論文全体、section、figure story が、読者のどの疑問に答え、何を入力にし、どの出力を作り、何を禁止するかを定める paperops-managed の標準契約である。論文固有に変える場合だけ `_paperops/contracts/` に同名 overlay を置く。
 
 主な契約:
 
@@ -298,8 +299,8 @@ section compiler:
 - `CLAUDE.md`
 - `Makefile`
 - `TROUBLESHOOTING.md`
-- `_paperops/contracts/`
-- `_paperops/workflow/`
+- `_paperops/defaults/contracts/`
+- `_paperops/defaults/workflow/`
 - `scripts/`
 - `.agents/`
 - `.claude/`
@@ -327,7 +328,7 @@ project-owned extension point:
 - `.agents/skills/project-*`
 - `.claude/skills/project-*`
 
-標準の `AGENTS.md`、`CLAUDE.md`、`Makefile`、配布 skill、scripts は managed core として更新される。下流での最適化は project-owned extension point に寄せ、汎用化できる改善は upstream feedback として戻す。将来の `_paperops/harness/` migration では、managed default contracts / workflow と project overlay contracts / workflow をさらに分離する。
+標準の `AGENTS.md`、`CLAUDE.md`、`Makefile`、配布 skill、scripts、`_paperops/defaults/` は managed core として更新される。下流での最適化は project-owned extension point と `_paperops/contracts/` / `_paperops/workflow/` overlay に寄せ、汎用化できる改善は upstream feedback として戻す。現在の defaults split では、managed default contracts / workflow と project overlay contracts / workflow を分離している。
 
 ## 10. 検証 scripts
 
@@ -339,7 +340,7 @@ project-owned extension point:
 - `make pre-submit`: 投稿前 profile
 - `make smoke`: テンプレート管理 repo から `template/` を検証する smoke
 
-内部 path は `template/scripts/paperops_paths.py` の `internal_path` が解決する。`_paperops/<rel>` があれば優先し、なければ legacy `<rel>` を読む。
+内部 path は `template/scripts/paperops_paths.py` の `internal_path` が解決する。`_paperops/<rel>` の project overlay / state があれば優先し、なければ `_paperops/defaults/<rel>`、最後に legacy `<rel>` を読む。
 
 ## 11. build helper
 
@@ -354,7 +355,7 @@ project-owned extension point:
 
 ## 12. subagent ハーネス
 
-`_paperops/workflow/subagent-roster.yml` は、main agent / orchestrator が subagent をどう使うかの契約である。
+`_paperops/defaults/workflow/subagent-roster.yml` は、main agent / orchestrator が subagent をどう使うかの標準契約である。論文固有に role や allowed input を変える場合だけ `_paperops/workflow/subagent-roster.yml` overlay を置く。
 
 主な role:
 
@@ -419,7 +420,7 @@ scripts と CLI は互換期間中、modern path を優先し、なければ leg
 
 破壊的な project-state 変更は migration item にする。`v1.1 -> v1.2` の migration は `v1.2.x` が提供し、`v1.3.x` 以降へ同じ handler を無期限に持ち越さない。`v1.1 -> v1.4` のように複数 checkpoint を跨ぐ場合は、`update-paperops --apply-chain` で中間 checkpoint を踏み、各 checkpoint の `pops migrate apply <id>` を dry-run 後に適用する。
 
-現在の `_paperops/` 移行は `M0-0001` として登録する。
+現在の `_paperops/` 移行は `M0-0001` として登録する。managed defaults と project overlay の分離は `M0-0002` として扱い、`pops update-paperops` で `_paperops/defaults/` を追加したうえで、既存の `_paperops/contracts/` や `_paperops/workflow/machine.yml` は project overlay として残す。
 
 ## 16. 用語集
 
@@ -430,12 +431,12 @@ scripts と CLI は互換期間中、modern path を優先し、なければ leg
 | claim card | 論文で言ってよい主張と scope / evidence / visual obligation | `_paperops/claims/claims/` |
 | scientific gate | Abstract、Conclusion、main figure に出せる claim かの判定 | `_paperops/claims/gates/` |
 | controlled authoring view | 本文語彙、条件名、読者順序、story spine を統制する view | `_paperops/notes/views/` |
-| contract | section や figure story の読者質問、入力、出力、禁止構造 | `_paperops/contracts/` |
+| contract | section や figure story の読者質問、入力、出力、禁止構造 | `_paperops/defaults/contracts/` + `_paperops/contracts/` overlay |
 | workflow state | 全体状態、section 状態、loop route、guard | `_paperops/workflow/` |
 | stale | 上流 artifact が変わり、依存 section の再確認が必要な状態 | `pops workflow invalidate` |
 | paper_ir | Writer に渡す前の生成一時中間表現 | `.paperops/cache/` |
 | section compiler | card / contract / view を Methods / Results / Discussion の読者向け構造へ変換する段階 | `finish-manuscript` |
-| subagent roster | subagent role、allowed inputs、outputs、integration contract | `_paperops/workflow/subagent-roster.yml` |
+| subagent roster | subagent role、allowed inputs、outputs、integration contract | `_paperops/defaults/workflow/subagent-roster.yml` + optional overlay |
 | link registry | 外部 project / directory への portable link intent | `_paperops/refs/links.toml` |
 | local locations | 個人環境の実パスを ignored file へ分離する仕組み | `_paperops/refs/local/locations.toml` |
 | scratch archive | 過去稿を sealed split bundle として封印したもの | `_archives/` |

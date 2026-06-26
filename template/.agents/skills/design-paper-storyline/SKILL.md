@@ -17,7 +17,8 @@ description: Use when a manuscript needs a top-level story spine, Results hierar
 
 ## 最初に読む
 
-- `_paperops/contracts/storyline.yml`
+- `_paperops/defaults/contracts/storyline.yml`
+- `_paperops/contracts/storyline.yml` if project overlay exists
 - `_paperops/notes/views/storyline.md`
 - `_paperops/notes/views/argument-map.md`
 - `_paperops/notes/views/result-pattern-map.md`

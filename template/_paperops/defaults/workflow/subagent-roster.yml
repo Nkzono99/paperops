@@ -62,7 +62,7 @@
       "entry_condition": "Before section drafting or whenever Results/Discussion feel thin.",
       "allowed_inputs": [
         "_paperops/notes/views/storyline.md",
-        "_paperops/contracts/storyline.yml",
+        "_paperops/defaults/contracts/storyline.yml",
         "_paperops/notes/project-brief.md",
         "manuscript/ja/ or public PDF slices"
       ],
@@ -95,7 +95,7 @@
       "purpose": "Read Results for reader-question order, quantitative evidence, figure linkage, and consequence.",
       "entry_condition": "After Results plan or draft exists, before prose polish.",
       "allowed_inputs": [
-        "_paperops/contracts/results.yml",
+        "_paperops/defaults/contracts/results.yml",
         "_paperops/notes/views/storyline.md",
         "manuscript/ja/sections/30_results.tex",
         "_paperops/evidence/results/",
@@ -113,7 +113,7 @@
       "purpose": "Read Discussion for mechanism warrant, prior-work delta, alternative boundaries, implication, and decisive next test.",
       "entry_condition": "After Discussion plan or draft exists, before prose polish.",
       "allowed_inputs": [
-        "_paperops/contracts/discussion.yml",
+        "_paperops/defaults/contracts/discussion.yml",
         "_paperops/notes/views/storyline.md",
         "manuscript/ja/sections/40_discussion.tex",
         "_paperops/refs/summaries/",
@@ -131,7 +131,7 @@
       "purpose": "Check whether the figure sequence satisfies visual obligations before final prose.",
       "entry_condition": "Before main figure order is treated as fixed.",
       "allowed_inputs": [
-        "_paperops/contracts/figures.yml",
+        "_paperops/defaults/contracts/figures.yml",
         "_paperops/claims/",
         "_paperops/evidence/figures/",
         "manuscript/shared/figures/",
