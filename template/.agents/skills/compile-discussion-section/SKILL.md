@@ -30,6 +30,8 @@ Discussion functions は、少なくとも `principal_finding`、`mechanism_warr
 
 baseline、control、reference condition、comparator を Results の中心に置いた場合、Discussion ではその control が支える解釈と支えない解釈を分ける。baseline 結果を real-world mechanism claim に拡張する場合は、足りない coupled process、boundary condition、decisive next test を明示する。
 
+AI Writer の作業計画を Discussion prose に混ぜない。`claim を強めるための追加作業` は、公開読者に必要なら `decisive_next_test` や limitation/future work として翻訳し、未解決の執筆意図なら `% INTENT:` / `% TODO-PAPER:` または `_paperops/requests/` へ移す。
+
 ## Section Depth
 
 `manuscript/writing-profile.yml` の `section_depth` を確認する。`ja_chars` は日本語原稿の TeX noise を除いた文字数、`en_words` は英語原稿の TeX noise を除いた word count として扱う。`length_is_floor_not_target` の原則に従い、短い場合も文量だけを増やさない。
@@ -38,4 +40,4 @@ baseline、control、reference condition、comparator を Results の中心に�
 
 `section-contract-check` が Discussion functions の不足を返した場合は、principal finding、mechanism warrant、prior-work delta、alternative/boundary、implication、decisive next test のどれが本文 block にないかを明示して section_loop に戻す。
 
-生成した section plan は必要な場合だけ `.paperops/cache/section-plan-discussion.yml` に置き、Git 管理しない。
+生成した section plan は必要な場合だけ `.paperops/cache/section-plan-discussion.yml` に置き、Git 管理しない。本文を生成・修正した後は `make authoring-intent-check` を使い、AI 執筆意図が公開 prose に漏れていないことを確認する。

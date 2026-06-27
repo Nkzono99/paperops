@@ -1,4 +1,4 @@
-.PHONY: venv build-ja build-en build-submission lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check storyline-check section-contract-check section-depth-check quantity-integrity-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context readiness-check export-arxiv ci audit pre-submit
+.PHONY: venv build-ja build-en build-submission lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context readiness-check export-arxiv ci audit pre-submit
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
 PYTHON_BOOTSTRAP ?= python
@@ -43,6 +43,9 @@ concept-term-check:
 argument-focus-check:
 	$(PYTHON) scripts/check-argument-focus.py --root .
 
+authoring-intent-check:
+	$(PYTHON) scripts/check-authoring-intent.py --root .
+
 storyline-check:
 	$(PYTHON) scripts/check-storyline.py --root .
 
@@ -58,8 +61,9 @@ quantity-integrity-check:
 content-first-check:
 	$(PYTHON) scripts/check-content-first.py --root . --phase start --intent content
 
-finish-manuscript-check: storyline-check section-contract-check public-terms-check quantity-integrity-check figure-obligation-check claim-evidence-check workflow-check
+finish-manuscript-check: storyline-check section-contract-check public-terms-check authoring-intent-check quantity-integrity-check figure-obligation-check claim-evidence-check workflow-check
 	$(PYTHON) scripts/check-public-terms.py --root . --strict
+	$(PYTHON) scripts/check-authoring-intent.py --root . --strict
 	$(PYTHON) scripts/check-section-contracts.py --root . --strict
 	$(PYTHON) scripts/check-section-depth.py --root . --strict
 	$(PYTHON) scripts/check-content-first.py --root . --phase finish --intent content --strict
@@ -108,10 +112,11 @@ export-arxiv:
 
 ci: lint-bib citation-check mirror-check public-terms-check paper-layer-card-check workflow-check archive-seal-check skill-mirror-check links-check build-ja build-en
 
-audit: mirror-freshness-check concept-term-check argument-focus-check storyline-check section-contract-check section-depth-check quantity-integrity-check content-first-check figure-reference-check figure-obligation-check claim-evidence-check research-request-handoff-check external-import-check submission-drift-check
+audit: mirror-freshness-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check content-first-check figure-reference-check figure-obligation-check claim-evidence-check research-request-handoff-check external-import-check submission-drift-check
 
 pre-submit: ci audit finish-manuscript-check lint-bib-pre-submit mirror-strict-check
 	$(PYTHON) scripts/check-concept-terms.py --root . --strict
+	$(PYTHON) scripts/check-authoring-intent.py --root . --strict
 	$(PYTHON) scripts/check-storyline.py --root . --strict
 	$(PYTHON) scripts/check-section-depth.py --root . --strict
 	$(PYTHON) scripts/check-quantity-integrity.py --root . --strict

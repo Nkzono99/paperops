@@ -22,10 +22,10 @@
 1. `/resume-session` で前回の状態を読む。
 2. `story/story-seed.md` で、研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を確認する。
 3. `pops workflow status` と `pops workflow next` で、全体状態と stale section を確認する。
-4. 必要なら `content-first-gate`、`_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、project 固有の `_paperops/contracts/` overlay、`manuscript/writing-profile.yml` を重ね、`design-paper-storyline`、`make content-first-check`、`make section-contract-check`、`make section-depth-check` で story spine、Results hierarchy、Discussion functions、Methods definition registry、Results / Discussion の薄さ、次の作業が本文 blocker を減らすことを確認する。
+4. 必要なら `content-first-gate`、`_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、project 固有の `_paperops/contracts/` overlay、`manuscript/writing-profile.yml` を重ね、`design-paper-storyline`、`make content-first-check`、`make section-contract-check`、`make section-depth-check`、`make authoring-intent-check` で story spine、Results hierarchy、Discussion functions、Methods definition registry、Results / Discussion の薄さ、AI Writer の執筆意図漏れ、次の作業が本文 blocker を減らすことを確認する。
 5. subagent を使う場合、`orchestrate-manuscript-subagents` で main agent は orchestrator として role brief と integration decision を `_paperops/review/rounds/` に残す。
 6. `plan-figure-story` で本文生成前の visual obligation と主図構成を決め、`paper_ir` と `compile-results-section` / `compile-discussion-section` / `compile-methods-section` で Results / Discussion / Methods の読者向け構造を作る。
-7. `manuscript/ja/` を中心に書く。
+7. `manuscript/ja/` を中心に書く。AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose ではなく `% INTENT:` または `% TODO-PAPER:` コメントに置き、必要なら `_paperops/notes/` / `_paperops/requests/` へ移す。
 8. 必要な block を `manuscript/en/` に同期する。
 9. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、`route-manuscript-feedback` と `pops workflow route-review` で戻る深さを決める。
 10. Submission hygiene は STRUCTURE_ACCEPTED 後に主作業にする。完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `manuscript/publication-metadata.toml` の `[submission]`、`[open_research]`、`[human_verification]` を埋めて `make pre-submit` を実行する。

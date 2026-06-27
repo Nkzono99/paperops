@@ -42,8 +42,8 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 ### 原稿完成
 
-- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める route-level skill。詳細な gate、subagent、feedback routing、section compiler、final checks は下記の専門 skill へ委譲する。
-- `audit-ai-draft`: AI 初稿をそのまま磨かず、claim / evidence / section compiler へ戻す routing skill として使う。
+- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める route-level skill。詳細な gate、subagent、feedback routing、section compiler、AI authoring intent guard、final checks は下記の専門 skill へ委譲する。
+- `audit-ai-draft`: AI 初稿をそのまま磨かず、claim / evidence / section compiler へ戻す routing skill として使う。AI Writer の authoring intent が本文 prose に漏れた場合もここで検出し、`% INTENT:` / `% TODO-PAPER:`、notes、requests へ戻す。
 - `content-first-gate`: 原稿本文 blocker が残る間に Submission hygiene や harness 改修へ逸れないか確認する。
 - `orchestrate-manuscript-subagents`: subagent roster、brief、privacy、subagent report、integration decision を管理する。
 - `route-manuscript-feedback`: Issue Router と Backward propagation で feedback を evidence / story / section / prose / submission loop へ戻す。
@@ -57,7 +57,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `integrate-writing-feedback`: 人間レビューや自然文指示を feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
 - `peer-review-manuscript`: 投稿前原稿を査読者パネルとして読み、科学面、line-level readability、rendered figure を分けて見る。
 - `respond-to-peer-review`: editor / reviewer comments を response matrix、closure audit、revision plan に分ける。
-- `review-public-manuscript`: 公開原稿だけを外部読者視点で読む。
+- `review-public-manuscript`: 公開原稿だけを外部読者視点で読み、AI authoring intent leak も読者に見える meta prose として検出する。
 
 ### 俯瞰・改善
 
@@ -79,7 +79,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `contextualize-conditions`: 条件数や run inventory を論文上の比較へ翻訳する。
 - `public-terminology-pass`: 内部語や未定義略語を公開語へ置換する。
 - `paragraph-surgery`: 段落単位で流れを整える。
-- `polish-ai-draft`: claim lock 後に AI 初稿の文体を整える。
+- `polish-ai-draft`: claim lock 後に AI 初稿の文体を整える。作業計画や判断保留を自然な本文に見せかけず、reader-facing 内容か `% INTENT:` / `% TODO-PAPER:` / request かに分ける。
 
 ### 図表・投稿前点検
 
@@ -91,13 +91,13 @@ downstream skill は route-level skills と leaf skills に分ける。
 ### レビュー補助
 
 - `start-manuscript-review`: 人間の通読レビューを開始する。
-- `collect-manuscript-review`: TeX diff と inline comment を回収する。
+- `collect-manuscript-review`: TeX diff と inline comment を回収する。`% INTENT:` は AI Writer が本文に混ぜそうになった authoring intent の退避先として扱う。
 
 ## paper_ir と section compiler
 
 原稿編集では `make concept-term-check` と `_paperops/notes/views/concept-terms.md` も使う。AI 初稿で起きやすい concept-term compression、つまり強い英語名詞句への単語化は、claim / argument / evidence card の意味を本文へ写すときの語彙問題として扱い、必要なら普通の文へほどく。
 
-Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は薄い router として `content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`finalize-manuscript` を必要時に呼ぶ。story spine、Results hierarchy、Discussion functions、Methods definition registry は `design-paper-storyline` で固定し、`plan-figure-story` で visual obligation を本文生成前に固定する。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` を通してから本文生成へ進む。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry の機能 block を確認する。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
+Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は薄い router として `content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`finalize-manuscript` を必要時に呼ぶ。story spine、Results hierarchy、Discussion functions、Methods definition registry は `design-paper-storyline` で固定し、`plan-figure-story` で visual obligation を本文生成前に固定する。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` を通してから本文生成へ進む。AI Writer の authoring intent、TODO、後で埋める内容、作業計画は公開 prose にせず `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ置く。`authoring-intent-check` は audit では advisory、finish / pre-submit では strict に使う。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry の機能 block を確認する。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
 
 ## 重要な境界
 

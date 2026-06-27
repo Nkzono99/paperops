@@ -27,9 +27,10 @@ main agent は writer だけでなく orchestrator として動く。subagent �
 2. story spine が弱い場合は `design-paper-storyline` を editorial architect として使い、Results hierarchy と Discussion functions を確認する。
 3. 図表が本文生成後の飾りになりそうなら `plan-figure-story` で visual obligation と main / supplement split を先に決め、必要なら `figure-obligation-check` で欠落を確認する。
 4. Writer に生の card ontology を直接渡さない。必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` で読者向け構造へ変換する。
-5. review 後や route が不明な feedback は `route-manuscript-feedback` に渡し、evidence / story / section / prose / submission loop のどこへ戻すか決める。
-6. 模擬査読や公開原稿確認が必要なら `review-public-manuscript` と `peer-review-manuscript` を回し、blocking / major concern を `integrate-writing-feedback` へ戻す。
-7. 完了前に `finalize-manuscript` を読み、Finish criteria、human approval、`make finish-manuscript-check`、必要な audit / ci を確認する。
+5. AI Writer の authoring intent、判断保留、後で埋める内容、作業計画は本文 prose に書かない。近傍の `% INTENT:` または `% TODO-PAPER:` に残し、未解決なら `_paperops/notes/` / `_paperops/requests/` へ移す。
+6. review 後や route が不明な feedback は `route-manuscript-feedback` に渡し、evidence / story / section / prose / submission loop のどこへ戻すか決める。
+7. 模擬査読や公開原稿確認が必要なら `review-public-manuscript` と `peer-review-manuscript` を回し、blocking / major concern を `integrate-writing-feedback` へ戻す。
+8. 完了前に `finalize-manuscript` を読み、Finish criteria、human approval、`make finish-manuscript-check`、必要な audit / ci を確認する。
 
 ## Lane Notes
 
@@ -43,5 +44,6 @@ Response lane では、`respond-to-peer-review` の comment inventory、response
 
 - `content-first-gate` が content blocker 未解決と判定する間は、Submission hygiene や downstream harness 改修を主作業にしない。
 - `paper_ir` や section plan は生成一時物であり、必要な場合だけ `.paperops/cache/` に置く。
+- AI の執筆メモを読者向け本文に混ぜない。`% INTENT:` / `% TODO-PAPER:` は回収可能な TeX comment として使い、公開本文に意図的に残す場合だけ `% paperops: allow-authoring-intent -- reason` を置く。
 - `/goal` 中は今の blocker、次の 1-3 手、Finish criteria の未達項目を短く更新する。
 - 迷ったら prose polish ではなく、evidence、story、section、feedback route のどこが詰まっているかを先に決める。

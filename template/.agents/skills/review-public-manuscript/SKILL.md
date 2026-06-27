@@ -39,6 +39,7 @@ description: Use when reviewing public manuscript text for reader assumptions an
 - `methods-definition`: Results や caption に出る推定量、判定基準、threshold、baseline 名が Methods または初出箇所で定義されているかを探す。
 - `public-reproducibility`: data availability、case count、diagnostic assumptions、figure/table label から再現性ギャップを探す。
 - `editorial-architect`: storyline、Results hierarchy、Discussion functions、section-depth を探す。
+- `authoring-intent`: AI Writer の執筆意図、作業計画、TODO、後で埋める内容が公開本文へ漏れていないか探す。
 
 ## 読んではいけないもの
 
@@ -85,8 +86,12 @@ description: Use when reviewing public manuscript text for reader assumptions an
    - `section_depth` の floor を、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words` として確認しているか
    - section-depth 不足を Submission hygiene と混同していないか
    - one-paragraph subsections が、必要な読者質問に答える単位ではなく過剰分割になっていないか
-7. 追加解析候補を High / Medium / Low に分類する。
-8. 対応を以下に分解する:
+7. authoring intent leak を確認する:
+   - `claim を強めるための追加作業`、`後で埋める`、`TODO`、`authoring note`、`drafting note` が本文 prose に出ていないか
+   - 本文に必要な future work / limitation なのか、AI Writer の作業メモなのかを分ける
+   - 作業メモなら `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ移す
+8. 追加解析候補を High / Medium / Low に分類する。
+9. 対応を以下に分解する:
    - 原稿修正
    - 図表追加または図注修正
    - methods / data availability 追記
@@ -115,6 +120,7 @@ repo-aware editor と public-only reviewer を同じ判断に混ぜない。publ
 - `Figure/table cleanup`: title、legend、axis、caption、table header の置換候補
 - `Data availability additions`: 公開データ、選別基準、diagnostic の追記候補
 - `Storyline / editorial architect`: Results hierarchy、Discussion functions、section-depth の不足
+- `Authoring intent leaks`: AI 執筆意図や作業計画が本文 prose に漏れた箇所と移動先
 - `Additional analyses`: High / Medium / Low の追加解析候補
 - `Rewrite patch plan`: file / block ID 単位の修正計画
 - `Action checklist`: 原稿、図表、methods/data availability、将来課題に分けた対応リスト
@@ -140,3 +146,4 @@ repo-aware editor と public-only reviewer を同じ判断に混ぜない。publ
 - runops project、publication export bundle、raw run directory、campaign、case、production run、smoke/feasibility check は、公開原稿では原則として内部 provenance 語として指摘する。
 - 未定義語、ローカル語、暗黙前提、再現性ギャップ、図表 cleanup、Data availability 追記、rewrite patch plan、対応チェックリストに分けて返す。
 - repo-aware editor と public-only reviewer を混ぜず、public-only review は読者が詰まる箇所の検出に限定する。修正実装や内部台帳反映は通常の repo 文脈で行う。
+- authoring intent leak を見つけたら、`make authoring-intent-check` または `scripts/check-authoring-intent.py --root . --strict` で機械検査できるか確認する。

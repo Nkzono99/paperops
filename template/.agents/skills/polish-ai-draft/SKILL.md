@@ -40,6 +40,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 - `一方で`、`さらに`、`なお`、`このことは` が機械的に段落をつなぐ。
 - 防御的 caveat が各段落に散り、中心主張の位置がぼやける。
 - 曖昧な主語、曖昧な出典、`先行研究では` だけの文がある。
+- `この claim を強めるための追加作業`、`後で埋める`、`authoring note` のように、AI Writer の執筆意図や作業計画が本文 prose になっている。
 - figure caption が「計算したこと」だけを述べ、「読ませたい対比」を述べない。
 - 結論が一般的な前向き文で終わり、論文固有の持ち帰りが弱い。
 - concept-term compression が多い。強い hyphen / slash compound や英語名詞句が、説明なしに概念名として並ぶ。
@@ -63,6 +64,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 - underclaim
 - local provenance term
 - concept-term compression
+- authoring intent leak
 - weak stress position
 
 必要なら `_paperops/notes/ai-draft-polish.md` の `AI 初稿 smell inventory` に要約する。
@@ -79,6 +81,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 - つなぎ語を増やさず、論理関係を文の配置で示す。
 - 日本語原稿では、硬い論文語を保ちながらも、無内容な名詞句を削る。
 - 英語原稿では、AI らしい promotional phrase、過剰な em dash、空疎な metadiscourse を減らす。
+- AI の判断保留や作業計画は自然な本文に言い換えて隠さない。公開読者に必要な内容なら reader-facing claim / limitation / future work へ翻訳し、未解決なら `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ移す。
 
 ### 4. Integrity pass
 
@@ -96,6 +99,6 @@ rewrite 後に、元の claim / evidence / scope から逸脱していないか�
 
 ## Codex 実行メモ
 
-- 本文を編集した場合は `make mirror-check`、概念語を変えた場合は `make concept-term-check`、公開語を変えた場合は `make public-terms-check` を実行する。
+- 本文を編集した場合は `make mirror-check`、概念語を変えた場合は `make concept-term-check`、公開語を変えた場合は `make public-terms-check`、AI 執筆意図を整理した場合は `make authoring-intent-check` を実行する。
 - 原稿構造や claim strength を変える必要がある場合は、`/paragraph-surgery`、`/calibrate-claims`、`/scientific-gate` へ戻す。
 - `_paperops/notes/ai-use.md` の AI 利用ログや開示文案を消さない。

@@ -18,10 +18,11 @@ uvx --from paper-harness-cli pops doctor
 下流の Makefile は、確認を三つの profile に分ける。
 
 - `make ci`: 構造、引用、mirror、公開語彙、カード層、link、build fallback など、壊れていると作業を続けにくい項目を確認する。
-- `make audit`: argument focus、concept-term compression、content-first intent、main-text figure reference、figure obligation、claim evidence、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
+- `make audit`: argument focus、concept-term compression、AI authoring intent leak、content-first intent、main-text figure reference、figure obligation、claim evidence、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
+- `make authoring-intent-check`: AI Writer の執筆意図、後で埋める内容、TODO、作業計画が TeX コメントではなく公開本文 prose に漏れていないか advisory に確認する。保持したい作業意図は `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ移す。
 - `make section-contract-check`: `_paperops/notes/views/storyline.md` の Results hierarchy、Discussion functions、Methods definition registry が、読者質問・baseline rationale・判定基準定義を持つか advisory に確認する。
 - `make section-depth-check`: Results / Discussion が `manuscript/writing-profile.yml` の `section_depth` floor を大きく下回っていないか advisory に確認する。JA は `ja_chars`、EN は `en_words` として数える。
-- `make finish-manuscript-check`: STRUCTURE_ACCEPTED 前に `/goal` を完了扱いしないための content-first finish gate。`make pre-submit` とは別に、原稿本文 blocker、strict public terms、section-contract、Results / Discussion の section-depth blocker が閉じているかを確認する。
+- `make finish-manuscript-check`: STRUCTURE_ACCEPTED 前に `/goal` を完了扱いしないための content-first finish gate。`make pre-submit` とは別に、原稿本文 blocker、AI authoring intent leak、strict public terms、section-contract、Results / Discussion の section-depth blocker が閉じているかを確認する。
 - `make pre-submit`: `ci` と `audit`、`finish-manuscript-check` に加え、concept term、figure reference、figure obligation、research request handoff、external import、readiness を投稿前 profile として厳しめに確認する。
 
 ## コマンド一覧
@@ -140,6 +141,8 @@ runops queue へ渡す予定の request は、下流 repo で `make research-req
 `paper_ir` は、card 正本と controlled authoring view から Writer に渡す context を作る生成一時物である。`pops` の永続管理対象ではなく、通常は skill が必要に応じて作る。手書き正本は `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` に置き、`paper_ir` は Methods / Results / Discussion の section compiler へ渡す一時的な変換結果として扱う。
 
 section compiler は、`_paperops/defaults/contracts/<section>.yml` の入出力契約、必要な `_paperops/contracts/<section>.yml` project overlay、`manuscript/writing-profile.yml` の paper type / venue overlay を重ねる。`plan-section` で作る一時 plan は必要なら `.paperops/cache/` に置き、Git 管理しない。
+
+AI Writer が section draft 中に「この claim を強めるための追加作業」「後で埋める」「authoring note」のような執筆意図を本文へ書きそうな場合は、本文 prose にせず近傍の `% INTENT:` または `% TODO-PAPER:` へ残す。追加解析や人間判断が必要なら `_paperops/requests/` または `_paperops/notes/` へ移し、完了前に `make authoring-intent-check` または `scripts/check-authoring-intent.py --root . --strict` を実行する。公開本文として意図的に扱う必要がある場合だけ、直前行に `% paperops: allow-authoring-intent -- reason` を置く。
 
 ## Workflow
 

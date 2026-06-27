@@ -25,6 +25,8 @@ Methods を bookkeeping と物理モデル説明に分け、読者が再実装�
 
 Results や figure caption に出る推定量、baseline/control、comparison、decision criterion、threshold、verification は、Methods definition registry に登録してから本文へ出す。登録単位は `estimand_and_unit_of_analysis`、`comparison_or_baseline`、`decision_criteria`、`verification_or_convergence` を最低限とし、`_paperops/notes/views/storyline.md` の `Methods definition registry` へ definition location と manuscript block を残す。
 
+AI Writer が Methods prose に「後で埋める」「TODO」「authoring note」のような未解決作業を混ぜる場合は本文にしない。近傍の `% INTENT:` / `% TODO-PAPER:` comment、または `_paperops/requests/` へ残す。
+
 配置判断は次の語彙を使う。
 
 - `main_text`: 結果の解釈を変える情報、モデルの仮定、境界条件、推定量、検証の要点。
@@ -35,4 +37,4 @@ method unit の plan には、`role_in_claim`、`nonstandard_choice`、`sensitiv
 
 `section-contract-check` が Methods definition registry の不足を返した場合は、Results の prose を先に直さない。Methods plan に criterion glossary と baseline/comparator の scientific role を追加し、必要な `% block:` ID を作ってから Results / captions へ戻る。
 
-生成した section plan は必要な場合だけ `.paperops/cache/section-plan-methods.yml` に置き、Git 管理しない。
+生成した section plan は必要な場合だけ `.paperops/cache/section-plan-methods.yml` に置き、Git 管理しない。本文を生成・修正した後は `make authoring-intent-check` を使い、AI 執筆意図が公開 prose に漏れていないことを確認する。

@@ -19,12 +19,13 @@ description: Use before declaring a manuscript goal complete or before preparing
 - Results / Discussion が `section_depth` の soft floor を満たすか、short_article profile または人間承認済みの例外として記録されている。
 - Results の baseline / comparator rationale と、Methods の estimand / decision criteria / verification 定義が本文の公開読者に見える。
 - 概念語ビューで accepted / plain-language / avoid が整理され、表記揺れや過剰な concept-term compression が残っていない。
+- AI Writer の authoring intent、TODO、後で埋める内容、作業計画が公開本文 prose に残っていない。必要なものは `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ移っている。
 - 実査読改訂では、comment inventory、response matrix、本文変更、response letter が対応している。
 - 最終 PDF / TeX / response letter のどれを成果物とするかを明示し、最終 commit または共有すべき artifact を記録している。
 
 ## Checks
 
-完了前は `make finish-manuscript-check` を実行する。原稿を編集したら `make mirror-check`、引用や bibliography に触れたら `make citation-check`、概念語に触れたら `make concept-term-check`、図表に触れたら `make figure-reference-check` と `make figure-obligation-check`、claim / evidence / layer card に触れたら `make claim-evidence-check` と `make paper-layer-card-check` を実行する。
+完了前は `make finish-manuscript-check` を実行する。原稿を編集したら `make mirror-check`、引用や bibliography に触れたら `make citation-check`、概念語に触れたら `make concept-term-check`、AI 執筆意図を整理したら `make authoring-intent-check`、図表に触れたら `make figure-reference-check` と `make figure-obligation-check`、claim / evidence / layer card に触れたら `make claim-evidence-check` と `make paper-layer-card-check` を実行する。
 
 storyline を更新したら `make storyline-check` と `make section-contract-check` を実行する。投稿前には `scripts/check-storyline.py --root . --strict`、`scripts/check-section-contracts.py --root . --strict`、`scripts/check-public-terms.py --root . --strict`、`scripts/check-figure-obligations.py --root . --strict`、`make pre-submit` を使う。
 

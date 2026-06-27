@@ -17,6 +17,7 @@ description: Use when collecting TeX review diffs and inline comments into a rev
   - `% AI: ...`
   - `% Q: ...`
   - `% KEEP?: ...`
+  - `% INTENT: ...`
   - `% TODO-PAPER: ...`
 - 近傍の `% block: ...`
 - `manuscript/mirror/status.md`
@@ -50,7 +51,7 @@ description: Use when collecting TeX review diffs and inline comments into a rev
 
 1. `manuscript/mirror/status.md` に別段の記載がない限り、`manuscript/ja/` を科学的 source of truth として編集する。
 2. `% block: ...` を保持する。削除、改名、番号振り直しはしない。
-3. 解決済み inline comment は削除する。未解決のものは台帳、`_paperops/notes/todo.md`、または原稿内 comment のいずれに残すか明記する。
+3. 解決済み inline comment は削除する。未解決のものは台帳、`_paperops/notes/todo.md`、`_paperops/requests/`、または原稿内 comment のいずれに残すか明記する。AI が本文生成中に残した `% INTENT:` は public prose ではなく authoring intent として扱い、必要なら本文文言、上流 card、または request へ移す。
 4. 人間の直接編集 diff は尊重し、意図が曖昧な箇所だけ open question に戻す。
 5. claim / evidence / gate に影響する変更は、`/integrate-writing-feedback` で feedback card と上流 card を更新してから本文へ反映する。
 6. JA の科学的意味を変えた場合は、対応する `manuscript/en` block を更新するか、`manuscript/mirror/change-queue.md` に残す。
@@ -83,6 +84,6 @@ description: Use when collecting TeX review diffs and inline comments into a rev
 
 - `git status --short --branch`、`manuscript/mirror/status.md`、`manuscript/mirror/map.toml` を確認する。
 - `python scripts/collect-manuscript-review.py --root . --output notes/reviews/review-YYYY-MM-DD.md` で台帳を生成する。
-- `% REVIEW:`, `% AI:`, `% Q:`, `% KEEP?:`, `% TODO-PAPER:` を file / line / `% block:` に紐付けて読む。
+- `% REVIEW:`, `% AI:`, `% Q:`, `% KEEP?:`, `% INTENT:`, `% TODO-PAPER:` を file / line / `% block:` に紐付けて読む。
 - 本文反映を依頼されている場合は、まず source-of-truth 側を整え、解決済み inline comment を削除し、必要な `manuscript/en` block を同期する。
 - 原稿本文または mirror を変えたら `make mirror-check` を実行する。構造、引用、refs、build に触れた場合は `make ci` を実行する。

@@ -14,7 +14,7 @@ AI が生成した原稿や段落を、主張と証拠を変えずに論文向�
 
 | scope | smell | 例の要約 | rewrite route | status |
 | --- | --- | --- | --- | --- |
-| 未記入 | vague significance / formulaic transition / triad / vague attribution / defensive clutter / overclaim / underclaim / local provenance term / weak stress position | 未記入 | `/polish-ai-draft` / `/paragraph-surgery` / `/calibrate-claims` | open |
+| 未記入 | vague significance / formulaic transition / triad / vague attribution / defensive clutter / overclaim / underclaim / local provenance term / authoring intent leak / weak stress position | 未記入 | `/polish-ai-draft` / `/paragraph-surgery` / `/calibrate-claims` | open |
 
 ## Rewrite log
 

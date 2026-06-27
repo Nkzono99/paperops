@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `authoring-intent-check` を追加し、AI Writer の執筆意図、後で埋める内容、TODO、作業計画が公開原稿 prose に漏れた場合に advisory / finish-phase strict で検出できるようにした。`% INTENT:` を `collect-manuscript-review` の inline marker に追加し、未解決の執筆意図は `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ退避する運用を `finish-manuscript`、AI 初稿診断、section compiler、review skill、AGENTS / CLAUDE / README に明文化した。既存下流リポジトリで取り込む場合は、`scripts/check-authoring-intent.py`、Makefile の `authoring-intent-check` / `finish-manuscript-check` / `pre-submit` 接続、`collect-manuscript-review.py`、AGENTS / CLAUDE / README、AI draft / section compiler / review skill、`_paperops/notes/ai-draft-polish.md` を更新する必要がある。closes #71
+
 ## 0.10.0 - 2026-06-27
 
 - `section-contract-check` を追加し、Results hierarchy、Discussion functions、Methods definition registry の semantic coverage を advisory / strict で確認できるようにした。`make audit` / root `make smoke` では warning、`make finish-manuscript-check` では strict error として扱い、baseline / comparator rationale、Methods の判定基準定義、Discussion function 欠落を文字数不足とは別に検出する。あわせて `check-public-terms.py --strict` で `needs_definition` 用語の first_definition_location に実際の definition sentence があるかを確認する。既存下流リポジトリで取り込む場合は、`scripts/check-section-contracts.py`、`scripts/check-public-terms.py`、Makefile の `section-contract-check` / `finish-manuscript-check` 接続、`_paperops/notes/views/storyline.md` の `baseline / comparator rationale` と `Methods definition registry`、Results / Methods / Discussion / Storyline contract、執筆 skill、AGENTS / CLAUDE / README を更新する必要がある。
