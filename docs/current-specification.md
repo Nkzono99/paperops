@@ -166,7 +166,7 @@ flowchart TD
 - `figures/`: figure card
 - `sources/`: source card
 
-result card は quantity contract、scope、claim link、source artifact を持つ。figure card は supported claims、visual obligation、caption status、本文参照を持つ。
+result card は quantity contract、scope、claim link、source artifact を持つ。figure card は supported claims、visual obligation、caption status、本文参照に加え、`design-paper-figure` が作る図の設計意図、reader task、takeaway、encoding、scale/denominator、uncertainty/distribution、caption、runops handoff の Figure design brief を持つ。source card は、summary だけでは足りない claim_boundary、parameter_choice、reviewer_objection、method_precedent の根拠を持つ。
 
 ### 6.2 claims
 
@@ -337,7 +337,8 @@ project-owned extension point:
 主な検証 target:
 
 - `make ci`: 構造、引用、mirror、公開語彙、カード層、link、build fallback
-- `make audit`: argument focus、concept term、content-first、section contract、figure reference、figure obligation、claim evidence、external import、research request handoff
+- `make audit`: argument focus、concept term、content-first、section contract、figure reference、figure obligation、claim evidence、card coverage、external import、research request handoff
+- `make card-coverage-check`: 原稿中の図、citation、block ID が card 層に接続されているかを advisory に確認する
 - `make finish-manuscript-check`: 原稿完成 goal を閉じる前の content-first gate。strict public terms、section contract、section-depth も含む
 - `make pre-submit`: 投稿前 profile
 - `make smoke`: テンプレート管理 repo から `template/` を検証する smoke
@@ -359,7 +360,7 @@ project-owned extension point:
 
 `_paperops/defaults/workflow/subagent-roster.yml` は、main agent / orchestrator が subagent をどう使うかの標準契約である。論文固有に role や allowed input を変える場合だけ `_paperops/workflow/subagent-roster.yml` overlay を置く。
 
-実行時の詳細は `orchestrate-manuscript-subagents` に置き、`finish-manuscript` は必要時にそれを呼ぶ。content-first の自己点検は `content-first-gate`、review 後の戻り先分類は `route-manuscript-feedback`、完了前確認は `finalize-manuscript` が担当する。
+実行時の詳細は `orchestrate-manuscript-subagents` に置き、`finish-manuscript` は必要時にそれを呼ぶ。content-first の自己点検は `content-first-gate`、review 後の戻り先分類は `route-manuscript-feedback`、完了前確認は `finalize-manuscript` が担当する。図表系では `figure_story_reviewer` が `design-paper-figure` の Figure design brief、reader task、runops handoff を監査対象に含める。
 
 主な role:
 

@@ -31,6 +31,7 @@ description: Use before drafting Results or locking ARCHITECTURE_LOCKED, to desi
 3. computational modeling では、空間分解された状態量が新規性の入口なら `model_or_state_visualization`、経路依存推定量や threshold が claim を支えるなら `estimator_or_decision_criterion` を原則 required にする。
 4. 利用可能な result、figure data、linked artifact、既存 plot script を確認し、採用候補を `.paperops/cache/figure-candidates.yml` に一時整理する。生成物なので Git 管理しない。
 5. 採用する図だけを `_paperops/evidence/figures/` の figure card に昇格し、`satisfies_visual_obligations` に対応する `VO-*` ID を記録する。
+   その後、個別の図や panel を作る前に `design-paper-figure` で reader_task、takeaway_sentence、encoding_choice、scale_and_denominator、runops handoff、acceptance criteria を固定する。
 6. claim card には `visual_obligations` を残す。図が不要な claim は `no_figure_reason` を明示する。
 7. 主図と補足図の切り分けを決める。sensitivity / screening 図は、中心 claim を読むための前提でなければ supplement を既定にする。
 8. Figure 1 は、paper type 契約と reader question に照らして決める。model/state が新規性の入口なら、heterogeneous screening summary を Figure 1 にしない。
@@ -68,11 +69,13 @@ current_manuscript_role: main
 - Figure 1 role decision
 - `.paperops/cache/figure-candidates.yml` if useful
 - 更新済み claim / figure card
+- `design-paper-figure` に渡す figure / panel design backlog
 - `figure-obligation-check` 結果
 
 ## Codex 実行メモ
 
 - 原稿本文を先に書かない。本文生成前に図の role と obligation を固定する。
 - 既存図だけを正当化しない。中心 claim から逆算して、state_visualization、criterion_curve、primary_evidence、mechanism_or_boundary_comparison の欠落を見る。
+- 図の存在が決まっただけで採用しない。実際の plot、panel、caption、runops request は `design-paper-figure` で読者タスクから設計してから使う。
 - max / p95 / fraction / sample count を主図で使う場合は、同じ denominator、unit of analysis、independence caveat を `figure-story-audit` に引き継ぐ。
 - figure candidate は `.paperops/cache/` の生成一時物に置き、採用図だけを card 化する。

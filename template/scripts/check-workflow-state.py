@@ -67,6 +67,7 @@ def main() -> int:
     if machine and current:
         validate_machine(machine, findings)
         validate_current(machine, current, findings)
+        validate_state_consistency(current, findings)
     if subagent_roster:
         validate_subagent_roster(subagent_roster, findings)
 
@@ -163,6 +164,26 @@ def validate_current(
             for ref in refs:
                 if "@" not in str(ref):
                     findings.append(f"section `{name}` dependency `{ref}` should include @version")
+
+
+def validate_state_consistency(current: dict[str, Any], findings: list[str]) -> None:
+    overall = current.get("overall", {})
+    overall_state = overall.get("state") if isinstance(overall, dict) else None
+    sections = current.get("sections", {})
+    if not isinstance(sections, dict):
+        return
+
+    accepted_like = {"AUDITED", "ACCEPTED"}
+    if overall_state == "POLISHED":
+        for name, section in sections.items():
+            if not isinstance(section, dict):
+                continue
+            section_state = section.get("state")
+            if section_state not in accepted_like:
+                findings.append(
+                    "current-state.yml overall.state `POLISHED` requires every manuscript section "
+                    f"to be AUDITED or ACCEPTED; section `{name}` is `{section_state}`"
+                )
 
 
 def validate_subagent_roster(roster: dict[str, Any], findings: list[str]) -> None:

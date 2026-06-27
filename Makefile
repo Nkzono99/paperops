@@ -1,4 +1,4 @@
-.PHONY: venv smoke cli-smoke scaffold-package-boundary-check build-submission lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
+.PHONY: venv smoke cli-smoke scaffold-package-boundary-check build-submission lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
 
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
 PYTHON_BOOTSTRAP ?= python
@@ -7,7 +7,7 @@ venv:
 	$(PYTHON_BOOTSTRAP) -m venv .venv
 	@if [ -x .venv/bin/python ]; then .venv/bin/python -m pip install --upgrade pip; else .venv/Scripts/python.exe -m pip install --upgrade pip; fi
 
-smoke: cli-smoke lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check content-first-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
+smoke: cli-smoke lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check content-first-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
 
 cli-smoke:
 	$(PYTHON) -m compileall src
@@ -76,6 +76,9 @@ claim-evidence-check:
 
 paper-layer-card-check:
 	$(PYTHON) template/scripts/check-paper-layer-cards.py --root template
+
+card-coverage-check:
+	$(PYTHON) template/scripts/check-card-coverage.py --root template
 
 workflow-check:
 	$(PYTHON) template/scripts/check-workflow-state.py --root template

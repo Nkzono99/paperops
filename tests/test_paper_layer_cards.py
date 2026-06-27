@@ -41,6 +41,29 @@ class PaperLayerCardsTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("`_paperops/notes/views/result-pattern-map.md` に `view_type: pure_overview` がありません", result.stdout)
 
+    def test_source_templates_define_promotion_decisions(self) -> None:
+        source_template = (
+            ROOT / "template" / "_paperops" / "evidence" / "sources" / "source-card-template.md"
+        ).read_text(encoding="utf-8")
+        summary_template = (
+            ROOT / "template" / "_paperops" / "refs" / "summaries" / "summary-template.md"
+        ).read_text(encoding="utf-8")
+        related_work = (
+            ROOT / "template" / "_paperops" / "notes" / "related-work-map.md"
+        ).read_text(encoding="utf-8")
+
+        for required in [
+            "promotion_decision",
+            "promotion_required_when",
+            "claim_boundary",
+            "parameter_choice",
+            "reviewer_objection",
+            "method_precedent",
+            "source card に昇格",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, source_template + "\n" + summary_template + "\n" + related_work)
+
 
 if __name__ == "__main__":
     unittest.main()

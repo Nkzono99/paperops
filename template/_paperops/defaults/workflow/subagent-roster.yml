@@ -165,17 +165,20 @@
     },
     {
       "id": "figure_story_reviewer",
-      "purpose": "Check whether the figure sequence satisfies visual obligations before final prose.",
+      "purpose": "Check whether the figure sequence satisfies visual obligations and whether each figure has passed design-paper-figure reader-task review before final prose.",
       "entry_condition": "Before main figure order is treated as fixed.",
       "allowed_inputs": [
         "_paperops/defaults/contracts/figures.yml",
         "_paperops/claims/",
         "_paperops/evidence/figures/",
+        "Figure design brief fields prepared by design-paper-figure",
         "manuscript/shared/figures/",
         "manuscript/ja/"
       ],
       "outputs": [
         "missing visual obligation",
+        "missing design-paper-figure brief",
+        "reader task, takeaway, encoding, denominator, uncertainty, caption, or runops handoff gap",
         "caption or denominator gap",
         "main/supplement split issue"
       ],

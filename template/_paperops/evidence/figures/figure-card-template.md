@@ -8,6 +8,17 @@ uses_results: []
 manuscript_blocks: []
 current_manuscript_role: main
 satisfies_visual_obligations: []
+design_review:
+  reader_task: unchecked
+  takeaway_sentence: unchecked
+  claim_or_decision: unchecked
+  encoding_choice: unchecked
+  scale_and_denominator: unchecked
+  uncertainty_or_distribution: unchecked
+  annotation_caption: unchecked
+  color_accessibility: unchecked
+  runops_handoff: unchecked
+  acceptance_criteria: unchecked
 checks:
   color_range: unchecked
   decision_boundary_visible: unchecked
@@ -38,6 +49,27 @@ updated: YYYY-MM-DD
 - claim ID:
 - evidence role:
 - 本文 block:
+
+## Figure design brief
+
+図は「データがあるから載せる」ものではなく、読者に比較・判断・境界確認・機構理解をさせるために設計する。
+複数 panel の場合は、panel ごとに同じ項目を埋める。
+
+- reader_task:
+- takeaway_sentence:
+- claim_or_decision:
+- why_this_figure_not_text_or_table:
+- panel_story:
+- primary_comparison:
+- encoding_choice:
+- scale_and_denominator:
+- uncertainty_or_distribution:
+- annotation_plan:
+- caption_plan:
+- color_accessibility:
+- render_size:
+- runops_handoff:
+- acceptance_criteria:
 
 ## 監査項目
 

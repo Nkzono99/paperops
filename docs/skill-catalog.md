@@ -39,6 +39,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `design-manuscript-claims`: 作業報告型の原稿を主張中心に再設計し、`paper_ir` の seed を作る。
 - `design-paper-storyline`: 論文全体の story spine、Results hierarchy、Discussion functions を editorial architect 視点で固定し、Submission hygiene へ逃げる前に原稿内容の blocker を検出する。
 - `plan-figure-story`: 本文生成前に中心 claim から visual obligation を作り、Figure 1、主図、補足図、missing figure を設計する。
+- `design-paper-figure`: 個別の図やpanelについて、図の設計意図、reader task、takeaway、encoding、denominator、uncertainty、caption、runops handoff を固定する。
 
 ### 原稿完成
 
@@ -83,6 +84,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 ### 図表・投稿前点検
 
+- `design-paper-figure`: 「データがあるから図にする」状態を避け、reader task と runops handoff まで含む Figure design brief を作る。
 - `figure-story-audit`: figure/table が claim、decision boundary、denominator、本文参照を支えているか点検する。
 - `venue-fit-review`: 投稿先・読者モデルとの fit を確認する。
 - `ai-disclosure-check`: AI 利用開示と人間検証を確認する。
@@ -97,12 +99,13 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 原稿編集では `make concept-term-check` と `_paperops/notes/views/concept-terms.md` も使う。AI 初稿で起きやすい concept-term compression、つまり強い英語名詞句への単語化は、claim / argument / evidence card の意味を本文へ写すときの語彙問題として扱い、必要なら普通の文へほどく。
 
-Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は薄い router として `content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`finalize-manuscript` を必要時に呼ぶ。story spine、Results hierarchy、Discussion functions、Methods definition registry は `design-paper-storyline` で固定し、`plan-figure-story` で visual obligation を本文生成前に固定する。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` を通してから本文生成へ進む。AI Writer の authoring intent、TODO、後で埋める内容、作業計画は公開 prose にせず `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ置く。`authoring-intent-check` は audit では advisory、finish / pre-submit では strict に使う。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry の機能 block を確認する。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
+Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は薄い router として `content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`finalize-manuscript` を必要時に呼ぶ。story spine、Results hierarchy、Discussion functions、Methods definition registry は `design-paper-storyline` で固定し、`plan-figure-story` で visual obligation を本文生成前に固定する。個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、denominator、uncertainty、caption、runops handoff を Figure design brief にしてから `figure-story-audit` へ回す。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` を通してから本文生成へ進む。AI Writer の authoring intent、TODO、後で埋める内容、作業計画は公開 prose にせず `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ置く。`authoring-intent-check` は audit では advisory、finish / pre-submit では strict に使う。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry の機能 block を確認する。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。`card-coverage-check` は原稿中の図、citation、block ID が card 層へ接続されているかを advisory に見る。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
 
 ## 重要な境界
 
 - 人間向けの高次構想は `story/` に置く。
 - カード正本は `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`。
+- source summary は背景だけなら hold に留め、claim_boundary、parameter_choice、reviewer_objection、method_precedent に使う場合だけ source card に昇格する。
 - `_paperops/notes/views/` には pure overview view と controlled authoring view がある。
 - `_paperops/notes/views/concept-terms.md` は概念語ビューであり、claim / argument / evidence card の意味と本文語彙の対応を記録する。
 - `_paperops/notes/views/*.md` は `view_type` と `source_of_truth` の front matter を持つ。`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。

@@ -111,6 +111,19 @@ raw findings は `_paperops/refs/research/<topic-slug>/results/` に一時保存
 
 文献の存在、年、著者、DOI、主張内容を確認できない場合は `unchecked` または `unverified` と明示し、supported claim の証拠にしない。
 
+### 7. source card への昇格を判定する
+
+`_paperops/refs/summaries/` は採用文献の要約であり、すべてを source card にしない。背景、分野整理、関連研究の列挙だけなら summary の `promotion_decision: hold` に留める。
+
+次のいずれかに該当する場合は `_paperops/evidence/sources/` の source card に昇格し、`promotion_required_when` と理由を記録する。
+
+- `claim_boundary`: 本稿の claim scope、支えられない主張、比較範囲を決める。
+- `parameter_choice`: Methods のパラメータ、閾値、比較条件、評価指標、データ選別を正当化する。
+- `reviewer_objection`: 想定査読者の反論、代替説明、否定証拠、limitation response に使う。
+- `method_precedent`: 方法、ベンチマーク、可視化、再現性情報の先行例として使う。
+
+昇格した source card は claim / manuscript block / verification state を持つ。昇格しない summary を supported claim の直接根拠にしない。
+
 ## 出力
 
 - `Research outline`: 追加・更新した item と field
@@ -118,6 +131,7 @@ raw findings は `_paperops/refs/research/<topic-slug>/results/` に一時保存
 - `Source clusters`: 関連研究の束
 - `Debate matrix`: 対立軸とこの論文での扱い
 - `Promotion list`: `_paperops/refs/summaries/` と `.bib` に昇格する文献
+- `Source card decisions`: hold / source-card / reject と、claim_boundary / parameter_choice / reviewer_objection / method_precedent の該当
 - `Do not use`: 使わない文献と理由
 - `Next actions`: 読む、要約する、引用する、保留する、捨てる
 - `Files updated`: 更新した notes / refs / bib

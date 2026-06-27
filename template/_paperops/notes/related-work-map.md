@@ -52,6 +52,17 @@ Web、GitHub、動画、RSS、SNS、議論サイトなど複数の外部 source 
 | --- | --- | --- | --- | --- |
 | 未記入 | 未記入 | `_paperops/refs/summaries/...` | 未記入 | unchecked / metadata-checked / read / cited |
 
+## Source card 昇格ルール
+
+summary だけでよい文献は `_paperops/refs/summaries/` に留める。本文の supported claim や Methods / Discussion の根拠に使う場合は、以下の条件を `promotion_required_when` に記録して source card に昇格する。
+
+| trigger | source card に昇格する理由 | 記録する境界 |
+| --- | --- | --- |
+| claim_boundary | 主張できる範囲、否定できない範囲、引用元が支える限界を決める | claim / section / unsupported claim |
+| parameter_choice | 閾値、比較条件、評価指標、データ選別、実験設定を正当化する | parameter / method unit / alternative |
+| reviewer_objection | 想定査読者の反論、代替説明、否定証拠を受ける | objection / response route / required evidence |
+| method_precedent | 方法、ベンチマーク、可視化、評価基準の先行例として使う | method dependency / reproducibility note |
+
 ## Source reach 由来の finding
 
 | finding ID | source channel | 要約 | 関連する debate / claim | 昇格判断 |

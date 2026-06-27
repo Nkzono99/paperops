@@ -25,7 +25,7 @@ main agent は writer だけでなく orchestrator として動く。subagent �
 
 1. `content-first-gate` で Start self-critique を行い、次の作業が manuscript content blocker を減らすか確認する。
 2. story spine が弱い場合は `design-paper-storyline` を editorial architect として使い、Results hierarchy と Discussion functions を確認する。
-3. 図表が本文生成後の飾りになりそうなら `plan-figure-story` で visual obligation と main / supplement split を先に決め、必要なら `figure-obligation-check` で欠落を確認する。
+3. 図表が本文生成後の飾りになりそうなら `plan-figure-story` で visual obligation と main / supplement split を先に決める。実際の plot、panel、caption、runops request は `design-paper-figure` で reader task と acceptance criteria を固定し、必要なら `figure-obligation-check` で欠落を確認する。
 4. Writer に生の card ontology を直接渡さない。必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` で読者向け構造へ変換する。
 5. AI Writer の authoring intent、判断保留、後で埋める内容、作業計画は本文 prose に書かない。近傍の `% INTENT:` または `% TODO-PAPER:` に残し、未解決なら `_paperops/notes/` / `_paperops/requests/` へ移す。
 6. review 後や route が不明な feedback は `route-manuscript-feedback` に渡し、evidence / story / section / prose / submission loop のどこへ戻すか決める。
@@ -34,7 +34,7 @@ main agent は writer だけでなく orchestrator として動く。subagent �
 
 ## Lane Notes
 
-From-scratch lane では、文章生成へ急がず、core claim、essential results、storyline、figure story、paper_ir を先に揃える。`design-manuscript-claims` で keep / compress / move / cut を決め、承認が必要な assumption や claim scope は human approval なしに中心主張へ昇格しない。
+From-scratch lane では、文章生成へ急がず、core claim、essential results、storyline、figure story、figure design brief、paper_ir を先に揃える。`design-manuscript-claims` で keep / compress / move / cut を決め、承認が必要な assumption や claim scope は human approval なしに中心主張へ昇格しない。
 
 Revision lane では、現稿の読みと feedback を分ける。AI 初稿や Results / Discussion の薄さが目立つ場合は `audit-ai-draft` と `design-paper-storyline` へ戻り、本文編集は上流 card と section plan の更新後に行う。
 

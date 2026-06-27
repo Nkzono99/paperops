@@ -52,7 +52,7 @@
 | `story/` | 人間が読む高次ストーリー、仮説、期待する evidence path、結果に応じた分岐 | 人間向け構想 | `/design-paper-storyline`, prompt での相談 |
 | `AGENTS.project.md`, `CLAUDE.project.md` | managed core を編集せず project 固有の恒久指示を置く | project overlay | 人間または Agent の明示更新 |
 | `Makefile.project` | project 固有の tracked target を置く | project overlay | 人間または Agent の明示更新 |
-| `_paperops/evidence/` | result / figure / source を論文上の証拠単位へ整理する | AI 内部正本 | `/map-result-patterns`, `/research-related-work` |
+| `_paperops/evidence/` | result / figure / source を論文上の証拠単位へ整理する | AI 内部正本 | `/map-result-patterns`, `/research-related-work`, `/design-paper-figure` |
 | `_paperops/claims/` | claim、scientific gate、argument を管理する | AI 内部正本 | `/scientific-gate`, `/design-manuscript-claims` |
 | `_paperops/review/` | 人間レビュー、模擬査読、実査読 response を管理する | AI 内部正本 | `/integrate-writing-feedback`, `/peer-review-manuscript`, `/respond-to-peer-review` |
 | `_paperops/requests/` | 追加解析や改稿依頼を管理する | AI 内部正本 | `/integrate-writing-feedback`, runops handoff |
@@ -117,9 +117,9 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 
 `_paperops/defaults/contracts/` は文章テンプレートではなく、storyline と section ごとの入出力契約である。`_paperops/defaults/contracts/storyline.yml` は reader_promise、central_claim、evidence_ladder、Results hierarchy、Discussion functions を個別 section より上位で固定する。論文固有に変える場合だけ `_paperops/contracts/` に同名 overlay を置く。Introduction は `problem -> unresolved tension -> precise gap -> approach -> contribution -> scope` のような論理機能を持ち、Methods / Results / Discussion はそれぞれ情報配置、subsection 契約、推論型を明示する。`manuscript/writing-profile.yml` は `paper_type: computational_modeling` のような論文種別 overlay と投稿先要求を重ねる。
 
-`_paperops/defaults/contracts/figures.yml` は figure story 標準契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。論文固有の figure contract は `_paperops/contracts/figures.yml` overlay へ置く。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
+`_paperops/defaults/contracts/figures.yml` は figure story 標準契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、scale/denominator、uncertainty/distribution、caption、runops handoff を Figure design brief として固定する。論文固有の figure contract は `_paperops/contracts/figures.yml` overlay へ置く。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
 
-section compiler は、`finish-manuscript` から呼ばれる専門 skill 群として Writer の前に走る。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry が読者質問、baseline/comparator rationale、判定基準定義を持つかを見る semantic coverage gate である。Results / Discussion はさらに `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。
+section compiler は、`finish-manuscript` から呼ばれる専門 skill 群として Writer の前に走る。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry が読者質問、baseline/comparator rationale、判定基準定義を持つかを見る semantic coverage gate である。Results / Discussion はさらに `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。`card-coverage-check` は本文中の図、citation、block ID が `_paperops/evidence/` や関連 card に接続されているかを確認し、source summary を claim_boundary、parameter_choice、reviewer_objection、method_precedent の根拠に使う場合は source card に昇格させる。
 
 - `compile-methods-section`: method unit ごとに、本文 / supplement / code への配分、非標準性、結果感度、再実装に必要な情報を決める。
 - `compile-results-section`: reader question -> one-sentence answer -> quantitative evidence -> figure -> baseline/comparator rationale -> consequence の順に、結果の読み順を作る。
@@ -133,7 +133,7 @@ section compiler は、`finish-manuscript` から呼ばれる専門 skill 群と
 
 各 section は `UNPLANNED`、`PLANNED`、`DRAFTED`、`AUDITED`、`ACCEPTED`、`STALE` の局所状態を持つ。claim、result、figure、contract などの upstream artifact が変わった場合は、過去状態へ機械的に戻すのではなく、依存 section を `STALE` にする。`pops workflow invalidate CLM-0003` は、`depends_on` に `CLM-0003@...` を持つ section だけを stale にし、artifact 種別に応じた loop route を付ける。
 
-`_paperops/defaults/workflow/machine.yml` は状態、transition、guard、loop policy の既定規約であり、`_paperops/workflow/current-state.yml` は現在状態である。`_paperops/defaults/workflow/focus-policy.yml` は content / evidence / prose / submission / harness intent の優先順位と許可条件を持つ。`_paperops/defaults/workflow/subagent-roster.yml` は orchestrator が subagent の role、allowed inputs、output、integration decision を管理する契約である。論文固有の workflow 差分が必要な場合だけ `_paperops/workflow/` に同名 overlay を置く。
+`_paperops/defaults/workflow/machine.yml` は状態、transition、guard、loop policy の既定規約であり、`_paperops/workflow/current-state.yml` は現在状態である。`workflow-check` は `overall.state` が `POLISHED` なのに section が `DRAFTED` や `STALE` のまま残る不整合も検出する。`_paperops/defaults/workflow/focus-policy.yml` は content / evidence / prose / submission / harness intent の優先順位と許可条件を持つ。`_paperops/defaults/workflow/subagent-roster.yml` は orchestrator が subagent の role、allowed inputs、output、integration decision を管理する契約である。論文固有の workflow 差分が必要な場合だけ `_paperops/workflow/` に同名 overlay を置く。
 
 ## 設計原則
 

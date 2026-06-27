@@ -1,5 +1,15 @@
 # <citation_key>
 
+---
+promotion_decision: hold
+promotion_required_when: []
+promotion_reason: ""
+claim_boundary: ""
+parameter_choice: ""
+reviewer_objection: ""
+method_precedent: ""
+---
+
 ## 文献情報
 
 - Citation key:
@@ -23,6 +33,17 @@
 ## 本稿に関係する方法・データの詳細
 
 未記入
+
+## Source card 昇格判断
+
+この summary は関連研究や背景説明で足りる場合に使う。次のいずれかに該当する場合は source card に昇格し、`_paperops/evidence/sources/` に確認状態、claim link、本文 block を持たせる。
+
+- promotion_decision: hold / source-card / reject
+- promotion_required_when: claim_boundary / parameter_choice / reviewer_objection / method_precedent
+- claim_boundary: この文献に依存して主張範囲を狭める、または強める場合。
+- parameter_choice: Methods のパラメータ、閾値、比較条件、データ選別を正当化する場合。
+- reviewer_objection: 想定査読者の反論、代替説明、否定証拠として扱う場合。
+- method_precedent: 方法、ベンチマーク、評価基準の先行例として引用する場合。
 
 ## ページ・節つきの短い引用または要約
 

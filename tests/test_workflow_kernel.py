@@ -109,6 +109,31 @@ class WorkflowKernelTest(unittest.TestCase):
             self.assertIn("public_reader", result.stdout)
             self.assertIn("public-only", result.stdout)
 
+    def test_workflow_check_rejects_polished_overall_with_drafted_sections(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = copy_template(tmp)
+            state_path = root / "_paperops" / "workflow" / "current-state.yml"
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["overall"]["state"] = "POLISHED"
+            state["sections"]["results.core_relaxation"]["state"] = "DRAFTED"
+            state_path.write_text(
+                json.dumps(state, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+            result = run_python_script(
+                root / "scripts" / "check-workflow-state.py",
+                "--root",
+                root,
+                encoding="utf-8",
+                errors="replace",
+            )
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("overall.state `POLISHED`", result.stdout)
+        self.assertIn("results.core_relaxation", result.stdout)
+        self.assertIn("DRAFTED", result.stdout)
+
     def test_pops_workflow_status_next_and_advance_with_guards(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"

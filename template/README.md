@@ -24,7 +24,7 @@
 3. `pops workflow status` と `pops workflow next` で、全体状態と stale section を確認する。
 4. 必要なら `content-first-gate`、`_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、project 固有の `_paperops/contracts/` overlay、`manuscript/writing-profile.yml` を重ね、`design-paper-storyline`、`make content-first-check`、`make section-contract-check`、`make section-depth-check`、`make authoring-intent-check` で story spine、Results hierarchy、Discussion functions、Methods definition registry、Results / Discussion の薄さ、AI Writer の執筆意図漏れ、次の作業が本文 blocker を減らすことを確認する。
 5. subagent を使う場合、`orchestrate-manuscript-subagents` で main agent は orchestrator として role brief と integration decision を `_paperops/review/rounds/` に残す。
-6. `plan-figure-story` で本文生成前の visual obligation と主図構成を決め、`paper_ir` と `compile-results-section` / `compile-discussion-section` / `compile-methods-section` で Results / Discussion / Methods の読者向け構造を作る。
+6. `plan-figure-story` で本文生成前の visual obligation と主図構成を決め、個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、denominator、caption、runops handoff を Figure design brief にする。その後、`paper_ir` と `compile-results-section` / `compile-discussion-section` / `compile-methods-section` で Results / Discussion / Methods の読者向け構造を作る。
 7. `manuscript/ja/` を中心に書く。AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose ではなく `% INTENT:` または `% TODO-PAPER:` コメントに置き、必要なら `_paperops/notes/` / `_paperops/requests/` へ移す。
 8. 必要な block を `manuscript/en/` に同期する。
 9. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、`route-manuscript-feedback` と `pops workflow route-review` で戻る深さを決める。
@@ -53,6 +53,7 @@
 - `_paperops/refs/summaries/`: 採用する文献や外部 source の確認済み要約。
 - `_paperops/refs/research/`: 関連研究調査の設計と raw finding。
 - `_paperops/refs/source-reach/`: Web、GitHub、動画、RSS、SNS など外部 source channel の調査メモ。
+- `_paperops/evidence/sources/`: summary だけでは足りない claim_boundary、parameter_choice、reviewer_objection、method_precedent の source card。
 - `_paperops/refs/links.toml`: 共有できる外部 project / directory link の意味。
 - `_paperops/refs/imports/`: 外部 export bundle の source index、integrity、claim role、取り込み状態。
 - `_paperops/refs/local/locations.toml`: 個人環境の実パス。Git 管理しない。
@@ -66,6 +67,7 @@
 - `/source-reach-scan`, `/research-related-work`: 外部 source と関連研究を整理する。
 - `/map-result-patterns`, `/scientific-gate`: 結果を証拠カードにし、主張として書けるか判定する。
 - `/plan-figure-story`: 本文生成前に claim から visual obligation、Figure 1、主図/補足図、missing figure を設計する。
+- `/design-paper-figure`: 個別図の図の設計意図、reader task、takeaway、encoding、caption、runops handoff を決める。
 - `/finish-manuscript`: `/goal` で原稿完成まで進める薄い route-level 入口。`content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`compile-results-section` / `compile-discussion-section` / `compile-methods-section`、`finalize-manuscript` を必要時に呼ぶ。
 - `/design-paper-storyline`: 原稿全体の story spine、Results hierarchy、Discussion functions を俯瞰し、Submission hygiene へ逸れる前に本文 blocker を固定する。
 - `/review-public-manuscript`, `/peer-review-manuscript`: 公開原稿や投稿前原稿を読者・査読者目線で読む。

@@ -34,6 +34,7 @@ make ci
 make audit
 make pre-submit
 make paper-layer-card-check
+make card-coverage-check
 make workflow-check
 make concept-term-check
 make authoring-intent-check
@@ -56,7 +57,7 @@ make figure-obligation-check
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
 6. Writer の前に、`content-first-gate`、`pops workflow status`、`_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、必要な `_paperops/contracts/` overlay、`manuscript/writing-profile.yml`、`/design-paper-storyline` を確認し、`make content-first-check`、`make section-contract-check`、`make section-depth-check` で次の作業が本文 blocker を減らすこと、Results / Discussion の機能 block と Methods 定義 registry が埋まっていること、Results / Discussion が薄すぎないことを確認する。`section_depth` は JA を `ja_chars`、EN を `en_words` で数える floor であり、水増し target にしない。
 7. subagent を使う場合は `orchestrate-manuscript-subagents` で story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分け、orchestrator が `_paperops/review/rounds/` に integration decision を残す。
-8. `/plan-figure-story` で visual obligation と主図構成を決め、その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section` / `compile-discussion-section` / `compile-methods-section` で読者向け構造へ変換する。
+8. `/plan-figure-story` で visual obligation と主図構成を決め、個別図は `/design-paper-figure` で図の設計意図、reader task、takeaway、encoding、denominator、caption、runops handoff を Figure design brief にする。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section` / `compile-discussion-section` / `compile-methods-section` で読者向け構造へ変換する。
 9. AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose に書かず、近傍の `% INTENT:` または `% TODO-PAPER:` コメントに置く。解決できない場合は `_paperops/notes/` または `_paperops/requests/` へ移す。公開本文として意図的に扱う場合だけ、直前に `% paperops: allow-authoring-intent -- reason` を置く。
 10. 強い英語名詞句や hyphen / slash compound は `_paperops/notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
 11. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
@@ -68,14 +69,14 @@ make figure-obligation-check
 
 - 初回セットアップ・更新: `/setup`, `/update-paperops`
 - セッション再開・記録: `/resume-session`, `/note-writing-session`
-- 関連研究・外部 source: `/source-reach-scan`, `/research-related-work`, `/update-refs`, `/resolve-local-paths`
+- 関連研究・外部 source: `/source-reach-scan`, `/research-related-work`, `/update-refs`, `/resolve-local-paths`。summary で済む文献と source card に昇格する文献を分ける。
 - 証拠・主張: `/map-result-patterns`, `/scientific-gate`, `/design-manuscript-claims`, `/calibrate-claims`
 - AI 初稿診断: `/audit-ai-draft`, `/contextualize-conditions`, `/polish-ai-draft`
 - 原稿調整: `/paragraph-surgery`, `/public-terminology-pass`, `/sync-ja-en`
 - 通読レビュー: `/start-manuscript-review`, `/collect-manuscript-review`, `/integrate-writing-feedback`
 - 査読: `/review-public-manuscript`, `/peer-review-manuscript`, `/respond-to-peer-review`
 - 原稿完成補助: `/finish-manuscript`, `/content-first-gate`, `/orchestrate-manuscript-subagents`, `/route-manuscript-feedback`, `/compile-results-section`, `/compile-discussion-section`, `/compile-methods-section`, `/finalize-manuscript`
-- 投稿前点検: `/plan-figure-story`, `/figure-story-audit`, `/venue-fit-review`, `/ai-disclosure-check`
+- 投稿前点検: `/plan-figure-story`, `/design-paper-figure`, `/figure-story-audit`, `/venue-fit-review`, `/ai-disclosure-check`
 - アーカイブ・書き直し: `/archive-scratch`
 - 俯瞰・改善: `/open-paper-scan`, `/design-paper-storyline`, `/feedback-paper-harness`
 

@@ -17,11 +17,12 @@ uvx --from paper-harness-cli pops doctor
 
 下流の Makefile は、確認を三つの profile に分ける。
 
-- `make ci`: 構造、引用、mirror、公開語彙、カード層、link、build fallback など、壊れていると作業を続けにくい項目を確認する。
-- `make audit`: argument focus、concept-term compression、AI authoring intent leak、content-first intent、main-text figure reference、figure obligation、claim evidence、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
+- `make ci`: 構造、引用、mirror、公開語彙、カード層、card coverage、link、build fallback など、壊れていると作業を続けにくい項目を確認する。
+- `make audit`: argument focus、concept-term compression、AI authoring intent leak、content-first intent、main-text figure reference、figure obligation、claim evidence、card coverage、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
 - `make authoring-intent-check`: AI Writer の執筆意図、後で埋める内容、TODO、作業計画が TeX コメントではなく公開本文 prose に漏れていないか advisory に確認する。保持したい作業意図は `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ移す。
 - `make section-contract-check`: `_paperops/notes/views/storyline.md` の Results hierarchy、Discussion functions、Methods definition registry が、読者質問・baseline rationale・判定基準定義を持つか advisory に確認する。
 - `make section-depth-check`: Results / Discussion が `manuscript/writing-profile.yml` の `section_depth` floor を大きく下回っていないか advisory に確認する。JA は `ja_chars`、EN は `en_words` として数える。
+- `make card-coverage-check`: 原稿中の図、citation、block ID が card 層へ接続されているかを advisory に確認する。投稿前やレビュー前に厳しく見る場合は `python scripts/check-card-coverage.py --root . --strict` を使う。
 - `make finish-manuscript-check`: STRUCTURE_ACCEPTED 前に `/goal` を完了扱いしないための content-first finish gate。`make pre-submit` とは別に、原稿本文 blocker、AI authoring intent leak、strict public terms、section-contract、Results / Discussion の section-depth blocker が閉じているかを確認する。
 - `make pre-submit`: `ci` と `audit`、`finish-manuscript-check` に加え、concept term、figure reference、figure obligation、research request handoff、external import、readiness を投稿前 profile として厳しめに確認する。
 
