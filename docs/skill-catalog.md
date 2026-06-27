@@ -51,6 +51,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `compile-results-section`: `paper_ir` から Results の reader question、answer、quantitative evidence、figure、baseline/comparator rationale、consequence を作る。
 - `compile-discussion-section`: `paper_ir` から Discussion functions、mechanism warrant、alternative、implication、decisive next test を作る。
 - `compile-methods-section`: `paper_ir` から Methods の method unit、main text / supplement / code 配分、再実装情報を作る。
+- `review-block-flow`: DRAFTED section の block flow、author stance、reader question を読み直し、block operation table で move / split / merge / delete / add を決める。
 - `finalize-manuscript`: 完了宣言前に Finish criteria、review loop、mirror、引用、figure、AI disclosure、pre-submit を確認する。
 
 ### レビュー・査読
@@ -80,6 +81,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `contextualize-conditions`: 条件数や run inventory を論文上の比較へ翻訳する。
 - `public-terminology-pass`: 内部語や未定義略語を公開語へ置換する。
 - `paragraph-surgery`: 段落単位で流れを整える。
+- `review-block-flow`: paragraph polish の前に、block 単位の reader question、author stance、why here を確認する。
 - `polish-ai-draft`: claim lock 後に AI 初稿の文体を整える。作業計画や判断保留を自然な本文に見せかけず、reader-facing 内容か `% INTENT:` / `% TODO-PAPER:` / request かに分ける。
 
 ### 図表・投稿前点検
@@ -99,7 +101,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 原稿編集では `make concept-term-check` と `_paperops/notes/views/concept-terms.md` も使う。AI 初稿で起きやすい concept-term compression、つまり強い英語名詞句への単語化は、claim / argument / evidence card の意味を本文へ写すときの語彙問題として扱い、必要なら普通の文へほどく。
 
-Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は薄い router として `content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`finalize-manuscript` を必要時に呼ぶ。story spine、Results hierarchy、Discussion functions、Methods definition registry は `design-paper-storyline` で固定し、`plan-figure-story` で visual obligation を本文生成前に固定する。個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、denominator、uncertainty、caption、runops handoff を Figure design brief にしてから `figure-story-audit` へ回す。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` を通してから本文生成へ進む。AI Writer の authoring intent、TODO、後で埋める内容、作業計画は公開 prose にせず `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ置く。`authoring-intent-check` は audit では advisory、finish / pre-submit では strict に使う。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry の機能 block を確認する。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。`card-coverage-check` は原稿中の図、citation、block ID が card 層へ接続されているかを advisory に見る。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
+Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は薄い router として `content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`finalize-manuscript` を必要時に呼ぶ。story spine、Results hierarchy、Discussion functions、Methods definition registry は `design-paper-storyline` で固定し、`plan-figure-story` で visual obligation を本文生成前に固定する。個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、denominator、uncertainty、caption、runops handoff を Figure design brief にしてから `figure-story-audit` へ回す。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` を通してから本文生成へ進む。DRAFTED から AUDITED へ進む前に `review-block-flow` で block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を明示する。AI Writer の authoring intent、TODO、後で埋める内容、作業計画は公開 prose にせず `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ置く。`authoring-intent-check` は audit では advisory、finish / pre-submit では strict に使う。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry の機能 block を確認する。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。`card-coverage-check` は原稿中の図、citation、block ID が card 層へ接続されているかを advisory に見る。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
 
 ## 重要な境界
 

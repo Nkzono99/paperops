@@ -58,12 +58,13 @@ make figure-obligation-check
 6. Writer の前に、`content-first-gate`、`pops workflow status`、`_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、必要な `_paperops/contracts/` overlay、`manuscript/writing-profile.yml`、`/design-paper-storyline` を確認し、`make content-first-check`、`make section-contract-check`、`make section-depth-check` で次の作業が本文 blocker を減らすこと、Results / Discussion の機能 block と Methods 定義 registry が埋まっていること、Results / Discussion が薄すぎないことを確認する。`section_depth` は JA を `ja_chars`、EN を `en_words` で数える floor であり、水増し target にしない。
 7. subagent を使う場合は `orchestrate-manuscript-subagents` で story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分け、orchestrator が `_paperops/review/rounds/` に integration decision を残す。
 8. `/plan-figure-story` で visual obligation と主図構成を決め、個別図は `/design-paper-figure` で図の設計意図、reader task、takeaway、encoding、denominator、caption、runops handoff を Figure design brief にする。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section` / `compile-discussion-section` / `compile-methods-section` で読者向け構造へ変換する。
-9. AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose に書かず、近傍の `% INTENT:` または `% TODO-PAPER:` コメントに置く。解決できない場合は `_paperops/notes/` または `_paperops/requests/` へ移す。公開本文として意図的に扱う場合だけ、直前に `% paperops: allow-authoring-intent -- reason` を置く。
-10. 強い英語名詞句や hyphen / slash compound は `_paperops/notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
-11. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
-12. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
-13. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映し、必要なら `route-manuscript-feedback`、`pops workflow route-review`、`pops workflow invalidate <artifact-id>` で戻る深さと stale section を更新する。
-14. Submission hygiene は STRUCTURE_ACCEPTED 後にだけ主作業にする。完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `make pre-submit` を実行する。
+9. DRAFTED section は `/review-block-flow` で block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を確認してから AUDITED 扱いにする。
+10. AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose に書かず、近傍の `% INTENT:` または `% TODO-PAPER:` コメントに置く。解決できない場合は `_paperops/notes/` または `_paperops/requests/` へ移す。公開本文として意図的に扱う場合だけ、直前に `% paperops: allow-authoring-intent -- reason` を置く。
+11. 強い英語名詞句や hyphen / slash compound は `_paperops/notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
+12. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
+13. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
+14. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映し、必要なら `route-manuscript-feedback`、`pops workflow route-review`、`pops workflow invalidate <artifact-id>` で戻る深さと stale section を更新する。
+15. Submission hygiene は STRUCTURE_ACCEPTED 後にだけ主作業にする。完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `make pre-submit` を実行する。
 
 ## スキル入口
 
@@ -75,7 +76,7 @@ make figure-obligation-check
 - 原稿調整: `/paragraph-surgery`, `/public-terminology-pass`, `/sync-ja-en`
 - 通読レビュー: `/start-manuscript-review`, `/collect-manuscript-review`, `/integrate-writing-feedback`
 - 査読: `/review-public-manuscript`, `/peer-review-manuscript`, `/respond-to-peer-review`
-- 原稿完成補助: `/finish-manuscript`, `/content-first-gate`, `/orchestrate-manuscript-subagents`, `/route-manuscript-feedback`, `/compile-results-section`, `/compile-discussion-section`, `/compile-methods-section`, `/finalize-manuscript`
+- 原稿完成補助: `/finish-manuscript`, `/content-first-gate`, `/orchestrate-manuscript-subagents`, `/route-manuscript-feedback`, `/compile-results-section`, `/compile-discussion-section`, `/compile-methods-section`, `/review-block-flow`, `/finalize-manuscript`
 - 投稿前点検: `/plan-figure-story`, `/design-paper-figure`, `/figure-story-audit`, `/venue-fit-review`, `/ai-disclosure-check`
 - アーカイブ・書き直し: `/archive-scratch`
 - 俯瞰・改善: `/open-paper-scan`, `/design-paper-storyline`, `/feedback-paper-harness`

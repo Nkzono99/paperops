@@ -25,10 +25,11 @@
 4. 必要なら `content-first-gate`、`_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、project 固有の `_paperops/contracts/` overlay、`manuscript/writing-profile.yml` を重ね、`design-paper-storyline`、`make content-first-check`、`make section-contract-check`、`make section-depth-check`、`make authoring-intent-check` で story spine、Results hierarchy、Discussion functions、Methods definition registry、Results / Discussion の薄さ、AI Writer の執筆意図漏れ、次の作業が本文 blocker を減らすことを確認する。
 5. subagent を使う場合、`orchestrate-manuscript-subagents` で main agent は orchestrator として role brief と integration decision を `_paperops/review/rounds/` に残す。
 6. `plan-figure-story` で本文生成前の visual obligation と主図構成を決め、個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、denominator、caption、runops handoff を Figure design brief にする。その後、`paper_ir` と `compile-results-section` / `compile-discussion-section` / `compile-methods-section` で Results / Discussion / Methods の読者向け構造を作る。
-7. `manuscript/ja/` を中心に書く。AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose ではなく `% INTENT:` または `% TODO-PAPER:` コメントに置き、必要なら `_paperops/notes/` / `_paperops/requests/` へ移す。
-8. 必要な block を `manuscript/en/` に同期する。
-9. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、`route-manuscript-feedback` と `pops workflow route-review` で戻る深さを決める。
-10. Submission hygiene は STRUCTURE_ACCEPTED 後に主作業にする。完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `manuscript/publication-metadata.toml` の `[submission]`、`[open_research]`、`[human_verification]` を埋めて `make pre-submit` を実行する。
+7. DRAFTED section は `review-block-flow` で block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を確認してから AUDITED 扱いにする。
+8. `manuscript/ja/` を中心に書く。AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose ではなく `% INTENT:` または `% TODO-PAPER:` コメントに置き、必要なら `_paperops/notes/` / `_paperops/requests/` へ移す。
+9. 必要な block を `manuscript/en/` に同期する。
+10. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、`route-manuscript-feedback` と `pops workflow route-review` で戻る深さを決める。
+11. Submission hygiene は STRUCTURE_ACCEPTED 後に主作業にする。完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `manuscript/publication-metadata.toml` の `[submission]`、`[open_research]`、`[human_verification]` を埋めて `make pre-submit` を実行する。
 
 ## 中間層
 
@@ -68,7 +69,8 @@
 - `/map-result-patterns`, `/scientific-gate`: 結果を証拠カードにし、主張として書けるか判定する。
 - `/plan-figure-story`: 本文生成前に claim から visual obligation、Figure 1、主図/補足図、missing figure を設計する。
 - `/design-paper-figure`: 個別図の図の設計意図、reader task、takeaway、encoding、caption、runops handoff を決める。
-- `/finish-manuscript`: `/goal` で原稿完成まで進める薄い route-level 入口。`content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`compile-results-section` / `compile-discussion-section` / `compile-methods-section`、`finalize-manuscript` を必要時に呼ぶ。
+- `/review-block-flow`: DRAFTED section の block operation table、author stance、reader question、move / split / merge / delete / add を決める。
+- `/finish-manuscript`: `/goal` で原稿完成まで進める薄い route-level 入口。`content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`compile-results-section` / `compile-discussion-section` / `compile-methods-section`、`review-block-flow`、`finalize-manuscript` を必要時に呼ぶ。
 - `/design-paper-storyline`: 原稿全体の story spine、Results hierarchy、Discussion functions を俯瞰し、Submission hygiene へ逸れる前に本文 blocker を固定する。
 - `/review-public-manuscript`, `/peer-review-manuscript`: 公開原稿や投稿前原稿を読者・査読者目線で読む。
 - `/respond-to-peer-review`: 実査読コメントへの返答を整理する。

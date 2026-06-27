@@ -15,6 +15,7 @@ class FinishManuscriptSkillTest(unittest.TestCase):
         "compile-results-section",
         "compile-discussion-section",
         "compile-methods-section",
+        "review-block-flow",
         "finalize-manuscript",
     ]
 
@@ -36,6 +37,8 @@ class FinishManuscriptSkillTest(unittest.TestCase):
             "design-paper-storyline",
             "editorial architect",
             "plan-figure-story",
+            "design-paper-figure",
+            "review-block-flow",
             "paper_ir",
             "compile-results-section",
             "compile-discussion-section",
@@ -48,6 +51,8 @@ class FinishManuscriptSkillTest(unittest.TestCase):
             "peer-review-manuscript",
             "respond-to-peer-review",
             "review-public-manuscript",
+            "DRAFTED -> AUDITED",
+            "block operation table",
             "human approval",
             "content-first-gate",
             "orchestrate-manuscript-subagents",
@@ -140,6 +145,17 @@ class FinishManuscriptSkillTest(unittest.TestCase):
                 "supplement",
                 "code_or_manifest",
                 "writing-profile.yml",
+            ],
+            "review-block-flow": [
+                "block operation table",
+                "reader_question",
+                "author_move",
+                "move",
+                "split",
+                "merge",
+                "delete",
+                "add",
+                "author stance",
             ],
             "finalize-manuscript": [
                 "Finish criteria",

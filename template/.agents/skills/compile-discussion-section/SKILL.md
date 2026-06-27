@@ -40,4 +40,6 @@ AI Writer の作業計画を Discussion prose に混ぜない。`claim を強め
 
 `section-contract-check` が Discussion functions の不足を返した場合は、principal finding、mechanism warrant、prior-work delta、alternative/boundary、implication、decisive next test のどれが本文 block にないかを明示して section_loop に戻す。
 
+Draft 後は `review-block-flow` で block operation table を作る。各 block の reader_question、author_move、why_here、next_block_expectation を確認し、author stance が assert / reject / boundary / hold のどれかを明示してから AUDITED 扱いにする。
+
 生成した section plan は必要な場合だけ `.paperops/cache/section-plan-discussion.yml` に置き、Git 管理しない。本文を生成・修正した後は `make authoring-intent-check` を使い、AI 執筆意図が公開 prose に漏れていないことを確認する。

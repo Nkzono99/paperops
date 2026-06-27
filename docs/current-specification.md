@@ -269,6 +269,7 @@ section compiler:
 - `compile-methods-section`: method unit ごとに本文 / supplement / code への配分、非標準性、結果感度、再実装情報を決める。
 - `compile-results-section`: reader question -> one-sentence answer -> quantitative evidence -> figure -> baseline / comparator rationale -> consequence の順に結果を並べる。
 - `compile-discussion-section`: observation / inference / mechanism_hypothesis / alternative_explanation / implication / prediction / limitation を分ける。
+- `review-block-flow`: DRAFTED section の block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を確認してから AUDITED へ進める。
 
 `check-section-contracts.py` は、`_paperops/notes/views/storyline.md` の controlled authoring view から Results hierarchy、Discussion functions、Methods definition registry を確認する。`audit` では warning として扱い、`finish-manuscript-check` では strict error として扱う。これは section-depth の文字数 floor とは別の semantic coverage gate であり、水増しではなく baseline rationale、decision criteria、mechanism warrant などの不足へ戻すための検査である。
 
@@ -360,7 +361,7 @@ project-owned extension point:
 
 `_paperops/defaults/workflow/subagent-roster.yml` は、main agent / orchestrator が subagent をどう使うかの標準契約である。論文固有に role や allowed input を変える場合だけ `_paperops/workflow/subagent-roster.yml` overlay を置く。
 
-実行時の詳細は `orchestrate-manuscript-subagents` に置き、`finish-manuscript` は必要時にそれを呼ぶ。content-first の自己点検は `content-first-gate`、review 後の戻り先分類は `route-manuscript-feedback`、完了前確認は `finalize-manuscript` が担当する。図表系では `figure_story_reviewer` が `design-paper-figure` の Figure design brief、reader task、runops handoff を監査対象に含める。
+実行時の詳細は `orchestrate-manuscript-subagents` に置き、`finish-manuscript` は必要時にそれを呼ぶ。content-first の自己点検は `content-first-gate`、review 後の戻り先分類は `route-manuscript-feedback`、block flow の再設計は `review-block-flow`、完了前確認は `finalize-manuscript` が担当する。図表系では `figure_story_reviewer` が `design-paper-figure` の Figure design brief、reader task、runops handoff を監査対象に含める。
 
 主な role:
 
