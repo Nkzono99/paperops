@@ -16,7 +16,7 @@
 - `_paperops/notes/views/` は pure overview view と controlled authoring view を含む。`view_type` と `source_of_truth` を確認し、`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
 - `_paperops/defaults/contracts/` は paperops-managed の標準 section / figure story 契約であり、文章テンプレートではない。論文固有の契約差分だけ `_paperops/contracts/` に同名 overlay として置く。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
 - `_paperops/workflow/` は現在状態、review loop、stale 伝播、人間判断の状態正本である。標準の状態機械、focus policy、subagent roster は `_paperops/defaults/workflow/` にあり、本文編集前に `pops workflow status` を確認する。
-- subagent を使う執筆では `orchestrate-manuscript-subagents` で `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay を読み、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
+- subagent を使う執筆では通常 `/finish-manuscript` から必要時に `orchestrate-manuscript-subagents` へ委譲し、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
 - `_paperops/` の作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名は英語のままでよい。
 - raw PDF、未整理ファイル、個人環境の絶対パス、confidential reviewer correspondence は tracked file へ混ぜない。
 - `_handoff/` は人間から AI への一時受け取り箱であり、内容は Git 管理しない。
@@ -57,11 +57,11 @@ make figure-obligation-check
 3. 必要なら `/map-result-patterns` で raw result や figure data を `_paperops/evidence/` の card にする。
 4. 外部 export bundle を使う場合は `_paperops/refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-6. Writer の前に、`content-first-gate`、`pops workflow status`、`_paperops/defaults/workflow/subagent-roster.yml`、`_paperops/defaults/contracts/`、必要な `_paperops/contracts/` overlay、`manuscript/writing-profile.yml`、`/design-paper-storyline` を確認し、`make content-first-check`、`make section-contract-check`、`make section-depth-check` で次の作業が本文 blocker を減らすこと、Results / Discussion の機能 block と Methods 定義 registry が埋まっていること、Results / Discussion が薄すぎないことを確認する。`section_depth` は JA を `ja_chars`、EN を `en_words` で数える floor であり、水増し target にしない。
-7. subagent を使う場合は `orchestrate-manuscript-subagents` で story_architect、evidence_auditor、results_structure_reviewer、discussion_function_reviewer などを reviewer として分け、orchestrator が `_paperops/review/rounds/` に integration decision を残す。
-8. `/plan-figure-story` で visual obligation と主図構成を決め、個別図は `/design-paper-figure` で図の設計意図、reader task、takeaway、encoding、denominator、caption、runops handoff を Figure design brief にする。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section` / `compile-discussion-section` / `compile-methods-section` で読者向け構造へ変換する。
-9. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/draft-predicted-results` で予測稿を作る。本文内には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` を置き、`xx` と `_paperops/requests/analysis/` を実データ置換まで追跡する。
-10. DRAFTED section は `/review-block-flow` で block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を確認してから AUDITED 扱いにする。
+6. 原稿を進めるときは `/finish-manuscript` を主入口にする。内部で content-first gate、storyline、section contract、section depth、subagent orchestration、section compiler、予測稿、block-flow review、final check を必要な範囲だけ呼ぶ。
+7. 図表が本文の主張を支える場合は `/plan-figure-story` を入口にし、必要な個別図だけ `design-paper-figure` や `figure-story-audit` へ進める。
+8. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/finish-manuscript` 内の予測稿 route で扱う。本文内には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` を置き、`xx` と `_paperops/requests/analysis/` を実データ置換まで追跡する。
+9. DRAFTED section は block flow を見直してから AUDITED 扱いにする。直接 `review-block-flow` を呼ぶのは、block 構成の再設計が明示された場合に限る。
+10. subagent を使う場合、main agent は orchestrator として role brief と integration decision を `_paperops/review/rounds/` に残す。通常は `/finish-manuscript` から必要時に委譲する。
 11. AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose に書かず、近傍の `% INTENT:` または `% TODO-PAPER:` コメントに置く。解決できない場合は `_paperops/notes/` または `_paperops/requests/` へ移す。公開本文として意図的に扱う場合だけ、直前に `% paperops: allow-authoring-intent -- reason` を置く。
 12. 強い英語名詞句や hyphen / slash compound は `_paperops/notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
 13. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
@@ -74,13 +74,14 @@ make figure-obligation-check
 - 初回セットアップ・更新: `/setup`, `/update-paperops`
 - セッション再開・記録: `/resume-session`, `/note-writing-session`
 - 関連研究・外部 source: `/source-reach-scan`, `/research-related-work`, `/update-refs`, `/resolve-local-paths`。summary で済む文献と source card に昇格する文献を分ける。
-- 証拠・主張: `/map-result-patterns`, `/scientific-gate`, `/draft-predicted-results`, `/design-manuscript-claims`, `/calibrate-claims`
+- 証拠・主張: `/map-result-patterns`, `/scientific-gate`, `/design-manuscript-claims`, `/calibrate-claims`
 - AI 初稿診断: `/audit-ai-draft`, `/contextualize-conditions`, `/polish-ai-draft`
 - 原稿調整: `/paragraph-surgery`, `/public-terminology-pass`, `/sync-ja-en`
 - 通読レビュー: `/start-manuscript-review`, `/collect-manuscript-review`, `/integrate-writing-feedback`
 - 査読: `/review-public-manuscript`, `/peer-review-manuscript`, `/respond-to-peer-review`
-- 原稿完成補助: `/finish-manuscript`, `/content-first-gate`, `/orchestrate-manuscript-subagents`, `/route-manuscript-feedback`, `/compile-results-section`, `/compile-discussion-section`, `/compile-methods-section`, `/draft-predicted-results`, `/review-block-flow`, `/finalize-manuscript`, `/submission-gate`
-- 投稿前点検: `/plan-figure-story`, `/design-paper-figure`, `/figure-story-audit`, `/venue-fit-review`, `/ai-disclosure-check`, `/submission-gate`
+- 原稿完成の主入口: `/finish-manuscript`, `/route-manuscript-feedback`, `/submission-gate`
+- 原稿完成の内部 route（通常は `/finish-manuscript` から呼ばせる）: `content-first-gate`, `orchestrate-manuscript-subagents`, `compile-results-section`, `compile-discussion-section`, `compile-methods-section`, `draft-predicted-results`, `review-block-flow`, `finalize-manuscript`
+- 投稿前点検: `/plan-figure-story`, `/venue-fit-review`, `/ai-disclosure-check`, `/submission-gate`。個別図と監査は `plan-figure-story` から `design-paper-figure` / `figure-story-audit` へ進める。
 - アーカイブ・書き直し: `/archive-scratch`
 - 俯瞰・改善: `/open-paper-scan`, `/design-paper-storyline`, `/feedback-paper-harness`
 

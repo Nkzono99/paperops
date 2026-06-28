@@ -39,23 +39,26 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `design-manuscript-claims`: 作業報告型の原稿を主張中心に再設計し、`paper_ir` の seed を作る。
 - `design-paper-storyline`: 論文全体の story spine、Results hierarchy、Discussion functions を editorial architect 視点で固定し、Submission hygiene へ逃げる前に原稿内容の blocker を検出する。
 - `plan-figure-story`: 本文生成前に中心 claim から visual obligation を作り、Figure 1、主図、補足図、missing figure を設計する。
-- `design-paper-figure`: 個別の図やpanelについて、図の設計意図、reader task、takeaway、encoding、denominator、uncertainty、caption、runops handoff を固定する。
-- `draft-predicted-results`: 未実行だが投稿前に現実的に実施できる追加シミュレーションを、Future Work や defensive prose に逃がさず、`PREDICTED-RESULT` / `SIM-REQUEST` comment と `_paperops/requests/analysis/` つきの予測稿として扱う。
 
 ### 原稿完成
 
-- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める route-level skill。詳細な gate、subagent、feedback routing、section compiler、AI authoring intent guard、final checks は下記の専門 skill へ委譲する。
+- `finish-manuscript`: `/goal` で原稿を 1 から、または既存稿と feedback loop から投稿可能な状態まで進める主入口。詳細な gate、subagent、feedback routing、section compiler、AI authoring intent guard、final checks は内部 route に委譲する。
 - `audit-ai-draft`: AI 初稿をそのまま磨かず、claim / evidence / section compiler へ戻す routing skill として使う。AI Writer の authoring intent が本文 prose に漏れた場合もここで検出し、`% INTENT:` / `% TODO-PAPER:`、notes、requests へ戻す。
+- `route-manuscript-feedback`: Issue Router と Backward propagation で feedback を evidence / story / section / prose / submission loop へ戻す。
+- `submission-gate`: `manuscript/` の authoring source と `submission/` の submission candidate / round snapshot を分け、revision-authoring 後の再投稿も含めて投稿版に予測稿、open AREQ、`xx`、AI intent が残らないか確認する。
+
+### 原稿完成の内部 route
+
+通常は `/finish-manuscript` から呼ばせる。特定の blocker を人間が明示した場合だけ直接使う。
+
 - `content-first-gate`: 原稿本文 blocker が残る間に Submission hygiene や harness 改修へ逸れないか確認する。
 - `orchestrate-manuscript-subagents`: subagent roster、brief、privacy、subagent report、integration decision を管理する。
-- `route-manuscript-feedback`: Issue Router と Backward propagation で feedback を evidence / story / section / prose / submission loop へ戻す。
 - `compile-results-section`: `paper_ir` から Results の reader question、answer、quantitative evidence、figure、baseline/comparator rationale、consequence を作る。
 - `compile-discussion-section`: `paper_ir` から Discussion functions、mechanism warrant、alternative、implication、decisive next test を作る。
 - `compile-methods-section`: `paper_ir` から Methods の method unit、main text / supplement / code 配分、再実装情報を作る。
 - `draft-predicted-results`: goal 中に追加シミュレーションで閉じられる Results / Discussion blocker を、未検証予測稿と analysis request として扱う。
 - `review-block-flow`: DRAFTED section の block flow、author stance、reader question を読み直し、block operation table で move / split / merge / delete / add を決める。
 - `finalize-manuscript`: 完了宣言前に Finish criteria、review loop、mirror、引用、figure、AI disclosure、pre-submit を確認する。
-- `submission-gate`: `manuscript/` の authoring source と `submission/` の submission candidate / round snapshot を分け、revision-authoring 後の再投稿も含めて投稿版に予測稿、open AREQ、`xx`、AI intent が残らないか確認する。
 
 ### レビュー・査読
 
@@ -84,14 +87,12 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `contextualize-conditions`: 条件数や run inventory を論文上の比較へ翻訳する。
 - `public-terminology-pass`: 内部語や未定義略語を公開語へ置換する。
 - `paragraph-surgery`: 段落単位で流れを整える。
-- `review-block-flow`: paragraph polish の前に、block 単位の reader question、author stance、why here を確認する。
 - `polish-ai-draft`: claim lock 後に AI 初稿の文体を整える。作業計画や判断保留を自然な本文に見せかけず、reader-facing 内容か `% INTENT:` / `% TODO-PAPER:` / request かに分ける。
-- `draft-predicted-results`: Results / Discussion の `xx` placeholder、予測図、投稿前追加シミュレーションの解釈を、未検証状態を明示した予測稿として書く。
 
 ### 図表・投稿前点検
 
-- `design-paper-figure`: 「データがあるから図にする」状態を避け、reader task と runops handoff まで含む Figure design brief を作る。
-- `figure-story-audit`: figure/table が claim、decision boundary、denominator、本文参照を支えているか点検する。
+- `design-paper-figure`: `plan-figure-story` または figure blocker から呼ぶ。個別図について「データがあるから図にする」状態を避け、reader task と runops handoff まで含む Figure design brief を作る。
+- `figure-story-audit`: `plan-figure-story` 後、または投稿前の figure blocker で呼ぶ。figure/table が claim、decision boundary、denominator、本文参照を支えているか点検する。
 - `venue-fit-review`: 投稿先・読者モデルとの fit を確認する。
 - `ai-disclosure-check`: AI 利用開示と人間検証を確認する。
 - `submission-gate`: 投稿・外部共有・再投稿前の strict gate と round snapshot 記録を扱う。

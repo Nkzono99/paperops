@@ -101,8 +101,10 @@ class PredictedResultDraftingSkillTemplateTest(unittest.TestCase):
         self.assertIn("goal 中", finish)
         self.assertIn("draft-predicted-results", finish)
         self.assertRegex(catalog, r"### 原稿完成[\s\S]*draft-predicted-results")
-        self.assertRegex(agents, r"原稿完成補助:.*draft-predicted-results")
-        self.assertRegex(claude, r"原稿完成補助:.*draft-predicted-results")
+        self.assertRegex(agents, r"原稿完成の内部 route.*draft-predicted-results")
+        self.assertRegex(claude, r"原稿完成の内部 route.*draft-predicted-results")
+        self.assertNotRegex(agents, r"証拠・主張:.*draft-predicted-results")
+        self.assertNotRegex(claude, r"証拠・主張:.*draft-predicted-results")
         self.assertRegex(readme, r"/finish-manuscript.*draft-predicted-results")
 
     def test_collect_manuscript_review_collects_predicted_result_markers(self) -> None:
