@@ -6,17 +6,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from paperops_links import (
+    link_dicts,
+    link_registry_path,
+    local_locations,
+    read_toml,
+    resolve_local_path,
+)
 from paperops_paths import display_path, internal_path
 
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover
-    tomllib = None
-
-
-LINKS_REL_PATH = "refs/links.toml"
-LOCAL_LOCATIONS_REL_PATH = "refs/local/locations.toml"
-LINKS_DISPLAY_PATH = "_paperops/refs/links.toml"
 REQUEST_VIEW_PATHS = [
     "notes/views/research-requests.md",
     "notes/research-requests.md",
@@ -67,14 +65,6 @@ class QueueState:
     request_ids: set[str]
     statuses: dict[str, str]
     duplicate_ids: set[str]
-
-
-def read_toml(path: Path) -> dict[str, Any]:
-    if tomllib is None:
-        raise RuntimeError("TOML parsing requires Python 3.11 or newer.")
-    with open(path, "rb") as f:
-        data = tomllib.load(f)
-    return data if isinstance(data, dict) else {}
 
 
 def normalize(value: object) -> str:
@@ -131,7 +121,7 @@ def is_placeholder_request(request: PaperRequest) -> bool:
 
 
 def load_links(root: Path, findings: list[Finding]) -> list[dict[str, Any]]:
-    path = internal_path(root, LINKS_REL_PATH)
+    path = link_registry_path(root)
     if not path.exists():
         return []
     try:
@@ -139,35 +129,10 @@ def load_links(root: Path, findings: list[Finding]) -> list[dict[str, Any]]:
     except Exception as exc:
         findings.append(Finding("error", f"`{display_path(root, path)}` を TOML として読めません: {exc}"))
         return []
-    links = raw.get("links", [])
-    if not isinstance(links, list):
+    if not isinstance(raw.get("links", []), list):
         findings.append(Finding("error", f"`{display_path(root, path)}` の `links` は配列にしてください"))
         return []
-    return [link for link in links if isinstance(link, dict)]
-
-
-def load_local_locations(root: Path) -> dict[str, dict[str, Any]]:
-    path = internal_path(root, LOCAL_LOCATIONS_REL_PATH)
-    if not path.exists():
-        return {}
-    raw = read_toml(path)
-    paths = raw.get("paths", {})
-    if not isinstance(paths, dict):
-        return {}
-    return {key: value for key, value in paths.items() if isinstance(value, dict)}
-
-
-def resolve_local_path(root: Path, link: dict[str, Any], local_locations: dict[str, dict[str, Any]]) -> Path | None:
-    location_ref = normalize(link.get("location_ref"))
-    if not location_ref or location_ref not in local_locations:
-        return None
-    raw_path = normalize(local_locations[location_ref].get("path"))
-    if not raw_path:
-        return None
-    path = Path(raw_path).expanduser()
-    if not path.is_absolute():
-        path = root / path
-    return path
+    return link_dicts(raw)
 
 
 def request_cards(root: Path) -> list[PaperRequest]:
@@ -358,7 +323,7 @@ def check_handoff(root: Path, *, live: bool) -> list[Finding]:
         return findings
 
     requests = collect_requests(root)
-    local_locations = load_local_locations(root) if live else {}
+    project_locations = local_locations(root) if live else {}
     for link in runops_links:
         link_id = normalize(link.get("id"))
         linked_requests = [request for request in requests if request_targets_link(request, link)]
@@ -368,7 +333,7 @@ def check_handoff(root: Path, *, live: bool) -> list[Finding]:
             for request in linked_requests:
                 check_request_against_queue(request, None, findings)
             continue
-        local_path = resolve_local_path(root, link, local_locations)
+        local_path = resolve_local_path(root, link, project_locations)
         if local_path is None or not local_path.exists():
             findings.append(
                 Finding(

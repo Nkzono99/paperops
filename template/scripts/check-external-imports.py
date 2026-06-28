@@ -5,23 +5,20 @@ from __future__ import annotations
 import argparse
 import csv
 import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from paperops_links import (
+    LINKS_DISPLAY_PATH,
+    link_map,
+    link_registry_path,
+    local_locations,
+    read_toml,
+)
 from paperops_paths import display_path, internal_path
 
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover
-    tomllib = None  # type: ignore[assignment]
-
-
-LINKS_REL_PATH = "refs/links.toml"
-LOCAL_LOCATIONS_REL_PATH = "refs/local/locations.toml"
 IMPORTS_REL_PATH = "refs/imports"
-LINKS_DISPLAY_PATH = "_paperops/refs/links.toml"
 IMPORTS_DISPLAY_PATH = "_paperops/refs/imports/"
 
 ALLOWED_STATES = {
@@ -60,20 +57,12 @@ class Finding:
     message: str
 
 
-def read_toml(path: Path) -> dict[str, Any]:
-    if tomllib is None:
-        raise RuntimeError("TOML parsing requires Python 3.11 or newer.")
-    with open(path, "rb") as f:
-        data = tomllib.load(f)
-    return data if isinstance(data, dict) else {}
-
-
 def add(findings: list[Finding], severity: str, message: str) -> None:
     findings.append(Finding(severity=severity, message=message))
 
 
 def load_links(root: Path, findings: list[Finding]) -> dict[str, dict[str, Any]]:
-    path = internal_path(root, LINKS_REL_PATH)
+    path = link_registry_path(root)
     if not path.exists():
         return {}
     try:
@@ -81,27 +70,7 @@ def load_links(root: Path, findings: list[Finding]) -> dict[str, dict[str, Any]]
     except Exception as exc:
         add(findings, "error", f"`{display_path(root, path)}` を TOML として読めません: {exc}")
         return {}
-    links = raw.get("links", [])
-    if not isinstance(links, list):
-        return {}
-    rows: dict[str, dict[str, Any]] = {}
-    for item in links:
-        if isinstance(item, dict):
-            link_id = str(item.get("id", "")).strip()
-            if link_id:
-                rows[link_id] = item
-    return rows
-
-
-def load_local_locations(root: Path) -> dict[str, dict[str, Any]]:
-    path = internal_path(root, LOCAL_LOCATIONS_REL_PATH)
-    if not path.exists():
-        return {}
-    raw = read_toml(path)
-    paths = raw.get("paths", {})
-    if not isinstance(paths, dict):
-        return {}
-    return {key: value for key, value in paths.items() if isinstance(value, dict)}
+    return link_map(raw)
 
 
 def import_record_paths(root: Path) -> list[Path]:
@@ -403,7 +372,7 @@ def check_record(
 def check_external_imports(root: Path, *, live: bool) -> tuple[list[Finding], int]:
     findings: list[Finding] = []
     links = load_links(root, findings)
-    local_locations = load_local_locations(root) if live else {}
+    live_locations = local_locations(root) if live else {}
     paths = import_record_paths(root)
     for path in paths:
         try:
@@ -411,7 +380,7 @@ def check_external_imports(root: Path, *, live: bool) -> tuple[list[Finding], in
         except Exception as exc:
             add(findings, "error", f"`{path.relative_to(root).as_posix()}` を TOML として読めません: {exc}")
             continue
-        check_record(path.relative_to(root), record, links, local_locations, findings, live=live)
+        check_record(path.relative_to(root), record, links, live_locations, findings, live=live)
     return findings, len(paths)
 
 

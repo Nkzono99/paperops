@@ -1,34 +1,22 @@
 #!/usr/bin/env python3
 
 import argparse
-import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
-from paperops_paths import display_path, internal_path
-
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover
-    tomllib = None
-
-
-LINKS_REL_PATH = "refs/links.toml"
-LOCAL_LOCATIONS_REL_PATH = "refs/local/locations.toml"
-EXAMPLE_LOCATIONS_REL_PATH = "refs/local/locations.example.toml"
-LINKS_DISPLAY_PATH = "_paperops/refs/links.toml"
-LOCAL_LOCATIONS_DISPLAY_PATH = "_paperops/refs/local/locations.toml"
-EXAMPLE_LOCATIONS_DISPLAY_PATH = "_paperops/refs/local/locations.example.toml"
-ALLOWED_LINK_KINDS = {
-    "runops_project",
-    "directory",
-    "dataset",
-    "figure_source",
-    "knowledge",
-    "simulation",
-}
-ALLOWED_ACCESS = {"read", "read_write"}
+from paperops_links import (
+    ALLOWED_ACCESS,
+    ALLOWED_LINK_KINDS,
+    EXAMPLE_LOCATIONS_DISPLAY_PATH,
+    LINKS_DISPLAY_PATH,
+    LOCAL_LOCATIONS_DISPLAY_PATH,
+    example_locations,
+    link_registry_path,
+    link_rows,
+    local_locations,
+    read_toml,
+)
+from paperops_paths import display_path
 
 
 @dataclass
@@ -37,31 +25,13 @@ class Finding:
     message: str
 
 
-def read_toml(path: Path) -> dict[str, Any]:
-    if tomllib is None:
-        raise RuntimeError("TOML parsing requires Python 3.11 or newer.")
-    with open(path, "rb") as f:
-        data = tomllib.load(f)
-    return data if isinstance(data, dict) else {}
-
-
-def paths_table(path: Path) -> dict[str, dict[str, Any]]:
-    if not path.exists():
-        return {}
-    raw = read_toml(path)
-    paths = raw.get("paths", {})
-    if not isinstance(paths, dict):
-        return {}
-    return {key: value for key, value in paths.items() if isinstance(value, dict)}
-
-
 def add(findings: list[Finding], severity: str, message: str) -> None:
     findings.append(Finding(severity=severity, message=message))
 
 
 def check_links(root: Path, *, strict_local: bool) -> list[Finding]:
     findings: list[Finding] = []
-    registry_path = internal_path(root, LINKS_REL_PATH)
+    registry_path = link_registry_path(root)
     if not registry_path.exists():
         return findings
 
@@ -73,14 +43,14 @@ def check_links(root: Path, *, strict_local: bool) -> list[Finding]:
     if raw.get("schema_version") != 1:
         add(findings, "error", f"`{display_path(root, registry_path)}` の `schema_version` は 1 である必要があります")
 
-    links = raw.get("links", [])
-    if not isinstance(links, list):
+    links = link_rows(raw)
+    if links is None:
         add(findings, "error", f"`{display_path(root, registry_path)}` の `links` は配列にしてください")
         links = []
 
-    local_locations = paths_table(internal_path(root, LOCAL_LOCATIONS_REL_PATH))
-    example_locations = paths_table(internal_path(root, EXAMPLE_LOCATIONS_REL_PATH))
-    has_local_locations = bool(local_locations)
+    project_locations = local_locations(root)
+    project_example_locations = example_locations(root)
+    has_local_locations = bool(project_locations)
     seen_ids: set[str] = set()
 
     for index, item in enumerate(links, start=1):
@@ -108,13 +78,13 @@ def check_links(root: Path, *, strict_local: bool) -> list[Finding]:
         if not location_ref:
             add(findings, "error", f"`{label}` に `location_ref` がありません")
             continue
-        if example_locations and location_ref not in example_locations:
+        if project_example_locations and location_ref not in project_example_locations:
             add(
                 findings,
                 "warning",
                 f"`{label}` の location_ref `{location_ref}` が `{EXAMPLE_LOCATIONS_DISPLAY_PATH}` にありません",
             )
-        if has_local_locations and location_ref not in local_locations:
+        if has_local_locations and location_ref not in project_locations:
             add(
                 findings,
                 "warning",

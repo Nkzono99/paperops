@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- template checker scripts の link registry / local locations 読み込みを `scripts/paperops_links.py` に集約した。既存下流で `check-links.py`、`check-external-imports.py`、`check-research-request-handoff.py` を更新する場合は、同時に `scripts/paperops_links.py` も取り込む必要がある。
 - `research-request-handoff-check` と `external-import-check` の default を静的検証にし、linked runops queue、外部 export CSV、外部 repo の `git status` を読む live drift 確認は `--live` / `*-live-check` target で明示実行するようにした。`make audit` / `make pre-submit` が login node や大きな外部 repo を暗黙に読みに行く状況を避ける。
 - `pops workflow` と `check-workflow-state.py` が通常 YAML の workflow overlay を読む前提を package metadata でも満たすよう、`PyYAML>=6.0` を依存に追加した。`.yml` を JSON 互換だけに制限するのではなく、下流の自然な YAML 編集をサポートする。
 - Makefile と TeX build helper の Python 解決を `scripts/resolve-python.sh` に集約し、Python 3.11 未満の `python3` / `python` / `.venv` を候補から外すようにした。Python 3.11 以上が見つからない場合は明示エラーにし、`tomllib` 前提の checker が古い Python で途中失敗する状況を避ける。
