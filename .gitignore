@@ -1,5 +1,6 @@
 .DS_Store
 .codex-tmp/
+.paperops/cache/
 _handoff/
 .venv/
 __pycache__/

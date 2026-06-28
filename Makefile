@@ -26,7 +26,7 @@ citation-check:
 	$(PYTHON) template/scripts/check-citations.py --root template
 
 mirror-check:
-	$(PYTHON) template/scripts/mirror-check.py --root template/manuscript --report template/manuscript/mirror/reports/smoke-check.md
+	$(PYTHON) template/scripts/mirror-check.py --root template/manuscript --report .paperops/cache/template/mirror-smoke-check.md
 
 mirror-freshness-check:
 	$(PYTHON) template/scripts/mirror-freshness-check.py --root template/manuscript
@@ -107,7 +107,7 @@ external-import-check:
 	$(PYTHON) template/scripts/check-external-imports.py --root template
 
 collect-context:
-	$(PYTHON) template/scripts/collect-note-context.py --root template --output template/_paperops/notes/session-context.generated.md
+	$(PYTHON) template/scripts/collect-note-context.py --root template --output .paperops/cache/template/session-context.generated.md
 
 template-readiness-check:
 	$(PYTHON) template/scripts/readiness-check.py --root template --allow-placeholders --starter-smoke
