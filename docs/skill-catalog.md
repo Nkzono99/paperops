@@ -55,6 +55,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `draft-predicted-results`: goal 中に追加シミュレーションで閉じられる Results / Discussion blocker を、未検証予測稿と analysis request として扱う。
 - `review-block-flow`: DRAFTED section の block flow、author stance、reader question を読み直し、block operation table で move / split / merge / delete / add を決める。
 - `finalize-manuscript`: 完了宣言前に Finish criteria、review loop、mirror、引用、figure、AI disclosure、pre-submit を確認する。
+- `submission-gate`: `manuscript/` の authoring source と `submission/` の submission candidate / round snapshot を分け、revision-authoring 後の再投稿も含めて投稿版に予測稿、open AREQ、`xx`、AI intent が残らないか確認する。
 
 ### レビュー・査読
 
@@ -93,6 +94,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `figure-story-audit`: figure/table が claim、decision boundary、denominator、本文参照を支えているか点検する。
 - `venue-fit-review`: 投稿先・読者モデルとの fit を確認する。
 - `ai-disclosure-check`: AI 利用開示と人間検証を確認する。
+- `submission-gate`: 投稿・外部共有・再投稿前の strict gate と round snapshot 記録を扱う。
 - `sync-ja-en`: 日英 block を同期する。
 
 ### レビュー補助
@@ -104,7 +106,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 
 原稿編集では `make concept-term-check` と `_paperops/notes/views/concept-terms.md` も使う。AI 初稿で起きやすい concept-term compression、つまり強い英語名詞句への単語化は、claim / argument / evidence card の意味を本文へ写すときの語彙問題として扱い、必要なら普通の文へほどく。
 
-Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は薄い router として `content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`finalize-manuscript` を必要時に呼ぶ。story spine、Results hierarchy、Discussion functions、Methods definition registry は `design-paper-storyline` で固定し、`plan-figure-story` で visual obligation を本文生成前に固定する。個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、denominator、uncertainty、caption、runops handoff を Figure design brief にしてから `figure-story-audit` へ回す。未実行の追加シミュレーションが投稿前に現実的で、予測根拠を持つ場合は `draft-predicted-results` で `PREDICTED-RESULT` / `SIM-REQUEST` comment、`xx` 置換条件、`_paperops/requests/analysis/` を接続し、Future Work や defensive prose に逃がさない。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` を通してから本文生成へ進む。DRAFTED から AUDITED へ進む前に `review-block-flow` で block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を明示する。AI Writer の authoring intent、TODO、後で埋める内容、作業計画は公開 prose にせず `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ置く。`authoring-intent-check` は audit では advisory、finish / pre-submit では strict に使う。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry の機能 block を確認する。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。`card-coverage-check` は原稿中の図、citation、block ID が card 層へ接続されているかを advisory に見る。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
+Writer には card 正本や gate 語彙を直接読み込ませすぎない。`finish-manuscript` は薄い router として `content-first-gate`、`orchestrate-manuscript-subagents`、`route-manuscript-feedback`、`finalize-manuscript`、`submission-gate` を必要時に呼ぶ。story spine、Results hierarchy、Discussion functions、Methods definition registry は `design-paper-storyline` で固定し、`plan-figure-story` で visual obligation を本文生成前に固定する。個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、denominator、uncertainty、caption、runops handoff を Figure design brief にしてから `figure-story-audit` へ回す。未実行の追加シミュレーションが投稿前に現実的で、予測根拠を持つ場合は `draft-predicted-results` で `PREDICTED-RESULT` / `SIM-REQUEST` comment、`xx` 置換条件、`_paperops/requests/analysis/` を接続し、Future Work や defensive prose に逃がさない。`manuscript/` は living authoring source として予測稿を管理できるが、submission candidate / round snapshot には残さない。その後、必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` を通してから本文生成へ進む。DRAFTED から AUDITED へ進む前に `review-block-flow` で block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を明示する。AI Writer の authoring intent、TODO、後で埋める内容、作業計画は公開 prose にせず `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ置く。`authoring-intent-check` は audit では advisory、finish / pre-submit では strict に使う。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry の機能 block を確認する。`section-depth-check` は JA を `ja_chars`、EN を `en_words` で数え、length is floor, not target として one-paragraph subsections や短すぎる Results / Discussion を検出する。`card-coverage-check` は原稿中の図、citation、block ID が card 層へ接続されているかを advisory に見る。`check-predicted-results.py` は audit では advisory、finish / submission gate / pre-submit では strict に使う。Submission hygiene は manuscript content が accepted になった後の最終面として扱う。
 
 ## 重要な境界
 

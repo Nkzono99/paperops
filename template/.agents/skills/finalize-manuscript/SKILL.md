@@ -7,6 +7,8 @@ description: Use before declaring a manuscript goal complete or before preparing
 
 `finish-manuscript` の最後に、本文内容、review loop、mirror、引用、figure、submission readiness をまとめて確認する skill。`pre-submit` は STRUCTURE_ACCEPTED 後の最終確認であり、本文 blocker の代替ではない。
 
+`manuscript/` は living authoring source であり、投稿後や査読後も revision-authoring に戻って編集できる。投稿・外部共有・再投稿の直前だけ、`submission-gate` で submission candidate / round snapshot を作れる状態か確認する。
+
 ## Finish criteria
 
 次を満たすまで `/goal` を完了にしない。
@@ -21,6 +23,7 @@ description: Use before declaring a manuscript goal complete or before preparing
 - 概念語ビューで accepted / plain-language / avoid が整理され、表記揺れや過剰な concept-term compression が残っていない。
 - AI Writer の authoring intent、TODO、後で埋める内容、作業計画が公開本文 prose に残っていない。必要なものは `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ移っている。
 - `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:`、`xx` placeholder が投稿版に残っていない。予測稿を使った block は、対応する追加シミュレーション、result / figure card 更新、`scientific-gate` の再判定が閉じている。
+- `check-predicted-results.py --root . --scope all --strict` と `make submission-gate` が通り、open AREQ、authoring source marker、submission drift が submission candidate に残っていない。
 - 実査読改訂では、comment inventory、response matrix、本文変更、response letter が対応している。
 - 最終 PDF / TeX / response letter のどれを成果物とするかを明示し、最終 commit または共有すべき artifact を記録している。
 
@@ -28,7 +31,7 @@ description: Use before declaring a manuscript goal complete or before preparing
 
 完了前は `make finish-manuscript-check` を実行する。原稿を編集したら `make mirror-check`、引用や bibliography に触れたら `make citation-check`、概念語に触れたら `make concept-term-check`、AI 執筆意図を整理したら `make authoring-intent-check`、図表に触れたら `make figure-reference-check` と `make figure-obligation-check`、claim / evidence / layer card に触れたら `make claim-evidence-check` と `make paper-layer-card-check` を実行する。
 
-storyline を更新したら `make storyline-check` と `make section-contract-check` を実行する。投稿前には `scripts/check-storyline.py --root . --strict`、`scripts/check-section-contracts.py --root . --strict`、`scripts/check-public-terms.py --root . --strict`、`scripts/check-figure-obligations.py --root . --strict`、`make pre-submit` を使う。
+storyline を更新したら `make storyline-check` と `make section-contract-check` を実行する。投稿前には `scripts/check-storyline.py --root . --strict`、`scripts/check-section-contracts.py --root . --strict`、`scripts/check-public-terms.py --root . --strict`、`scripts/check-figure-obligations.py --root . --strict`、`make submission-gate`、`make pre-submit` を使う。
 
 AI が本文、レビュー、response draft に関与した場合は `ai-disclosure-check` を通す。文章を磨くために evidence の弱さを隠さない。`analysis-needed` や `assumption-blocked` は文体ではなく upstream route で処理する。予測稿が残る場合は `draft-predicted-results` の analysis request を閉じるまで完了扱いにしない。
 

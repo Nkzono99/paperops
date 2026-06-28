@@ -65,8 +65,8 @@
 | `_paperops/defaults/workflow/` | 状態機械、content-first focus policy、subagent role roster の標準規約を管理する | managed default | `pops workflow`, `content-first-gate`, `route-manuscript-feedback`, `orchestrate-manuscript-subagents` |
 | `_paperops/workflow/` | 現在状態、section 状態、review loop、stale 伝播、人間判断、任意の workflow overlay を管理する | project state | `pops workflow`, review loop |
 | `.paperops/cache/` | section plan や一時 IR を置く | Git 管理しない生成物 | section compiler |
-| `manuscript/` | 読者へ出す本文 | 成果物 | Writer / editor pass |
-| `submission/` | 投稿先に合わせた提出版 | 派生成果物 | `prepare-submission` 相当の投稿前作業 |
+| `manuscript/` | living manuscript / authoring source。投稿後や査読後も編集してよい本文 source | 編集中の成果物 | Writer / editor pass / revision-authoring |
+| `submission/` | 投稿先に合わせた submission candidate と提出済み round snapshot | 派生成果物・証跡 | `submission-gate` と投稿前作業 |
 | `_handoff/` | 未整理入力の一時置き場 | Git 管理しない | 人間入力、raw file intake |
 | `_archives/` | sealed scratch archive | 通常読まない封印物 | `pops scratch archive/restart/restore` |
 
@@ -109,7 +109,7 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 13. Writer は `paper_ir` と承認済み claim package を使って本文を書く。Writer に生の card ontology を直接渡しすぎない。
 14. Review 後は `route-manuscript-feedback` と `pops workflow route-review` で evidence / story / section / prose / submission loop のどこへ戻るかを決め、上流 artifact が変わったら `pops workflow invalidate <artifact-id>` で依存 section を stale にする。
 15. 原稿修正は最後に行う。本文だけ直して上流の claim や evidence を放置しない。
-16. Submission hygiene は STRUCTURE_ACCEPTED 後に扱う。著者 metadata、license、Open Research DOI、readiness-check 改修は、Results hierarchy や Discussion functions の blocker より優先しない。
+16. Submission hygiene は STRUCTURE_ACCEPTED 後に扱う。著者 metadata、license、Open Research DOI、readiness-check 改修は、Results hierarchy や Discussion functions の blocker より優先しない。投稿・外部共有・再投稿の直前だけ `submission-gate` で submission candidate を strict に確認し、提出済み round snapshot は `_paperops/workflow/submission-ledger.yml` に記録する。
 
 ## paper_ir と section compiler
 
@@ -117,7 +117,7 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 
 `_paperops/defaults/contracts/` は文章テンプレートではなく、storyline と section ごとの入出力契約である。`_paperops/defaults/contracts/storyline.yml` は reader_promise、central_claim、evidence_ladder、Results hierarchy、Discussion functions を個別 section より上位で固定する。論文固有に変える場合だけ `_paperops/contracts/` に同名 overlay を置く。Introduction は `problem -> unresolved tension -> precise gap -> approach -> contribution -> scope` のような論理機能を持ち、Methods / Results / Discussion はそれぞれ情報配置、subsection 契約、推論型を明示する。`manuscript/writing-profile.yml` は `paper_type: computational_modeling` のような論文種別 overlay と投稿先要求を重ねる。
 
-`_paperops/defaults/contracts/figures.yml` は figure story 標準契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、scale/denominator、uncertainty/distribution、caption、runops handoff を Figure design brief として固定する。追加シミュレーションが投稿前に実施可能で予測根拠がある場合は、`draft-predicted-results` が `PREDICTED-RESULT` / `SIM-REQUEST` comment、`xx` 置換条件、`_paperops/requests/analysis/` を伴う予測稿を作り、Future Work や defensive prose へ早すぎる退避を避ける。論文固有の figure contract は `_paperops/contracts/figures.yml` overlay へ置く。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
+`_paperops/defaults/contracts/figures.yml` は figure story 標準契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、scale/denominator、uncertainty/distribution、caption、runops handoff を Figure design brief として固定する。追加シミュレーションが投稿前に実施可能で予測根拠がある場合は、`draft-predicted-results` が `PREDICTED-RESULT` / `SIM-REQUEST` comment、`xx` 置換条件、`_paperops/requests/analysis/` を伴う予測稿を `manuscript/` の authoring source に作り、Future Work や defensive prose へ早すぎる退避を避ける。`check-predicted-results.py` と `submission-gate` は、submission candidate / round snapshot に予測稿、open AREQ、`xx` が残らないことを確認する。論文固有の figure contract は `_paperops/contracts/figures.yml` overlay へ置く。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
 
 section compiler は、`finish-manuscript` から呼ばれる専門 skill 群として Writer の前に走る。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry が読者質問、baseline/comparator rationale、判定基準定義を持つかを見る semantic coverage gate である。Results / Discussion はさらに `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。DRAFTED section は `review-block-flow` で block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を確認してから AUDITED へ進める。`card-coverage-check` は本文中の図、citation、block ID が `_paperops/evidence/` や関連 card に接続されているかを確認し、source summary を claim_boundary、parameter_choice、reviewer_objection、method_precedent の根拠に使う場合は source card に昇格させる。
 
@@ -134,6 +134,8 @@ section compiler は、`finish-manuscript` から呼ばれる専門 skill 群と
 各 section は `UNPLANNED`、`PLANNED`、`DRAFTED`、`AUDITED`、`ACCEPTED`、`STALE` の局所状態を持つ。claim、result、figure、contract などの upstream artifact が変わった場合は、過去状態へ機械的に戻すのではなく、依存 section を `STALE` にする。`pops workflow invalidate CLM-0003` は、`depends_on` に `CLM-0003@...` を持つ section だけを stale にし、artifact 種別に応じた loop route を付ける。
 
 `_paperops/defaults/workflow/machine.yml` は状態、transition、guard、loop policy の既定規約であり、`_paperops/workflow/current-state.yml` は現在状態である。`workflow-check` は `overall.state` が `POLISHED` なのに section が `DRAFTED` や `STALE` のまま残る不整合も検出する。`_paperops/defaults/workflow/focus-policy.yml` は content / evidence / prose / submission / harness intent の優先順位と許可条件を持つ。`_paperops/defaults/workflow/subagent-roster.yml` は orchestrator が subagent の role、allowed inputs、output、integration decision を管理する契約である。論文固有の workflow 差分が必要な場合だけ `_paperops/workflow/` に同名 overlay を置く。
+
+投稿は二軸で扱う。Authoring axis は `authoring`、`prediction-staged`、`executed`、`reconciled`、`revision-authoring` を持ち、`manuscript/` は常に living authoring source として更新できる。Submission axis は `candidate`、`gated`、`frozen`、`submitted`、`under-review`、`revision-candidate`、`resubmitted` を持ち、`submission/<venue>/round-*` と `_paperops/workflow/submission-ledger.yml` に source commit、gate report、提出 artifact、response package を記録する。
 
 ## 設計原則
 

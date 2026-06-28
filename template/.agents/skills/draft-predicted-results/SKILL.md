@@ -12,8 +12,10 @@ description: Use when manuscript writing is blocked by missing but feasible addi
 - 投稿締切が固定でないなら、必要な追加シミュレーションは Future Work ではなく投稿前 blocker として扱う。
 - 予測稿は `ready-to-write` ではない。Abstract、Conclusion、title、main figure caption、投稿版では、実データへ置換されるまで使わない。
 - 予測稿は必ず TeX comment で未検証状態を明示する。本文 prose だけに `xx` や予測解釈を置かない。
+- 予測稿は `manuscript/` の authoring source 限定である。PDF、外部共有、submission candidate、round snapshot では comment が不可視になるため、未検証 prose を残さない。
 - 追加シミュレーションは現実的、または既存 run / parameter sweep / analysis script の延長線上である必要がある。
 - 予測の根拠は、既存 run の傾向、保存則、scaling、pilot result、文献拘束、モデル上の単調性など、後で検証できるものに限る。
+- 予測と実結果が違う場合は、本文を予測へ合わせず、negative/null route に従って Results hierarchy、Discussion functions、claim scope を再設計する。
 
 ## 使わない場合
 
@@ -36,7 +38,7 @@ description: Use when manuscript writing is blocked by missing but feasible addi
 1. 欠けているものを一文で書く。metric、denominator、unit of analysis、comparison、figure panel、Discussion function のどれが未確定かを分ける。
 2. feasibility table を作る。追加シミュレーション、既存条件との差分、必要 walltime / storage、入力変更、出力 artifact、解析 script、失敗時の代替 route を書く。
 3. prediction basis を作る。期待される符号、順位、範囲、uncertainty、外れた場合の解釈を、既存 evidence かモデル理由に接続する。
-4. `_paperops/requests/analysis/` に analysis request を作成または更新する。Acceptance criteria には artifact、metric / estimand、denominator、validated scope、not covered、result card update を入れる。
+4. `_paperops/requests/analysis/` に analysis request を作成または更新する。Acceptance criteria には artifact、metric / estimand、denominator、validated scope、not covered、result card update を入れる。予測稿を使う場合は、planned_analysis、prediction、replacement、provenance_after_execution、reconciliation、analysis_plan_frozen_commit、data_not_seen_before_freeze、negative/null route も埋める。
 5. gate card は `analysis-needed` のままにする。`approved_writing_scope` には「予測稿のみ」「publish 不可」「実データ置換後に再 gate」と書き、`must_not_claim` を更新する。
 6. 本文へ予測稿を書く場合、対象 block の直前に次の comment block を置く。
 
@@ -51,6 +53,7 @@ description: Use when manuscript writing is blocked by missing but feasible addi
 8. 図を先に設計する場合は、Figure design brief に predicted panel、reader task、expected trend、replacement artifact、acceptance criteria を入れる。実データがない図を final figure として扱わない。
 9. Discussion では予測結果が得られた場合の解釈、代替説明、境界、decisive next test を書いてよい。ただし「future work」として弱めるのではなく、投稿前に実行する検証待ちの論理として置く。
 10. 実データが得られたら、`xx` と予測 comment を置換し、result / figure card、gate card、claim-evidence view、Figure design brief を更新してから `scientific-gate` を再実行する。
+11. 投稿・外部共有・再投稿前は `submission-gate` と `check-predicted-results.py --root . --scope all --strict` を通し、予測稿が submission candidate に残っていないことを確認する。
 
 ## 出力
 
@@ -69,3 +72,4 @@ description: Use when manuscript writing is blocked by missing but feasible addi
 - 実行不能な追加シミュレーションを前提に本文を書かない。
 - `PREDICTED-RESULT` comment がある block は final / accepted 扱いにしない。
 - 投稿前に必ず実データへ置換し、`xx`、予測 comment、未解決 request が残っていないことを確認する。
+- `manuscript/` の authoring source には予測を管理してよいが、submission candidate / round snapshot には残さない。

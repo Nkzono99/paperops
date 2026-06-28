@@ -15,7 +15,9 @@ authoritative_for:
 
 | request ID | card | requested by | related claim | target link | requested outputs | verification axis | runops_id | status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| AREQ-0001 | `_paperops/requests/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | draft |
+| AREQ-0001 | `_paperops/requests/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | planned |
+
+Analysis request status は `planned`、`predicted`、`running`、`executed`、`reconciled`、`abandoned` のいずれかにする。予測稿を本文 authoring source に置く場合は `predicted` または `planned` にし、submission candidate へ切る前に `executed` から `reconciled` へ進める。
 
 ## Writing requests
 

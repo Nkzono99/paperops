@@ -270,6 +270,7 @@ section compiler:
 - `compile-results-section`: reader question -> one-sentence answer -> quantitative evidence -> figure -> baseline / comparator rationale -> consequence の順に結果を並べる。
 - `compile-discussion-section`: observation / inference / mechanism_hypothesis / alternative_explanation / implication / prediction / limitation を分ける。
 - `draft-predicted-results`: 未実行だが投稿前に現実的な追加シミュレーションを、`PREDICTED-RESULT` / `SIM-REQUEST` comment、`xx` 置換条件、`_paperops/requests/analysis/` つきの予測稿として扱う。
+- `submission-gate`: `manuscript/` を authoring source、`submission/` を submission candidate / round snapshot として分け、revision-authoring 後の再投稿も含めて投稿版の strict gate を扱う。
 - `review-block-flow`: DRAFTED section の block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を確認してから AUDITED へ進める。
 
 `check-section-contracts.py` は、`_paperops/notes/views/storyline.md` の controlled authoring view から Results hierarchy、Discussion functions、Methods definition registry を確認する。`audit` では warning として扱い、`finish-manuscript-check` では strict error として扱う。これは section-depth の文字数 floor とは別の semantic coverage gate であり、水増しではなく baseline rationale、decision criteria、mechanism warrant などの不足へ戻すための検査である。
@@ -341,8 +342,10 @@ project-owned extension point:
 - `make ci`: 構造、引用、mirror、公開語彙、カード層、link、build fallback
 - `make audit`: argument focus、concept term、content-first、section contract、figure reference、figure obligation、claim evidence、card coverage、external import、research request handoff
 - `make card-coverage-check`: 原稿中の図、citation、block ID が card 層に接続されているかを advisory に確認する
-- `make finish-manuscript-check`: 原稿完成 goal を閉じる前の content-first gate。strict public terms、section contract、section-depth も含む
-- `make pre-submit`: 投稿前 profile
+- `make predicted-results-check`: authoring source に残る `PREDICTED-RESULT`、`xx`、open AREQ を advisory に確認する
+- `make finish-manuscript-check`: 原稿完成 goal を閉じる前の content-first gate。strict public terms、section contract、section-depth、predicted results strict も含む
+- `make submission-gate`: submission candidate / round snapshot に予測稿、open AREQ、AI intent、submission drift が残らないか確認する
+- `make pre-submit`: 投稿前 profile。`submission-gate` を含む
 - `make smoke`: テンプレート管理 repo から `template/` を検証する smoke
 
 内部 path は `template/scripts/paperops_paths.py` の `internal_path` が解決する。`_paperops/<rel>` の project overlay / state があれば優先し、なければ `_paperops/defaults/<rel>`、最後に legacy `<rel>` を読む。
@@ -362,7 +365,7 @@ project-owned extension point:
 
 `_paperops/defaults/workflow/subagent-roster.yml` は、main agent / orchestrator が subagent をどう使うかの標準契約である。論文固有に role や allowed input を変える場合だけ `_paperops/workflow/subagent-roster.yml` overlay を置く。
 
-実行時の詳細は `orchestrate-manuscript-subagents` に置き、`finish-manuscript` は必要時にそれを呼ぶ。content-first の自己点検は `content-first-gate`、review 後の戻り先分類は `route-manuscript-feedback`、予測稿は `draft-predicted-results`、block flow の再設計は `review-block-flow`、完了前確認は `finalize-manuscript` が担当する。図表系では `figure_story_reviewer` が `design-paper-figure` の Figure design brief、reader task、runops handoff を監査対象に含める。
+実行時の詳細は `orchestrate-manuscript-subagents` に置き、`finish-manuscript` は必要時にそれを呼ぶ。content-first の自己点検は `content-first-gate`、review 後の戻り先分類は `route-manuscript-feedback`、予測稿は `draft-predicted-results`、block flow の再設計は `review-block-flow`、完了前確認は `finalize-manuscript`、投稿・外部共有・再投稿前の gate は `submission-gate` が担当する。図表系では `figure_story_reviewer` が `design-paper-figure` の Figure design brief、reader task、runops handoff を監査対象に含める。
 
 主な role:
 

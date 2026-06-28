@@ -129,8 +129,8 @@ class ResearchRequestHandoffCheckTest(unittest.TestCase):
             text = view.read_text(encoding="utf-8")
             view.write_text(
                 text.replace(
-                    "| AREQ-0001 | `_paperops/requests/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | draft |",
-                    "| AREQ-0001 | `_paperops/requests/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | draft |\n"
+                    "| AREQ-0001 | `_paperops/requests/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | planned |",
+                    "| AREQ-0001 | `_paperops/requests/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | planned |\n"
                     "| RR-0008 | `_paperops/requests/analysis/RR-0008.md` | FB-0001 | CLM-0001 | runops-main | verification table | convergence | blank | open |",
                 ),
                 encoding="utf-8",

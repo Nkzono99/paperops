@@ -38,15 +38,17 @@ make card-coverage-check
 make workflow-check
 make concept-term-check
 make authoring-intent-check
+make predicted-results-check
 make content-first-check
 make section-contract-check
 make section-depth-check
 make finish-manuscript-check
+make submission-gate
 make figure-reference-check
 make figure-obligation-check
 ```
 
-`make ci` は構造と壊れやすい不整合の確認、`make audit` は執筆品質の advisory check、`make pre-submit` は投稿・外部共有前の厳しめ確認に使う。`authoring-intent-check` は、AI Writer が執筆意図、後で埋める内容、作業計画を公開本文へ漏らしていないか確認する。TeX 環境がない場合、ビルド系 helper は構造検証へフォールバックする。
+`make ci` は構造と壊れやすい不整合の確認、`make audit` は執筆品質の advisory check、`make pre-submit` は投稿・外部共有前の厳しめ確認に使う。`manuscript/` は living authoring source であり、投稿後や査読後も編集してよい。投稿用の submission candidate / round snapshot は `submission/` と `_paperops/workflow/submission-ledger.yml` に記録し、`make submission-gate` で予測稿、open AREQ、`xx`、AI intent を strict に落とす。`authoring-intent-check` は、AI Writer が執筆意図、後で埋める内容、作業計画を公開本文へ漏らしていないか確認する。TeX 環境がない場合、ビルド系 helper は構造検証へフォールバックする。
 
 ## 執筆フロー
 
@@ -65,7 +67,7 @@ make figure-obligation-check
 13. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
 14. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
 15. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映し、必要なら `route-manuscript-feedback`、`pops workflow route-review`、`pops workflow invalidate <artifact-id>` で戻る深さと stale section を更新する。
-16. Submission hygiene は STRUCTURE_ACCEPTED 後にだけ主作業にする。完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `make pre-submit` を実行する。
+16. Submission hygiene は STRUCTURE_ACCEPTED 後にだけ主作業にする。完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `/submission-gate`、`make submission-gate`、`make pre-submit` を実行する。投稿後や査読後の修正は `manuscript/` の revision-authoring に戻し、提出済み round snapshot は編集しない。
 
 ## スキル入口
 
@@ -77,8 +79,8 @@ make figure-obligation-check
 - 原稿調整: `/paragraph-surgery`, `/public-terminology-pass`, `/sync-ja-en`
 - 通読レビュー: `/start-manuscript-review`, `/collect-manuscript-review`, `/integrate-writing-feedback`
 - 査読: `/review-public-manuscript`, `/peer-review-manuscript`, `/respond-to-peer-review`
-- 原稿完成補助: `/finish-manuscript`, `/content-first-gate`, `/orchestrate-manuscript-subagents`, `/route-manuscript-feedback`, `/compile-results-section`, `/compile-discussion-section`, `/compile-methods-section`, `/draft-predicted-results`, `/review-block-flow`, `/finalize-manuscript`
-- 投稿前点検: `/plan-figure-story`, `/design-paper-figure`, `/figure-story-audit`, `/venue-fit-review`, `/ai-disclosure-check`
+- 原稿完成補助: `/finish-manuscript`, `/content-first-gate`, `/orchestrate-manuscript-subagents`, `/route-manuscript-feedback`, `/compile-results-section`, `/compile-discussion-section`, `/compile-methods-section`, `/draft-predicted-results`, `/review-block-flow`, `/finalize-manuscript`, `/submission-gate`
+- 投稿前点検: `/plan-figure-story`, `/design-paper-figure`, `/figure-story-audit`, `/venue-fit-review`, `/ai-disclosure-check`, `/submission-gate`
 - アーカイブ・書き直し: `/archive-scratch`
 - 俯瞰・改善: `/open-paper-scan`, `/design-paper-storyline`, `/feedback-paper-harness`
 

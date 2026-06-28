@@ -9,7 +9,7 @@ description: Use when /goal asks Codex to finish a manuscript from scratch, revi
 
 この skill は **content-first** の監督役であり、本文 blocker を減らす順路を決める。Submission hygiene は原稿本文の story spine、Results hierarchy、Discussion functions、claim scope、figure story、major review blocker が閉じた後の最終面である。
 
-main agent は writer だけでなく orchestrator として動く。goal 中の一気通貫ルーチンでは、`draft-predicted-results` も専門 skill として扱い、追加シミュレーションで閉じられる blocker を Future Work や defensive prose に逃がさない。subagent を使う場合は `orchestrate-manuscript-subagents` を先に読み、report を本文へ直接混ぜず、claim / evidence / feedback / section plan へ統合する。
+main agent は writer だけでなく orchestrator として動く。goal 中の一気通貫ルーチンでは、`draft-predicted-results` も専門 skill として扱い、追加シミュレーションで閉じられる blocker を Future Work や defensive prose に逃がさない。`manuscript/` は authoring source として扱い、投稿用の submission candidate / round snapshot は `submission-gate` で別軸に切る。subagent を使う場合は `orchestrate-manuscript-subagents` を先に読み、report を本文へ直接混ぜず、claim / evidence / feedback / section plan へ統合する。
 
 ## 最初に決める
 
@@ -32,7 +32,8 @@ main agent は writer だけでなく orchestrator として動く。goal 中の
 7. AI Writer の authoring intent、判断保留、後で埋める内容、作業計画は本文 prose に書かない。近傍の `% INTENT:` または `% TODO-PAPER:` に残し、未解決なら `_paperops/notes/` / `_paperops/requests/` へ移す。
 8. review 後や route が不明な feedback は `route-manuscript-feedback` に渡し、evidence / story / section / prose / submission loop のどこへ戻すか決める。
 9. 模擬査読や公開原稿確認が必要なら `review-public-manuscript` と `peer-review-manuscript` を回し、blocking / major concern を `integrate-writing-feedback` へ戻す。
-10. 完了前に `finalize-manuscript` を読み、Finish criteria、human approval、`make finish-manuscript-check`、必要な audit / ci を確認する。
+10. 投稿・外部共有・再投稿へ進む場合は `submission-gate` を読み、`manuscript/` の living authoring source と `submission/<venue>/round-*` の submission candidate / round snapshot を分ける。
+11. 完了前に `finalize-manuscript` を読み、Finish criteria、human approval、`make finish-manuscript-check`、必要な audit / ci を確認する。
 
 ## Lane Notes
 
@@ -41,6 +42,8 @@ From-scratch lane では、文章生成へ急がず、core claim、essential res
 Revision lane では、現稿の読みと feedback を分ける。AI 初稿や Results / Discussion の薄さが目立つ場合は `audit-ai-draft`、`design-paper-storyline`、`review-block-flow` へ戻り、本文編集は上流 card と section plan の更新後に行う。
 
 Response lane では、`respond-to-peer-review` の comment inventory、response matrix、revision plan、response letter と本文変更を対応させる。査読対応だけで本文の claim scope を変える場合は `route-manuscript-feedback` へ戻す。
+
+投稿後や査読後に原稿修正が必要になったら、提出済み snapshot は編集せず、`manuscript/` を `revision-authoring` として更新する。再投稿は `revision-candidate` を新しい submission round として作り、`submission-gate` と `_paperops/workflow/submission-ledger.yml` に記録する。
 
 ## Stop Rules
 
