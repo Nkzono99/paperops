@@ -1,4 +1,4 @@
-.PHONY: venv smoke cli-smoke scaffold-package-boundary-check build-submission lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check research-request-handoff-live-check external-import-check external-import-live-check collect-context template-readiness-check
+.PHONY: venv smoke cli-smoke scaffold-package-boundary-check build-submission lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check figure-design-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check research-request-handoff-live-check external-import-check external-import-live-check collect-context template-readiness-check
 
 PYTHON_FALLBACK = $(shell bash template/scripts/resolve-python.sh "$(CURDIR)" 2>/dev/null || echo python3.11)
 PYTHON ?= $(PYTHON_FALLBACK)
@@ -22,6 +22,7 @@ SMOKE_CHECKS = \
 	content-first-check \
 	figure-reference-check \
 	figure-obligation-check \
+	figure-design-check \
 	claim-evidence-check \
 	paper-layer-card-check \
 	card-coverage-check \
@@ -43,6 +44,7 @@ FINISH_MANUSCRIPT_CHECKS = \
 	quantity-integrity-check \
 	predicted-results-check \
 	figure-obligation-check \
+	figure-design-check \
 	claim-evidence-check \
 	workflow-check
 
@@ -110,6 +112,7 @@ finish-manuscript-check: $(FINISH_MANUSCRIPT_CHECKS)
 	$(PYTHON) template/scripts/check-section-contracts.py --root template --strict
 	$(PYTHON) template/scripts/check-section-depth.py --root template --strict
 	$(PYTHON) template/scripts/check-predicted-results.py --root template --scope all --strict
+	$(PYTHON) template/scripts/check-figure-design.py --root template --strict
 	$(PYTHON) template/scripts/check-claim-evidence.py --root template --strict
 	$(PYTHON) template/scripts/check-content-first.py --root template --phase finish --intent content --strict
 
@@ -118,6 +121,9 @@ figure-reference-check:
 
 figure-obligation-check:
 	$(PYTHON) template/scripts/check-figure-obligations.py --root template
+
+figure-design-check:
+	$(PYTHON) template/scripts/check-figure-design.py --root template
 
 claim-evidence-check:
 	$(PYTHON) template/scripts/check-claim-evidence.py --root template
