@@ -11,6 +11,7 @@
 - 下流 project state の破壊的変更は `pops migrate list/show/apply` の migration item として扱う。
 - patch version は原則として踏まず、minor ごとの最新 patch を checkpoint とする。
 - major version を跨ぐ chain は `--allow-major` が指定された場合だけ実行する。
+- `apply-chain` の途中で changed managed files が見つかった場合、その step は停止し、`.pops/manifest.toml` の `scaffold.version` は進めない。意図的な project fork は `pops detach` で登録し、上書きしてよい変更だけ review 後に `--force` で進める。
 
 ## コマンド
 
@@ -29,6 +30,7 @@ uvx --from paper-harness-cli==0.3.4 pops update-paperops --upgrade-step --from-v
 ```
 
 `--upgrade-step` は内部用の実行入口であり、人間向けの通常導線では使わない。
+この step は atomic に扱う。`--force` なしで changed managed files が残る場合、missing files だけを入れて version を進めるのではなく、適用前に失敗する。
 
 ## Manifest fields
 

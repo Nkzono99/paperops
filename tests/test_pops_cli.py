@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -578,6 +579,38 @@ class PopsCliTest(unittest.TestCase):
 
             self.assertEqual(code, 2)
             self.assertIn("--allow-major", err)
+
+    def test_upgrade_step_does_not_advance_manifest_when_changed_files_block_apply(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            set_scaffold_version(target, "0.1.0")
+            agents = target / "AGENTS.md"
+            agents.write_text(
+                agents.read_text(encoding="utf-8") + "\nlocal fork without detach\n",
+                encoding="utf-8",
+            )
+
+            code, out, err = run_cli(
+                [
+                    "update-paperops",
+                    "--upgrade-step",
+                    "--from-version",
+                    "0.1.0",
+                    "--to-version",
+                    __version__,
+                    "--apply",
+                    str(target),
+                ]
+            )
+
+            self.assertEqual(code, 1)
+            self.assertIn("changed managed files", out + err)
+            self.assertIn("--force", out + err)
+            manifest = tomllib.loads(
+                (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
+            )
+            self.assertEqual(manifest["scaffold"]["version"], "0.1.0")
 
     def test_update_harness_alias_still_works(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

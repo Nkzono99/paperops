@@ -105,6 +105,7 @@ uvx --from paper-harness-cli pops update-paperops --target latest --allow-major 
 ```
 
 詳しい保持方針は [upgrade-policy.md](upgrade-policy.md) を参照する。
+`apply-chain` の途中で changed managed files が見つかった場合は、その checkpoint で停止し、manifest の scaffold version は進めない。意図的な fork は `pops detach`、上書きしてよい変更だけ review 後に `--force` で扱う。
 
 ## Project-State Migrations
 

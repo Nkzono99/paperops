@@ -739,6 +739,14 @@ def cmd_upgrade_step(args: argparse.Namespace, root: Path) -> int:
         )
         print_update_plan(plan)
         if args.apply:
+            if plan.changed and not args.force:
+                print(
+                    "error: changed managed files block this upgrade step. "
+                    "Review the plan, detach intentional forks, or re-run this step "
+                    "with --force only when local edits may be replaced.",
+                    file=sys.stderr,
+                )
+                return 1
             applied_count = apply_managed_update(
                 source,
                 root,
@@ -748,11 +756,6 @@ def cmd_upgrade_step(args: argparse.Namespace, root: Path) -> int:
             )
             write_manifest(root, template_ref=template_ref)
             print(f"Applied files: {applied_count}")
-            if plan.changed and not args.force:
-                print(
-                    "Changed managed files were left untouched. Re-run this step "
-                    "with --force only after reviewing the plan."
-                )
     return 0
 
 
