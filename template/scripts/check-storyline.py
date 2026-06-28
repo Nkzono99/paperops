@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import argparse
 import re
-from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_checks import Finding, emit_findings, read_text, warning_severity
 from paperops_paths import display_path, internal_path
 
 
@@ -19,16 +19,6 @@ REQUIRED_FUNCTIONS = [
     "prior_work_delta",
     "decisive_next_test",
 ]
-
-
-@dataclass
-class Finding:
-    severity: str
-    message: str
-
-
-def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="replace")
 
 
 def is_blank(value: str | None) -> bool:
@@ -106,12 +96,12 @@ def check(root: Path, text: str, rel_path: str, strict: bool) -> list[Finding]:
     spine = extract_spine_values(text)
     for key in REQUIRED_SPINE:
         if is_blank(spine.get(key)):
-            findings.append(Finding("error" if strict else "warning", f"`{rel_path}` の `{key}` が未記入です"))
+            findings.append(Finding(warning_severity(strict), f"`{rel_path}` の `{key}` が未記入です"))
 
     rows = extract_section_depth_rows(text)
     if not rows:
         findings.append(
-            Finding("error" if strict else "warning", f"`{rel_path}` に Section depth map がありません")
+            Finding(warning_severity(strict), f"`{rel_path}` に Section depth map がありません")
         )
         return findings
 
@@ -120,19 +110,22 @@ def check(root: Path, text: str, rel_path: str, strict: bool) -> list[Finding]:
         row = by_function.get(function)
         if row is None:
             findings.append(
-                Finding("error" if strict else "warning", f"`{rel_path}` の Section depth map に `{function}` がありません")
+                Finding(
+                    warning_severity(strict),
+                    f"`{rel_path}` の Section depth map に `{function}` がありません",
+                )
             )
             continue
         if is_blank(row.get("manuscript_block")):
             findings.append(
-                Finding("error" if strict else "warning", f"`{function}` の manuscript block が未記入です")
+                Finding(warning_severity(strict), f"`{function}` の manuscript block が未記入です")
             )
 
     for row in rows:
         function = row.get("function", "").strip()
         block_value = row.get("manuscript_block", "")
         if is_blank(function):
-            findings.append(Finding("error" if strict else "warning", "Section depth map に function 未記入の行があります"))
+            findings.append(Finding(warning_severity(strict), "Section depth map に function 未記入の行があります"))
         if is_blank(block_value):
             continue
         known_blocks = manuscript_blocks(root)
@@ -140,7 +133,7 @@ def check(root: Path, text: str, rel_path: str, strict: bool) -> list[Finding]:
             if known_blocks and token not in known_blocks:
                 findings.append(
                     Finding(
-                        "error" if strict else "warning",
+                        warning_severity(strict),
                         f"`{function}` の manuscript block `{token}` が manuscript/*.tex に見つかりません",
                     )
                 )
@@ -162,25 +155,11 @@ def main() -> int:
         print("- `_paperops/notes/views/storyline.md` が見つかりません（旧互換: `notes/views/storyline.md`, `notes/storyline.md`）")
         return 1
     rel_path, path = resolved
-    findings = check(root, read_text(path), rel_path, strict=args.strict)
-    errors = [finding for finding in findings if finding.severity == "error"]
-    warnings = [finding for finding in findings if finding.severity == "warning"]
-
-    print("# storyline-check")
-    print("")
-    if errors:
-        print("## Errors")
-        for finding in errors:
-            print(f"- {finding.message}")
-        print("")
-    if warnings:
-        print("## Warnings")
-        for finding in warnings:
-            print(f"- {finding.message}")
-        print("")
-    if not findings:
-        print("storyline view は required function と manuscript block に対応しています。")
-    return 1 if errors else 0
+    return emit_findings(
+        "storyline-check",
+        check(root, read_text(path), rel_path, strict=args.strict),
+        success_message="storyline view は required function と manuscript block に対応しています。",
+    )
 
 
 if __name__ == "__main__":

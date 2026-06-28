@@ -2,23 +2,13 @@
 
 import argparse
 import re
-from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_checks import Finding, emit_findings, read_text, warning_severity
 from paperops_paths import display_path, internal_path
 
 
 PLACEHOLDER_RE = re.compile(r"(未記入|TBD|TODO|置き換えてください)")
-
-
-@dataclass
-class Finding:
-    severity: str
-    message: str
-
-
-def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
 
 
 def resolve_view_path(root: Path) -> tuple[str, Path] | None:
@@ -102,10 +92,6 @@ def read_public_edge_text(root: Path) -> str:
     return "\n".join(chunks)
 
 
-def warning_severity(strict: bool) -> str:
-    return "error" if strict else "warning"
-
-
 def check_claims(root: Path, text: str, rel_path: str, *, strict: bool = False) -> list[Finding]:
     findings: list[Finding] = []
     rows = extract_claim_rows(text)
@@ -161,25 +147,11 @@ def main() -> int:
         return 1
     rel_path, path = resolved
 
-    findings = check_claims(root, read_text(path), rel_path, strict=args.strict)
-    errors = [finding for finding in findings if finding.severity == "error"]
-    warnings = [finding for finding in findings if finding.severity == "warning"]
-
-    print("# claim-evidence-check")
-    print("")
-    if errors:
-        print("## Errors")
-        for finding in errors:
-            print(f"- {finding.message}")
-        print("")
-    if warnings:
-        print("## Warnings")
-        for finding in warnings:
-            print(f"- {finding.message}")
-        print("")
-    if not findings:
-        print("supported claim に evidence、scope、本文 block の対応があります。")
-    return 1 if errors else 0
+    return emit_findings(
+        "claim-evidence-check",
+        check_claims(root, read_text(path), rel_path, strict=args.strict),
+        success_message="supported claim に evidence、scope、本文 block の対応があります。",
+    )
 
 
 if __name__ == "__main__":

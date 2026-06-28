@@ -348,7 +348,7 @@ project-owned extension point:
 - `make pre-submit`: 投稿前 profile。`submission-gate` を含む
 - `make smoke`: テンプレート管理 repo から `template/` を検証する smoke
 
-内部 path は `template/scripts/paperops_paths.py` の `internal_path` が解決する。`_paperops/<rel>` の project overlay / state があれば優先し、なければ `_paperops/defaults/<rel>`、最後に legacy `<rel>` を読む。
+内部 path は `template/scripts/paperops_paths.py` の `internal_path` が解決する。`_paperops/<rel>` の project overlay / state があれば優先し、なければ `_paperops/defaults/<rel>`、最後に legacy `<rel>` を読む。checker 共通の Finding、UTF-8 読み込み、front matter 抽出、report 出力は `template/scripts/paperops_checks.py` に置く。
 
 ## 11. build helper
 

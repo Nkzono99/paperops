@@ -5,16 +5,11 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_checks import Finding, emit_findings, frontmatter, read_text
 from paperops_paths import display_path, internal_path
 
 
 OBLIGATION_RE = re.compile(r"\bVO-[A-Za-z0-9_.-]+\b")
-
-
-@dataclass
-class Finding:
-    severity: str
-    message: str
 
 
 @dataclass
@@ -34,22 +29,6 @@ class FigureCard:
     status: str
     manuscript_role: str
     obligations: set[str]
-
-
-def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="replace")
-
-
-def frontmatter(text: str) -> str:
-    lines = text.splitlines()
-    if not lines or lines[0].strip() != "---":
-        return ""
-    collected: list[str] = []
-    for line in lines[1:]:
-        if line.strip() == "---":
-            return "\n".join(collected)
-        collected.append(line)
-    return ""
 
 
 def scalar_value(front: str, key: str) -> str:
@@ -186,26 +165,11 @@ def main() -> int:
     args = parser.parse_args()
 
     root = args.root.resolve()
-    findings = check(root, strict=args.strict)
-    errors = [finding for finding in findings if finding.severity == "error"]
-    warnings = [finding for finding in findings if finding.severity == "warning"]
-
-    print("# figure-obligation-check")
-    print("")
-    if errors:
-        print("## Errors")
-        for finding in errors:
-            print(f"- {finding.message}")
-        print("")
-    if warnings:
-        print("## Warnings")
-        for finding in warnings:
-            print(f"- {finding.message}")
-        print("")
-    if not findings:
-        print("visual obligation の未接続は見つかりませんでした。")
-
-    return 1 if errors else 0
+    return emit_findings(
+        "figure-obligation-check",
+        check(root, strict=args.strict),
+        success_message="visual obligation の未接続は見つかりませんでした。",
+    )
 
 
 if __name__ == "__main__":

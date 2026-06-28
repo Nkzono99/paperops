@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_checks import Finding, emit_findings, read_text
 from paperops_paths import display_path, internal_path
-
-
-@dataclass
-class Finding:
-    severity: str
-    message: str
 
 
 REQUIRED_FILES = [
@@ -96,10 +90,6 @@ LEGACY_VIEW_FILES = [
 ]
 
 
-def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="replace")
-
-
 def check_required_files(root: Path, findings: list[Finding]) -> None:
     for rel_path in REQUIRED_FILES:
         path = internal_path(root, rel_path)
@@ -146,25 +136,11 @@ def main() -> int:
     check_frontmatter_tokens(root, findings)
     check_legacy_views(root, findings)
 
-    errors = [finding for finding in findings if finding.severity == "error"]
-    warnings = [finding for finding in findings if finding.severity == "warning"]
-
-    print("# paper layer cards")
-    print("")
-    if errors:
-        print("## Errors")
-        for finding in errors:
-            print(f"- {finding.message}")
-        print("")
-    if warnings:
-        print("## Warnings")
-        for finding in warnings:
-            print(f"- {finding.message}")
-        print("")
-    if not findings:
-        print("カード層と互換ビューの外形に問題は見つかりませんでした。")
-
-    return 1 if errors else 0
+    return emit_findings(
+        "paper layer cards",
+        findings,
+        success_message="カード層と互換ビューの外形に問題は見つかりませんでした。",
+    )
 
 
 if __name__ == "__main__":

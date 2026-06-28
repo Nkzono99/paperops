@@ -8,6 +8,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_checks import Finding, emit_findings, read_text
 from paperops_paths import display_path, internal_path
 
 
@@ -21,16 +22,6 @@ class ManuscriptUse:
     kind: str
     value: str
     path: Path
-
-
-@dataclass(frozen=True)
-class Finding:
-    severity: str
-    message: str
-
-
-def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="replace")
 
 
 def manuscript_files(root: Path) -> list[Path]:
@@ -163,26 +154,11 @@ def main() -> int:
     args = parser.parse_args()
 
     root = args.root.resolve()
-    findings = check(root, strict=args.strict)
-    errors = [finding for finding in findings if finding.severity == "error"]
-    warnings = [finding for finding in findings if finding.severity == "warning"]
-
-    print("# card-coverage-check")
-    print("")
-    if errors:
-        print("## Errors")
-        for finding in errors:
-            print(f"- {finding.message}")
-        print("")
-    if warnings:
-        print("## Warnings")
-        for finding in warnings:
-            print(f"- {finding.message}")
-        print("")
-    if not findings:
-        print("coverage gaps are not detected.")
-
-    return 1 if errors else 0
+    return emit_findings(
+        "card-coverage-check",
+        check(root, strict=args.strict),
+        success_message="coverage gaps are not detected.",
+    )
 
 
 if __name__ == "__main__":

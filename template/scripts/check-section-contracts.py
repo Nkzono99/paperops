@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import argparse
 import re
-from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_checks import Finding, emit_findings, read_text, warning_severity
 from paperops_paths import display_path, internal_path
 
 
@@ -38,22 +38,12 @@ REQUIRED_METHOD_REGISTRY_ROWS = [
 ]
 
 
-@dataclass
-class Finding:
-    severity: str
-    message: str
-
-
-def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="replace")
-
-
 def is_blank(value: str | None) -> bool:
     return value is None or not value.strip() or PLACEHOLDER_RE.search(value) is not None
 
 
 def severity(strict: bool) -> str:
-    return "error" if strict else "warning"
+    return warning_severity(strict)
 
 
 def normalize_key(value: str) -> str:
@@ -233,25 +223,11 @@ def main() -> int:
         return 1
 
     rel_path, path = resolved
-    findings = check(root, read_text(path), rel_path, strict=args.strict)
-    errors = [finding for finding in findings if finding.severity == "error"]
-    warnings = [finding for finding in findings if finding.severity == "warning"]
-
-    print("# section-contract-check")
-    print("")
-    if errors:
-        print("## Errors")
-        for finding in errors:
-            print(f"- {finding.message}")
-        print("")
-    if warnings:
-        print("## Warnings")
-        for finding in warnings:
-            print(f"- {finding.message}")
-        print("")
-    if not findings:
-        print("section contracts は Results hierarchy / Discussion functions / Methods registry を満たしています。")
-    return 1 if errors else 0
+    return emit_findings(
+        "section-contract-check",
+        check(root, read_text(path), rel_path, strict=args.strict),
+        success_message="section contracts は Results hierarchy / Discussion functions / Methods registry を満たしています。",
+    )
 
 
 if __name__ == "__main__":
