@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.12.0 - 2026-06-28
+
 - `check-content-first.py` が `_paperops/workflow/current-state.yml` の `CONTENT_FIRST` guard を実際に確認し、strict では最高優先 content blocker と次 action の自己批判が未記録のまま progress / finish へ進むことを error にするようにした。あわせて `workflow-check` / `block-flow-review-check` が `STRUCTURE_ACCEPTED` 以降の Results / Discussion に `AUDITED` / `ACCEPTED` と block-flow review を要求するようにした。
 - `pops update-paperops --apply` が changed managed files を検出した場合、`--force` なしでは missing files の部分適用も `.pops/manifest.toml` の scaffold version 更新もしないで停止するようにした。意図的な fork は `pops detach`、上書き可能な差分は review 後の `--apply --force` で扱う。
 - scaffold / package boundary の除外対象に `__pycache__`、`.pyc`、`.paperops/cache/`、`.tools/`、submission build / local tools、`tex-env.toml`、refs papers / research generated artifacts を追加し、ignored/generated artifact が `pops init` や wheel 同梱 scaffold へ混入しないようにした。
