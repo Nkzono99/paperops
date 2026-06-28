@@ -37,8 +37,7 @@ class PaperIrSpecTest(unittest.TestCase):
         pre_submit_checks = make_var_tokens(makefile, "PRE_SUBMIT_CHECKS")
 
         self.assertIn("audit: $(AUDIT_CHECKS)", makefile)
-        self.assertNotIn("command -v", makefile)
-        self.assertIn("PYTHON_BOOTSTRAP ?= python", makefile)
+        self.assertIn("PYTHON_BOOTSTRAP ?= $(PYTHON_FALLBACK)", makefile)
         self.assertIn("pre-submit: $(PRE_SUBMIT_CHECKS)", makefile)
         self.assertIn("ci: $(CI_CHECKS) build-ja build-en", makefile)
         self.assertIn("lint-bib", ci_checks)

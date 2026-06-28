@@ -1,7 +1,8 @@
 .PHONY: venv smoke cli-smoke scaffold-package-boundary-check build-submission lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
 
-PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
-PYTHON_BOOTSTRAP ?= python
+PYTHON_FALLBACK = $(shell command -v python3.11 2>/dev/null || command -v python3 2>/dev/null || command -v python 2>/dev/null || echo python)
+PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(PYTHON_FALLBACK)))
+PYTHON_BOOTSTRAP ?= $(PYTHON_FALLBACK)
 
 SMOKE_CHECKS = \
 	cli-smoke \

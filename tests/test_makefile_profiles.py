@@ -6,6 +6,16 @@ from tests.helpers import ROOT, make_var_tokens
 
 
 class MakefileProfileTest(unittest.TestCase):
+    def test_makefiles_prefer_python311_before_plain_python(self) -> None:
+        for path in [ROOT / "Makefile", ROOT / "template" / "Makefile"]:
+            makefile = path.read_text(encoding="utf-8")
+            with self.subTest(path=path):
+                self.assertIn("PYTHON_FALLBACK = $(shell command -v python3.11", makefile)
+                self.assertIn("command -v python3", makefile)
+                self.assertIn("command -v python", makefile)
+                self.assertIn("PYTHON_BOOTSTRAP ?= $(PYTHON_FALLBACK)", makefile)
+                self.assertIn("$(PYTHON_FALLBACK)", makefile)
+
     def test_root_smoke_uses_named_check_profile(self) -> None:
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
         smoke_checks = make_var_tokens(makefile, "SMOKE_CHECKS")
