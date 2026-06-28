@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `pops update-paperops --apply` が changed managed files を検出した場合、`--force` なしでは missing files の部分適用も `.pops/manifest.toml` の scaffold version 更新もしないで停止するようにした。意図的な fork は `pops detach`、上書き可能な差分は review 後の `--apply --force` で扱う。
 - scaffold / package boundary の除外対象に `__pycache__`、`.pyc`、`.paperops/cache/`、`.tools/`、submission build / local tools、`tex-env.toml`、refs papers / research generated artifacts を追加し、ignored/generated artifact が `pops init` や wheel 同梱 scaffold へ混入しないようにした。
 - `make pre-submit` が `check-argument-focus.py --strict` と `check-card-coverage.py --strict` を明示再実行するようにし、argument focus drift や本文参照済みカード未登録を audit warning のまま投稿前 gate で通さないようにした。
 - `check-block-flow-review.py` と `block-flow-review-check` target を追加し、Results / Discussion が `AUDITED` / `ACCEPTED` のときに `_paperops/review/block-flow/` の block operation table が `% block:` を網羅し、`reader_question`、`author_move`、`why_here`、`next_block_expectation`、`operation` を埋めているか確認するようにした。内容の良し悪しは判定せず、block-flow review を口頭だけで済ませないための gate として扱う。

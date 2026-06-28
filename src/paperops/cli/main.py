@@ -425,6 +425,14 @@ def cmd_update_paperops(args: argparse.Namespace) -> int:
         plan = plan_managed_update(source, root, only_prefixes=only)
         print_update_plan(plan)
         if args.apply:
+            if plan.changed and not args.force:
+                print(
+                    "error: changed managed files block this update. "
+                    "Review the plan, detach intentional forks, or re-run with "
+                    "--apply --force only when local edits may be replaced.",
+                    file=sys.stderr,
+                )
+                return 1
             applied = apply_managed_update(
                 source,
                 root,
@@ -433,11 +441,6 @@ def cmd_update_paperops(args: argparse.Namespace) -> int:
                 template_ref=template_ref,
             )
             print(f"Applied files: {applied}")
-            if plan.changed and not args.force:
-                print(
-                    "Changed managed files were left untouched. Re-run with "
-                    "--apply --force only after reviewing the plan."
-                )
     return 0
 
 

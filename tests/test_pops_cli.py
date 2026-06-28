@@ -470,6 +470,38 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("! AGENTS.md [agent guidance]", out)
             self.assertIn("--apply --force only when local edits may be replaced", out)
 
+    def test_update_paperops_apply_stops_before_manifest_advance_when_changed_files_exist(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            set_scaffold_version(target, "0.1.0")
+            missing_contract = target / "_paperops" / "defaults" / "contracts" / "results.yml"
+            missing_contract.unlink()
+            agents = target / "AGENTS.md"
+            agents.write_text(
+                agents.read_text(encoding="utf-8") + "\nlocal fork without detach\n",
+                encoding="utf-8",
+            )
+
+            code, out, err = run_cli(
+                [
+                    "update-paperops",
+                    "--apply",
+                    "--only",
+                    "AGENTS.md,_paperops/defaults/contracts/",
+                    str(target),
+                ]
+            )
+
+            self.assertEqual(code, 1)
+            self.assertIn("changed managed files block this update", out + err)
+            self.assertIn("--force", out + err)
+            self.assertFalse(missing_contract.exists())
+            manifest = tomllib.loads(
+                (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
+            )
+            self.assertEqual(manifest["scaffold"]["version"], "0.1.0")
+
     def test_detach_marks_managed_file_and_update_skips_it(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
