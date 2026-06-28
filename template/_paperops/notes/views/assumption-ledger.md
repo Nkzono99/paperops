@@ -1,5 +1,6 @@
 ---
 view_type: pure_overview
+starter_example_rows: true
 source_of_truth:
   - _paperops/claims/gates/
 authoritative_for:
@@ -9,6 +10,8 @@ authoritative_for:
 # Assumption Ledger View
 
 このファイルは `_paperops/claims/gates/` の central_assumptions を人間が俯瞰するためのビューである。正本は gate card と関連する claim / evidence / request card に置く。
+
+初期状態の `*-0001` 行は例示行であり、対応する実カードはまだ作成されていない。実カードを作成したら、この行を実 ID に置き換えるか削除し、`starter_example_rows` を `false` にする。
 
 ## Assumption matrix
 

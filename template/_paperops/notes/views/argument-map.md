@@ -1,5 +1,6 @@
 ---
 view_type: controlled_authoring
+starter_example_rows: true
 source_of_truth:
   - _paperops/claims/arguments/
   - _paperops/claims/claims/
@@ -12,6 +13,8 @@ authoritative_for:
 # 論旨設計ビュー
 
 このファイルは `_paperops/claims/arguments/` の argument card を人間が俯瞰するためのビューである。論旨構造の正本は argument card に置く。
+
+初期状態の `*-0001` 行は例示行であり、対応する実カードはまだ作成されていない。実カードを作成したら、この行を実 ID に置き換えるか削除し、`starter_example_rows` を `false` にする。
 
 ## 一文の中心主張
 

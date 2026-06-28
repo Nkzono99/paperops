@@ -13,6 +13,8 @@
 - `view_type: pure_overview`: 正本カードを読むための総覧。判断の正本は `source_of_truth` に戻す。
 - `view_type: controlled_authoring`: カード正本の意味を本文語彙、条件名、読者順序へ変換するための編集可能な統制ビュー。科学的主張や証拠そのものの正本ではない。
 
+starter template の `CLM-0001`、`RES-0001`、`FIG-0001` などの `*-0001` 行は、schema と記入粒度を示す例示行であり、実カード在庫ではない。実カードを作成したら該当行を実 ID に置き換えるか削除し、front matter の `starter_example_rows` を `false` にする。
+
 ### pure overview view
 
 pure overview view は、カード正本を人間が読むための集約である。必要なら手で更新してよいが、判断の正本は対応する card に戻す。

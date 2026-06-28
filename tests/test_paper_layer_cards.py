@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import tempfile
 import unittest
 
@@ -8,6 +9,9 @@ from tests.helpers import ROOT, copy_template, run_python_script
 
 
 SCRIPT = ROOT / "template" / "scripts" / "check-paper-layer-cards.py"
+STARTER_EXAMPLE_ID_RE = re.compile(
+    r"\b(?:CLM|RES|SRC|FIG|GATE|RP|EP|AREQ|WREQ|RVW|FB|RSP|SG|ASM|UPG)-0001\b"
+)
 
 
 class PaperLayerCardsTest(unittest.TestCase):
@@ -40,6 +44,18 @@ class PaperLayerCardsTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("`_paperops/notes/views/result-pattern-map.md` に `view_type: pure_overview` がありません", result.stdout)
+
+    def test_starter_views_mark_concrete_id_rows_as_examples(self) -> None:
+        views_dir = ROOT / "template" / "_paperops" / "notes" / "views"
+        for view in sorted(views_dir.glob("*.md")):
+            if view.name == "README.md":
+                continue
+            text = view.read_text(encoding="utf-8")
+            if not STARTER_EXAMPLE_ID_RE.search(text):
+                continue
+            with self.subTest(view=view.name):
+                self.assertIn("starter_example_rows: true", text)
+                self.assertIn("初期状態の `*-0001` 行は例示行", text)
 
     def test_source_templates_define_promotion_decisions(self) -> None:
         source_template = (

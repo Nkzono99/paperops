@@ -1,5 +1,6 @@
 ---
 view_type: pure_overview
+starter_example_rows: true
 source_of_truth:
   - _paperops/evidence/results/
   - _paperops/evidence/figures/
@@ -10,6 +11,8 @@ authoritative_for:
 # 結果パターンビュー
 
 このファイルは `_paperops/evidence/results/` と `_paperops/evidence/figures/` のカードを人間が俯瞰するためのビューである。result の正本は result card / figure card に置く。
+
+初期状態の `*-0001` 行は例示行であり、対応する実カードはまだ作成されていない。実カードを作成したら、この行を実 ID に置き換えるか削除し、`starter_example_rows` を `false` にする。
 
 ## 結果パターン inventory
 
