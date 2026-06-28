@@ -8,6 +8,9 @@ version = "0.11.0"
 description = "CLI kernel for bootstrapping and maintaining paper-harness projects"
 readme = "README.md"
 requires-python = ">=3.11"
+dependencies = [
+  "PyYAML>=6.0",
+]
 authors = [
   { name = "paperops maintainers" },
 ]

@@ -5,6 +5,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import yaml
+
 from tests.helpers import ROOT, copy_template, run_cli, run_python_script
 
 
@@ -72,6 +74,32 @@ class WorkflowKernelTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("workflow-check", result.stdout)
         self.assertIn("workflow state is valid", result.stdout)
+
+    def test_workflow_loaders_accept_non_json_yaml_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+
+            state_path = target / "_paperops" / "workflow" / "current-state.yml"
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            yaml_text = yaml.safe_dump(state, allow_unicode=True, sort_keys=False)
+            self.assertNotIn('"overall"', yaml_text)
+            state_path.write_text(yaml_text, encoding="utf-8")
+
+            code, out, err = run_cli(["workflow", "status", str(target)])
+            check = run_python_script(
+                target / "scripts" / "check-workflow-state.py",
+                "--root",
+                target,
+                encoding="utf-8",
+                errors="replace",
+            )
+
+        self.assertEqual(code, 0, err)
+        self.assertIn("workflow state: SCOPED", out)
+        self.assertEqual(check.returncode, 0, check.stdout + check.stderr)
+        self.assertIn("workflow state is valid", check.stdout)
 
     def test_workflow_check_validates_subagent_roster_schema(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -263,6 +291,11 @@ class WorkflowKernelTest(unittest.TestCase):
         self.assertIn("Issue Router", skill)
         self.assertIn("route-review", skill)
         self.assertIn("UNDER_REVIEW", skill)
+
+    def test_package_declares_pyyaml_for_workflow_yaml_loading(self) -> None:
+        pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+
+        self.assertIn("PyYAML>=6.0", pyproject)
 
 
 if __name__ == "__main__":
