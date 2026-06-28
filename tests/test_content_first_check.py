@@ -11,6 +11,13 @@ from tests.helpers import ROOT, copy_template, run_python_script
 SCRIPT = ROOT / "template" / "scripts" / "check-content-first.py"
 
 
+def set_guard_group(root: Path, group: str, value: bool) -> None:
+    state_path = root / "_paperops" / "workflow" / "current-state.yml"
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["guards"][group] = {key: value for key in state["guards"][group]}
+    state_path.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 class ContentFirstCheckTest(unittest.TestCase):
     def test_strict_blocks_submission_only_work_before_structure_acceptance(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -67,6 +74,7 @@ class ContentFirstCheckTest(unittest.TestCase):
     def test_allows_content_work_when_structure_is_not_accepted(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)
+            set_guard_group(root, "CONTENT_FIRST", True)
 
             result = run_python_script(
                 SCRIPT,
@@ -86,8 +94,32 @@ class ContentFirstCheckTest(unittest.TestCase):
             )
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertIn("content-first", result.stdout)
-            self.assertIn("content intent is aligned", result.stdout)
+        self.assertIn("content-first", result.stdout)
+        self.assertIn("content intent is aligned", result.stdout)
+
+    def test_strict_requires_content_first_self_critique_even_for_content_work(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = copy_template(tmp)
+
+            result = run_python_script(
+                SCRIPT,
+                "--root",
+                root,
+                "--phase",
+                "progress",
+                "--intent",
+                "content",
+                "--changed-file",
+                "manuscript/ja/sections/30_results.tex",
+                "--strict",
+                encoding="utf-8",
+                errors="replace",
+            )
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("CONTENT_FIRST", result.stdout)
+        self.assertIn("highest_priority_content_blocker_declared", result.stdout)
+        self.assertIn("next_action_reduces_content_blocker", result.stdout)
 
     def test_strict_blocks_subagent_report_only_work_as_content_progress(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

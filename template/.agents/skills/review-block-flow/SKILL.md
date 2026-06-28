@@ -60,7 +60,7 @@ description: Use when a manuscript section has a draft, weak author stance, thin
 - section_loop or prose_loop recommendation
 - upstream card / Figure design brief / request updates needed
 
-`AUDITED` / `ACCEPTED` に進める前に `make block-flow-review-check` を実行し、Results / Discussion の `% block:` が table に揃っていることを確認する。
+`AUDITED` / `ACCEPTED` に進める前に `make block-flow-review-check` を実行し、Results / Discussion の `% block:` が table に揃っていることを確認する。`STRUCTURE_ACCEPTED` 以降は Results / Discussion が `AUDITED` / `ACCEPTED` で、block-flow review が揃っていないと gate が止まる。
 
 ## Codex 実行メモ
 

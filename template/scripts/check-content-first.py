@@ -22,6 +22,7 @@ CONTENT_GUARD_STATES = [
     "SECTION_PLANNED",
     "STRUCTURE_ACCEPTED",
 ]
+CONTENT_FIRST_GUARD = "CONTENT_FIRST"
 SUBMISSION_INTENTS = {"submission"}
 HARNESS_INTENTS = {"harness"}
 
@@ -131,9 +132,19 @@ def check(root: Path, phase: str, intent: str, changed_files: list[str], strict:
     findings: list[Finding] = []
     current = load_mapping(internal_path(root, "workflow", "current-state.yml"))
     missing = missing_content_guards(current)
-    structure_ready = not missing.get("STRUCTURE_ACCEPTED")
+    content_first_missing = missing_guard_values(current, CONTENT_FIRST_GUARD)
     content_blocker_open = any(missing.get(state) for state in CONTENT_GUARD_STATES)
     changed_kinds = classify_changed_files(changed_files)
+
+    if content_first_missing:
+        findings.append(
+            Finding(
+                "error" if strict else "warning",
+                "CONTENT_FIRST guard is incomplete; record the current self-critique before treating this as manuscript progress: "
+                + ", ".join(content_first_missing)
+                + ".",
+            )
+        )
 
     if phase == "finish":
         unfinished_states = [state for state in CONTENT_GUARD_STATES if missing.get(state)]
@@ -205,12 +216,18 @@ def missing_content_guards(current: dict[str, Any]) -> dict[str, list[str]]:
         return {state: ["guards mapping missing"] for state in CONTENT_GUARD_STATES}
     missing: dict[str, list[str]] = {}
     for state in CONTENT_GUARD_STATES:
-        values = guards.get(state, {})
-        if not isinstance(values, dict):
-            missing[state] = ["guard values missing"]
-            continue
-        missing[state] = [str(key) for key, value in values.items() if value is not True]
+        missing[state] = missing_guard_values(current, state)
     return missing
+
+
+def missing_guard_values(current: dict[str, Any], state: str) -> list[str]:
+    guards = current.get("guards", {})
+    if not isinstance(guards, dict):
+        return ["guards mapping missing"]
+    values = guards.get(state, {})
+    if not isinstance(values, dict):
+        return ["guard values missing"]
+    return [str(key) for key, value in values.items() if value is not True]
 
 
 def classify_changed_files(paths: list[str]) -> set[str]:

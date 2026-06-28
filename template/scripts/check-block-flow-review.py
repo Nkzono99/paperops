@@ -27,6 +27,7 @@ TARGET_SECTIONS = {
     "discussion": ("40_discussion.tex",),
 }
 REVIEWED_SECTION_STATES = {"AUDITED", "ACCEPTED"}
+STRUCTURE_ACCEPTED_OR_LATER = {"STRUCTURE_ACCEPTED", "POLISHED", "SUBMISSION_READY"}
 REQUIRED_COLUMNS = {
     "block_id",
     "reader_question",
@@ -62,6 +63,17 @@ def section_states(root: Path) -> dict[str, str]:
         if isinstance(section, dict):
             states[str(name)] = str(section.get("state", "")).strip()
     return states
+
+
+def overall_state(root: Path) -> str:
+    path = internal_path(root, "workflow", "current-state.yml")
+    if not path.exists():
+        return ""
+    current = load_mapping(path)
+    overall = current.get("overall", {})
+    if not isinstance(overall, dict):
+        return ""
+    return str(overall.get("state", "")).strip()
 
 
 def manuscript_blocks(root: Path, section: str) -> set[str]:
@@ -138,15 +150,26 @@ def check(root: Path, strict: bool) -> list[Finding]:
     severity = warning_severity(strict)
     findings: list[Finding] = []
     states = section_states(root)
+    overall = overall_state(root)
     for section in ["results", "discussion"]:
-        if states.get(section) not in REVIEWED_SECTION_STATES:
+        section_state = states.get(section)
+        if overall in STRUCTURE_ACCEPTED_OR_LATER and section_state not in REVIEWED_SECTION_STATES:
+            findings.append(
+                Finding(
+                    severity,
+                    f"`{overall}` requires `{section}` to be AUDITED / ACCEPTED before structure acceptance, "
+                    f"but current section state is `{section_state}`.",
+                )
+            )
+            continue
+        if section_state not in REVIEWED_SECTION_STATES:
             continue
         blocks = manuscript_blocks(root, section)
         if not blocks:
             findings.append(
                 Finding(
                     severity,
-                    f"`{section}` は {states.get(section)} ですが、manuscript section に `% block:` がありません。",
+                    f"`{section}` は {section_state} ですが、manuscript section に `% block:` がありません。",
                 )
             )
             continue
@@ -155,7 +178,7 @@ def check(root: Path, strict: bool) -> list[Finding]:
             findings.append(
                 Finding(
                     severity,
-                    f"`{section}` は {states.get(section)} ですが、"
+                    f"`{section}` は {section_state} ですが、"
                     "`_paperops/review/block-flow/` に block-flow review artifact がありません。",
                 )
             )

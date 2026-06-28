@@ -49,6 +49,8 @@ REQUIRED_SUBAGENT_ROLE_FIELDS = {
     "outputs",
     "route_bias",
 }
+STRUCTURE_ACCEPTED_OR_LATER = {"STRUCTURE_ACCEPTED", "POLISHED", "SUBMISSION_READY"}
+BLOCK_FLOW_REQUIRED_SECTIONS = {"results", "discussion"}
 
 
 def main() -> int:
@@ -174,6 +176,17 @@ def validate_state_consistency(current: dict[str, Any], findings: list[str]) -> 
         return
 
     accepted_like = {"AUDITED", "ACCEPTED"}
+    if overall_state in STRUCTURE_ACCEPTED_OR_LATER:
+        for name in sorted(BLOCK_FLOW_REQUIRED_SECTIONS):
+            section = sections.get(name)
+            section_state = section.get("state") if isinstance(section, dict) else None
+            if section_state not in accepted_like:
+                findings.append(
+                    f"current-state.yml overall.state `{overall_state}` requires section `{name}` "
+                    "to be AUDITED or ACCEPTED after block-flow review; "
+                    f"section `{name}` is `{section_state}`"
+                )
+
     if overall_state == "POLISHED":
         for name, section in sections.items():
             if not isinstance(section, dict):

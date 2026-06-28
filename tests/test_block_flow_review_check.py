@@ -18,6 +18,13 @@ def set_section_state(root: Path, section: str, state: str) -> None:
     state_path.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def set_overall_state(root: Path, state: str) -> None:
+    state_path = root / "_paperops" / "workflow" / "current-state.yml"
+    current = json.loads(state_path.read_text(encoding="utf-8"))
+    current["overall"]["state"] = state
+    state_path.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def write_block_flow_review(root: Path, section: str, table_rows: str) -> Path:
     reviews = root / "_paperops" / "review" / "block-flow"
     reviews.mkdir(parents=True, exist_ok=True)
@@ -40,6 +47,21 @@ status: reviewed
 
 
 class BlockFlowReviewCheckTest(unittest.TestCase):
+    def test_strict_requires_results_and_discussion_review_states_after_structure_acceptance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = copy_template(tmp)
+            set_overall_state(root, "STRUCTURE_ACCEPTED")
+            set_section_state(root, "results", "DRAFTED")
+            set_section_state(root, "discussion", "DRAFTED")
+
+            result = run_python_script(SCRIPT, "--root", root, "--strict")
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("STRUCTURE_ACCEPTED", result.stdout)
+        self.assertIn("results", result.stdout)
+        self.assertIn("discussion", result.stdout)
+        self.assertIn("AUDITED / ACCEPTED", result.stdout)
+
     def test_strict_requires_review_artifact_for_audited_results(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)

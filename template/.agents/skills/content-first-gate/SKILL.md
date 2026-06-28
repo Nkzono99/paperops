@@ -40,7 +40,7 @@ description: Use when manuscript work may drift from content repair into submiss
 - 30 分以上、Results hierarchy / Discussion functions / claim scope / figure story を進めずに周辺作業だけをしている。
 - 新しい feedback が出て、route が manuscript_only か上位 loop か不明になった。
 
-この checkpoint では `scripts/check-content-first.py --root . --phase progress --intent <content|evidence|prose|submission|harness> --strict` を使う。content blocker が残る間に Submission hygiene や harness だけが changed file なら、その作業を止め、必要なら `feedback-paper-harness` へ要約して原稿へ戻る。
+この checkpoint では `scripts/check-content-first.py --root . --phase progress --intent <content|evidence|prose|submission|harness> --strict` を使う。`CONTENT_FIRST` guard で最高優先 content blocker と next action の自己批判を記録し、content blocker が残る間に Submission hygiene や harness だけが changed file なら、その作業を止め、必要なら `feedback-paper-harness` へ要約して原稿へ戻る。
 
 ## Completion self-critique
 

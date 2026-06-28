@@ -175,6 +175,33 @@ class WorkflowKernelTest(unittest.TestCase):
         self.assertIn("results", result.stdout)
         self.assertIn("DRAFTED", result.stdout)
 
+    def test_workflow_check_rejects_structure_accepted_before_results_and_discussion_audit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = copy_template(tmp)
+            state_path = root / "_paperops" / "workflow" / "current-state.yml"
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["overall"]["state"] = "STRUCTURE_ACCEPTED"
+            state["sections"]["results"]["state"] = "DRAFTED"
+            state["sections"]["discussion"]["state"] = "DRAFTED"
+            state_path.write_text(
+                json.dumps(state, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+            result = run_python_script(
+                root / "scripts" / "check-workflow-state.py",
+                "--root",
+                root,
+                encoding="utf-8",
+                errors="replace",
+            )
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("overall.state `STRUCTURE_ACCEPTED`", result.stdout)
+        self.assertIn("results", result.stdout)
+        self.assertIn("discussion", result.stdout)
+        self.assertIn("block-flow review", result.stdout)
+
     def test_pops_workflow_status_next_and_advance_with_guards(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
