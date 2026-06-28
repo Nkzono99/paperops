@@ -395,6 +395,10 @@ subagent は直接同じ manuscript block を同時編集しない。main agent 
 - `_paperops/claims/`
 - `_paperops/review/`
 - `_paperops/requests/`
+- `_paperops/contracts/`
+- `_paperops/workflow/`
+
+旧互換 layout の `notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`contracts/`、`workflow/` も同じ scratch layer として扱う。
 
 `--include-handoff` を付けた場合だけ `_handoff/` payload も封印する。
 

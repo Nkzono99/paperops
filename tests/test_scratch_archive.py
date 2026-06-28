@@ -117,6 +117,10 @@ class ScratchArchiveTest(unittest.TestCase):
                 target / "_paperops" / "claims" / "claims" / "CLM-CUSTOM.md",
                 target / "_paperops" / "review" / "feedback" / "FB-CUSTOM.md",
                 target / "_paperops" / "requests" / "analysis" / "AREQ-CUSTOM.md",
+                target / "_paperops" / "contracts" / "results.yml",
+                target / "_paperops" / "workflow" / "custom-state.yml",
+                target / "contracts" / "legacy-contract.yml",
+                target / "workflow" / "legacy-state.yml",
                 target / "_handoff" / "secret.txt",
             ]
             for path in added_files:

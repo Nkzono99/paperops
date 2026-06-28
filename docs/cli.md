@@ -170,7 +170,7 @@ uvx --from paper-harness-cli pops scratch reset --yes
 uvx --from paper-harness-cli pops scratch restore <archive-id> --yes
 ```
 
-`pops scratch archive` は `story/`、`manuscript/`、`submission/` と `_paperops/notes/`、`_paperops/refs/`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` を `_archives/<id>/archive.zip.partNNNN` に分割保存する。既定の part size は 48 MiB で、GitHub の単一ファイル制限にかからないようにする。
+`pops scratch archive` は `story/`、`manuscript/`、`submission/` と `_paperops/notes/`、`_paperops/refs/`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/contracts/`、`_paperops/workflow/` を `_archives/<id>/archive.zip.partNNNN` に分割保存する。旧互換の `notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`contracts/`、`workflow/` も対象にする。既定の part size は 48 MiB で、GitHub の単一ファイル制限にかからないようにする。
 
 `pops scratch restart --yes` は archive 作成と reset を一操作で行う。`--include-handoff` を付けると `_handoff/` payload も封印してから starter 状態へ戻す。既存稿を残さず1から執筆へ戻したい場合は、`archive` と `reset` を別々に実行するより `restart` を使う。
 

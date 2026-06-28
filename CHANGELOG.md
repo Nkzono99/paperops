@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `pops scratch archive/restart/reset/restore` の作業層 scope に `_paperops/contracts/` と `_paperops/workflow/`、旧互換の `contracts/` と `workflow/` を追加した。1から書き直すときに古い contract overlay や workflow state / submission ledger が残り続けることを防ぐ。
 - `pops update-paperops --apply-chain` の内部 step で changed managed files が残る場合、`.pops/manifest.toml` の scaffold version を進めずに停止するようにした。これにより、実際には管理ファイルが更新されていないのに checkpoint 適用済み扱いになる事故を防ぐ。意図的な project fork は `pops detach`、上書きしてよい変更は review 後の `--force` で扱う。
 - `check-claim-evidence.py` と `check-submission-drift.py` に `--strict` を追加し、`finish-manuscript-check` では claim-evidence drift、`submission-gate` / `pre-submit` では submission drift を warning のまま通さず error として検出するようにした。テンプレート管理 repo 側の root `make smoke` / `finish-manuscript-check` も predicted-results と strict claim-evidence を見るように揃えた。既存下流リポジトリで取り込む場合は、該当 script、Makefile、AGENTS / CLAUDE、docs を更新する必要がある。
 - `submission-gate` と `check-predicted-results.py` を追加し、`manuscript/` を living authoring source、`submission/` を submission candidate / round snapshot として扱う二軸モデルを明文化した。authoring source では予測稿や `xx` を advisory に管理し、`finish-manuscript-check` / `submission-gate` / `pre-submit` では `PREDICTED-RESULT`、open AREQ、`xx`、AI intent を strict に検出する。`_paperops/workflow/submission-ledger.yml` と analysis request の prediction lifecycle fields を追加し、査読後は `revision-authoring` から新しい `revision-candidate` / round snapshot を作れるようにした。既存下流リポジトリで取り込む場合は、新 script、Makefile target、新 skill と Claude wrapper、analysis request template、submission ledger、AGENTS / CLAUDE / README、docs を更新する必要がある。
