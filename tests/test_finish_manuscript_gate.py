@@ -23,6 +23,15 @@ class FinishManuscriptGateTest(unittest.TestCase):
         self.assertRegex(makefile, r"smoke:.*section-contract-check")
         self.assertIn("template/scripts/check-section-contracts.py --root template", makefile)
 
+    def test_root_makefile_mirrors_finish_gate_for_prediction_and_claim_evidence(self) -> None:
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+
+        self.assertIn("predicted-results-check", makefile)
+        self.assertRegex(makefile, r"smoke:.*predicted-results-check")
+        self.assertIn("template/scripts/check-predicted-results.py --root template", makefile)
+        self.assertIn("template/scripts/check-predicted-results.py --root template --scope all --strict", makefile)
+        self.assertIn("template/scripts/check-claim-evidence.py --root template --strict", makefile)
+
 
 if __name__ == "__main__":
     unittest.main()
