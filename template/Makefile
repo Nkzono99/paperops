@@ -207,6 +207,7 @@ audit: $(AUDIT_CHECKS)
 
 pre-submit: $(PRE_SUBMIT_CHECKS)
 	$(PYTHON) scripts/check-concept-terms.py --root . --strict
+	$(PYTHON) scripts/check-argument-focus.py --root . --strict
 	$(PYTHON) scripts/check-authoring-intent.py --root . --strict
 	$(PYTHON) scripts/check-storyline.py --root . --strict
 	$(PYTHON) scripts/check-section-depth.py --root . --strict
@@ -215,6 +216,7 @@ pre-submit: $(PRE_SUBMIT_CHECKS)
 	$(PYTHON) scripts/check-figure-references.py --root . --strict
 	$(PYTHON) scripts/check-figure-obligations.py --root . --strict
 	$(PYTHON) scripts/check-figure-design.py --root . --strict
+	$(PYTHON) scripts/check-card-coverage.py --root . --strict
 	$(PYTHON) scripts/check-research-request-handoff.py --root . --strict
 	$(PYTHON) scripts/check-external-imports.py --root . --strict
 	$(PYTHON) scripts/readiness-check.py --root . --require-submission

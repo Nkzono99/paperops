@@ -136,6 +136,16 @@ class MakefileProfileTest(unittest.TestCase):
                 with self.subTest(variable=variable, target=target):
                     self.assertIn(target, tokens)
 
+    def test_template_pre_submit_rechecks_warning_capable_content_gates_as_strict(self) -> None:
+        makefile = (ROOT / "template" / "Makefile").read_text(encoding="utf-8")
+
+        for command in [
+            "scripts/check-argument-focus.py --root . --strict",
+            "scripts/check-card-coverage.py --root . --strict",
+        ]:
+            with self.subTest(command=command):
+                self.assertIn(command, makefile)
+
 
 if __name__ == "__main__":
     unittest.main()
