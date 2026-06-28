@@ -88,79 +88,50 @@
     }
   },
   "sections": {
+    "abstract": {
+      "state": "UNPLANNED",
+      "depends_on": {
+        "claims": [],
+        "figures": []
+      }
+    },
     "introduction": {
       "state": "UNPLANNED",
       "depends_on": {
-        "claims": [
-          "CLM-0001@v1"
-        ],
-        "contract": [
-          "CONTRACT-introduction@v1"
-        ]
+        "claims": [],
+        "contract": []
       }
     },
     "methods": {
       "state": "UNPLANNED",
       "depends_on": {
-        "evidence": [
-          "RES-0001@v1"
-        ],
-        "contract": [
-          "CONTRACT-methods@v1"
-        ]
+        "evidence": [],
+        "contract": []
       }
     },
-    "results.core_relaxation": {
+    "results": {
       "state": "UNPLANNED",
       "depends_on": {
-        "claims": [
-          "CLM-0003@v1"
-        ],
-        "evidence": [
-          "RES-0012@v1"
-        ],
-        "figures": [
-          "FIG-0005@v1"
-        ],
-        "contract": [
-          "CONTRACT-results@v1"
-        ]
+        "claims": [],
+        "evidence": [],
+        "figures": [],
+        "contract": []
       }
     },
-    "discussion.mechanism": {
+    "discussion": {
       "state": "UNPLANNED",
       "depends_on": {
-        "claims": [
-          "CLM-0003@v1"
-        ],
-        "evidence": [
-          "RES-0012@v1"
-        ],
-        "contract": [
-          "CONTRACT-discussion@v1"
-        ]
-      }
-    },
-    "abstract": {
-      "state": "UNPLANNED",
-      "depends_on": {
-        "claims": [
-          "CLM-0001@v1"
-        ],
-        "figures": [
-          "FIG-0001@v1"
-        ]
+        "claims": [],
+        "evidence": [],
+        "figures": [],
+        "contract": []
       }
     },
     "conclusion": {
       "state": "UNPLANNED",
       "depends_on": {
-        "claims": [
-          "CLM-0001@v1"
-        ],
-        "contract": [
-          "CONTRACT-conclusion@v1"
-        ]
+        "claims": [],
+        "contract": []
       }
     }
   },

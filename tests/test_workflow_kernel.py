@@ -43,9 +43,22 @@ class WorkflowKernelTest(unittest.TestCase):
 
         self.assertIn('"state": "SCOPED"', state)
         self.assertIn('"depends_on"', state)
-        self.assertIn('"results.core_relaxation"', state)
         self.assertIn("workflow-check:", makefile)
         self.assertIn("check-workflow-state.py --root .", makefile)
+
+    def test_template_current_state_is_topic_neutral_starter(self) -> None:
+        state_path = ROOT / "template" / "_paperops" / "workflow" / "current-state.yml"
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(
+            set(state["sections"]),
+            {"abstract", "introduction", "methods", "results", "discussion", "conclusion"},
+        )
+        for section_name, section in state["sections"].items():
+            with self.subTest(section=section_name):
+                self.assertEqual(section["state"], "UNPLANNED")
+                for refs in section.get("depends_on", {}).values():
+                    self.assertEqual([], refs)
 
     def test_workflow_check_accepts_template_state(self) -> None:
         result = run_python_script(
@@ -115,7 +128,7 @@ class WorkflowKernelTest(unittest.TestCase):
             state_path = root / "_paperops" / "workflow" / "current-state.yml"
             state = json.loads(state_path.read_text(encoding="utf-8"))
             state["overall"]["state"] = "POLISHED"
-            state["sections"]["results.core_relaxation"]["state"] = "DRAFTED"
+            state["sections"]["results"]["state"] = "DRAFTED"
             state_path.write_text(
                 json.dumps(state, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
@@ -131,7 +144,7 @@ class WorkflowKernelTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("overall.state `POLISHED`", result.stdout)
-        self.assertIn("results.core_relaxation", result.stdout)
+        self.assertIn("results", result.stdout)
         self.assertIn("DRAFTED", result.stdout)
 
     def test_pops_workflow_status_next_and_advance_with_guards(self) -> None:
@@ -173,15 +186,24 @@ class WorkflowKernelTest(unittest.TestCase):
             code, _out, err = run_cli(["init", str(target)])
             self.assertEqual(code, 0, err)
 
-            code, out, err = run_cli(["workflow", "invalidate", "CLM-0003", str(target)])
-            self.assertEqual(code, 0, err)
-            self.assertIn("stale: results.core_relaxation", out)
-            self.assertIn("stale: discussion.mechanism", out)
+            state_path = target / "_paperops" / "workflow" / "current-state.yml"
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["sections"]["results"]["depends_on"]["claims"] = ["CLM-0001@v1"]
+            state["sections"]["discussion"]["depends_on"]["claims"] = ["CLM-0001@v1"]
+            state_path.write_text(
+                json.dumps(state, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
 
-            state = json.loads((target / "_paperops" / "workflow" / "current-state.yml").read_text(encoding="utf-8"))
-            self.assertEqual(state["sections"]["results.core_relaxation"]["state"], "STALE")
-            self.assertEqual(state["sections"]["results.core_relaxation"]["route"], "story_loop")
-            self.assertEqual(state["sections"]["discussion.mechanism"]["state"], "STALE")
+            code, out, err = run_cli(["workflow", "invalidate", "CLM-0001", str(target)])
+            self.assertEqual(code, 0, err)
+            self.assertIn("stale: results", out)
+            self.assertIn("stale: discussion", out)
+
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(state["sections"]["results"]["state"], "STALE")
+            self.assertEqual(state["sections"]["results"]["route"], "story_loop")
+            self.assertEqual(state["sections"]["discussion"]["state"], "STALE")
 
     def test_pops_workflow_route_review_can_apply_issue_class_route(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

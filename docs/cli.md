@@ -153,11 +153,11 @@ AI Writer が section draft 中に「この claim を強めるための追加作
 uvx --from paper-harness-cli pops workflow status
 uvx --from paper-harness-cli pops workflow next
 uvx --from paper-harness-cli pops workflow advance evidence-ready
-uvx --from paper-harness-cli pops workflow invalidate CLM-0003
+uvx --from paper-harness-cli pops workflow invalidate CLM-0001
 uvx --from paper-harness-cli pops workflow route-review --issue-class story-loop --apply
 ```
 
-`_paperops/defaults/workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`_paperops/workflow/machine.yml` があれば project overlay として優先する。`_paperops/workflow/current-state.yml` は現在状態と section の `depends_on` を持つ。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
+`_paperops/defaults/workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`_paperops/workflow/machine.yml` があれば project overlay として優先する。`_paperops/workflow/current-state.yml` は現在状態と section の `depends_on` を持つ。starter の依存は空なので、claim / result / figure / contract card を作った後に対応 section の `depends_on` を埋める。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
 
 `submission_loop` は STRUCTURE_ACCEPTED 後の route である。`pops workflow route-review --issue-class submission-loop --apply` は、storyline / section / structure guard が未達なら拒否される。原稿完成作業中に author metadata、license、readiness-check、Makefile、script、skill 改修へ逸れそうな場合は、`make content-first-check` または `scripts/check-content-first.py --phase progress --intent <intent> --strict` で進路を確認する。
 
