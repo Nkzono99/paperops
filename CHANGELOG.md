@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- root `README.md` の論文プロジェクト構造説明を現行 `_paperops/` layout に揃え、`template/.agents/README.md` も `.agents/skills/` を共通手順の source of truth、`.claude/skills/` を wrapper として説明するよう直した。旧 top-level `evidence/` / `claims/` / `refs/` や逆向きの skill 正本説明を新規利用者へ案内しない。
 - root の `AGENTS.md` / `CLAUDE.md` の repository map と HarnessOps 境界説明を揃え、実在しない `.Codex/skills/` を案内しないよう root guidance test を追加した。テンプレート保守作業で root 層と下流 `template/` 層の入口を取り違えにくくする。
 - starter の `_paperops/notes/views/` に残る `CLM-0001` / `RES-0001` / `FIG-0001` などの実カード風 ID を `starter_example_rows: true` と明示し、例示行であって未作成カードの在庫ではないことを README と root テストで固定した。新規下流 project が view のサンプル行を実カード構成と誤解しにくくする。
 - 下流向け docs / AGENTS / CLAUDE / README の skill 入口を整理し、`finish-manuscript`、`route-manuscript-feedback`、`submission-gate`、`plan-figure-story` を主入口として見せ、compiler、subagent orchestration、predicted-result drafting、block-flow review、figure design / audit は通常それらから呼ぶ内部 route として扱うようにした。AI が局所 skill へ飛びつき、原稿全体の改善を置き去りにする運用を減らす。

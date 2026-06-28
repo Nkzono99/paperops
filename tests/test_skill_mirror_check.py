@@ -4,10 +4,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.helpers import run_cli, run_python_script
+from tests.helpers import ROOT, run_cli, run_python_script
 
 
 class SkillMirrorCheckTest(unittest.TestCase):
+    def test_agents_readme_names_agents_skills_as_source_of_truth(self) -> None:
+        readme = (ROOT / "template" / ".agents" / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("`.agents/skills/` を共通手順の source of truth", readme)
+        self.assertIn("`.claude/skills/` は Claude Code 用 wrapper", readme)
+        self.assertNotIn("`template/.claude/skills/` をハーネス方針の source of truth", readme)
+
     def test_claude_wrapper_imports_agents_source_without_cwd_dependency(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
