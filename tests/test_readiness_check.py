@@ -13,6 +13,56 @@ MIRROR_FRESHNESS_SCRIPT = ROOT / "template" / "scripts" / "mirror-freshness-chec
 
 
 class ReadinessCheckTest(unittest.TestCase):
+    def test_starter_smoke_summarizes_expected_placeholders(self) -> None:
+        result = run_python_script(
+            SCRIPT,
+            "--root",
+            ROOT / "template",
+            "--allow-placeholders",
+            "--starter-smoke",
+            encoding="utf-8",
+            errors="replace",
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("starter scaffold", result.stdout)
+        self.assertNotIn("README.md:1", result.stdout)
+        self.assertNotIn("_paperops/notes/reviewer-model.md:46", result.stdout)
+        self.assertLessEqual(result.stdout.count("- "), 6)
+
+    def test_root_template_readiness_uses_starter_smoke_profile(self) -> None:
+        makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+
+        self.assertIn(
+            "template/scripts/readiness-check.py --root template --allow-placeholders --starter-smoke",
+            makefile,
+        )
+
+    def test_starter_smoke_still_rejects_broken_managed_metadata_defaults(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = copy_template(tmp)
+            metadata = target / "manuscript" / "publication-metadata.toml"
+            metadata.write_text(
+                metadata.read_text(encoding="utf-8").replace(
+                    'source_language = "ja"',
+                    'source_language = ""',
+                ),
+                encoding="utf-8",
+            )
+
+            result = run_python_script(
+                SCRIPT,
+                "--root",
+                target,
+                "--allow-placeholders",
+                "--starter-smoke",
+                encoding="utf-8",
+                errors="replace",
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("starter scaffold metadata default `manuscript.source_language` is missing", result.stdout)
+
     def test_requires_decision_log(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)

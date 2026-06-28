@@ -56,8 +56,30 @@ def check_placeholders(
     rel_paths: Iterable[str],
     findings: list[Finding],
     allow_placeholders: bool,
+    starter_smoke: bool,
 ) -> None:
     severity = "warning" if allow_placeholders else "error"
+    if starter_smoke and allow_placeholders:
+        matched_files: set[str] = set()
+        matched_count = 0
+        for rel_path in rel_paths:
+            path = require_file(root, rel_path, findings)
+            if path is None:
+                continue
+            display_rel_path = display_path(root, path)
+            for line in read_text(path).splitlines():
+                if PLACEHOLDER_RE.search(line):
+                    matched_files.add(display_rel_path)
+                    matched_count += 1
+        if matched_count:
+            add(
+                findings,
+                "warning",
+                "starter scaffold placeholders are present; "
+                f"{matched_count} entries across {len(matched_files)} files are expected until project setup",
+            )
+        return
+
     for rel_path in rel_paths:
         path = require_file(root, rel_path, findings)
         if path is None:
@@ -122,6 +144,7 @@ def check_metadata(
     findings: list[Finding],
     allow_placeholders: bool,
     require_submission: bool,
+    starter_smoke: bool,
 ) -> None:
     rel_path = "manuscript/publication-metadata.toml"
     path = require_file(root, rel_path, findings)
@@ -135,6 +158,48 @@ def check_metadata(
         metadata = tomllib.loads(read_text(path))
     except tomllib.TOMLDecodeError as exc:
         add(findings, "error", f"`{rel_path}` を TOML として読めません: {exc}")
+        return
+
+    if starter_smoke and allow_placeholders and not require_submission:
+        for key in [
+            "manuscript.source_language",
+            "manuscript.status",
+            "repository.primary_branch",
+        ]:
+            if is_blank(get_nested(metadata, key)):
+                add(
+                    findings,
+                    "error",
+                    f"starter scaffold metadata default `{key}` is missing in `{rel_path}`",
+                )
+        starter_blanks: list[str] = []
+        for key in [
+            "manuscript.title_ja",
+            "manuscript.title_en",
+            "licenses.manuscript",
+            "repository.url",
+            "licenses.code",
+            "licenses.data",
+            "provenance.last_public_build_commit",
+        ]:
+            if is_blank(get_nested(metadata, key)):
+                starter_blanks.append(key)
+        authors = metadata.get("authors")
+        if not isinstance(authors, list) or not authors:
+            starter_blanks.append("[[authors]]")
+        else:
+            for index, author in enumerate(authors, start=1):
+                if not isinstance(author, dict) or is_blank(author.get("name")):
+                    starter_blanks.append(f"authors[{index}].name")
+                if not isinstance(author, dict) or is_blank(author.get("affiliation")):
+                    starter_blanks.append(f"authors[{index}].affiliation")
+        if starter_blanks:
+            add(
+                findings,
+                "warning",
+                "`manuscript/publication-metadata.toml` still has starter scaffold metadata "
+                f"fields to fill ({len(starter_blanks)} fields)",
+            )
         return
 
     required_scalars = [
@@ -249,8 +314,14 @@ def has_filled_section(text: str, heading: str | list[str]) -> bool:
     return bool(body) and PLACEHOLDER_RE.search(body) is None
 
 
-def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeholders: bool) -> None:
+def check_paper_quality_notes(
+    root: Path,
+    findings: list[Finding],
+    allow_placeholders: bool,
+    starter_smoke: bool,
+) -> None:
     severity = "warning" if allow_placeholders else "error"
+    summarize_starter_gaps = starter_smoke and allow_placeholders
 
     claim_resolved = require_any_file(
         root,
@@ -259,7 +330,10 @@ def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeho
     )
     if claim_resolved is not None:
         claim_rel_path, claim_path = claim_resolved
-        if not has_filled_section(read_text(claim_path), ["中心主張", "Core claim"]):
+        if not summarize_starter_gaps and not has_filled_section(
+            read_text(claim_path),
+            ["中心主張", "Core claim"],
+        ):
             add(findings, severity, f"`{claim_rel_path}` の中心主張が未記入です")
 
     ai_use_path = require_file(root, "notes/ai-use.md", findings)
@@ -269,7 +343,7 @@ def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeho
         disclosure_headings = ["投稿時の開示文案", "Submission disclosure draft"]
         if not any(f"## {heading}" in text for heading in disclosure_headings):
             add(findings, "error", f"`{ai_use_rel_path}` に投稿時の開示文案セクションがありません")
-        if not has_filled_section(text, disclosure_headings):
+        if not summarize_starter_gaps and not has_filled_section(text, disclosure_headings):
             add(findings, severity, f"`{ai_use_rel_path}` の投稿時の開示文案が未記入です")
 
     venue_path = require_file(root, "manuscript/venue.md", findings)
@@ -278,7 +352,9 @@ def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeho
         for label in ["投稿タイプ", "ページ制限", "必須セクション"]:
             pattern = re.compile(rf"^\s*-\s*{re.escape(label)}\s*[:：]\s*(?P<value>.+?)\s*$", re.MULTILINE)
             match = pattern.search(text)
-            if match is None or is_blank(match.group("value")):
+            if not summarize_starter_gaps and (
+                match is None or is_blank(match.group("value"))
+            ):
                 add(findings, severity, f"`manuscript/venue.md` の `{label}` が未記入です")
 
     reproducibility_path = require_file(root, "notes/reproducibility.md", findings)
@@ -295,6 +371,14 @@ def check_paper_quality_notes(root: Path, findings: list[Finding], allow_placeho
                 add(findings, "error", f"`{reproducibility_rel_path}` に {label} セクションがありません")
 
     require_file(root, "notes/decision-log.md", findings)
+
+    if summarize_starter_gaps:
+        add(
+            findings,
+            "warning",
+            "starter scaffold project-specific readiness fields are intentionally unfilled; "
+            "run normal readiness-check after project setup for line-level gaps",
+        )
 
 
 def check_submission_slot(root: Path, findings: list[Finding], require_submission: bool) -> None:
@@ -378,6 +462,11 @@ def main() -> int:
         action="store_true",
         help="投稿前ゲートとして `submission/<venue>/README.md` または `main.tex` を必須にする。",
     )
+    parser.add_argument(
+        "--starter-smoke",
+        action="store_true",
+        help="テンプレート smoke 用に starter placeholder と未記入項目を集約表示する。",
+    )
     args = parser.parse_args()
 
     root = args.root.resolve()
@@ -398,11 +487,12 @@ def main() -> int:
         ],
         findings,
         args.allow_placeholders,
+        args.starter_smoke,
     )
-    check_metadata(root, findings, args.allow_placeholders, args.require_submission)
+    check_metadata(root, findings, args.allow_placeholders, args.require_submission, args.starter_smoke)
     check_workflows(root, findings, args.allow_placeholders)
     check_issue_templates(root, findings)
-    check_paper_quality_notes(root, findings, args.allow_placeholders)
+    check_paper_quality_notes(root, findings, args.allow_placeholders, args.starter_smoke)
     check_submission_slot(root, findings, args.require_submission)
     check_public_bibliography(root, findings)
 

@@ -3,6 +3,7 @@
 ## Unreleased
 
 - 下流向け docs / AGENTS / CLAUDE / README の skill 入口を整理し、`finish-manuscript`、`route-manuscript-feedback`、`submission-gate`、`plan-figure-story` を主入口として見せ、compiler、subagent orchestration、predicted-result drafting、block-flow review、figure design / audit は通常それらから呼ぶ内部 route として扱うようにした。AI が局所 skill へ飛びつき、原稿全体の改善を置き去りにする運用を減らす。
+- root の `template-readiness-check` で `--starter-smoke` profile を使い、スターターとして当然残る placeholder / 未記入項目を行単位で大量に出さず集約 warning にした。下流 project の通常 `make readiness-check` と投稿前 `--require-submission` の詳細検出は維持する。
 - starter manuscript の説明を現行 `_paperops/` layout に合わせ、旧 top-level `notes/` / `refs/` / `.claude/` を中核とする記述を削除した。新規下流 project が旧 layout を正道と誤解しないようにした。
 - starter の `_paperops/workflow/current-state.yml` から topic 固有の section 名と未作成カード依存を削除し、汎用 section と空の `depends_on` で始めるようにした。実際の claim / result / figure card を作った後で project 側が依存を埋める運用に揃えた。
 - template checker scripts の共通 helper `scripts/paperops_checks.py` を追加し、claim/card/figure/storyline 系 checker の Finding、read_text、frontmatter、report 出力を共通化した。既存下流で取り込む場合は、対象 checker と同時に `scripts/paperops_checks.py` も更新する必要がある。
