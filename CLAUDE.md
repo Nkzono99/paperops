@@ -26,7 +26,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 - このリポジトリは `.harnessops/project.toml` 上では `target-repository` で、HOPS overlay は `storage = "local"` の `harness-lab/` を使う。正本は `local_id = "paper-harness-template"` で解決される `~/.harnessops/projects/paper-harness-template/` 側に置く。
 - 下流 project repo に HOPS をリンクする場合も、`uvx --from harnessops hops project link --profile paper-harness-project` を使い、`harness-feedback/` を repo 外の local state に置く。
 - HarnessOps 管理ファイルは直接組み替えず、確認は `uvx --from harnessops hops doctor --check-overlay --check-records`、local state 更新は `uvx --refresh-package harnessops --from harnessops hops update-harness` を使う。
-- repo-local skill の更新や bridge 再展開が必要な場合は `uvx --from harnessops hops agent bridge --codex --force` を使う。
+- HOPS 関連 skill は HarnessOps plugin から参照し、この repo には vendor しない。
 
 ## 変更ワークフロー
 
@@ -65,11 +65,11 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 ```
 docs/                  architecture, change-policy, triage-rules, skill-catalog, distribution
-.claude/skills/        triage-template-feedback, apply-template-improvement, review-template-regression
-template/.agents/      Codex 用の下流執筆スキル互換入口
+.agents/skills/       triage-template-feedback, apply-template-improvement, review-template-regression, release
+.claude/skills/       Claude Code 互換入口
 .github/workflows/     reusable-build, reusable-mirror-check, reusable-release, publish-pypi
 .github/ISSUE_TEMPLATE/ template-feedback, skill-request, structure-change
 src/paperops/          pops CLI
 scripts/               smoke helpers
-template/              下流スキャフォールド一式（template/CLAUDE.md を参照）
+template/              下流スキャフォールド一式（template/AGENTS.md / template/CLAUDE.md を参照）
 ```

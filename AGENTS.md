@@ -65,7 +65,8 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 ```
 docs/                  architecture, change-policy, triage-rules, skill-catalog, distribution
-.Codex/skills/        triage-template-feedback, apply-template-improvement, review-template-regression
+.agents/skills/       triage-template-feedback, apply-template-improvement, review-template-regression, release
+.claude/skills/       Claude Code 互換入口
 .github/workflows/     reusable-build, reusable-mirror-check, reusable-release, publish-pypi
 .github/ISSUE_TEMPLATE/ template-feedback, skill-request, structure-change
 src/paperops/          pops CLI
