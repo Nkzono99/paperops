@@ -90,6 +90,22 @@ class PaperopsInternalLayoutTest(unittest.TestCase):
 
             self.assertEqual([modern], matches)
 
+    def test_starter_manuscript_describes_modern_paperops_layout(self) -> None:
+        manuscript_sections = list((ROOT / "template" / "manuscript" / "ja" / "sections").glob("*.tex"))
+        manuscript_sections.extend((ROOT / "template" / "manuscript" / "en" / "sections").glob("*.tex"))
+        text = "\n".join(path.read_text(encoding="utf-8") for path in manuscript_sections)
+
+        for stale_phrase in [
+            "`notes/`",
+            "`refs/`",
+            "`refs/summaries/`",
+            "`.claude/`",
+        ]:
+            with self.subTest(stale_phrase=stale_phrase):
+                self.assertNotIn(stale_phrase, text)
+        self.assertIn("`_paperops/`", text)
+        self.assertIn("`_paperops/refs/summaries/`", text)
+
 
 if __name__ == "__main__":
     unittest.main()

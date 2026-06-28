@@ -3,6 +3,7 @@
 ## Unreleased
 
 - 下流向け docs / AGENTS / CLAUDE / README の skill 入口を整理し、`finish-manuscript`、`route-manuscript-feedback`、`submission-gate`、`plan-figure-story` を主入口として見せ、compiler、subagent orchestration、predicted-result drafting、block-flow review、figure design / audit は通常それらから呼ぶ内部 route として扱うようにした。AI が局所 skill へ飛びつき、原稿全体の改善を置き去りにする運用を減らす。
+- starter manuscript の説明を現行 `_paperops/` layout に合わせ、旧 top-level `notes/` / `refs/` / `.claude/` を中核とする記述を削除した。新規下流 project が旧 layout を正道と誤解しないようにした。
 - template checker scripts の共通 helper `scripts/paperops_checks.py` を追加し、claim/card/figure/storyline 系 checker の Finding、read_text、frontmatter、report 出力を共通化した。既存下流で取り込む場合は、対象 checker と同時に `scripts/paperops_checks.py` も更新する必要がある。
 - `pops scratch archive/restart/reset/restore` の作業層 scope に `_paperops/contracts/` と `_paperops/workflow/`、旧互換の `contracts/` と `workflow/` を追加した。1から書き直すときに古い contract overlay や workflow state / submission ledger が残り続けることを防ぐ。
 - `pops update-paperops --apply-chain` の内部 step で changed managed files が残る場合、`.pops/manifest.toml` の scaffold version を進めずに停止するようにした。これにより、実際には管理ファイルが更新されていないのに checkpoint 適用済み扱いになる事故を防ぐ。意図的な project fork は `pops detach`、上書きしてよい変更は review 後の `--force` で扱う。
