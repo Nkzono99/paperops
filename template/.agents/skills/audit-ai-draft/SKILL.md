@@ -35,6 +35,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - `これは直接証明ではない`、`主張しない`、`screening である` のような防御的記述を、必要な場所へ集約する。
 - 内部 provenance 語、local run label、directory name、artifact name を公開語へ置換する。
 - AI Writer が「この claim を強めるための追加作業」「後で埋める」「authoring note」のような執筆意図を本文 prose に混ぜていないか確認し、`% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ戻す。
+- データがまだ無いことを一般的な Future Work や defensive caveat に畳んでいないか確認する。投稿前に現実的な追加シミュレーションで閉じられ、期待結果の根拠がある場合は `draft-predicted-results` へ戻し、`% PREDICTED-RESULT:` / `% SIM-REQUEST:` と `_paperops/requests/analysis/` を接続する。
 - `surface-element charge update` や `code/reproducibility package` のような concept-term compression を検出し、claim / argument / evidence card の意味を本文語彙へ圧縮しすぎていないか判断する。
 - `_paperops/notes/views/argument-map.md` と `_paperops/notes/views/claim-evidence-map.md` を更新する改稿計画を出す。
 - 関連研究の位置づけが未整理な場合は、本文を磨く前に `_paperops/notes/related-work-map.md` または `/research-related-work` へ戻す。
@@ -63,6 +64,7 @@ AI に一旦書かせた原稿、または大きく自動生成した節を、�
 - `主張しない`、`証明ではない`、`限定される` が各節で繰り返される箇所
 - run label、export 名、directory 名、script 名、artifact 名
 - `claim を強めるための追加作業`、`後で埋める`、`TODO`、`authoring note` など AI 執筆時の meta instruction が本文 prose に出ている箇所
+- 未実行の追加シミュレーションを Future Work や limitation として弱く片付け、投稿前に実行する選択肢を消している箇所
 - 図の caption が「何を示すか」ではなく「何を計算したか」だけを述べる箇所
 - hyphen / slash compound や 3 語前後の強い英語名詞句が一文に集中する箇所。必要なら `_paperops/notes/views/concept-terms.md` に記録し、accepted、plain-language、avoid を分ける。
 
@@ -131,5 +133,6 @@ Results が図表や条件の列挙に見える、または Discussion が limit
 - `_paperops/refs/` と `_paperops/notes/` の作業用ドキュメントは日本語で書く。
 - editorial architect として Results hierarchy / Discussion functions を先に診断し、薄い章を文体問題にしない。
 - authoring intent leak が疑われる本文行は、読者向け文に翻訳できるものだけ本文へ残す。判断保留や作業計画は `% INTENT:` / `% TODO-PAPER:` または `_paperops/requests/` へ移し、`make authoring-intent-check` を実行する。
+- 投稿前に実行できる追加シミュレーションがある場合は、defensive prose を増やす前に `draft-predicted-results` へ戻す。予測稿は final claim ではなく、実行 request と `xx` 置換条件を持つ scaffold として扱う。
 - 本文に戻す文言は、ローカル条件数ではなく、物理的意味、機構、境界条件、読者の持ち帰りを主語にする。
 - AI 初稿の定型臭だけを直す場合も、`_paperops/notes/ai-use.md` の AI 利用開示を消さない。

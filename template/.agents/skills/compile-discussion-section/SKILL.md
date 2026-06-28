@@ -30,7 +30,7 @@ Discussion functions は、少なくとも `principal_finding`、`mechanism_warr
 
 baseline、control、reference condition、comparator を Results の中心に置いた場合、Discussion ではその control が支える解釈と支えない解釈を分ける。baseline 結果を real-world mechanism claim に拡張する場合は、足りない coupled process、boundary condition、decisive next test を明示する。
 
-AI Writer の作業計画を Discussion prose に混ぜない。`claim を強めるための追加作業` は、公開読者に必要なら `decisive_next_test` や limitation/future work として翻訳し、未解決の執筆意図なら `% INTENT:` / `% TODO-PAPER:` または `_paperops/requests/` へ移す。
+AI Writer の作業計画を Discussion prose に混ぜない。`claim を強めるための追加作業` は、公開読者に必要なら `decisive_next_test` や limitation/future work として翻訳し、未解決の執筆意図なら `% INTENT:` / `% TODO-PAPER:` または `_paperops/requests/` へ移す。ただし追加シミュレーションを投稿前に実施でき、結果の予測根拠がある場合は、一般的な Future Work や defensive prose にせず `draft-predicted-results` へ戻す。予測解釈を書く場合は `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` と `_paperops/requests/analysis/` を必ず接続する。
 
 ## Section Depth
 

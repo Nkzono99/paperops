@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `draft-predicted-results` を追加し、未実行だが投稿前に現実的に実施できる追加シミュレーションを、Future Work や defensive prose に逃がさず、`% PREDICTED-RESULT:` / `% SIM-REQUEST:` / `% EXPECTATION-BASIS:` / `% REPLACE-XX:` comment と `_paperops/requests/analysis/` へ接続した予測稿として扱えるようにした。`scientific-gate`、Results / Discussion compiler、`finish-manuscript`、AI 初稿診断、review intake、AGENTS / CLAUDE / README、docs に接続した。既存下流リポジトリで取り込む場合は、新 skill と Claude wrapper、`collect-manuscript-review.py`、`collect-manuscript-review` skill、`scientific-gate`、`compile-results-section`、`compile-discussion-section`、`finish-manuscript`、`audit-ai-draft`、AGENTS / CLAUDE / README、docs を更新する必要がある。
+
 ## 0.11.0 - 2026-06-28
 
 - `review-block-flow` を追加し、DRAFTED section を AUDITED 扱いにする前に block operation table で author stance、reader question、why here、move / split / merge / delete / add を確認できるようにした。`finish-manuscript`、Results / Discussion compiler、AGENTS / CLAUDE / README、skill catalog / architecture docs へ接続し、薄い構成を保存したまま prose polish へ進む失敗を減らす。既存下流リポジトリで取り込む場合は、新 skill と Claude wrapper、`finish-manuscript`、`compile-results-section`、`compile-discussion-section`、AGENTS / CLAUDE / README、docs を更新する必要がある。

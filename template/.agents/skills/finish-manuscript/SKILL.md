@@ -26,12 +26,13 @@ main agent は writer だけでなく orchestrator として動く。subagent �
 1. `content-first-gate` で Start self-critique を行い、次の作業が manuscript content blocker を減らすか確認する。
 2. story spine が弱い場合は `design-paper-storyline` を editorial architect として使い、Results hierarchy と Discussion functions を確認する。
 3. 図表が本文生成後の飾りになりそうなら `plan-figure-story` で visual obligation と main / supplement split を先に決める。実際の plot、panel、caption、runops request は `design-paper-figure` で reader task と acceptance criteria を固定し、必要なら `figure-obligation-check` で欠落を確認する。
-4. Writer に生の card ontology を直接渡さない。必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` で読者向け構造へ変換する。
-5. `DRAFTED -> AUDITED` の前に `review-block-flow` で block operation table を作り、keep / move / split / merge / delete / add と author stance を確認する。
-6. AI Writer の authoring intent、判断保留、後で埋める内容、作業計画は本文 prose に書かない。近傍の `% INTENT:` または `% TODO-PAPER:` に残し、未解決なら `_paperops/notes/` / `_paperops/requests/` へ移す。
-7. review 後や route が不明な feedback は `route-manuscript-feedback` に渡し、evidence / story / section / prose / submission loop のどこへ戻すか決める。
-8. 模擬査読や公開原稿確認が必要なら `review-public-manuscript` と `peer-review-manuscript` を回し、blocking / major concern を `integrate-writing-feedback` へ戻す。
-9. 完了前に `finalize-manuscript` を読み、Finish criteria、human approval、`make finish-manuscript-check`、必要な audit / ci を確認する。
+4. 追加シミュレーションが現実的で、結果の向きや図の形を根拠つきで予測できる場合は、Future Work や defensive prose に逃がさず `draft-predicted-results` で `% PREDICTED-RESULT:` 付きの予測稿と analysis request を作る。
+5. Writer に生の card ontology を直接渡さない。必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` で読者向け構造へ変換する。
+6. `DRAFTED -> AUDITED` の前に `review-block-flow` で block operation table を作り、keep / move / split / merge / delete / add と author stance を確認する。
+7. AI Writer の authoring intent、判断保留、後で埋める内容、作業計画は本文 prose に書かない。近傍の `% INTENT:` または `% TODO-PAPER:` に残し、未解決なら `_paperops/notes/` / `_paperops/requests/` へ移す。
+8. review 後や route が不明な feedback は `route-manuscript-feedback` に渡し、evidence / story / section / prose / submission loop のどこへ戻すか決める。
+9. 模擬査読や公開原稿確認が必要なら `review-public-manuscript` と `peer-review-manuscript` を回し、blocking / major concern を `integrate-writing-feedback` へ戻す。
+10. 完了前に `finalize-manuscript` を読み、Finish criteria、human approval、`make finish-manuscript-check`、必要な audit / ci を確認する。
 
 ## Lane Notes
 

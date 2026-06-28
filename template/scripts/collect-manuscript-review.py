@@ -8,7 +8,11 @@ from datetime import date
 from pathlib import Path
 
 
-MARKER_RE = re.compile(r"(?<!\\)%\s*(REVIEW|AI|Q|KEEP\?|INTENT|TODO-PAPER)\s*:?\s*(.*)$")
+MARKER_RE = re.compile(
+    r"(?<!\\)%\s*"
+    r"(REVIEW|AI|Q|KEEP\?|INTENT|TODO-PAPER|PREDICTED-RESULT|SIM-REQUEST|EXPECTATION-BASIS|REPLACE-XX)"
+    r"\s*:?\s*(.*)$"
+)
 BLOCK_RE = re.compile(r"^\s*%\s*block:\s*(\S+)")
 MANUSCRIPT_DIRS = ("manuscript/ja", "manuscript/en")
 
@@ -187,7 +191,7 @@ def render_report(root: Path, review_date: str) -> str:
         "",
         f"- branch: `{branch}`",
         "- diff scope: `manuscript/ja`, `manuscript/en`",
-        "- inline markers: `% REVIEW:`, `% AI:`, `% Q:`, `% KEEP?:`, `% INTENT:`, `% TODO-PAPER:`",
+        "- inline markers: `% REVIEW:`, `% AI:`, `% Q:`, `% KEEP?:`, `% INTENT:`, `% TODO-PAPER:`, `% PREDICTED-RESULT:`, `% SIM-REQUEST:`, `% EXPECTATION-BASIS:`, `% REPLACE-XX:`",
         "",
         "## Inline comments",
         "",

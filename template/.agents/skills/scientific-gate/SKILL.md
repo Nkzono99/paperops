@@ -41,7 +41,7 @@ Academic Research Skills の pipeline / integrity gate / material provenance の
 - `supplement-only`: 本文の中心主張ではなく、補足・Methods・Data availability に回す。
 - `defer`: 今回の論文では扱わない。
 
-Abstract、Conclusion、title、main figure caption では `ready-to-write` だけを使う。中心主張が `analysis-needed` または `assumption-blocked` の場合、原稿生成へ進まず、必要な確認へ戻す。
+Abstract、Conclusion、title、main figure caption では `ready-to-write` だけを使う。中心主張が `assumption-blocked` の場合、原稿生成へ進まず、必要な確認へ戻す。`analysis-needed` でも、追加シミュレーションが投稿前に現実的かつ既存の延長線上で実施でき、期待される結果の根拠を明示できる場合だけ、`draft-predicted-results` で `% PREDICTED-RESULT:` / `% SIM-REQUEST:` 付きの予測稿を作ってよい。この場合も gate status は `analysis-needed` のままで、publish 不可、`must_not_claim`、実データ置換後の再 gate 条件を残す。
 
 ## Claim package
 
@@ -82,7 +82,8 @@ method sanity、workflow QA、readiness table、overclaim consistency audit、co
 6. 各 claim を gate status へ分類し、gate card に block reason と次の route を書く。
 7. central assumptions、claim stress tests、external validation gates がある場合は、`_paperops/notes/views/assumption-ledger.md` と `_paperops/notes/views/claim-upgrade-gates.md` にも俯瞰用の row を残す。
 8. `ready-to-write` の claim だけ、本文や caption で使える scope statement を作る。
-9. 人間承認が必要な assumption は、AI が勝手に受容せず gate card と `_paperops/notes/views/scientific-gate.md` の approval log に残す。
+9. `analysis-needed` のうち追加シミュレーションが現実的な claim は、Future Work や defensive prose に逃がさず `draft-predicted-results` へ渡す候補にする。予測稿は `% PREDICTED-RESULT:` comment、analysis request、`xx` 置換条件、再 gate 条件を必ず持つ。
+10. 人間承認が必要な assumption は、AI が勝手に受容せず gate card と `_paperops/notes/views/scientific-gate.md` の approval log に残す。
 
 ## Role pass
 
@@ -104,7 +105,7 @@ method sanity、workflow QA、readiness table、overclaim consistency audit、co
 - `Assumption ledger updates`
 - `Claim stress-test / external validation gate updates`
 - `Assumption approvals needed`
-- `Routes`: `/map-result-patterns`、`/research-related-work`、`/source-reach-scan`、`/calibrate-claims`、`/figure-story-audit`、`/peer-review-manuscript`、`_paperops/requests/analysis/`
+- `Routes`: `/map-result-patterns`、`/research-related-work`、`/source-reach-scan`、`/calibrate-claims`、`/figure-story-audit`、`/draft-predicted-results`、`/peer-review-manuscript`、`_paperops/requests/analysis/`
 - `Files updated`
 - `Checks run`
 
@@ -114,3 +115,4 @@ method sanity、workflow QA、readiness table、overclaim consistency audit、co
 - `_paperops/refs/` と `_paperops/notes/` の作業用ドキュメントは日本語で書く。
 - 既存 source の DOI、metadata、投稿日、投稿先 policy、外部 repository の軽い確認は必要なら web で行い、出典リンクを残す。新規 source channel、credential、raw capture、SNS / 動画 / platform-specific source が絡む場合は先に `/source-reach-scan` へ戻す。
 - `assumption-blocked` を文章上の hedge だけで処理しない。承認または scope 変更へ戻す。
+- `analysis-needed` を最終 prose に見せない。予測稿が必要なら `draft-predicted-results` を使い、`PREDICTED-RESULT` comment と `_paperops/requests/analysis/` への接続を残す。

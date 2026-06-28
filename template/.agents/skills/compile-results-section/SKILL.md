@@ -31,6 +31,8 @@ Results hierarchy は、`_paperops/notes/views/storyline.md` の `Section depth 
 
 AI Writer が「この claim を強めるために必要な追加作業」「後で埋める」などの authoring intent を Results prose に書きそうな場合は、本文にしない。近傍の `% INTENT:` / `% TODO-PAPER:` comment に残し、追加解析が必要なら `_paperops/requests/` へ切り出す。公開本文として意図的に扱う場合だけ `% paperops: allow-authoring-intent -- reason` を直前に置く。
 
+必要な定量値、比較、panel が未実行だが、投稿前に現実的な追加シミュレーションとして閉じられる場合は、Future Work や defensive caveat へ回す前に `draft-predicted-results` を使う。Results prose に `xx` や予測図を置く場合は、近傍に `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` を残し、対応する `_paperops/requests/analysis/` card があることを確認する。
+
 ## Section Depth
 
 `manuscript/writing-profile.yml` の `section_depth` を確認する。`ja_chars` は日本語原稿の TeX noise を除いた文字数、`en_words` は英語原稿の TeX noise を除いた word count として扱う。`length_is_floor_not_target` の原則に従い、短い場合も水増ししない。
