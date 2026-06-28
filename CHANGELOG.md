@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `docs/current-specification.md` を詳細仕様本文から source-of-truth 索引へ縮約し、architecture / CLI / migration / skill docs との正本競合を減らした。BibTeX の標準配置も `manuscript/shared/bib/` を正道、`_paperops/refs/bib/{curated,imported}` を外部/import 用、legacy `refs/bib/` を互換扱いとして整理した。
 - `check-quantity-integrity.py` の Finding / frontmatter / 出力処理を共通 helper `scripts/paperops_checks.py` へ寄せた。checker ごとの出力形式や strict warning handling の重複を減らすための内部整理で、検出内容は変えない。
 - root / template の Makefile が `.venv` 未作成時に `python3.11`、`python3`、`python` の順で Python を探すようにした。`python` コマンドが無い環境でも `make skill-mirror-check` などの checker が起動前に落ちにくくなる。
 - `skill-mirror-check` が `.agents/skills/` と `.claude/skills/` の対応だけでなく、各 `SKILL.md` の frontmatter `name` と directory name の不一致も検出するようにした。Claude wrapper の import は合っているが起動名だけ古い、という見落としを防ぐ。
