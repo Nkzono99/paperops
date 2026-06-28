@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `develop-manuscript-content` を追加し、claims、storyline、figure story、Results hierarchy、Discussion functions、Methods definition、section compiler、block-flow review、本文 prose だけを進める原稿内容専用入口を用意した。`finish-manuscript` は投稿可能状態までの監督役として残し、ORCID、affiliation、license などの投稿メタデータや submission candidate / round snapshot は `submission-gate` に分ける。既存下流リポジトリで取り込む場合は、新 skill と Claude wrapper、`finish-manuscript`、AGENTS / CLAUDE / README、skill catalog を更新する必要がある。
+
 ## 0.12.0 - 2026-06-28
 
 - `check-content-first.py` が `_paperops/workflow/current-state.yml` の `CONTENT_FIRST` guard を実際に確認し、strict では最高優先 content blocker と次 action の自己批判が未記録のまま progress / finish へ進むことを error にするようにした。あわせて `workflow-check` / `block-flow-review-check` が `STRUCTURE_ACCEPTED` 以降の Results / Discussion に `AUDITED` / `ACCEPTED` と block-flow review を要求するようにした。

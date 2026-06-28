@@ -5,11 +5,11 @@ description: Use when /goal asks Codex to finish a manuscript from scratch, revi
 
 # finish-manuscript
 
-原稿を投稿可能な状態まで進める route-level skill。1から書く場合、既存稿を仕上げる場合、査読や人間コメントから response を作る場合の入口だが、詳細手順は専門 skill に委譲する。
+原稿を投稿可能な状態まで進める route-level skill。1から書く場合、既存稿を仕上げる場合、査読や人間コメントから response を作る場合の入口だが、原稿内容そのものは `develop-manuscript-content`、投稿候補化は `submission-gate` へ委譲する。
 
 この skill は **content-first** の監督役であり、本文 blocker を減らす順路を決める。Submission hygiene は原稿本文の story spine、Results hierarchy、Discussion functions、claim scope、figure story、major review blocker が閉じた後の最終面である。
 
-main agent は writer だけでなく orchestrator として動く。goal 中の一気通貫ルーチンでは、`draft-predicted-results` も専門 skill として扱い、追加シミュレーションで閉じられる blocker を Future Work や defensive prose に逃がさない。`manuscript/` は authoring source として扱い、投稿用の submission candidate / round snapshot は `submission-gate` で別軸に切る。subagent を使う場合は `orchestrate-manuscript-subagents` を先に読み、report を本文へ直接混ぜず、claim / evidence / feedback / section plan へ統合する。
+main agent は writer だけでなく orchestrator として動く。goal 中の一気通貫ルーチンでは、manuscript content の作成・拡張・再設計を `develop-manuscript-content` に寄せ、`draft-predicted-results` も専門 skill として扱い、追加シミュレーションで閉じられる blocker を Future Work や defensive prose に逃がさない。`manuscript/` は authoring source として扱い、投稿用の submission candidate / round snapshot は `submission-gate` で別軸に切る。subagent を使う場合は `orchestrate-manuscript-subagents` を先に読み、report を本文へ直接混ぜず、claim / evidence / feedback / section plan へ統合する。
 
 ## 最初に決める
 
@@ -23,7 +23,7 @@ main agent は writer だけでなく orchestrator として動く。goal 中の
 
 ## Route
 
-1. `content-first-gate` で Start self-critique を行い、次の作業が manuscript content blocker を減らすか確認する。
+1. `content-first-gate` で Start self-critique を行い、次の作業が manuscript content blocker を減らすか確認する。本文内容の作成・拡張・再設計が主目的なら `develop-manuscript-content` を読む。
 2. story spine が弱い場合は `design-paper-storyline` を editorial architect として使い、Results hierarchy と Discussion functions を確認する。
 3. 図表が本文生成後の飾りになりそうなら `plan-figure-story` で visual obligation と main / supplement split を先に決める。実際の plot、panel、caption、runops request は `design-paper-figure` で reader task と acceptance criteria を固定し、必要なら `figure-obligation-check` で欠落を確認する。
 4. 追加シミュレーションが現実的で、結果の向きや図の形を根拠つきで予測できる場合は、Future Work や defensive prose に逃がさず `draft-predicted-results` で `% PREDICTED-RESULT:` 付きの予測稿と analysis request を作る。

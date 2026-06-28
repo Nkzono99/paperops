@@ -24,15 +24,15 @@
 1. `/resume-session` で前回の状態を読む。
 2. `story/story-seed.md` で、研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を確認する。
 3. `pops workflow status` と `pops workflow next` で、全体状態と stale section を確認する。
-4. 原稿を進めるときは `/finish-manuscript` を主入口にする。内部で content-first gate、storyline、section contract、section depth、subagent orchestration、section compiler、予測稿、block-flow review、final check を必要な範囲だけ呼ぶ。
+4. 原稿内容を進めるときは `/develop-manuscript-content` を入口にし、claims、storyline、figure story、section compiler、block-flow review、本文 prose を扱う。`/finish-manuscript` は投稿可能状態までの監督入口として使う。
 5. 図表が本文の主張を支える場合は `/plan-figure-story` を入口にし、必要な個別図だけ `design-paper-figure` や `figure-story-audit` へ進める。
-6. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/finish-manuscript` 内の予測稿 route で扱う。本文には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` と `xx` 置換条件を残し、`_paperops/requests/analysis/` と接続する。
+6. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/develop-manuscript-content` 内の予測稿 route で扱う。本文には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` と `xx` 置換条件を残し、`_paperops/requests/analysis/` と接続する。
 7. DRAFTED section は block flow を見直してから AUDITED 扱いにする。直接 `review-block-flow` を呼ぶのは、block 構成の再設計が明示された場合に限る。
 8. subagent を使う場合、main agent は orchestrator として role brief と integration decision を `_paperops/review/rounds/` に残す。通常は `/finish-manuscript` から必要時に委譲する。
 9. `manuscript/ja/` を中心に書く。AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose ではなく `% INTENT:` または `% TODO-PAPER:` コメントに置き、必要なら `_paperops/notes/` / `_paperops/requests/` へ移す。
 10. 必要な block を `manuscript/en/` に同期する。
 11. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、`route-manuscript-feedback` と `pops workflow route-review` で戻る深さを決める。
-12. Submission hygiene は STRUCTURE_ACCEPTED 後に主作業にする。`manuscript/` は living authoring source で、投稿後や査読後も revision-authoring に戻して編集できる。投稿用の submission candidate / round snapshot は `submission/` と `_paperops/workflow/submission-ledger.yml` に記録し、完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `submission-gate`、`make submission-gate`、`manuscript/publication-metadata.toml` の `[submission]`、`[open_research]`、`[human_verification]` を埋めた `make pre-submit` を実行する。
+12. Submission hygiene と投稿メタデータは STRUCTURE_ACCEPTED 後に主作業にする。`manuscript/` は living authoring source で、投稿後や査読後も revision-authoring に戻して編集できる。投稿用の submission candidate / round snapshot は `submission/` と `_paperops/workflow/submission-ledger.yml` に記録し、完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `submission-gate`、`make submission-gate`、ORCID や affiliation を含む `manuscript/publication-metadata.toml` の `[submission]`、`[open_research]`、`[human_verification]` を埋めた `make pre-submit` を実行する。
 
 ## 中間層
 
@@ -72,7 +72,8 @@
 - `/source-reach-scan`, `/research-related-work`: 外部 source と関連研究を整理する。
 - `/map-result-patterns`, `/scientific-gate`: 結果を証拠カードにし、主張として書けるか判定する。
 - `/plan-figure-story`: 本文生成前に claim から visual obligation、Figure 1、主図/補足図、missing figure を設計する。
-- `/finish-manuscript`: `/goal` で原稿完成まで進める薄い route-level 入口。content-first gate、subagent orchestration、feedback routing、section compiler、`draft-predicted-results`、`review-block-flow`、final checks を内部 route として必要時に呼ぶ。
+- `/develop-manuscript-content`: 原稿内容専用の route-level 入口。claims、storyline、figure story、Results hierarchy、Discussion functions、Methods definition、section compiler、`draft-predicted-results`、`review-block-flow`、本文 prose を扱い、ORCID、affiliation、license などの投稿メタデータは扱わない。
+- `/finish-manuscript`: `/goal` で原稿完成まで進める薄い route-level 入口。原稿内容は `/develop-manuscript-content`、投稿候補化は `/submission-gate` へ委譲し、`draft-predicted-results` を含む content route と final checks を監督する。
 - `/submission-gate`: `manuscript/` の authoring source から submission candidate / round snapshot を切り出す前に、予測稿、open AREQ、`xx`、AI intent、submission drift を strict に確認する。
 - `/design-paper-storyline`: 原稿全体の story spine、Results hierarchy、Discussion functions を俯瞰し、Submission hygiene へ逸れる前に本文 blocker を固定する。
 - `/review-public-manuscript`, `/peer-review-manuscript`: 公開原稿や投稿前原稿を読者・査読者目線で読む。

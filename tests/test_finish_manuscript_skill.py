@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class FinishManuscriptSkillTest(unittest.TestCase):
     SPECIALIST_SKILLS = [
+        "develop-manuscript-content",
         "content-first-gate",
         "orchestrate-manuscript-subagents",
         "route-manuscript-feedback",
@@ -63,6 +64,7 @@ class FinishManuscriptSkillTest(unittest.TestCase):
             "Finish criteria",
             "main agent",
             "orchestrator",
+            "develop-manuscript-content",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, skill)
@@ -102,6 +104,19 @@ class FinishManuscriptSkillTest(unittest.TestCase):
                 "finish-manuscript-check",
                 "next_action_reduces_content_blocker",
                 "feedback-paper-harness",
+            ],
+            "develop-manuscript-content": [
+                "manuscript content",
+                "claims",
+                "storyline",
+                "figure story",
+                "Results hierarchy",
+                "Discussion functions",
+                "submission metadata",
+                "ORCID",
+                "affiliation",
+                "license",
+                "submission-gate",
             ],
             "orchestrate-manuscript-subagents": [
                 "_paperops/defaults/workflow/subagent-roster.yml",

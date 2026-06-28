@@ -16,7 +16,7 @@
 - `_paperops/notes/views/` は pure overview view と controlled authoring view を含む。`view_type` と `source_of_truth` を確認し、`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
 - `_paperops/defaults/contracts/` は paperops-managed の標準 section / figure story 契約であり、文章テンプレートではない。論文固有の契約差分だけ `_paperops/contracts/` に同名 overlay として置く。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
 - `_paperops/workflow/` は現在状態、review loop、stale 伝播、人間判断の状態正本である。標準の状態機械、focus policy、subagent roster は `_paperops/defaults/workflow/` にあり、本文編集前に `pops workflow status` を確認する。
-- subagent を使う執筆では通常 `/finish-manuscript` から必要時に `orchestrate-manuscript-subagents` へ委譲し、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
+- subagent を使う執筆では通常 `/develop-manuscript-content` または `/finish-manuscript` から必要時に `orchestrate-manuscript-subagents` へ委譲し、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
 - `_paperops/` の作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名は英語のままでよい。
 - raw PDF、未整理ファイル、個人環境の絶対パス、confidential reviewer correspondence は tracked file へ混ぜない。
 - `_handoff/` は人間から AI への一時受け取り箱であり、内容は Git 管理しない。
@@ -57,17 +57,17 @@ make figure-obligation-check
 3. 必要なら `/map-result-patterns` で raw result や figure data を `_paperops/evidence/` の card にする。
 4. 外部 export bundle を使う場合は `_paperops/refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-6. 原稿を進めるときは `/finish-manuscript` を主入口にする。内部で content-first gate、storyline、section contract、section depth、subagent orchestration、section compiler、予測稿、block-flow review、final check を必要な範囲だけ呼ぶ。
+6. 原稿内容を進めるときは `/develop-manuscript-content` を入口にし、claims、storyline、figure story、section compiler、予測稿、block-flow review、本文 prose を扱う。`/finish-manuscript` は投稿可能状態までの監督入口として使う。
 7. 図表が本文の主張を支える場合は `/plan-figure-story` を入口にし、必要な個別図だけ `design-paper-figure` や `figure-story-audit` へ進める。
-8. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/finish-manuscript` 内の予測稿 route で扱う。本文内には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` を置き、`xx` と `_paperops/requests/analysis/` を実データ置換まで追跡する。
+8. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/develop-manuscript-content` 内の予測稿 route で扱う。本文内には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` を置き、`xx` と `_paperops/requests/analysis/` を実データ置換まで追跡する。
 9. DRAFTED section は block flow を見直してから AUDITED 扱いにする。直接 `review-block-flow` を呼ぶのは、block 構成の再設計が明示された場合に限る。
-10. subagent を使う場合、main agent は orchestrator として role brief と integration decision を `_paperops/review/rounds/` に残す。通常は `/finish-manuscript` から必要時に委譲する。
+10. subagent を使う場合、main agent は orchestrator として role brief と integration decision を `_paperops/review/rounds/` に残す。通常は `/develop-manuscript-content` または `/finish-manuscript` から必要時に委譲する。
 11. AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose に書かず、近傍の `% INTENT:` または `% TODO-PAPER:` コメントに置く。解決できない場合は `_paperops/notes/` または `_paperops/requests/` へ移す。公開本文として意図的に扱う場合だけ、直前に `% paperops: allow-authoring-intent -- reason` を置く。
 12. 強い英語名詞句や hyphen / slash compound は `_paperops/notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
 13. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
 14. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
 15. 人間レビューやプロンプト指示は `/integrate-writing-feedback` で上流カードと原稿へ反映し、必要なら `route-manuscript-feedback`、`pops workflow route-review`、`pops workflow invalidate <artifact-id>` で戻る深さと stale section を更新する。
-16. Submission hygiene は STRUCTURE_ACCEPTED 後にだけ主作業にする。完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `/submission-gate`、`make submission-gate`、`make pre-submit` を実行する。投稿後や査読後の修正は `manuscript/` の revision-authoring に戻し、提出済み round snapshot は編集しない。
+16. Submission hygiene と投稿メタデータは STRUCTURE_ACCEPTED 後にだけ主作業にする。ORCID、affiliation、license などの記入は `/develop-manuscript-content` では扱わず、投稿前に `/submission-gate` と `make submission-gate`、`make pre-submit` で確認する。完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit` を実行する。投稿後や査読後の修正は `manuscript/` の revision-authoring に戻し、提出済み round snapshot は編集しない。
 
 ## スキル入口
 
@@ -79,7 +79,7 @@ make figure-obligation-check
 - 原稿調整: `/paragraph-surgery`, `/public-terminology-pass`, `/sync-ja-en`
 - 通読レビュー: `/start-manuscript-review`, `/collect-manuscript-review`, `/integrate-writing-feedback`
 - 査読: `/review-public-manuscript`, `/peer-review-manuscript`, `/respond-to-peer-review`
-- 原稿完成の主入口: `/finish-manuscript`, `/route-manuscript-feedback`, `/submission-gate`
+- 原稿完成の主入口: `/develop-manuscript-content`, `/finish-manuscript`, `/route-manuscript-feedback`, `/submission-gate`
 - 原稿完成の内部 route（通常は `/finish-manuscript` から呼ばせる）: `content-first-gate`, `orchestrate-manuscript-subagents`, `compile-results-section`, `compile-discussion-section`, `compile-methods-section`, `draft-predicted-results`, `review-block-flow`, `finalize-manuscript`
 - 投稿前点検: `/plan-figure-story`, `/venue-fit-review`, `/ai-disclosure-check`, `/submission-gate`。個別図と監査は `plan-figure-story` から `design-paper-figure` / `figure-story-audit` へ進める。
 - アーカイブ・書き直し: `/archive-scratch`
