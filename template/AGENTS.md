@@ -48,7 +48,7 @@ make figure-reference-check
 make figure-obligation-check
 ```
 
-`make ci` は構造と壊れやすい不整合の確認、`make audit` は執筆品質の advisory check、`make pre-submit` は投稿・外部共有前の厳しめ確認に使う。`manuscript/` は living authoring source であり、投稿後や査読後も編集してよい。投稿用の submission candidate / round snapshot は `submission/` と `_paperops/workflow/submission-ledger.yml` に記録し、`make submission-gate` で予測稿、open AREQ、`xx`、AI intent を strict に落とす。`authoring-intent-check` は、AI Writer が執筆意図、後で埋める内容、作業計画を公開本文へ漏らしていないか確認する。TeX 環境がない場合、ビルド系 helper は構造検証へフォールバックする。
+`make ci` は構造と壊れやすい不整合の確認、`make audit` は執筆品質の advisory check、`make pre-submit` は投稿・外部共有前の厳しめ確認に使う。`manuscript/` は living authoring source であり、投稿後や査読後も編集してよい。投稿用の submission candidate / round snapshot は `submission/` と `_paperops/workflow/submission-ledger.yml` に記録し、`make finish-manuscript-check` で claim-evidence drift を、`make submission-gate` で予測稿、open AREQ、`xx`、AI intent、submission drift を strict に落とす。`authoring-intent-check` は、AI Writer が執筆意図、後で埋める内容、作業計画を公開本文へ漏らしていないか確認する。TeX 環境がない場合、ビルド系 helper は構造検証へフォールバックする。
 
 ## 執筆フロー
 

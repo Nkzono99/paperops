@@ -70,6 +70,7 @@ finish-manuscript-check: storyline-check section-contract-check public-terms-che
 	$(PYTHON) scripts/check-section-contracts.py --root . --strict
 	$(PYTHON) scripts/check-section-depth.py --root . --strict
 	$(PYTHON) scripts/check-predicted-results.py --root . --scope all --strict
+	$(PYTHON) scripts/check-claim-evidence.py --root . --strict
 	$(PYTHON) scripts/check-content-first.py --root . --phase finish --intent content --strict
 
 submission-gate: public-terms-check authoring-intent-check predicted-results-check research-request-handoff-check submission-drift-check
@@ -77,7 +78,7 @@ submission-gate: public-terms-check authoring-intent-check predicted-results-che
 	$(PYTHON) scripts/check-public-terms.py --root . --strict
 	$(PYTHON) scripts/check-authoring-intent.py --root . --strict
 	$(PYTHON) scripts/check-research-request-handoff.py --root . --strict
-	$(PYTHON) scripts/check-submission-drift.py --root .
+	$(PYTHON) scripts/check-submission-drift.py --root . --strict
 
 figure-reference-check:
 	$(PYTHON) scripts/check-figure-references.py --root .
@@ -139,7 +140,7 @@ pre-submit: ci audit finish-manuscript-check lint-bib-pre-submit mirror-strict-c
 	$(PYTHON) scripts/check-research-request-handoff.py --root . --strict
 	$(PYTHON) scripts/check-external-imports.py --root . --strict
 	$(PYTHON) scripts/readiness-check.py --root . --require-submission
-	$(PYTHON) scripts/check-submission-drift.py --root .
+	$(PYTHON) scripts/check-submission-drift.py --root . --strict
 
 -include Makefile.project
 -include Makefile.local

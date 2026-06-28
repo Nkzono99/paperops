@@ -24,6 +24,7 @@ def find_submission_mains(root: Path) -> list[Path]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="submission/<venue>/main.tex と manuscript/en の同期注意点を確認する。")
     parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--strict", action="store_true", help="投稿前 gate として submission drift を error にする。")
     args = parser.parse_args()
 
     root = args.root.resolve()
@@ -53,13 +54,13 @@ def main() -> int:
             warnings.append(f"`{rel_path}` には manuscript/en にない block があります: {', '.join(extra)}")
 
     if warnings:
-        print("## Warnings")
+        print("## Errors" if args.strict else "## Warnings")
         for warning in warnings:
             print(f"- {warning}")
         print("")
     else:
         print("submission と manuscript/en の block ID は対応しています。")
-    return 0
+    return 1 if warnings and args.strict else 0
 
 
 if __name__ == "__main__":

@@ -343,8 +343,8 @@ project-owned extension point:
 - `make audit`: argument focus、concept term、content-first、section contract、figure reference、figure obligation、claim evidence、card coverage、external import、research request handoff
 - `make card-coverage-check`: 原稿中の図、citation、block ID が card 層に接続されているかを advisory に確認する
 - `make predicted-results-check`: authoring source に残る `PREDICTED-RESULT`、`xx`、open AREQ を advisory に確認する
-- `make finish-manuscript-check`: 原稿完成 goal を閉じる前の content-first gate。strict public terms、section contract、section-depth、predicted results strict も含む
-- `make submission-gate`: submission candidate / round snapshot に予測稿、open AREQ、AI intent、submission drift が残らないか確認する
+- `make finish-manuscript-check`: 原稿完成 goal を閉じる前の content-first gate。strict public terms、section contract、section-depth、predicted results strict、claim-evidence strict も含む
+- `make submission-gate`: submission candidate / round snapshot に予測稿、open AREQ、AI intent、submission drift が残らないか strict に確認する
 - `make pre-submit`: 投稿前 profile。`submission-gate` を含む
 - `make smoke`: テンプレート管理 repo から `template/` を検証する smoke
 

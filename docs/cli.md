@@ -23,8 +23,9 @@ uvx --from paper-harness-cli pops doctor
 - `make section-contract-check`: `_paperops/notes/views/storyline.md` の Results hierarchy、Discussion functions、Methods definition registry が、読者質問・baseline rationale・判定基準定義を持つか advisory に確認する。
 - `make section-depth-check`: Results / Discussion が `manuscript/writing-profile.yml` の `section_depth` floor を大きく下回っていないか advisory に確認する。JA は `ja_chars`、EN は `en_words` として数える。
 - `make card-coverage-check`: 原稿中の図、citation、block ID が card 層へ接続されているかを advisory に確認する。投稿前やレビュー前に厳しく見る場合は `python scripts/check-card-coverage.py --root . --strict` を使う。
-- `make finish-manuscript-check`: STRUCTURE_ACCEPTED 前に `/goal` を完了扱いしないための content-first finish gate。`make pre-submit` とは別に、原稿本文 blocker、AI authoring intent leak、strict public terms、section-contract、Results / Discussion の section-depth blocker が閉じているかを確認する。
-- `make pre-submit`: `ci` と `audit`、`finish-manuscript-check` に加え、concept term、figure reference、figure obligation、research request handoff、external import、readiness を投稿前 profile として厳しめに確認する。
+- `make finish-manuscript-check`: STRUCTURE_ACCEPTED 前に `/goal` を完了扱いしないための content-first finish gate。`make pre-submit` とは別に、原稿本文 blocker、AI authoring intent leak、strict public terms、section-contract、Results / Discussion の section-depth blocker、claim-evidence drift が閉じているかを確認する。
+- `make submission-gate`: submission candidate / round snapshot に予測稿、open AREQ、AI authoring intent、submission drift が残っていないか strict に確認する。
+- `make pre-submit`: `ci` と `audit`、`finish-manuscript-check`、`submission-gate` に加え、concept term、figure reference、figure obligation、research request handoff、external import、readiness を投稿前 profile として厳しめに確認する。
 
 ## コマンド一覧
 

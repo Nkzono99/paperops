@@ -102,11 +102,15 @@ def read_public_edge_text(root: Path) -> str:
     return "\n".join(chunks)
 
 
-def check_claims(root: Path, text: str, rel_path: str) -> list[Finding]:
+def warning_severity(strict: bool) -> str:
+    return "error" if strict else "warning"
+
+
+def check_claims(root: Path, text: str, rel_path: str, *, strict: bool = False) -> list[Finding]:
     findings: list[Finding] = []
     rows = extract_claim_rows(text)
     if not rows:
-        return [Finding("warning", f"`{rel_path}` に主張台帳が見つかりません")]
+        return [Finding(warning_severity(strict), f"`{rel_path}` に主張台帳が見つかりません")]
 
     for row in rows:
         claim_id = row.get("claim_id", "unknown")
@@ -116,21 +120,37 @@ def check_claims(root: Path, text: str, rel_path: str) -> list[Finding]:
                 if is_blank(row.get(key)):
                     findings.append(Finding("error", f"`{claim_id}` は supported ですが `{key}` が未記入です"))
         if status == "overclaim risk" and is_blank(row.get("limitation")):
-            findings.append(Finding("warning", f"`{claim_id}` は overclaim risk ですが limitation が未記入です"))
+            findings.append(
+                Finding(
+                    warning_severity(strict),
+                    f"`{claim_id}` は overclaim risk ですが limitation が未記入です",
+                )
+            )
 
     public_edge_text = read_public_edge_text(root)
     for item in extract_not_claiming_items(text):
         if item in public_edge_text:
-            findings.append(Finding("warning", f"`主張しないこと` の `{item}` が Abstract/Conclusion に出現しています"))
+            findings.append(
+                Finding(
+                    warning_severity(strict),
+                    f"`主張しないこと` の `{item}` が Abstract/Conclusion に出現しています",
+                )
+            )
 
     if all(row.get("status", "").strip().lower() == "draft" for row in rows):
-        findings.append(Finding("warning", "主張台帳は draft のみです。投稿前には supported / overclaim risk / defer を整理してください"))
+        findings.append(
+            Finding(
+                warning_severity(strict),
+                "主張台帳は draft のみです。投稿前には supported / overclaim risk / defer を整理してください",
+            )
+        )
     return findings
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="claim-evidence map の supported claim に証拠と本文対応があるか確認する。")
     parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--strict", action="store_true", help="投稿前 gate として警告級の claim drift も error にする。")
     args = parser.parse_args()
 
     root = args.root.resolve()
@@ -141,7 +161,7 @@ def main() -> int:
         return 1
     rel_path, path = resolved
 
-    findings = check_claims(root, read_text(path), rel_path)
+    findings = check_claims(root, read_text(path), rel_path, strict=args.strict)
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]
 
