@@ -4,28 +4,23 @@
 from __future__ import annotations
 
 import argparse
-import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from paperops_checks import Finding, emit_findings, frontmatter, read_text, warning_severity
+from paperops_checks import (
+    Finding,
+    emit_findings,
+    field_values,
+    frontmatter,
+    meaningful_value,
+    nested_scalar,
+    read_text,
+    scalar_value,
+    warning_severity,
+)
 from paperops_paths import display_path, internal_path
 
 
-PLACEHOLDER_VALUES = {
-    "",
-    "[]",
-    "{}",
-    '""',
-    "''",
-    "unchecked",
-    "未記入",
-    "todo",
-    "tbd",
-    "none",
-    "null",
-    "n/a",
-}
 SKIP_ROLES = {"notes-only", "removed", "discarded"}
 SKIP_STATUSES = {"removed", "discarded"}
 DESIGN_REVIEW_FIELDS = (
@@ -57,70 +52,8 @@ class FigureCard:
     manuscript_role: str
 
 
-def field_block(front: str, key: str) -> str:
-    lines = front.splitlines()
-    collected: list[str] = []
-    in_block = False
-    for line in lines:
-        if re.match(rf"^{re.escape(key)}:\s*", line):
-            in_block = True
-            collected.append(line)
-            continue
-        if in_block:
-            if line and not line.startswith((" ", "\t", "-")):
-                break
-            collected.append(line)
-    return "\n".join(collected)
-
-
-def scalar_value(front: str, key: str) -> str:
-    pattern = re.compile(rf"^{re.escape(key)}:\s*(.*)$", re.MULTILINE)
-    match = pattern.search(front)
-    if not match:
-        return ""
-    return clean_value(match.group(1))
-
-
-def nested_scalar(front: str, parent: str, key: str) -> str:
-    block = field_block(front, parent)
-    pattern = re.compile(rf"^\s+{re.escape(key)}:\s*(.*)$", re.MULTILINE)
-    match = pattern.search(block)
-    if not match:
-        return ""
-    return clean_value(match.group(1))
-
-
-def clean_value(value: str) -> str:
-    return value.strip().strip('"').strip("'")
-
-
 def meaningful(value: str) -> bool:
-    return clean_value(value).strip().lower() not in PLACEHOLDER_VALUES
-
-
-def field_values(front: str, key: str) -> list[str]:
-    block = field_block(front, key)
-    if not block:
-        return []
-    first = block.splitlines()[0]
-    inline = clean_value(first.split(":", 1)[1])
-    if inline.startswith("[") and inline.endswith("]"):
-        return [
-            clean_value(item)
-            for item in inline[1:-1].split(",")
-            if meaningful(item)
-        ]
-    if meaningful(inline):
-        return [inline]
-    values: list[str] = []
-    for line in block.splitlines()[1:]:
-        stripped = line.strip()
-        if not stripped.startswith("-"):
-            continue
-        item = clean_value(stripped[1:])
-        if meaningful(item):
-            values.append(item)
-    return values
+    return meaningful_value(value)
 
 
 def figure_cards(root: Path) -> list[FigureCard]:

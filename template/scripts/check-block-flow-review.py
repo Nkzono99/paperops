@@ -4,13 +4,21 @@
 from __future__ import annotations
 
 import argparse
-import json
 import re
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
-from paperops_checks import Finding, emit_findings, frontmatter, read_text, warning_severity
+from paperops_checks import (
+    Finding,
+    clean_value,
+    emit_findings,
+    frontmatter,
+    load_mapping,
+    meaningful_value,
+    parse_markdown_tables,
+    read_text,
+    scalar_value,
+    warning_severity,
+)
 from paperops_paths import display_path, internal_path
 
 
@@ -35,40 +43,10 @@ REQUIRED_NON_PLACEHOLDER = {
     "operation",
 }
 ALLOWED_OPERATIONS = {"keep", "move", "split", "merge", "delete", "add"}
-PLACEHOLDERS = {
-    "",
-    "[]",
-    "{}",
-    '""',
-    "''",
-    "unchecked",
-    "未記入",
-    "todo",
-    "tbd",
-    "none",
-    "null",
-    "n/a",
+EXTRA_PLACEHOLDERS = {
     "keep / move / split / merge / delete / add",
 }
 BLOCK_RE = re.compile(r"%\s*block:\s*([A-Za-z0-9_.:-]+)")
-
-
-@dataclass(frozen=True)
-class ReviewTable:
-    path: Path
-    headers: list[str]
-    rows: list[dict[str, str]]
-
-
-def load_mapping(path: Path) -> dict[str, Any]:
-    text = read_text(path)
-    try:
-        import yaml  # type: ignore[import-not-found]
-
-        data = yaml.safe_load(text)
-    except Exception:
-        data = json.loads(text)
-    return data if isinstance(data, dict) else {}
 
 
 def section_states(root: Path) -> dict[str, str]:
@@ -99,20 +77,8 @@ def manuscript_blocks(root: Path, section: str) -> set[str]:
     return blocks
 
 
-def clean(value: str) -> str:
-    return value.strip().strip("`").strip().strip('"').strip("'")
-
-
 def meaningful(value: str) -> bool:
-    return clean(value).lower() not in PLACEHOLDERS
-
-
-def scalar_value(front: str, key: str) -> str:
-    pattern = re.compile(rf"^{re.escape(key)}:\s*(.*)$", re.MULTILINE)
-    match = pattern.search(front)
-    if not match:
-        return ""
-    return clean(match.group(1))
+    return meaningful_value(value, placeholders=EXTRA_PLACEHOLDERS, strip_code=True)
 
 
 def review_files(root: Path, section: str) -> list[Path]:
@@ -129,37 +95,10 @@ def review_files(root: Path, section: str) -> list[Path]:
     return files
 
 
-def parse_tables(path: Path) -> list[ReviewTable]:
-    lines = read_text(path).splitlines()
-    tables: list[ReviewTable] = []
-    index = 0
-    while index < len(lines):
-        line = lines[index].strip()
-        if not line.startswith("|") or "block_id" not in line:
-            index += 1
-            continue
-        headers = [clean(cell) for cell in line.strip("|").split("|")]
-        if "block_id" not in headers:
-            index += 1
-            continue
-        index += 1
-        if index < len(lines) and set(lines[index].strip().replace("|", "").replace(" ", "")) <= {"-", ":"}:
-            index += 1
-        rows: list[dict[str, str]] = []
-        while index < len(lines) and lines[index].strip().startswith("|"):
-            cells = [clean(cell) for cell in lines[index].strip().strip("|").split("|")]
-            if len(cells) < len(headers):
-                cells.extend([""] * (len(headers) - len(cells)))
-            rows.append(dict(zip(headers, cells)))
-            index += 1
-        tables.append(ReviewTable(path=path, headers=headers, rows=rows))
-    return tables
-
-
 def review_rows(root: Path, section: str, findings: list[Finding], severity: str) -> dict[str, dict[str, str]]:
     rows_by_block: dict[str, dict[str, str]] = {}
     for path in review_files(root, section):
-        tables = parse_tables(path)
+        tables = parse_markdown_tables(read_text(path), required_header="block_id", source=path)
         if not tables:
             findings.append(
                 Finding(
@@ -174,7 +113,7 @@ def review_rows(root: Path, section: str, findings: list[Finding], severity: str
                 findings.append(
                     Finding(
                         severity,
-                        f"`{display_path(root, table.path)}` の block operation table に列がありません: "
+                        f"`{display_path(root, table.source or path)}` の block operation table に列がありません: "
                         + ", ".join(sorted(missing_columns)),
                     )
                 )
@@ -184,12 +123,12 @@ def review_rows(root: Path, section: str, findings: list[Finding], severity: str
                 if not meaningful(block_id):
                     continue
                 rows_by_block[block_id] = row
-                operation = clean(row.get("operation", "")).lower()
+                operation = clean_value(row.get("operation", ""), strip_code=True).lower()
                 if operation and operation not in ALLOWED_OPERATIONS:
                     findings.append(
                         Finding(
                             severity,
-                            f"`{display_path(root, table.path)}` の `{block_id}` operation `{operation}` は未知です。",
+                            f"`{display_path(root, table.source or path)}` の `{block_id}` operation `{operation}` は未知です。",
                         )
                     )
     return rows_by_block
