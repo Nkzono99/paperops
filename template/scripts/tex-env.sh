@@ -12,17 +12,7 @@ if [[ ! -f "$_TEX_ENV_TOML" ]]; then
 fi
 
 # Python を特定（ビルドスクリプトと同じ優先順）
-if [[ -x "$_TEX_ENV_ROOT/.venv/bin/python" ]]; then
-  _TEX_ENV_PYTHON="$_TEX_ENV_ROOT/.venv/bin/python"
-elif [[ -x "$_TEX_ENV_ROOT/.venv/Scripts/python.exe" ]]; then
-  _TEX_ENV_PYTHON="$_TEX_ENV_ROOT/.venv/Scripts/python.exe"
-elif command -v python3.11 >/dev/null 2>&1; then
-  _TEX_ENV_PYTHON="python3.11"
-elif command -v python3 >/dev/null 2>&1; then
-  _TEX_ENV_PYTHON="python3"
-else
-  _TEX_ENV_PYTHON="python"
-fi
+_TEX_ENV_PYTHON="$(bash "$_TEX_ENV_ROOT/scripts/resolve-python.sh" "$_TEX_ENV_ROOT")"
 
 # TOML を解析し、shell eval なしで値を取り込む
 _tex_env_vars=$("$_TEX_ENV_PYTHON" - "$_TEX_ENV_TOML" <<'PY'

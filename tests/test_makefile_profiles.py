@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
+import tempfile
 import unittest
+from pathlib import Path
 
 from tests.helpers import ROOT, make_var_tokens
 
@@ -10,11 +15,58 @@ class MakefileProfileTest(unittest.TestCase):
         for path in [ROOT / "Makefile", ROOT / "template" / "Makefile"]:
             makefile = path.read_text(encoding="utf-8")
             with self.subTest(path=path):
-                self.assertIn("PYTHON_FALLBACK = $(shell command -v python3.11", makefile)
-                self.assertIn("command -v python3", makefile)
-                self.assertIn("command -v python", makefile)
+                self.assertIn("resolve-python.sh", makefile)
                 self.assertIn("PYTHON_BOOTSTRAP ?= $(PYTHON_FALLBACK)", makefile)
                 self.assertIn("$(PYTHON_FALLBACK)", makefile)
+                self.assertNotIn("command -v python3 2>/dev/null || command -v python", makefile)
+
+    def test_python_resolver_requires_python311_or_newer(self) -> None:
+        resolver = ROOT / "template" / "scripts" / "resolve-python.sh"
+        bash = shutil.which("bash")
+        self.assertIsNotNone(bash)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            fake_bin = Path(tmp) / "bin"
+            fake_bin.mkdir()
+            self.write_fake_python(fake_bin / "python3", exit_code=1)
+            self.write_fake_python(fake_bin / "python", exit_code=1)
+            env = os.environ.copy()
+            env["PATH"] = str(fake_bin)
+
+            failed = subprocess.run(
+                [str(bash), str(resolver), tmp],
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                env=env,
+            )
+
+            self.write_fake_python(fake_bin / "python3.11", exit_code=0)
+            passed = subprocess.run(
+                [str(bash), str(resolver), tmp],
+                check=False,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                env=env,
+            )
+
+        self.assertEqual(failed.returncode, 1)
+        self.assertIn("requires Python 3.11 or newer", failed.stderr)
+        self.assertEqual(passed.returncode, 0, passed.stderr)
+        self.assertTrue(passed.stdout.strip().endswith("python3.11"))
+
+    @staticmethod
+    def write_fake_python(path: Path, *, exit_code: int) -> None:
+        path.write_text(
+            "#!/bin/sh\n"
+            f"exit {exit_code}\n",
+            encoding="utf-8",
+        )
+        path.chmod(0o755)
 
     def test_root_smoke_uses_named_check_profile(self) -> None:
         makefile = (ROOT / "Makefile").read_text(encoding="utf-8")

@@ -11,17 +11,7 @@ LANG_DIR="$ROOT/manuscript/ja"
 BUILD_DIR="$ROOT/manuscript/shared/build/ja"
 MAIN_TEX="$LANG_DIR/main.tex"
 
-if [[ -x "$ROOT/.venv/bin/python" ]]; then
-  PYTHON="$ROOT/.venv/bin/python"
-elif [[ -x "$ROOT/.venv/Scripts/python.exe" ]]; then
-  PYTHON="$ROOT/.venv/Scripts/python.exe"
-elif command -v python3.11 >/dev/null 2>&1; then
-  PYTHON="python3.11"
-elif command -v python3 >/dev/null 2>&1; then
-  PYTHON="python3"
-else
-  PYTHON="python"
-fi
+PYTHON="$(bash "$ROOT/scripts/resolve-python.sh" "$ROOT")"
 
 mkdir -p "$BUILD_DIR"
 

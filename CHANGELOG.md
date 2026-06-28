@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Makefile と TeX build helper の Python 解決を `scripts/resolve-python.sh` に集約し、Python 3.11 未満の `python3` / `python` / `.venv` を候補から外すようにした。Python 3.11 以上が見つからない場合は明示エラーにし、`tomllib` 前提の checker が古い Python で途中失敗する状況を避ける。
 - `.claude/skills/*` wrapper の `description` を `.agents/skills/*` source と一致させ、`check-skill-mirror.py` が `name` / `description` drift と concrete な `.claude/skills/<name>/...` helper 逆依存を検出するようにした。`sync-ja-en` の helper は `.agents/skills/sync-ja-en/` 側へ移し、review ledger の標準出力先も `_paperops/notes/reviews/` に統一した。
 - `docs/current-specification.md` の source-of-truth 索引から存在しない `docs/release.md` 参照と詳細仕様節を外し、release 正本を `docs/distribution.md` / `CHANGELOG.md` / `release` skill に整理した。root guidance の `make smoke` 方針、下流 README の `pops setup` 導線、migration planned item、legacy managed update 説明も現行挙動に合わせた。
 - `docs/current-specification.md` を詳細仕様本文から source-of-truth 索引へ縮約し、architecture / CLI / migration / skill docs との正本競合を減らした。BibTeX の標準配置も `manuscript/shared/bib/` を正道、`_paperops/refs/bib/{curated,imported}` を外部/import 用、legacy `refs/bib/` を互換扱いとして整理した。

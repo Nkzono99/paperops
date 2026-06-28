@@ -6,17 +6,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 _TEX_ENV_ROOT="$ROOT" source "$ROOT/scripts/tex-env.sh"
 
-if [[ -x "$ROOT/.venv/bin/python" ]]; then
-  PYTHON="$ROOT/.venv/bin/python"
-elif [[ -x "$ROOT/.venv/Scripts/python.exe" ]]; then
-  PYTHON="$ROOT/.venv/Scripts/python.exe"
-elif command -v python3.11 >/dev/null 2>&1; then
-  PYTHON="python3.11"
-elif command -v python3 >/dev/null 2>&1; then
-  PYTHON="python3"
-else
-  PYTHON="python"
-fi
+PYTHON="$(bash "$ROOT/scripts/resolve-python.sh" "$ROOT")"
 
 VENUE="${1:-${PAPEROPS_SUBMISSION_VENUE:-}}"
 if [[ -z "$VENUE" ]]; then
