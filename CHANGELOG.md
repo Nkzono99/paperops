@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `scaffold-package-boundary-check` が canary artifact を root `template/` に直接書かず、一時 scaffold copy を wheel build hook に渡して検証するようにした。`_paperops/` 側の generated source-reach / session-context canary も追加し、現行 layout の除外漏れを確認できるようにした。
 - template checker scripts の link registry / local locations 読み込みを `scripts/paperops_links.py` に集約した。既存下流で `check-links.py`、`check-external-imports.py`、`check-research-request-handoff.py` を更新する場合は、同時に `scripts/paperops_links.py` も取り込む必要がある。
 - `research-request-handoff-check` と `external-import-check` の default を静的検証にし、linked runops queue、外部 export CSV、外部 repo の `git status` を読む live drift 確認は `--live` / `*-live-check` target で明示実行するようにした。`make audit` / `make pre-submit` が login node や大きな外部 repo を暗黙に読みに行く状況を避ける。
 - `pops workflow` と `check-workflow-state.py` が通常 YAML の workflow overlay を読む前提を package metadata でも満たすよう、`PyYAML>=6.0` を依存に追加した。`.yml` を JSON 互換だけに制限するのではなく、下流の自然な YAML 編集をサポートする。

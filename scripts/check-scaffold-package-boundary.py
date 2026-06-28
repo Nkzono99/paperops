@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import fnmatch
+import os
 import shutil
 import subprocess
 import sys
@@ -22,6 +23,7 @@ from paperops.cli.constants import (  # noqa: E402
 
 PACKAGE_SCAFFOLD_PREFIX = "paperops/_data/scaffold/"
 CANARY_RELS = (
+    "_paperops/notes/session-context.generated.md",
     "notes/session-context.generated.md",
     "_handoff/secret.txt",
     ".harness/state.json",
@@ -29,6 +31,9 @@ CANARY_RELS = (
     "harness-feedback/records/feedback.md",
     "harness-lab/records/lab.md",
     "_archives/old/manuscript/main.tex",
+    "_paperops/refs/source-reach/canary/raw/cookie.txt",
+    "_paperops/refs/source-reach/canary/doctor.generated.json",
+    "_paperops/refs/source-reach/canary/capture.generated.json",
     "refs/source-reach/canary/raw/cookie.txt",
     "refs/source-reach/canary/doctor.generated.json",
     "refs/source-reach/canary/capture.generated.json",
@@ -59,32 +64,13 @@ def main() -> int:
     init_dir = tmp_root / "init" / "paper-demo"
 
     template_root = ROOT / "template"
-    canaries = [template_root / rel for rel in CANARY_RELS]
-    previous = {path: path.read_bytes() for path in canaries if path.exists()}
-    created_dirs: set[Path] = set()
+    canary_source = create_canary_scaffold_source(template_root, tmp_root / "canary-source")
     try:
-        for canary in canaries:
-            created_dirs.update(missing_parents(canary.parent, template_root))
-            canary.parent.mkdir(parents=True, exist_ok=True)
-            canary.write_text(
-                "generated canary for scaffold package boundary check\n",
-                encoding="utf-8",
-            )
-        wheel = build_wheel(dist_dir)
+        wheel = build_wheel(dist_dir, scaffold_source=canary_source)
         check_wheel_contents(wheel)
         run_from_wheel(wheel, init_dir)
         check_init_contents(init_dir)
     finally:
-        for canary in canaries:
-            if canary in previous:
-                canary.write_bytes(previous[canary])
-            else:
-                canary.unlink(missing_ok=True)
-        for directory in sorted(created_dirs, key=lambda path: len(path.parts), reverse=True):
-            try:
-                directory.rmdir()
-            except OSError:
-                pass
         if args.out_dir is None:
             shutil.rmtree(tmp_root, ignore_errors=True)
 
@@ -92,7 +78,21 @@ def main() -> int:
     return 0
 
 
-def build_wheel(dist_dir: Path) -> Path:
+def create_canary_scaffold_source(source: Path, target: Path) -> Path:
+    if target.exists():
+        shutil.rmtree(target)
+    shutil.copytree(source, target)
+    for rel in CANARY_RELS:
+        canary = target / rel
+        canary.parent.mkdir(parents=True, exist_ok=True)
+        canary.write_text(
+            "generated canary for scaffold package boundary check\n",
+            encoding="utf-8",
+        )
+    return target
+
+
+def build_wheel(dist_dir: Path, *, scaffold_source: Path | None = None) -> Path:
     dist_dir.mkdir(parents=True, exist_ok=True)
     uv = shutil.which("uv")
     if uv:
@@ -106,7 +106,8 @@ def build_wheel(dist_dir: Path) -> Path:
             "--outdir",
             str(dist_dir),
         ]
-    run(command, cwd=ROOT)
+    env = {"PAPEROPS_SCAFFOLD_SOURCE": str(scaffold_source)} if scaffold_source else None
+    run(command, cwd=ROOT, env=env)
 
     wheels = sorted(dist_dir.glob("*.whl"))
     if len(wheels) != 1:
@@ -183,20 +184,15 @@ def normalize_rel(path: Path) -> str:
     return path.as_posix()
 
 
-def missing_parents(path: Path, stop: Path) -> list[Path]:
-    parents: list[Path] = []
-    current = path
-    while current != stop and current != current.parent:
-        if not current.exists():
-            parents.append(current)
-        current = current.parent
-    return parents
-
-
-def run(command: Iterable[str], *, cwd: Path) -> None:
+def run(command: Iterable[str], *, cwd: Path, env: dict[str, str] | None = None) -> None:
+    run_env = None
+    if env:
+        run_env = os.environ.copy()
+        run_env.update(env)
     result = subprocess.run(
         list(command),
         cwd=cwd,
+        env=run_env,
         text=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import fnmatch
+import os
 import shutil
 import sys
 import tempfile
@@ -24,7 +25,10 @@ class CustomBuildHook(BuildHookInterface):
             return
 
         filtered = Path(tempfile.mkdtemp(prefix="paperops-scaffold-"))
-        copy_filtered_scaffold(Path(self.root) / "template", filtered)
+        scaffold_source = Path(
+            os.environ.get("PAPEROPS_SCAFFOLD_SOURCE", Path(self.root) / "template")
+        )
+        copy_filtered_scaffold(scaffold_source, filtered)
         self.config["filtered_scaffold"] = str(filtered)
         build_data["force_include"][str(filtered)] = "paperops/_data/scaffold"
 
