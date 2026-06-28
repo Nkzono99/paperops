@@ -15,6 +15,42 @@ def skill_names(root: Path, rel_dir: str) -> set[str]:
     }
 
 
+def frontmatter_fields(path: Path) -> tuple[dict[str, str], str | None]:
+    text = path.read_text(encoding="utf-8")
+    if not text.startswith("---"):
+        return {}, "frontmatter がありません"
+    parts = text.split("---", 2)
+    if len(parts) < 3:
+        return {}, "frontmatter が閉じていません"
+    fields: dict[str, str] = {}
+    for line in parts[1].splitlines():
+        if not line or line.startswith(" ") or ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        fields[key.strip()] = value.strip().strip('"')
+    return fields, None
+
+
+def validate_skill_frontmatter(root: Path, rel_dir: str, names: set[str]) -> tuple[list[str], list[str]]:
+    errors: list[str] = []
+    warnings: list[str] = []
+    for name in sorted(names):
+        skill_path = root / rel_dir / name / "SKILL.md"
+        rel_path = skill_path.relative_to(root)
+        fields, parse_error = frontmatter_fields(skill_path)
+        if parse_error is not None:
+            errors.append(f"`{rel_path}` の {parse_error}")
+            continue
+        actual_name = fields.get("name", "")
+        if actual_name != name:
+            errors.append(
+                f"`{rel_path}` の frontmatter name `{actual_name}` が directory name `{name}` と一致しません"
+            )
+        if not fields.get("description"):
+            warnings.append(f"`{rel_path}` の frontmatter description が未記入です")
+    return errors, warnings
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=".claude/skills が .agents/skills の Claude Code 互換入口として揃っているか検査する。"
@@ -36,6 +72,14 @@ def main() -> int:
         errors.append(f"`.claude/skills/{name}/SKILL.md` がありません")
     for name in extra_claude:
         warnings.append(f"`.claude/skills/{name}/SKILL.md` は `.agents/skills/` に対応 skill がありません")
+
+    for rel_dir, names in [
+        (".agents/skills", agent_skills),
+        (".claude/skills", claude_skills),
+    ]:
+        frontmatter_errors, frontmatter_warnings = validate_skill_frontmatter(root, rel_dir, names)
+        errors.extend(frontmatter_errors)
+        warnings.extend(frontmatter_warnings)
 
     for name in sorted(claude_skills & agent_skills):
         skill_path = root / ".claude" / "skills" / name / "SKILL.md"

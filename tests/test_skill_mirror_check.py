@@ -40,6 +40,29 @@ class SkillMirrorCheckTest(unittest.TestCase):
         self.assertEqual(failed.returncode, 1)
         self.assertIn("cwd 依存の参照", failed.stdout)
 
+    def test_claude_wrapper_frontmatter_name_must_match_skill_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+
+            script = target / "scripts" / "check-skill-mirror.py"
+            skill_path = target / ".claude" / "skills" / "sync-ja-en" / "SKILL.md"
+            skill_path.write_text(
+                skill_path.read_text(encoding="utf-8").replace(
+                    "name: sync-ja-en",
+                    "name: sync-ja-en-old",
+                    1,
+                ),
+                encoding="utf-8",
+            )
+
+            failed = run_python_script(script, "--root", target)
+
+        self.assertEqual(failed.returncode, 1)
+        self.assertIn("frontmatter name", failed.stdout)
+        self.assertIn(".claude/skills/sync-ja-en/SKILL.md", failed.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
