@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.helpers import ROOT, copy_template, run_python_script
+from tests.helpers import ROOT, copy_template, make_var_tokens, run_python_script
 
 
 SCRIPT = ROOT / "template" / "scripts" / "check-predicted-results.py"
@@ -139,13 +139,17 @@ class PredictedResultsCheckTest(unittest.TestCase):
 
     def test_makefile_exposes_authoring_and_submission_prediction_gates(self) -> None:
         makefile = (ROOT / "template" / "Makefile").read_text(encoding="utf-8")
+        audit_checks = make_var_tokens(makefile, "AUDIT_CHECKS")
+        submission_gate_checks = make_var_tokens(makefile, "SUBMISSION_GATE_CHECKS")
+        pre_submit_checks = make_var_tokens(makefile, "PRE_SUBMIT_CHECKS")
 
         self.assertIn("predicted-results-check:", makefile)
-        self.assertIn("submission-gate:", makefile)
+        self.assertIn("submission-gate: $(SUBMISSION_GATE_CHECKS)", makefile)
         self.assertIn("check-predicted-results.py --root .", makefile)
         self.assertIn("check-predicted-results.py --root . --scope all --strict", makefile)
-        self.assertIn("predicted-results-check", makefile.split("audit:", 1)[1])
-        self.assertIn("submission-gate", makefile.split("pre-submit:", 1)[1])
+        self.assertIn("predicted-results-check", audit_checks)
+        self.assertIn("predicted-results-check", submission_gate_checks)
+        self.assertIn("submission-gate", pre_submit_checks)
 
 
 if __name__ == "__main__":

@@ -3,6 +3,8 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
+from tests.helpers import make_var_tokens
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -30,17 +32,29 @@ class PaperIrSpecTest(unittest.TestCase):
 
     def test_template_makefile_splits_ci_audit_and_pre_submit_profiles(self) -> None:
         makefile = (ROOT / "template" / "Makefile").read_text(encoding="utf-8")
+        ci_checks = make_var_tokens(makefile, "CI_CHECKS")
+        audit_checks = make_var_tokens(makefile, "AUDIT_CHECKS")
+        pre_submit_checks = make_var_tokens(makefile, "PRE_SUBMIT_CHECKS")
 
-        self.assertIn("audit:", makefile)
+        self.assertIn("audit: $(AUDIT_CHECKS)", makefile)
         self.assertNotIn("command -v", makefile)
         self.assertIn("PYTHON_BOOTSTRAP ?= python", makefile)
-        self.assertIn("pre-submit: ci audit", makefile)
-        self.assertRegex(makefile, r"(?m)^ci: .*build-ja build-en$", "ci should stay structural")
-        self.assertRegex(
-            makefile,
-            r"(?m)^audit: .*concept-term-check.*argument-focus-check.*figure-reference-check",
-            "audit should collect authoring checks",
-        )
+        self.assertIn("pre-submit: $(PRE_SUBMIT_CHECKS)", makefile)
+        self.assertIn("ci: $(CI_CHECKS) build-ja build-en", makefile)
+        self.assertIn("lint-bib", ci_checks)
+        self.assertIn("mirror-check", ci_checks)
+        self.assertIn("build-ja", makefile)
+        self.assertIn("build-en", makefile)
+        for target in [
+            "concept-term-check",
+            "argument-focus-check",
+            "figure-reference-check",
+        ]:
+            with self.subTest(target=target):
+                self.assertIn(target, audit_checks)
+        for target in ["ci", "audit", "finish-manuscript-check", "submission-gate"]:
+            with self.subTest(target=target):
+                self.assertIn(target, pre_submit_checks)
         self.assertIn("check-concept-terms.py --root . --strict", makefile)
         self.assertIn("check-figure-references.py --root . --strict", makefile)
         self.assertIn("check-external-imports.py --root . --strict", makefile)

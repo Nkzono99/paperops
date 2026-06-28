@@ -3,6 +3,63 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,python))
 PYTHON_BOOTSTRAP ?= python
 
+CI_CHECKS = \
+	lint-bib \
+	citation-check \
+	mirror-check \
+	public-terms-check \
+	paper-layer-card-check \
+	card-coverage-check \
+	workflow-check \
+	archive-seal-check \
+	skill-mirror-check \
+	links-check
+
+AUDIT_CHECKS = \
+	mirror-freshness-check \
+	concept-term-check \
+	argument-focus-check \
+	authoring-intent-check \
+	storyline-check \
+	section-contract-check \
+	section-depth-check \
+	quantity-integrity-check \
+	predicted-results-check \
+	content-first-check \
+	figure-reference-check \
+	figure-obligation-check \
+	claim-evidence-check \
+	card-coverage-check \
+	research-request-handoff-check \
+	external-import-check \
+	submission-drift-check
+
+FINISH_MANUSCRIPT_CHECKS = \
+	storyline-check \
+	section-contract-check \
+	public-terms-check \
+	authoring-intent-check \
+	quantity-integrity-check \
+	predicted-results-check \
+	figure-obligation-check \
+	claim-evidence-check \
+	workflow-check
+
+SUBMISSION_GATE_CHECKS = \
+	public-terms-check \
+	authoring-intent-check \
+	predicted-results-check \
+	research-request-handoff-check \
+	submission-drift-check
+
+PRE_SUBMIT_CHECKS = \
+	ci \
+	audit \
+	finish-manuscript-check \
+	lint-bib-pre-submit \
+	mirror-strict-check \
+	submission-gate
+
 venv:
 	$(PYTHON_BOOTSTRAP) -m venv .venv
 	@if [ -x .venv/bin/python ]; then .venv/bin/python -m pip install --upgrade pip; else .venv/Scripts/python.exe -m pip install --upgrade pip; fi
@@ -64,7 +121,7 @@ predicted-results-check:
 content-first-check:
 	$(PYTHON) scripts/check-content-first.py --root . --phase start --intent content
 
-finish-manuscript-check: storyline-check section-contract-check public-terms-check authoring-intent-check quantity-integrity-check predicted-results-check figure-obligation-check claim-evidence-check workflow-check
+finish-manuscript-check: $(FINISH_MANUSCRIPT_CHECKS)
 	$(PYTHON) scripts/check-public-terms.py --root . --strict
 	$(PYTHON) scripts/check-authoring-intent.py --root . --strict
 	$(PYTHON) scripts/check-section-contracts.py --root . --strict
@@ -73,7 +130,7 @@ finish-manuscript-check: storyline-check section-contract-check public-terms-che
 	$(PYTHON) scripts/check-claim-evidence.py --root . --strict
 	$(PYTHON) scripts/check-content-first.py --root . --phase finish --intent content --strict
 
-submission-gate: public-terms-check authoring-intent-check predicted-results-check research-request-handoff-check submission-drift-check
+submission-gate: $(SUBMISSION_GATE_CHECKS)
 	$(PYTHON) scripts/check-predicted-results.py --root . --scope all --strict
 	$(PYTHON) scripts/check-public-terms.py --root . --strict
 	$(PYTHON) scripts/check-authoring-intent.py --root . --strict
@@ -125,11 +182,11 @@ readiness-check:
 export-arxiv:
 	bash scripts/export-arxiv.sh
 
-ci: lint-bib citation-check mirror-check public-terms-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check skill-mirror-check links-check build-ja build-en
+ci: $(CI_CHECKS) build-ja build-en
 
-audit: mirror-freshness-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check figure-reference-check figure-obligation-check claim-evidence-check card-coverage-check research-request-handoff-check external-import-check submission-drift-check
+audit: $(AUDIT_CHECKS)
 
-pre-submit: ci audit finish-manuscript-check lint-bib-pre-submit mirror-strict-check submission-gate
+pre-submit: $(PRE_SUBMIT_CHECKS)
 	$(PYTHON) scripts/check-concept-terms.py --root . --strict
 	$(PYTHON) scripts/check-authoring-intent.py --root . --strict
 	$(PYTHON) scripts/check-storyline.py --root . --strict

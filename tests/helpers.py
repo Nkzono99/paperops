@@ -46,3 +46,21 @@ def run_python_script(
         text=True,
         **kwargs,
     )
+
+
+def make_var_tokens(makefile: str, name: str) -> list[str]:
+    lines = makefile.splitlines()
+    value_parts: list[str] = []
+    for index, line in enumerate(lines):
+        if not line.startswith(f"{name} ="):
+            continue
+        value = line.split("=", 1)[1].strip()
+        value_parts.append(value.rstrip("\\").strip())
+        next_index = index + 1
+        while value.endswith("\\") and next_index < len(lines):
+            value = lines[next_index].strip()
+            value_parts.append(value.rstrip("\\").strip())
+            next_index += 1
+        break
+    value = " ".join(value_parts)
+    return value.split()

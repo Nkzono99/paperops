@@ -3,7 +3,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 
-from tests.helpers import ROOT, copy_template, run_python_script
+from tests.helpers import ROOT, copy_template, make_var_tokens, run_python_script
 
 
 SCRIPT = ROOT / "template" / "scripts" / "check-concept-terms.py"
@@ -93,11 +93,13 @@ class ConceptTermCheckTest(unittest.TestCase):
     def test_makefiles_expose_concept_term_check(self) -> None:
         template_makefile = (ROOT / "template" / "Makefile").read_text(encoding="utf-8")
         root_makefile = (ROOT / "Makefile").read_text(encoding="utf-8")
+        audit_checks = make_var_tokens(template_makefile, "AUDIT_CHECKS")
+        smoke_checks = make_var_tokens(root_makefile, "SMOKE_CHECKS")
 
         self.assertIn("concept-term-check:", template_makefile)
         self.assertIn("check-concept-terms.py", template_makefile)
-        self.assertIn("concept-term-check", template_makefile.split("ci:", 1)[1])
-        self.assertIn("concept-term-check", root_makefile.split("smoke:", 1)[1])
+        self.assertIn("concept-term-check", audit_checks)
+        self.assertIn("concept-term-check", smoke_checks)
 
     def test_concept_terms_are_connected_to_semantic_views_and_skills(self) -> None:
         combined = "\n".join(

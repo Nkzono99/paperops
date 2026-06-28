@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.helpers import ROOT, copy_template, run_python_script
+from tests.helpers import ROOT, copy_template, make_var_tokens, run_python_script
 
 
 SCRIPT = ROOT / "template" / "scripts" / "check-research-request-handoff.py"
@@ -144,10 +144,13 @@ class ResearchRequestHandoffCheckTest(unittest.TestCase):
 
     def test_makefile_exposes_research_request_handoff_check_target(self) -> None:
         makefile = (ROOT / "template" / "Makefile").read_text(encoding="utf-8")
+        audit_checks = make_var_tokens(makefile, "AUDIT_CHECKS")
+        submission_gate_checks = make_var_tokens(makefile, "SUBMISSION_GATE_CHECKS")
 
         self.assertIn("research-request-handoff-check:", makefile)
         self.assertIn("check-research-request-handoff.py", makefile)
-        self.assertIn("research-request-handoff-check", makefile.split("ci:", 1)[1])
+        self.assertIn("research-request-handoff-check", audit_checks)
+        self.assertIn("research-request-handoff-check", submission_gate_checks)
 
 
 if __name__ == "__main__":

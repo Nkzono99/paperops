@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- root / template の Makefile で長大化していた `smoke`、`ci`、`audit`、`finish-manuscript-check`、`submission-gate`、`pre-submit` の依存先を named profile 変数へ分離した。検証群の肥大化により、どの gate が構造検証・執筆監査・投稿前確認を担うのか読み取りにくくなる問題を減らす。
 - starter の `manuscript/writing-profile.yml` の既定 `paper_type` を `generic_research` にし、`computational_modeling` は opt-in overlay として残した。新規下流 project が最初から計算モデル論文として扱われる分野バイアスを避ける。
 - starter の figure / scientific gate に残っていた `detachment`、`W_final`、`charge distribution` など特定物理系の path-claim 例を、endpoint metric、cumulative criterion、threshold barrier、initial-condition subset などの汎用語へ置き換えた。path-dependent claim guard は残しつつ、テンプレート全体を特定論文の語彙へ寄せない。
 - root `README.md` の論文プロジェクト構造説明を現行 `_paperops/` layout に揃え、`template/.agents/README.md` も `.agents/skills/` を共通手順の source of truth、`.claude/skills/` を wrapper として説明するよう直した。旧 top-level `evidence/` / `claims/` / `refs/` や逆向きの skill 正本説明を新規利用者へ案内しない。
