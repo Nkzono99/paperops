@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `check-block-flow-review.py` と `block-flow-review-check` target を追加し、Results / Discussion が `AUDITED` / `ACCEPTED` のときに `_paperops/review/block-flow/` の block operation table が `% block:` を網羅し、`reader_question`、`author_move`、`why_here`、`next_block_expectation`、`operation` を埋めているか確認するようにした。内容の良し悪しは判定せず、block-flow review を口頭だけで済ませないための gate として扱う。
 - `check-figure-design.py` と `figure-design-check` target を追加し、main / claim-facing figure card の `design_review`、figure reference、claim/result/block/visual-obligation 接続が未記入のまま finish / pre-submit に進むことを strict に検出するようにした。図の美的品質は判定せず、設計意図と読者タスクの空欄だけを見る。
 - `scaffold-package-boundary-check` が canary artifact を root `template/` に直接書かず、一時 scaffold copy を wheel build hook に渡して検証するようにした。`_paperops/` 側の generated source-reach / session-context canary も追加し、現行 layout の除外漏れを確認できるようにした。
 - template checker scripts の link registry / local locations 読み込みを `scripts/paperops_links.py` に集約した。既存下流で `check-links.py`、`check-external-imports.py`、`check-research-request-handoff.py` を更新する場合は、同時に `scripts/paperops_links.py` も取り込む必要がある。

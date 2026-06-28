@@ -54,11 +54,13 @@ description: Use when a manuscript section has a draft, weak author stance, thin
 
 ## Output
 
-- block operation table
+- `_paperops/review/block-flow/` の block operation table
 - new block order
 - author stance summary: assert / reject / boundary / hold
 - section_loop or prose_loop recommendation
 - upstream card / Figure design brief / request updates needed
+
+`AUDITED` / `ACCEPTED` に進める前に `make block-flow-review-check` を実行し、Results / Discussion の `% block:` が table に揃っていることを確認する。
 
 ## Codex 実行メモ
 

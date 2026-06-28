@@ -40,6 +40,7 @@
 - `_paperops/evidence/`: result / figure / source card の正本
 - `_paperops/claims/`: claim / scientific gate / argument card の正本
 - `_paperops/review/`: feedback / review round / response card の正本
+- `_paperops/review/block-flow/`: AUDITED / ACCEPTED 前の block operation table と author stance
 - `_paperops/requests/`: analysis / writing request card の正本
 - `_paperops/notes/views/`: `view_type` / `source_of_truth` つきの pure overview view と controlled authoring view
 - `_paperops/defaults/contracts/`: paperops-managed の標準 section / figure story 契約

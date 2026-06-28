@@ -1,4 +1,4 @@
-.PHONY: venv build-ja build-en build-submission lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check submission-gate figure-reference-check figure-obligation-check figure-design-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check research-request-handoff-live-check external-import-check external-import-live-check collect-context readiness-check export-arxiv ci audit pre-submit
+.PHONY: venv build-ja build-en build-submission lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check submission-gate block-flow-review-check figure-reference-check figure-obligation-check figure-design-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check research-request-handoff-live-check external-import-check external-import-live-check collect-context readiness-check export-arxiv ci audit pre-submit
 
 PYTHON_FALLBACK = $(shell bash scripts/resolve-python.sh "$(CURDIR)" 2>/dev/null || echo python3.11)
 PYTHON ?= $(PYTHON_FALLBACK)
@@ -27,6 +27,7 @@ AUDIT_CHECKS = \
 	quantity-integrity-check \
 	predicted-results-check \
 	content-first-check \
+	block-flow-review-check \
 	figure-reference-check \
 	figure-obligation-check \
 	figure-design-check \
@@ -43,6 +44,7 @@ FINISH_MANUSCRIPT_CHECKS = \
 	authoring-intent-check \
 	quantity-integrity-check \
 	predicted-results-check \
+	block-flow-review-check \
 	figure-obligation-check \
 	figure-design-check \
 	claim-evidence-check \
@@ -130,6 +132,7 @@ finish-manuscript-check: $(FINISH_MANUSCRIPT_CHECKS)
 	$(PYTHON) scripts/check-section-contracts.py --root . --strict
 	$(PYTHON) scripts/check-section-depth.py --root . --strict
 	$(PYTHON) scripts/check-predicted-results.py --root . --scope all --strict
+	$(PYTHON) scripts/check-block-flow-review.py --root . --strict
 	$(PYTHON) scripts/check-figure-design.py --root . --strict
 	$(PYTHON) scripts/check-claim-evidence.py --root . --strict
 	$(PYTHON) scripts/check-content-first.py --root . --phase finish --intent content --strict
@@ -140,6 +143,9 @@ submission-gate: $(SUBMISSION_GATE_CHECKS)
 	$(PYTHON) scripts/check-authoring-intent.py --root . --strict
 	$(PYTHON) scripts/check-research-request-handoff.py --root . --strict
 	$(PYTHON) scripts/check-submission-drift.py --root . --strict
+
+block-flow-review-check:
+	$(PYTHON) scripts/check-block-flow-review.py --root .
 
 figure-reference-check:
 	$(PYTHON) scripts/check-figure-references.py --root .
@@ -205,6 +211,7 @@ pre-submit: $(PRE_SUBMIT_CHECKS)
 	$(PYTHON) scripts/check-storyline.py --root . --strict
 	$(PYTHON) scripts/check-section-depth.py --root . --strict
 	$(PYTHON) scripts/check-quantity-integrity.py --root . --strict
+	$(PYTHON) scripts/check-block-flow-review.py --root . --strict
 	$(PYTHON) scripts/check-figure-references.py --root . --strict
 	$(PYTHON) scripts/check-figure-obligations.py --root . --strict
 	$(PYTHON) scripts/check-figure-design.py --root . --strict

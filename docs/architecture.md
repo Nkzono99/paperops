@@ -39,7 +39,7 @@
 - `_paperops/refs/`: 文献サマリー、関連研究調査、外部 source、外部 project link、外部 bundle import state
 - `_paperops/evidence/`: result / figure / source card
 - `_paperops/claims/`: claim / scientific gate / argument card
-- `_paperops/review/`: feedback / review round / response card
+- `_paperops/review/`: feedback / review round / block-flow review / response card
 - `_paperops/requests/`: analysis / writing request card
 - `_paperops/notes/`: AI 利用、再現性、handoff、decision log、controlled authoring view
 
@@ -54,7 +54,7 @@
 | `Makefile.project` | project 固有の tracked target を置く | project overlay | 人間または Agent の明示更新 |
 | `_paperops/evidence/` | result / figure / source を論文上の証拠単位へ整理する | AI 内部正本 | `/map-result-patterns`, `/research-related-work`, `/design-paper-figure` |
 | `_paperops/claims/` | claim、scientific gate、argument を管理する | AI 内部正本 | `/scientific-gate`, `/design-manuscript-claims` |
-| `_paperops/review/` | 人間レビュー、模擬査読、実査読 response を管理する | AI 内部正本 | `/integrate-writing-feedback`, `/peer-review-manuscript`, `/respond-to-peer-review` |
+| `_paperops/review/` | 人間レビュー、block-flow review、模擬査読、実査読 response を管理する | AI 内部正本 | `/integrate-writing-feedback`, `/review-block-flow`, `/peer-review-manuscript`, `/respond-to-peer-review` |
 | `_paperops/requests/` | 追加解析や改稿依頼を管理する | AI 内部正本 | `/integrate-writing-feedback`, runops handoff |
 | `_paperops/notes/views/` の pure overview view | 正本カードを俯瞰する | 派生 view | 該当 card 更新後に手動または半自動で更新 |
 | `_paperops/notes/views/` の controlled authoring view | 本文での呼び方、条件名、概念語、読者向け語彙、story spine を統制する | 編集可能な統制 view | `/design-paper-storyline`, `/public-terminology-pass`, `/contextualize-conditions`, `/polish-ai-draft` |

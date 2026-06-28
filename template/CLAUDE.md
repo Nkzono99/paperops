@@ -102,7 +102,7 @@ _paperops/workflow/            現在状態、review loop、stale 伝播、人�
 _paperops/refs/                文献、外部 source、外部 link、import state、local path alias
 _paperops/evidence/            result / figure / source card
 _paperops/claims/              claim / scientific gate / argument card
-_paperops/review/              feedback / review round / response card
+_paperops/review/              feedback / review round / block-flow review / response card
 _paperops/requests/            analysis / writing request card
 _paperops/notes/views/         pure overview view と controlled authoring view
 _paperops/notes/               AI 利用、再現性、handoff、decision log
