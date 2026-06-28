@@ -345,7 +345,7 @@ def check_request_against_queue(
         )
 
 
-def check_handoff(root: Path) -> list[Finding]:
+def check_handoff(root: Path, *, live: bool) -> list[Finding]:
     findings: list[Finding] = []
     links = load_links(root, findings)
     runops_links = [
@@ -358,11 +358,15 @@ def check_handoff(root: Path) -> list[Finding]:
         return findings
 
     requests = collect_requests(root)
-    local_locations = load_local_locations(root)
+    local_locations = load_local_locations(root) if live else {}
     for link in runops_links:
         link_id = normalize(link.get("id"))
         linked_requests = [request for request in requests if request_targets_link(request, link)]
         if not linked_requests:
+            continue
+        if not live:
+            for request in linked_requests:
+                check_request_against_queue(request, None, findings)
             continue
         local_path = resolve_local_path(root, link, local_locations)
         if local_path is None or not local_path.exists():
@@ -387,9 +391,14 @@ def main() -> int:
     )
     parser.add_argument("--root", type=Path, default=Path("."))
     parser.add_argument("--strict", action="store_true", help="warning がある場合も non-zero exit を返す。")
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="linked runops queue を実際に読み、queued ID / status drift を確認する。",
+    )
     args = parser.parse_args()
 
-    findings = check_handoff(args.root.resolve())
+    findings = check_handoff(args.root.resolve(), live=args.live)
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]
 

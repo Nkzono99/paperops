@@ -75,9 +75,12 @@ class ResearchRequestHandoffCheckTest(unittest.TestCase):
             write_queue(runops_dir, "schema_version = 1\n")
             write_request_card(project)
 
-            result = run_python_script(SCRIPT, "--root", project)
-            strict_result = run_python_script(SCRIPT, "--root", project, "--strict")
+            static_result = run_python_script(SCRIPT, "--root", project)
+            result = run_python_script(SCRIPT, "--root", project, "--live")
+            strict_result = run_python_script(SCRIPT, "--root", project, "--live", "--strict")
 
+        self.assertEqual(static_result.returncode, 0, static_result.stdout + static_result.stderr)
+        self.assertNotIn("draft staged but not queued", static_result.stdout)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(strict_result.returncode, 1, strict_result.stdout + strict_result.stderr)
         self.assertIn("draft staged but not queued", result.stdout)
@@ -103,7 +106,7 @@ class ResearchRequestHandoffCheckTest(unittest.TestCase):
             )
             write_request_card(project, runops_id="PAPER-REQ-0008")
 
-            result = run_python_script(SCRIPT, "--root", project, "--strict")
+            result = run_python_script(SCRIPT, "--root", project, "--live", "--strict")
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("research request handoff に問題は見つかりませんでした", result.stdout)
@@ -113,8 +116,11 @@ class ResearchRequestHandoffCheckTest(unittest.TestCase):
             project = copy_template(tmp)
             write_request_card(project)
 
-            result = run_python_script(SCRIPT, "--root", project)
+            static_result = run_python_script(SCRIPT, "--root", project)
+            result = run_python_script(SCRIPT, "--root", project, "--live")
 
+        self.assertEqual(static_result.returncode, 0, static_result.stdout + static_result.stderr)
+        self.assertNotIn("local path を解決できません", static_result.stdout)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("local path を解決できません", result.stdout)
         self.assertIn("request handoff not checked", result.stdout)
@@ -148,7 +154,9 @@ class ResearchRequestHandoffCheckTest(unittest.TestCase):
         submission_gate_checks = make_var_tokens(makefile, "SUBMISSION_GATE_CHECKS")
 
         self.assertIn("research-request-handoff-check:", makefile)
+        self.assertIn("research-request-handoff-live-check:", makefile)
         self.assertIn("check-research-request-handoff.py", makefile)
+        self.assertIn("--live", makefile)
         self.assertIn("research-request-handoff-check", audit_checks)
         self.assertIn("research-request-handoff-check", submission_gate_checks)
 

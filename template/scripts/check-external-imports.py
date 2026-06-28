@@ -287,6 +287,8 @@ def check_record(
     links: dict[str, dict[str, Any]],
     local_locations: dict[str, dict[str, Any]],
     findings: list[Finding],
+    *,
+    live: bool,
 ) -> None:
     rel_label = path.as_posix()
     record_id = str(record.get("id", "")).strip()
@@ -358,6 +360,9 @@ def check_record(
             if artifact_state and artifact_state not in ALLOWED_STATES:
                 add(findings, "warning", f"`{record_label}` の artifact `{name}` の state `{artifact_state}` は未知です")
 
+    if not live:
+        return
+
     link = links.get(link_id, {})
     export_base, local_path = resolved_export_base(record, link, local_locations, record_label, findings)
     compare_live_csv(
@@ -395,10 +400,10 @@ def check_record(
             )
 
 
-def check_external_imports(root: Path) -> tuple[list[Finding], int]:
+def check_external_imports(root: Path, *, live: bool) -> tuple[list[Finding], int]:
     findings: list[Finding] = []
     links = load_links(root, findings)
-    local_locations = load_local_locations(root)
+    local_locations = load_local_locations(root) if live else {}
     paths = import_record_paths(root)
     for path in paths:
         try:
@@ -406,7 +411,7 @@ def check_external_imports(root: Path) -> tuple[list[Finding], int]:
         except Exception as exc:
             add(findings, "error", f"`{path.relative_to(root).as_posix()}` を TOML として読めません: {exc}")
             continue
-        check_record(path.relative_to(root), record, links, local_locations, findings)
+        check_record(path.relative_to(root), record, links, local_locations, findings, live=live)
     return findings, len(paths)
 
 
@@ -442,9 +447,14 @@ def main() -> int:
         action="store_true",
         help="warning も失敗扱いにする。",
     )
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="local locations の外部 export / git state を読み、recorded state との drift を確認する。",
+    )
     args = parser.parse_args()
 
-    findings, record_count = check_external_imports(args.root.resolve())
+    findings, record_count = check_external_imports(args.root.resolve(), live=args.live)
     print_findings(findings, record_count)
     has_errors = any(finding.severity == "error" for finding in findings)
     has_warnings = any(finding.severity == "warning" for finding in findings)

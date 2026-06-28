@@ -1,4 +1,4 @@
-.PHONY: venv smoke cli-smoke scaffold-package-boundary-check build-submission lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context template-readiness-check
+.PHONY: venv smoke cli-smoke scaffold-package-boundary-check build-submission lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check research-request-handoff-live-check external-import-check external-import-live-check collect-context template-readiness-check
 
 PYTHON_FALLBACK = $(shell bash template/scripts/resolve-python.sh "$(CURDIR)" 2>/dev/null || echo python3.11)
 PYTHON ?= $(PYTHON_FALLBACK)
@@ -146,8 +146,14 @@ links-check:
 research-request-handoff-check:
 	$(PYTHON) template/scripts/check-research-request-handoff.py --root template
 
+research-request-handoff-live-check:
+	$(PYTHON) template/scripts/check-research-request-handoff.py --root template --live
+
 external-import-check:
 	$(PYTHON) template/scripts/check-external-imports.py --root template
+
+external-import-live-check:
+	$(PYTHON) template/scripts/check-external-imports.py --root template --live
 
 collect-context:
 	$(PYTHON) template/scripts/collect-note-context.py --root template --output .paperops/cache/template/session-context.generated.md

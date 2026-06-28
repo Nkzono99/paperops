@@ -133,9 +133,12 @@ class ExternalImportCheckTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            advisory = run_check(root)
-            strict = run_check(root, "--strict")
+            static = run_check(root)
+            advisory = run_check(root, "--live")
+            strict = run_check(root, "--live", "--strict")
 
+        self.assertEqual(static.returncode, 0, static.stdout + static.stderr)
+        self.assertNotIn("source index rows drift", static.stdout)
         self.assertEqual(advisory.returncode, 0, advisory.stdout + advisory.stderr)
         self.assertIn("source index rows drift", advisory.stdout)
         self.assertEqual(strict.returncode, 1)

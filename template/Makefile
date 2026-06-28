@@ -1,4 +1,4 @@
-.PHONY: venv build-ja build-en build-submission lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check submission-gate figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check external-import-check collect-context readiness-check export-arxiv ci audit pre-submit
+.PHONY: venv build-ja build-en build-submission lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check submission-gate figure-reference-check figure-obligation-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check research-request-handoff-live-check external-import-check external-import-live-check collect-context readiness-check export-arxiv ci audit pre-submit
 
 PYTHON_FALLBACK = $(shell bash scripts/resolve-python.sh "$(CURDIR)" 2>/dev/null || echo python3.11)
 PYTHON ?= $(PYTHON_FALLBACK)
@@ -171,8 +171,14 @@ links-check:
 research-request-handoff-check:
 	$(PYTHON) scripts/check-research-request-handoff.py --root .
 
+research-request-handoff-live-check:
+	$(PYTHON) scripts/check-research-request-handoff.py --root . --live
+
 external-import-check:
 	$(PYTHON) scripts/check-external-imports.py --root .
+
+external-import-live-check:
+	$(PYTHON) scripts/check-external-imports.py --root . --live
 
 collect-context:
 	$(PYTHON) scripts/collect-note-context.py --root . --output _paperops/notes/session-context.generated.md
