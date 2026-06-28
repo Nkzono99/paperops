@@ -1,6 +1,6 @@
 ---
 name: design-paper-figure
-description: 個別の論文図、panel、table-like visual、runops plot request、caption を読者タスクから設計・改訂する。
+description: Use when creating or revising an individual manuscript figure, figure panel, table-like visual, runops plot request, or caption from data or an existing plot.
 argument-hint: "[figure-or-request]"
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 ---

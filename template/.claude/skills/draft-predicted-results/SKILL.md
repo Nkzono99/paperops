@@ -1,6 +1,6 @@
 ---
 name: draft-predicted-results
-description: 未実行だが投稿前に実施可能な追加シミュレーションの予測稿、xx placeholder、予測図、検証待ち Results / Discussion を扱う。
+description: Use when manuscript writing is blocked by missing but feasible additional simulations, expected quantitative results, placeholder xx values, predicted figures, or pressure to turn absent data into Future Work or defensive prose before submission.
 argument-hint: "[claim-or-block]"
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 ---

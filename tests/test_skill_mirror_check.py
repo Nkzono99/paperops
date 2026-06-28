@@ -63,6 +63,73 @@ class SkillMirrorCheckTest(unittest.TestCase):
         self.assertIn("frontmatter name", failed.stdout)
         self.assertIn(".claude/skills/sync-ja-en/SKILL.md", failed.stdout)
 
+    def test_claude_wrapper_description_must_match_agents_source(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+
+            script = target / "scripts" / "check-skill-mirror.py"
+            skill_path = target / ".claude" / "skills" / "sync-ja-en" / "SKILL.md"
+            skill_path.write_text(
+                skill_path.read_text(encoding="utf-8").replace(
+                    "description: 日本語と英語の原稿をブロックレベルで同期する。",
+                    "description: 古い wrapper description。",
+                    1,
+                ),
+                encoding="utf-8",
+            )
+
+            failed = run_python_script(script, "--root", target)
+
+        self.assertEqual(failed.returncode, 1)
+        self.assertIn("frontmatter description", failed.stdout)
+        self.assertIn(".agents/skills/sync-ja-en/SKILL.md", failed.stdout)
+
+    def test_agents_source_must_not_depend_on_claude_wrapper_assets(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+
+            script = target / "scripts" / "check-skill-mirror.py"
+            skill_path = target / ".agents" / "skills" / "sync-ja-en" / "SKILL.md"
+            skill_path.write_text(
+                skill_path.read_text(encoding="utf-8")
+                + "\n- `.claude/skills/sync-ja-en/scripts/sync_blocks.py`\n",
+                encoding="utf-8",
+            )
+
+            failed = run_python_script(script, "--root", target)
+
+        self.assertEqual(failed.returncode, 1)
+        self.assertIn(".agents/skills/sync-ja-en/SKILL.md", failed.stdout)
+        self.assertIn(".claude/skills/", failed.stdout)
+
+    def test_sync_ja_en_helper_assets_live_under_agents_source(self) -> None:
+        self.assertTrue(
+            (
+                ROOT
+                / "template"
+                / ".agents"
+                / "skills"
+                / "sync-ja-en"
+                / "scripts"
+                / "sync_blocks.py"
+            ).is_file()
+        )
+        self.assertFalse(
+            (
+                ROOT
+                / "template"
+                / ".claude"
+                / "skills"
+                / "sync-ja-en"
+                / "scripts"
+                / "sync_blocks.py"
+            ).exists()
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

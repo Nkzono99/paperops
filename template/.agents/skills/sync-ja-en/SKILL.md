@@ -33,4 +33,4 @@ description: 日本語と英語の原稿をブロックレベルで同期する�
 
 - `% block: ...` ID を保持し、片側を盲目的に上書きしない。
 - 同期前後に `manuscript/mirror/status.md` と `manuscript/mirror/change-queue.md` を確認する。
-- 必要に応じて `.claude/skills/sync-ja-en/scripts/sync_blocks.py` を実行し、最後に `make mirror-check` を実行する。
+- 必要に応じて `.agents/skills/sync-ja-en/scripts/sync_blocks.py` を実行し、最後に `make mirror-check` を実行する。

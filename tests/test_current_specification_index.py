@@ -13,6 +13,16 @@ class CurrentSpecificationIndexTest(unittest.TestCase):
         self.assertLessEqual(len(lines), 120)
         self.assertIn("正本ではなく", spec)
         self.assertIn("source of truth", spec)
+        self.assertNotIn("docs/release.md", spec)
+        self.assertIn(".agents/skills/release/SKILL.md", spec)
+        self.assertEqual(
+            [
+                "## Source Of Truth",
+                "## Current Invariants",
+                "## Update Rule",
+            ],
+            [line for line in lines if line.startswith("## ")],
+        )
         for required in [
             "docs/architecture.md",
             "docs/cli.md",

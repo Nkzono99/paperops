@@ -1,6 +1,6 @@
 ---
 name: research-related-work
-description: 関連研究、先行研究、文献レビュー、研究動向、比較対象、反論文献を広く集め、refs/research と refs/summaries と notes/related-work-map.md に整理するときに使う。
+description: Use when collecting related work, comparison papers, objections, and summaries.
 argument-hint: "<topic-or-literature-question>"
 allowed-tools: Read, Edit, Write, Glob, Grep, WebSearch, Bash
 ---

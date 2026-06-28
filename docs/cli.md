@@ -74,6 +74,8 @@ uvx --from paper-harness-cli pops doctor
 - `.github/ISSUE_TEMPLATE/`
 - `.github/PULL_REQUEST_TEMPLATE.md`
 
+互換期間中は、checkpoint migration 用に legacy top-level の `contracts/*` と `workflow/*` も managed update 判定に含める。これは新規 scaffold の正道ではなく、`M0-0002` 後の migration horizon で削除候補にする。
+
 `README.md`、`story/`、`manuscript/`、`submission/`、`_paperops/contracts/`、`_paperops/workflow/current-state.yml`、`_paperops/workflow/decisions.yml`、`_paperops/workflow/round-summary.yml`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/refs/`、`_paperops/notes/` はプロジェクト固有内容として自動更新しない。`manuscript/writing-profile.yml` は論文ごとの overlay なので、既存プロジェクトでは手動で追加・調整する。
 
 project repo で paperops-managed core を直接編集し続けると update 時に drift が増える。通常は次の project-owned extension point を使う。

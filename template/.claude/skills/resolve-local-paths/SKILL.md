@@ -1,6 +1,6 @@
 ---
 name: resolve-local-paths
-description: _paperops/refs/links.toml と _paperops/refs/local/ から runops ディレクトリリンク、図のソース、外部知識のローカルパスエイリアスを解決する。
+description: runops ディレクトリリンクや外部 project link を _paperops/refs/links.toml と _paperops/refs/local/ から解決する。
 allowed-tools: Read, Glob
 ---
 

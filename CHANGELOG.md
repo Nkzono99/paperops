@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `.claude/skills/*` wrapper の `description` を `.agents/skills/*` source と一致させ、`check-skill-mirror.py` が `name` / `description` drift と concrete な `.claude/skills/<name>/...` helper 逆依存を検出するようにした。`sync-ja-en` の helper は `.agents/skills/sync-ja-en/` 側へ移し、review ledger の標準出力先も `_paperops/notes/reviews/` に統一した。
+- `docs/current-specification.md` の source-of-truth 索引から存在しない `docs/release.md` 参照と詳細仕様節を外し、release 正本を `docs/distribution.md` / `CHANGELOG.md` / `release` skill に整理した。root guidance の `make smoke` 方針、下流 README の `pops setup` 導線、migration planned item、legacy managed update 説明も現行挙動に合わせた。
 - `docs/current-specification.md` を詳細仕様本文から source-of-truth 索引へ縮約し、architecture / CLI / migration / skill docs との正本競合を減らした。BibTeX の標準配置も `manuscript/shared/bib/` を正道、`_paperops/refs/bib/{curated,imported}` を外部/import 用、legacy `refs/bib/` を互換扱いとして整理した。
 - `check-quantity-integrity.py` の Finding / frontmatter / 出力処理を共通 helper `scripts/paperops_checks.py` へ寄せた。checker ごとの出力形式や strict warning handling の重複を減らすための内部整理で、検出内容は変えない。
 - root / template の Makefile が `.venv` 未作成時に `python3.11`、`python3`、`python` の順で Python を探すようにした。`python` コマンドが無い環境でも `make skill-mirror-check` などの checker が起動前に落ちにくくなる。

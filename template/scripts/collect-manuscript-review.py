@@ -237,16 +237,16 @@ def main() -> int:
     )
     parser.add_argument("--root", type=Path, default=Path("."))
     parser.add_argument("--date", default=date.today().isoformat())
-    parser.add_argument("--output", type=Path, default=None)
+    parser.add_argument("--output", type=Path, default=Path("_paperops/notes/reviews/review-{date}.md"))
     args = parser.parse_args()
 
     root = args.root.resolve()
     report = render_report(root, args.date)
 
-    if args.output is not None:
-        output = args.output if args.output.is_absolute() else root / args.output
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(report, encoding="utf-8")
+    output_arg = Path(str(args.output).format(date=args.date))
+    output = output_arg if output_arg.is_absolute() else root / output_arg
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(report, encoding="utf-8")
 
     print(report, end="")
     return 0

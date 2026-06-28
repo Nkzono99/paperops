@@ -1,6 +1,6 @@
 ---
 name: plan-figure-story
-description: 本文生成前に中心 claim から必要図表と visual obligation を設計し、missing figure を検出する。
+description: Use before drafting Results or locking ARCHITECTURE_LOCKED, to design required figures and detect missing visual obligations from claims and available artifacts.
 argument-hint: "[claim-or-section]"
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 ---

@@ -106,11 +106,17 @@ class AuthoringIntentCheckTest(unittest.TestCase):
             )
 
             result = run_python_script(COLLECT_SCRIPT, "--root", target, "--date", "2026-06-28")
+            review_ledger_exists = (
+                target / "_paperops" / "notes" / "reviews" / "review-2026-06-28.md"
+            ).is_file()
+            legacy_ledger_exists = (target / "notes" / "reviews" / "review-2026-06-28.md").exists()
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("% INTENT:", result.stdout)
         self.assertIn("`INTENT`", result.stdout)
         self.assertIn("results-authoring-intent", result.stdout)
+        self.assertTrue(review_ledger_exists)
+        self.assertFalse(legacy_ledger_exists)
 
 
 if __name__ == "__main__":

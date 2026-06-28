@@ -22,6 +22,15 @@ class RootGuidanceTest(unittest.TestCase):
         self.assertIn(boundary, agents)
         self.assertIn(boundary, claude)
 
+    def test_root_smoke_policy_is_not_contradictory(self) -> None:
+        expected = "`template/` 配下変更、リスクの高い変更、公開前確認では `make smoke`"
+        for name in ["AGENTS.md", "CLAUDE.md"]:
+            text = (ROOT / name).read_text(encoding="utf-8")
+            with self.subTest(name=name):
+                self.assertIn(expected, text)
+                self.assertNotIn("マージ前に `make smoke` を実行する", text)
+                self.assertNotIn("`make smoke` は必須 gate ではない。", text)
+
     def test_root_readme_describes_modern_paperops_internal_layout(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
@@ -49,6 +58,22 @@ class RootGuidanceTest(unittest.TestCase):
         ]:
             with self.subTest(modern_path=modern_path):
                 self.assertIn(modern_path, readme)
+
+    def test_downstream_readme_treats_setup_as_existing_repo_adoption(self) -> None:
+        readme = (ROOT / "template" / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("pops init", readme)
+        self.assertIn("すでに `.pops/manifest.toml` を持つ", readme)
+        self.assertIn("既存 repo を paperops 管理に採用するときだけ", readme)
+        self.assertIn("uvx --from paper-harness-cli pops doctor", readme)
+        self.assertNotIn("`uvx --from paper-harness-cli pops setup` と `pops doctor`", readme)
+
+    def test_cli_docs_explain_legacy_managed_update_horizon(self) -> None:
+        cli = (ROOT / "docs" / "cli.md").read_text(encoding="utf-8")
+
+        self.assertIn("legacy top-level の `contracts/*` と `workflow/*`", cli)
+        self.assertIn("新規 scaffold の正道ではなく", cli)
+        self.assertIn("M0-0002", cli)
 
 
 if __name__ == "__main__":

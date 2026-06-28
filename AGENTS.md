@@ -34,7 +34,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 2. `/triage-template-feedback` でトリアージする。
 3. `/apply-template-improvement` で実装する。
 4. `/review-template-regression` でレビューする。
-5. マージ前に `make smoke` を実行する。
+5. `template/` 配下変更、リスクの高い変更、公開前確認では `make smoke` を実行する。
 6. ユーザーに影響する変更ごとに `CHANGELOG.md` を更新する。
 
 変更を反映する前に `docs/change-policy.md` と `docs/triage-rules.md` を確認すること。
@@ -43,7 +43,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 
 - 一人開発のため、通常の変更は `main` で直接進めてよい。
 - ユーザーが「mergeして」「pushして」と依頼した場合は、特に指定がなければ現在の作業を `main` に取り込んで push する。
-- `make smoke` は必須 gate ではない。リスクの高い変更や公開前確認で必要な場合に使う。
+- `make smoke` は全変更の必須 gate ではない。`template/` 配下変更、リスクの高い変更、公開前確認では実行する。
 - release tag と GitHub Release は `main` に merge 済みの commit にだけ作成する。PyPI publish workflow も tag commit が `origin/main` から到達可能な場合だけ公開する。
 
 ## ルール
@@ -52,7 +52,7 @@ make cli-smoke                 # pops CLI の最小 smoke test を実行
 - 構造的な書き換えよりも追加的な変更を優先する。
 - 生成されたコンテンツはバージョン管理に含めない。
 - 下流作成は `pops init` に統一する。
-- `template/` 配下を変更した後は必ず `make smoke` を実行する。
+- `template/` 配下変更、リスクの高い変更、公開前確認では `make smoke` を実行する。
 - 長時間セッションでは、コンテキスト使用量が約50%の時点で手動で `/compact` を実行する。
 
 ## Git コミットルール

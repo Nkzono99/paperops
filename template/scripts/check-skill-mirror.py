@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
 import argparse
+import re
 from pathlib import Path
+
+
+CONCRETE_CLAUDE_SKILL_REF_RE = re.compile(r"\.claude/skills/[A-Za-z0-9_.-]+/")
 
 
 def skill_names(root: Path, rel_dir: str) -> set[str]:
@@ -82,7 +86,18 @@ def main() -> int:
         warnings.extend(frontmatter_warnings)
 
     for name in sorted(claude_skills & agent_skills):
+        agent_path = root / ".agents" / "skills" / name / "SKILL.md"
         skill_path = root / ".claude" / "skills" / name / "SKILL.md"
+        agent_fields, agent_parse_error = frontmatter_fields(agent_path)
+        wrapper_fields, wrapper_parse_error = frontmatter_fields(skill_path)
+        if agent_parse_error is None and wrapper_parse_error is None:
+            for field in ["name", "description"]:
+                if agent_fields.get(field, "") != wrapper_fields.get(field, ""):
+                    errors.append(
+                        f"`.claude/skills/{name}/SKILL.md` の frontmatter {field} が "
+                        f"`.agents/skills/{name}/SKILL.md` と一致しません"
+                    )
+
         text = skill_path.read_text(encoding="utf-8")
         expected = f"@${{CLAUDE_SKILL_DIR}}/../../../.agents/skills/{name}/SKILL.md"
         if expected not in text:
@@ -93,6 +108,15 @@ def main() -> int:
         if cwd_relative in text:
             errors.append(
                 f"`.claude/skills/{name}/SKILL.md` が cwd 依存の参照 `{cwd_relative}` を使っています"
+            )
+
+    for name in sorted(agent_skills):
+        agent_path = root / ".agents" / "skills" / name / "SKILL.md"
+        text = agent_path.read_text(encoding="utf-8")
+        if CONCRETE_CLAUDE_SKILL_REF_RE.search(text):
+            errors.append(
+                f"`.agents/skills/{name}/SKILL.md` が `.claude/skills/` 配下を参照しています。"
+                "helper は `.agents` 側か scripts/ を source of truth にしてください"
             )
 
     print("# skill-mirror-check")

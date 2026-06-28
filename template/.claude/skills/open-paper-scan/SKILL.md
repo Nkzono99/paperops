@@ -1,6 +1,6 @@
 ---
 name: open-paper-scan
-description: 論文プロジェクト、原稿、執筆ハーネスを俯瞰し、発散的な改善案、構造的な違和感、逆張り仮説、未言語化のテーマを出す。ユーザーが「俯瞰的に見て」「meta 的に」「普通に眺めて違和感」「発想を広げたい」「まだ記録や実装はしない」と頼んだとき、または改善指示が局所修正に固着しそうなときに使う。
+description: Use when broadly scanning a paper project for structural issues or fresh ideas before implementation.
 argument-hint: "<scope-or-artifact>"
 allowed-tools: Read, Glob, Grep, Bash
 ---

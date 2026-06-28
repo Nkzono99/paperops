@@ -90,7 +90,7 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 - `STORY_RECONCILED`: story seed と実結果を照合し、主張範囲、negative / boundary story、修正後の論旨を人間が確認した状態。
 - `ARCHITECTURE_LOCKED`: section 契約、storyline、figure story が本文生成に入れる程度に固定された状態。
 
-この設計では、たとえば「プラズマによる月面ダストの静電的離脱可能性」のような論文で、最初に「どのように帯電し、どの機構で、どれくらい離脱可能性が妥当か」を `story/` に置ける。その後、表面帯電 3D 図、帯電強度と機構、クーロン力の時系列、離脱経路での仕事や速度、粒径や配置依存性を evidence plan にし、結果が仮説と合えば story を強め、外れれば `STORY_RECONCILED` で論旨を作り直す。
+この設計では、分野を問わず、最初に「どの現象を、どの機構で、どの evidence path で示すのか」を `story/` に置ける。その後、状態図、主要な定量結果、機構検証、境界条件、反例や negative route を evidence plan にし、結果が仮説と合えば story を強め、外れれば `STORY_RECONCILED` で論旨を作り直す。
 
 ## 情報フロー
 

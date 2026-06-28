@@ -1,6 +1,6 @@
 ---
 name: review-block-flow
-description: 既存原稿 section の block 順、粒度、author stance、move/split/merge/delete/add を監査・再設計する。
+description: Use when a manuscript section has a draft, weak author stance, thin Results or Discussion, frozen block order, or needs block-level move/split/merge/delete/add review before AUDITED or ACCEPTED.
 argument-hint: "[section-or-block]"
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 ---

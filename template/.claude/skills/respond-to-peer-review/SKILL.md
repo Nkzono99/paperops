@@ -1,6 +1,6 @@
 ---
 name: respond-to-peer-review
-description: Use when editor decision letter、査読コメント、major/minor revision、rebuttal、response to reviewers、revision plan、response matrix を整理して返答案を作るときに使う。
+description: Use when organizing reviewer comments, rebuttal, revision plan, or response matrix.
 argument-hint: "<decision-letter-or-comments-path>"
 allowed-tools: Read, Edit, Write, Glob, Grep, WebSearch, Bash
 ---

@@ -6,14 +6,16 @@
 
 ## 初回セットアップ
 
-まず `/setup` を使う。手で進める場合の最小手順は次の通り。
+まず `/setup` を使う。`pops init` で作った新規 repo はすでに `.pops/manifest.toml` を持つため、手で進める場合の最小手順は次の通り。
 
 1. リポジトリ名とこの README を実プロジェクト名に合わせる。
-2. `uvx --from paper-harness-cli pops setup` と `pops doctor` で `.pops/manifest.toml` と構造を確認する。
+2. `uvx --from paper-harness-cli pops doctor` で `.pops/manifest.toml` と構造を確認する。
 3. `_paperops/refs/links.toml` を調整し、個人環境の実パスは ignored な `_paperops/refs/local/locations.toml` に書く。
 4. 人間から AI へ渡す未整理ファイルは `_handoff/` に置く。
 5. `story/story-seed.md`、`manuscript/venue.md`、`manuscript/publication-metadata.toml` を埋める。
 6. 必要なら `tex-env.example.toml` を `tex-env.toml` にコピーして TeX 環境を設定する。
+
+既存 repo を paperops 管理に採用するときだけ `uvx --from paper-harness-cli pops setup [path]` を使う。
 
 `pops` は `uvx --from paper-harness-cli pops ...` で実行する。プロジェクト用 Python 環境が必要な場合だけ `make venv` を使う。
 

@@ -1,6 +1,6 @@
 ---
 name: review-public-manuscript
-description: 節単位・週次・投稿前の公開原稿を外部読者・一般研究者視点でレビューする。PDF または公開原稿だけを入力に、未定義語・ローカル語・暗黙前提・再現性ギャップを洗い出す。
+description: Use when reviewing public manuscript text for reader assumptions and reproducibility gaps.
 argument-hint: "<pdf-or-public-manuscript-path> [section|weekly|pre-submit] [general-researcher|reader-assumptions|local-terminology]"
 allowed-tools: Read, Glob, Grep, Bash
 ---

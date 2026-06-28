@@ -1,6 +1,6 @@
 ---
 name: contextualize-conditions
-description: simulation condition、case count、run inventory を、論文上の claim role、scope、boundary、figure story へ翻訳する。
+description: Use when translating run conditions into claim scope, boundaries, or figure story.
 argument-hint: "[section-or-scope]"
 allowed-tools: Read, Edit, Write, Glob, Grep, Bash
 ---

@@ -43,6 +43,7 @@ uvx --from paper-harness-cli pops migrate show M0-0002
 
 ## Planned Migration Candidates
 
-- managed file を project fork として扱う detached fork manifest は、CLI と update policy が揃ってから migration item 化する。
+- 現時点で確定した planned migration candidate はない。
+- managed file を project fork として扱う detached fork manifest は `pops detach` / `pops reattach` として実装済みであり、既存 project は必要時に opt-in する。現時点では破壊的 state migration item として扱わない。
 
 現在の migration item は [v0.md](v0.md) に置く。
