@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- scaffold / package boundary の除外対象に `__pycache__`、`.pyc`、`.paperops/cache/`、`.tools/`、submission build / local tools、`tex-env.toml`、refs papers / research generated artifacts を追加し、ignored/generated artifact が `pops init` や wheel 同梱 scaffold へ混入しないようにした。
 - `make pre-submit` が `check-argument-focus.py --strict` と `check-card-coverage.py --strict` を明示再実行するようにし、argument focus drift や本文参照済みカード未登録を audit warning のまま投稿前 gate で通さないようにした。
 - `check-block-flow-review.py` と `block-flow-review-check` target を追加し、Results / Discussion が `AUDITED` / `ACCEPTED` のときに `_paperops/review/block-flow/` の block operation table が `% block:` を網羅し、`reader_question`、`author_move`、`why_here`、`next_block_expectation`、`operation` を埋めているか確認するようにした。内容の良し悪しは判定せず、block-flow review を口頭だけで済ませないための gate として扱う。
 - `check-figure-design.py` と `figure-design-check` target を追加し、main / claim-facing figure card の `design_review`、figure reference、claim/result/block/visual-obligation 接続が未記入のまま finish / pre-submit に進むことを strict に検出するようにした。図の美的品質は判定せず、設計意図と読者タスクの空欄だけを見る。

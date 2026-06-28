@@ -150,12 +150,50 @@ class PopsCliTest(unittest.TestCase):
             (source / "_archives" / "README.md").write_text("ok\n", encoding="utf-8")
             (source / "_paperops" / "notes").mkdir(parents=True)
             (source / "_paperops" / "notes" / "source-reach.md").write_text("ok\n", encoding="utf-8")
+            (source / ".paperops" / "cache").mkdir(parents=True)
+            (source / ".paperops" / "cache" / "context.generated.md").write_text("no\n", encoding="utf-8")
+            (source / ".tools" / "tex").mkdir(parents=True)
+            (source / ".tools" / "tex" / "bin").write_text("no\n", encoding="utf-8")
+            (source / "scripts" / "__pycache__").mkdir(parents=True)
+            (source / "scripts" / "__pycache__" / "check.cpython-311.pyc").write_bytes(b"no")
+            (source / "scripts" / "check.pyc").write_bytes(b"no")
+            (source / "submission" / "agu" / "build").mkdir(parents=True)
+            (source / "submission" / "agu" / "build" / "main.pdf").write_text("no\n", encoding="utf-8")
+            (source / "submission" / "agu" / ".tools").mkdir(parents=True)
+            (source / "submission" / "agu" / ".tools" / "local.txt").write_text("no\n", encoding="utf-8")
+            (source / "tex-env.toml").write_text("no\n", encoding="utf-8")
+            (source / "_paperops" / "refs" / "papers" / "paper.pdf").parent.mkdir(parents=True)
+            (source / "_paperops" / "refs" / "papers" / "paper.pdf").write_text("no\n", encoding="utf-8")
+            (source / "_paperops" / "refs" / "research" / "scan" / "results").mkdir(parents=True)
+            (source / "_paperops" / "refs" / "research" / "scan" / "results" / "raw.json").write_text(
+                "no\n",
+                encoding="utf-8",
+            )
+            (source / "_paperops" / "refs" / "research" / "scan" / "report.generated.md").write_text(
+                "no\n",
+                encoding="utf-8",
+            )
+            (source / "_paperops" / "refs" / "research" / "scan" / "raw-findings.json").write_text(
+                "no\n",
+                encoding="utf-8",
+            )
 
             plan = copy_scaffold(source, target, overwrite=False)
 
             self.assertTrue((target / "_handoff" / ".gitkeep").is_file())
             self.assertTrue((target / "_handoff" / "README.md").is_file())
             self.assertTrue((target / "_paperops" / "notes" / "source-reach.md").is_file())
+            self.assertFalse((target / ".paperops").exists())
+            self.assertFalse((target / ".tools").exists())
+            self.assertFalse((target / "scripts" / "__pycache__").exists())
+            self.assertFalse((target / "scripts" / "check.pyc").exists())
+            self.assertFalse((target / "submission" / "agu" / "build").exists())
+            self.assertFalse((target / "submission" / "agu" / ".tools").exists())
+            self.assertFalse((target / "tex-env.toml").exists())
+            self.assertFalse((target / "_paperops" / "refs" / "papers").exists())
+            self.assertFalse((target / "_paperops" / "refs" / "research" / "scan" / "results").exists())
+            self.assertFalse((target / "_paperops" / "refs" / "research" / "scan" / "report.generated.md").exists())
+            self.assertFalse((target / "_paperops" / "refs" / "research" / "scan" / "raw-findings.json").exists())
             self.assertFalse((target / "_handoff" / "secret.txt").exists())
             self.assertFalse((target / "_paperops" / "refs" / "source-reach" / "topic" / "raw").exists())
             self.assertFalse(
@@ -180,6 +218,17 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn(".harness/state.json", plan.excluded)
             self.assertIn(".harnessops/lock.json", plan.excluded)
             self.assertIn("_archives/old", plan.excluded)
+            self.assertIn(".paperops/cache/context.generated.md", plan.excluded)
+            self.assertIn(".tools/tex/bin", plan.excluded)
+            self.assertIn("scripts/__pycache__/check.cpython-311.pyc", plan.excluded)
+            self.assertIn("scripts/check.pyc", plan.excluded)
+            self.assertIn("submission/agu/build/main.pdf", plan.excluded)
+            self.assertIn("submission/agu/.tools/local.txt", plan.excluded)
+            self.assertIn("tex-env.toml", plan.excluded)
+            self.assertIn("_paperops/refs/papers/paper.pdf", plan.excluded)
+            self.assertIn("_paperops/refs/research/scan/results/raw.json", plan.excluded)
+            self.assertIn("_paperops/refs/research/scan/report.generated.md", plan.excluded)
+            self.assertIn("_paperops/refs/research/scan/raw-findings.json", plan.excluded)
 
     def test_init_uses_uvx_flow_without_project_local_cli(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

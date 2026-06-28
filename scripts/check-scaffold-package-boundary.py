@@ -37,6 +37,17 @@ CANARY_RELS = (
     "refs/source-reach/canary/raw/cookie.txt",
     "refs/source-reach/canary/doctor.generated.json",
     "refs/source-reach/canary/capture.generated.json",
+    "scripts/__pycache__/check.cpython-311.pyc",
+    "scripts/check.pyc",
+    ".paperops/cache/context.generated.md",
+    ".tools/tex/bin",
+    "submission/agu/build/main.pdf",
+    "submission/agu/.tools/local.txt",
+    "tex-env.toml",
+    "_paperops/refs/papers/paper.pdf",
+    "_paperops/refs/research/scan/results/raw.json",
+    "_paperops/refs/research/scan/report.generated.md",
+    "_paperops/refs/research/scan/raw-findings.json",
 )
 REQUIRED_RELS = (
     "_paperops/defaults/workflow/machine.yml",
@@ -124,6 +135,7 @@ def check_wheel_contents(wheel: Path) -> None:
         for name in names
         if name.startswith(PACKAGE_SCAFFOLD_PREFIX)
         and is_excluded_package_scaffold_path(name)
+        and not is_package_include_exception_parent(name)
     ]
     if blocked:
         formatted = "\n".join(f"  - {name}" for name in sorted(blocked))
@@ -154,6 +166,7 @@ def check_init_contents(init_dir: Path) -> None:
         normalize_rel(path.relative_to(init_dir))
         for path in init_dir.rglob("*")
         if is_excluded_scaffold_path(normalize_rel(path.relative_to(init_dir)))
+        and not is_include_exception_parent(normalize_rel(path.relative_to(init_dir)))
     ]
     if blocked:
         formatted = "\n".join(f"  - {name}" for name in sorted(blocked))
@@ -174,10 +187,20 @@ def is_excluded_package_scaffold_path(name: str) -> bool:
     return is_excluded_scaffold_path(rel)
 
 
+def is_package_include_exception_parent(name: str) -> bool:
+    rel = name.removeprefix(PACKAGE_SCAFFOLD_PREFIX)
+    return is_include_exception_parent(rel)
+
+
 def is_excluded_scaffold_path(rel: str) -> bool:
     if any(fnmatch.fnmatch(rel, pattern) for pattern in SCAFFOLD_INCLUDE_EXCEPTIONS):
         return False
     return any(fnmatch.fnmatch(rel, pattern) for pattern in EXCLUDED_SCAFFOLD_PATTERNS)
+
+
+def is_include_exception_parent(rel: str) -> bool:
+    normalized = rel.rstrip("/")
+    return any(exception.startswith(f"{normalized}/") for exception in SCAFFOLD_INCLUDE_EXCEPTIONS)
 
 
 def normalize_rel(path: Path) -> str:

@@ -43,6 +43,31 @@ class ScaffoldPackageBoundaryTest(unittest.TestCase):
         self.assertIn("refs/source-reach/canary/raw/cookie.txt", module.CANARY_RELS)
         self.assertIn("_paperops/refs/source-reach/canary/doctor.generated.json", module.CANARY_RELS)
         self.assertIn("_paperops/refs/source-reach/canary/capture.generated.json", module.CANARY_RELS)
+        self.assertIn("scripts/__pycache__/check.cpython-311.pyc", module.CANARY_RELS)
+        self.assertIn("scripts/check.pyc", module.CANARY_RELS)
+        self.assertIn(".paperops/cache/context.generated.md", module.CANARY_RELS)
+        self.assertIn(".tools/tex/bin", module.CANARY_RELS)
+        self.assertIn("submission/agu/build/main.pdf", module.CANARY_RELS)
+        self.assertIn("submission/agu/.tools/local.txt", module.CANARY_RELS)
+        self.assertIn("tex-env.toml", module.CANARY_RELS)
+        self.assertIn("_paperops/refs/papers/paper.pdf", module.CANARY_RELS)
+        self.assertIn("_paperops/refs/research/scan/results/raw.json", module.CANARY_RELS)
+        self.assertIn("_paperops/refs/research/scan/report.generated.md", module.CANARY_RELS)
+        self.assertIn("_paperops/refs/research/scan/raw-findings.json", module.CANARY_RELS)
+
+    def test_allowed_exception_parent_directories_are_not_reported_as_blocked(self) -> None:
+        module = load_boundary_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            init_dir = Path(tmp) / "paper-demo"
+            for rel in module.REQUIRED_RELS:
+                path = init_dir / rel
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("required\n", encoding="utf-8")
+            keep = init_dir / "_paperops" / "refs" / "papers" / ".gitkeep"
+            keep.parent.mkdir(parents=True, exist_ok=True)
+            keep.write_text("", encoding="utf-8")
+
+            module.check_init_contents(init_dir)
 
 
 if __name__ == "__main__":
