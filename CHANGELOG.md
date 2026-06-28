@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `check-quantity-integrity.py` の Finding / frontmatter / 出力処理を共通 helper `scripts/paperops_checks.py` へ寄せた。checker ごとの出力形式や strict warning handling の重複を減らすための内部整理で、検出内容は変えない。
 - root / template の Makefile が `.venv` 未作成時に `python3.11`、`python3`、`python` の順で Python を探すようにした。`python` コマンドが無い環境でも `make skill-mirror-check` などの checker が起動前に落ちにくくなる。
 - `skill-mirror-check` が `.agents/skills/` と `.claude/skills/` の対応だけでなく、各 `SKILL.md` の frontmatter `name` と directory name の不一致も検出するようにした。Claude wrapper の import は合っているが起動名だけ古い、という見落としを防ぐ。
 - root / template の Makefile で長大化していた `smoke`、`ci`、`audit`、`finish-manuscript-check`、`submission-gate`、`pre-submit` の依存先を named profile 変数へ分離した。検証群の肥大化により、どの gate が構造検証・執筆監査・投稿前確認を担うのか読み取りにくくなる問題を減らす。

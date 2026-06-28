@@ -7,6 +7,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from paperops_checks import Finding, emit_findings, frontmatter, read_text, warning_severity
 from paperops_paths import display_path, internal_path
 
 
@@ -25,12 +26,6 @@ REQUIRED_FIELDS = [
 
 
 @dataclass
-class Finding:
-    severity: str
-    message: str
-
-
-@dataclass
 class QuantityContract:
     path: Path
     value: str
@@ -38,24 +33,8 @@ class QuantityContract:
     fields: dict[str, str]
 
 
-def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8", errors="replace")
-
-
 def is_blank(value: str | None) -> bool:
     return value is None or not value.strip() or PLACEHOLDER_RE.search(value) is not None
-
-
-def frontmatter(text: str) -> str:
-    lines = text.splitlines()
-    if not lines or lines[0].strip() != "---":
-        return ""
-    collected: list[str] = []
-    for line in lines[1:]:
-        if line.strip() == "---":
-            return "\n".join(collected)
-        collected.append(line)
-    return ""
 
 
 def result_cards(root: Path) -> list[Path]:
@@ -139,7 +118,7 @@ def check(root: Path, strict: bool) -> list[Finding]:
             if is_blank(contract.fields.get(field)):
                 findings.append(
                     Finding(
-                        "error" if strict else "warning",
+                        warning_severity(strict),
                         f"`{rel(contract.path, root)}` の quantity_contract `{field}` が未記入です",
                     )
                 )
@@ -154,7 +133,7 @@ def check(root: Path, strict: bool) -> list[Finding]:
         if (value, denominator) not in declared_pairs:
             findings.append(
                 Finding(
-                    "error" if strict else "warning",
+                    warning_severity(strict),
                     f"未登録の数量表現 `{value} of {denominator}` が manuscript にあります。"
                     "`_paperops/evidence/results/` の quantity_contracts に value / denominator / unit_of_analysis を登録してください。",
                 )
@@ -177,24 +156,11 @@ def main() -> int:
 
     root = args.root.resolve()
     findings = check(root, strict=args.strict)
-    errors = [finding for finding in findings if finding.severity == "error"]
-    warnings = [finding for finding in findings if finding.severity == "warning"]
-
-    print("# quantity-integrity-check")
-    print("")
-    if errors:
-        print("## Errors")
-        for finding in errors:
-            print(f"- {finding.message}")
-        print("")
-    if warnings:
-        print("## Warnings")
-        for finding in warnings:
-            print(f"- {finding.message}")
-        print("")
-    if not findings:
-        print("quantity integrity の未登録 count fraction は見つかりませんでした。")
-    return 1 if errors else 0
+    return emit_findings(
+        "quantity-integrity-check",
+        findings,
+        success_message="quantity integrity の未登録 count fraction は見つかりませんでした。",
+    )
 
 
 if __name__ == "__main__":
