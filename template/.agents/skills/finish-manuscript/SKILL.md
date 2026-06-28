@@ -9,7 +9,7 @@ description: Use when /goal asks Codex to finish a manuscript from scratch, revi
 
 この skill は **content-first** の監督役であり、本文 blocker を減らす順路を決める。Submission hygiene は原稿本文の story spine、Results hierarchy、Discussion functions、claim scope、figure story、major review blocker が閉じた後の最終面である。
 
-main agent は writer だけでなく orchestrator として動く。subagent を使う場合は `orchestrate-manuscript-subagents` を先に読み、report を本文へ直接混ぜず、claim / evidence / feedback / section plan へ統合する。
+main agent は writer だけでなく orchestrator として動く。goal 中の一気通貫ルーチンでは、`draft-predicted-results` も専門 skill として扱い、追加シミュレーションで閉じられる blocker を Future Work や defensive prose に逃がさない。subagent を使う場合は `orchestrate-manuscript-subagents` を先に読み、report を本文へ直接混ぜず、claim / evidence / feedback / section plan へ統合する。
 
 ## 最初に決める
 

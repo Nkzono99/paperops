@@ -91,6 +91,20 @@ class PredictedResultDraftingSkillTemplateTest(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, docs)
 
+    def test_goal_finish_routine_lists_predicted_result_skill(self) -> None:
+        finish = read_template("template/.agents/skills/finish-manuscript/SKILL.md")
+        catalog = read_template("docs/skill-catalog.md")
+        agents = read_template("template/AGENTS.md")
+        claude = read_template("template/CLAUDE.md")
+        readme = read_template("template/README.md")
+
+        self.assertIn("goal 中", finish)
+        self.assertIn("draft-predicted-results", finish)
+        self.assertRegex(catalog, r"### 原稿完成[\s\S]*draft-predicted-results")
+        self.assertRegex(agents, r"原稿完成補助:.*draft-predicted-results")
+        self.assertRegex(claude, r"原稿完成補助:.*draft-predicted-results")
+        self.assertRegex(readme, r"/finish-manuscript.*draft-predicted-results")
+
     def test_collect_manuscript_review_collects_predicted_result_markers(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)

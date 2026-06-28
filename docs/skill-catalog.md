@@ -52,6 +52,7 @@ downstream skill は route-level skills と leaf skills に分ける。
 - `compile-results-section`: `paper_ir` から Results の reader question、answer、quantitative evidence、figure、baseline/comparator rationale、consequence を作る。
 - `compile-discussion-section`: `paper_ir` から Discussion functions、mechanism warrant、alternative、implication、decisive next test を作る。
 - `compile-methods-section`: `paper_ir` から Methods の method unit、main text / supplement / code 配分、再実装情報を作る。
+- `draft-predicted-results`: goal 中に追加シミュレーションで閉じられる Results / Discussion blocker を、未検証予測稿と analysis request として扱う。
 - `review-block-flow`: DRAFTED section の block flow、author stance、reader question を読み直し、block operation table で move / split / merge / delete / add を決める。
 - `finalize-manuscript`: 完了宣言前に Finish criteria、review loop、mirror、引用、figure、AI disclosure、pre-submit を確認する。
 

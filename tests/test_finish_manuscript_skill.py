@@ -15,6 +15,7 @@ class FinishManuscriptSkillTest(unittest.TestCase):
         "compile-results-section",
         "compile-discussion-section",
         "compile-methods-section",
+        "draft-predicted-results",
         "review-block-flow",
         "finalize-manuscript",
     ]
@@ -43,6 +44,7 @@ class FinishManuscriptSkillTest(unittest.TestCase):
             "compile-results-section",
             "compile-discussion-section",
             "compile-methods-section",
+            "draft-predicted-results",
             "Submission hygiene",
             "feedback loop",
             "scientific-gate",
@@ -145,6 +147,16 @@ class FinishManuscriptSkillTest(unittest.TestCase):
                 "supplement",
                 "code_or_manifest",
                 "writing-profile.yml",
+            ],
+            "draft-predicted-results": [
+                "PREDICTED-RESULT",
+                "SIM-REQUEST",
+                "EXPECTATION-BASIS",
+                "REPLACE-XX",
+                "_paperops/requests/analysis/",
+                "analysis-needed",
+                "Future Work",
+                "defensive",
             ],
             "review-block-flow": [
                 "block operation table",
