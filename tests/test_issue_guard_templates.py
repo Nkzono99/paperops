@@ -39,8 +39,8 @@ class IssueGuardTemplateTest(unittest.TestCase):
 
         for required in [
             "endpoint != reachability",
-            "cumulative work",
-            "energy barrier",
+            "cumulative criterion",
+            "threshold barrier",
             "same denominator",
             "independence caveat",
             "max-comparison",
@@ -52,6 +52,29 @@ class IssueGuardTemplateTest(unittest.TestCase):
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, combined)
+
+    def test_starter_scientific_gates_avoid_project_specific_path_examples(self) -> None:
+        combined = "\n".join(
+            [
+                read_template("template/_paperops/defaults/contracts/figures.yml"),
+                read_template("template/_paperops/claims/gates/scientific-gate-card-template.md"),
+                read_template("template/_paperops/notes/views/scientific-gate.md"),
+                read_template("template/_paperops/evidence/figures/figure-card-template.md"),
+                read_template("template/.agents/skills/figure-story-audit/SKILL.md"),
+            ]
+        )
+
+        for forbidden in [
+            "release / detachment",
+            "detachment",
+            "lofting",
+            "W_final",
+            "from-rest",
+            "force threshold",
+            "charge distribution",
+        ]:
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, combined)
 
     def test_peer_review_response_and_notes_require_closure_and_prose_explanations(self) -> None:
         response_card = read_template("template/_paperops/review/responses/response-card-template.md")

@@ -124,7 +124,9 @@ class PaperIrSpecTest(unittest.TestCase):
         gitignore = (ROOT / "template" / ".gitignore").read_text(encoding="utf-8")
         architecture = (ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
 
-        self.assertIn("paper_type: computational_modeling", profile)
+        self.assertIn("paper_type: generic_research", profile)
+        self.assertIn("generic_research:", profile)
+        self.assertIn("computational_modeling:", profile)
         self.assertIn("geometry_and_boundary_conditions", profile)
         self.assertIn("state_variables_and_update_law", profile)
         self.assertIn("estimator_definition", profile)

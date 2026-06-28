@@ -1,8 +1,31 @@
 schema_version: 1
 
-paper_type: computational_modeling
+paper_type: generic_research
 
 overlays:
+  generic_research:
+    method_requirements:
+      - study_context
+      - evidence_source
+      - inclusion_or_selection_criteria
+      - measurement_or_analysis_unit
+      - decision_criteria_definition
+      - reproducibility_pointer
+    result_requirements:
+      - main_observation
+      - comparison_or_contrast
+      - uncertainty_or_boundary
+      - figure_or_table_reference
+      - scope_statement
+    figure_requirements:
+      - study_object_or_design
+      - primary_evidence
+      - mechanism_or_boundary_comparison
+    discussion_requirements:
+      - principal_finding
+      - alternative_explanation
+      - limitation_or_boundary
+      - implication
   computational_modeling:
     method_requirements:
       - geometry_and_boundary_conditions

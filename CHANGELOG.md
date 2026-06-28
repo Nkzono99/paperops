@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- starter の `manuscript/writing-profile.yml` の既定 `paper_type` を `generic_research` にし、`computational_modeling` は opt-in overlay として残した。新規下流 project が最初から計算モデル論文として扱われる分野バイアスを避ける。
+- starter の figure / scientific gate に残っていた `detachment`、`W_final`、`charge distribution` など特定物理系の path-claim 例を、endpoint metric、cumulative criterion、threshold barrier、initial-condition subset などの汎用語へ置き換えた。path-dependent claim guard は残しつつ、テンプレート全体を特定論文の語彙へ寄せない。
 - root `README.md` の論文プロジェクト構造説明を現行 `_paperops/` layout に揃え、`template/.agents/README.md` も `.agents/skills/` を共通手順の source of truth、`.claude/skills/` を wrapper として説明するよう直した。旧 top-level `evidence/` / `claims/` / `refs/` や逆向きの skill 正本説明を新規利用者へ案内しない。
 - root の `AGENTS.md` / `CLAUDE.md` の repository map と HarnessOps 境界説明を揃え、実在しない `.Codex/skills/` を案内しないよう root guidance test を追加した。テンプレート保守作業で root 層と下流 `template/` 層の入口を取り違えにくくする。
 - starter の `_paperops/notes/views/` に残る `CLM-0001` / `RES-0001` / `FIG-0001` などの実カード風 ID を `starter_example_rows: true` と明示し、例示行であって未作成カードの在庫ではないことを README と root テストで固定した。新規下流 project が view のサンプル行を実カード構成と誤解しにくくする。

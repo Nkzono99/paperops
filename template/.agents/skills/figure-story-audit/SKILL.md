@@ -31,8 +31,8 @@ description: Use when checking whether figures support claims, evidence, caption
 5. caption が run/case list ではなく、図が支える contrast、mechanism、boundary を先に言っているか確認する。
 6. caption に sample/condition/scope/statistics が不足していないか確認する。
 7. fraction / count / percentage / sample / onset / majority / maximum / best / worst を含む場合、same denominator、independence caveat、max-comparison の criterion、verification coverage を確認する。比較が envelope、screening maxima、exploratory extrema なら main claim の controlled comparison として扱わない。
-8. release / detachment / ejection / lofting の figure では endpoint != reachability を確認する。endpoint work、cumulative work、energy barrier、from-rest subset、force threshold crossing、energy-equivalent speed を分け、caption が from-rest proof や actual trajectory speed に読ませていないか見る。
-9. representation / state-variable claim では state variable visualized を確認する。surface state、field map、microstructure、charge distribution、source attribution などに依存する claim は、outcome-only figure risk と state visualization is not comparator を figure card に明記する。
+8. path-dependent / threshold claim の figure では endpoint != reachability を確認する。endpoint metric、cumulative criterion、threshold barrier、initial-condition subset、decision threshold、derived outcome scale を分け、caption が process reachability や actual trajectory proof に読ませていないか見る。
+9. representation / state-variable claim では state variable visualized を確認する。surface state、field map、microstructure、state distribution、source attribution などに依存する claim は、outcome-only figure risk と state visualization is not comparator を figure card に明記する。
 10. representative / example / diagnostic curve を置く場合、その曲線が統計の denominator source なのか、criterion visualization なのかを分ける。複数 condition から選んだ例は diagnostic-only、not denominator source、not condition ranking を caption に出す。
 11. heatmap / phase-space / color map の場合、主張を運ぶ visual contrast、W=0 などの decision boundary、critical threshold、color-bin saturation、denominator を確認する。ほぼ同色で境界が読めない場合は、boundary curve、threshold table、criterion hierarchy、signed-work profile への差し替えを検討する。
 12. main-text figure は caption だけでなく本文側から `\ref{fig:...}` / `\autoref{fig:...}` / `\cref{fig:...}` で narrative に接続されているか確認する。
@@ -60,7 +60,7 @@ description: Use when checking whether figures support claims, evidence, caption
 - 図が intentless plot に見える場合は、caption だけで救わず `design-paper-figure` へ戻す。
 - caption が claim, evidence, boundary を示しているか確認する。
 - saturated heatmap や hidden threshold を主図証拠として通さない。
-- endpoint work、cumulative work、energy barrier、same denominator、independence caveat、diagnostic-only の扱いを確認する。
+- endpoint metric、cumulative criterion、threshold barrier、same denominator、independence caveat、diagnostic-only の扱いを確認する。
 - state variable visualized、outcome-only figure risk、state visualization is not comparator を figure card に残す。
 - `make figure-reference-check` を使い、main-text figure label が本文から参照されているか確認する。
 - provenance が変わる場合は `_paperops/notes/reproducibility.md` を更新する。

@@ -82,7 +82,7 @@ updated: YYYY-MM-DD
 - independence caveat:
 - max-comparison: controlled-condition metric / envelope / screening maxima / exploratory extrema
 - verification coverage: validated scope / not covered
-- path criterion: endpoint != reachability, cumulative work, energy barrier, from-rest subset
+- path criterion: endpoint != reachability, cumulative criterion, threshold barrier, initial-condition subset
 - state variable visualized: map / inventory / decomposition / attribution
 - outcome-only figure risk:
 - state visualization is not comparator:

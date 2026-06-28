@@ -45,7 +45,7 @@ Gate status は `ready-to-write`、`analysis-needed`、`assumption-blocked`、`s
 - 最大値や favorable condition を主要証拠にしていないか:
 - fraction / count / maximum は same denominator、same criterion、independence caveat を持つか:
 - partial validation の validated scope と not covered を分けたか:
-- release / detachment 系 claim で endpoint work、cumulative work、energy barrier、from-rest subset、force threshold を分けたか:
+- path-dependent / threshold claim で endpoint metric、cumulative criterion、threshold barrier、initial-condition subset、decision threshold を分けたか:
 - external validation needs を claim support ではなく claim upgrade blocker として扱ったか:
 - claim stress-test の allowed wording と must-not-claim が Abstract / Conclusion / caption より先に固定されているか:
 - proxy / sensitivity / authoring guard を measured model や validated solver output と誤読していないか:

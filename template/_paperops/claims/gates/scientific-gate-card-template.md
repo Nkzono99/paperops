@@ -81,9 +81,9 @@ updated: YYYY-MM-DD
 
 ## Path criterion
 
-release / detachment / ejection / lofting などの path-dependent claim では、endpoint work、cumulative work、energy barrier、from-rest subset、force threshold を分ける。
+path-dependent claim や threshold claim では、endpoint metric、cumulative criterion、threshold barrier、initial-condition subset、decision threshold を分ける。
 
-`W_final > 0`、endpoint force、最大値だけを from-rest reachability の十分条件として書かない。
+単一の endpoint metric、最大値、favorable condition だけを process reachability や mechanism claim の十分条件として書かない。
 
 ## Evidence design
 

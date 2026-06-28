@@ -13,14 +13,14 @@ roles:
       - geometry
       - surface state
       - field map
-      - spatially resolved charge distribution
+      - spatially resolved state distribution
       - microstructure
   estimator_or_decision_criterion:
     reader_question: "どの判定式、経路、閾値、階層で結果を読めばよいのか。"
     examples:
-      - cumulative work path
+      - cumulative criterion path
       - endpoint vs reachability
-      - barrier-free subset
+      - threshold-free subset
       - threshold curve
       - criterion hierarchy
   primary_evidence:
@@ -65,12 +65,12 @@ paper_type_rules:
           - surface state
           - field map
           - microstructure
-          - charge distribution
+          - state distribution
         require:
           - model_or_state_visualization
       path_dependent_estimator:
         cue_words:
-          - cumulative work
+          - cumulative criterion
           - barrier
           - trajectory path
           - threshold crossing
