@@ -304,6 +304,20 @@ class PopsCliTest(unittest.TestCase):
         self.assertIn("results-hierarchy.yml", out)
         self.assertIn("legacy", out.lower())
 
+    def test_typed_results_hierarchy_guide_requires_strict_check_before_legacy_delete(self) -> None:
+        guide = (ROOT / "docs" / "migrations" / "v0.md").read_text(encoding="utf-8")
+        m0_0003_guide = guide.split("## M0-0003:", 1)[1]
+        strict_command = "python scripts/check-section-contracts.py --root . --strict"
+        delete_step = "strict checker 成功後にだけ、旧 Markdown の Results hierarchy を削除する。"
+
+        self.assertIn(strict_command, m0_0003_guide)
+        self.assertIn(delete_step, m0_0003_guide)
+        self.assertLess(m0_0003_guide.index(strict_command), m0_0003_guide.index(delete_step))
+        self.assertNotIn(
+            "`make section-contract-check` を実行し、strict checker",
+            m0_0003_guide,
+        )
+
     def test_migrate_legacy_apply_still_writes_manifest_without_moving_dirs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             before_path_project = Path(tmp) / "before-path"
