@@ -61,6 +61,54 @@ class SectionContractCheckTest(unittest.TestCase):
         self.assertIn("one-sentence answer", result.stdout)
         self.assertIn("baseline / comparator rationale", result.stdout)
 
+    def test_strict_fails_when_any_legacy_results_item_is_incomplete(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_text(
+                root / "_paperops" / "notes" / "views" / "storyline.md",
+                """
+                # Storyline
+
+                ## Results hierarchy
+
+                - reader question 1: What changes in the baseline?
+                - one-sentence answer:
+                - quantitative evidence and unit of analysis: 12 of 16 trajectories, per candidate.
+                - figure / table role: Figure 2 shows the work budget.
+                - baseline / comparator rationale: The control isolates retained charge.
+                - consequence: The next item tests coupling.
+                - reader question 2: Does the criterion survive coupling?
+                - one-sentence answer: It survives only inside the stated boundary.
+                - quantitative evidence and unit of analysis: 8 of 16 trajectories, per candidate.
+                - figure / table role: Figure 3 shows the boundary.
+                - baseline / comparator rationale: The coupled case tests the omitted process.
+                - consequence: The Discussion interprets the boundary.
+
+                ## Discussion functions
+
+                - principal_finding: Baseline charging changes the work budget.
+                - mechanism_warrant: Retained charge changes the force balance.
+                - prior_work_delta: This separates local control from ambient estimates.
+                - alternative_or_boundary: Coupled illumination is outside this control.
+                - implication: The control defines a lower-complexity reference.
+                - decisive_next_test: Add coupled illumination and reuse the criterion.
+
+                ## Methods definition registry
+
+                | item | definition location | manuscript block | status |
+                | --- | --- | --- | --- |
+                | estimand_and_unit_of_analysis | Methods, paragraph 2 | methods.estimand.01 | locked |
+                | comparison_or_baseline | Methods, paragraph 3 | methods.baseline.01 | locked |
+                | decision_criteria | Methods, paragraph 4 | methods.criteria.01 | locked |
+                | verification_or_convergence | Methods, paragraph 5 | methods.verification.01 | locked |
+                """,
+            )
+            result = run_python_script(SCRIPT, "--root", root, "--strict")
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Results hierarchy item `1`", result.stdout)
+        self.assertIn("one-sentence answer", result.stdout)
+
     def test_strict_fails_when_discussion_functions_are_placeholders(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

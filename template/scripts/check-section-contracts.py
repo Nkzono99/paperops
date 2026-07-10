@@ -92,6 +92,28 @@ def extract_bullet_map(body: str) -> dict[str, str]:
     return values
 
 
+def extract_legacy_results_items(body: str) -> list[tuple[str, dict[str, str]]]:
+    items: list[tuple[str, dict[str, str]]] = []
+    current_label = "1"
+    current_values: dict[str, str] | None = None
+    pattern = re.compile(r"^[ \t]*-[ \t]*([^:]+):[ \t]*(.*)$", re.MULTILINE)
+    for match in pattern.finditer(body):
+        raw_key = match.group(1).strip()
+        key = normalize_key(raw_key)
+        if key == "reader_question":
+            if current_values is not None:
+                items.append((current_label, current_values))
+            suffix = re.search(r"(\d+)\s*$", raw_key)
+            current_label = suffix.group(1) if suffix else str(len(items) + 1)
+            current_values = {}
+        elif current_values is None:
+            current_values = {}
+        current_values[key] = match.group(2).strip()
+    if current_values is not None:
+        items.append((current_label, current_values))
+    return items
+
+
 def normalize_header(value: str) -> str:
     return normalize_key(value)
 
@@ -126,15 +148,15 @@ def check_results_hierarchy(rel_path: str, body: str, strict: bool) -> list[Find
                 f"`{rel_path}` に Results hierarchy がありません",
             )
         ]
-    values = extract_bullet_map(body)
-    for key, label in REQUIRED_RESULTS_FIELDS:
-        if is_blank(values.get(key)):
-            findings.append(
-                Finding(
-                    severity(strict),
-                    f"`{rel_path}` の Results hierarchy で {label} が未記入です",
+    for item_label, values in extract_legacy_results_items(body):
+        for key, label in REQUIRED_RESULTS_FIELDS:
+            if is_blank(values.get(key)):
+                findings.append(
+                    Finding(
+                        severity(strict),
+                        f"`{rel_path}` の Results hierarchy item `{item_label}` で {label} が未記入です",
+                    )
                 )
-            )
     return findings
 
 
