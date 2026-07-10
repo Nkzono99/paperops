@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paperops.dev/schemas/results-hierarchy.schema.json",
+  "title": "PaperOps Results hierarchy",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "items"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "reader_question",
+          "answer",
+          "quantitative_evidence_and_unit_of_analysis",
+          "figure_table_role",
+          "baseline_comparator_rationale",
+          "consequence",
+          "next_item_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^RHI-[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "reader_question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "quantitative_evidence_and_unit_of_analysis": {
+            "type": "string"
+          },
+          "figure_table_role": {
+            "type": "string"
+          },
+          "baseline_comparator_rationale": {
+            "type": "string"
+          },
+          "consequence": {
+            "type": "string"
+          },
+          "next_item_id": {
+            "type": "string",
+            "pattern": "^(?:|RHI-[A-Za-z0-9][A-Za-z0-9._-]*)$"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

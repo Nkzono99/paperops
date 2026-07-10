@@ -5,8 +5,9 @@ from __future__ import annotations
 import argparse
 import re
 from pathlib import Path
+from typing import Any
 
-from paperops_checks import Finding, emit_findings, read_text, warning_severity
+from paperops_checks import Finding, emit_findings, load_mapping, read_text, warning_severity
 from paperops_paths import display_path, internal_path
 
 
@@ -20,6 +21,17 @@ REQUIRED_RESULTS_FIELDS = [
     ("baseline_comparator_rationale", "`baseline / comparator rationale`"),
     ("consequence", "`consequence`"),
 ]
+
+REQUIRED_TYPED_RESULTS_FIELDS = [
+    "reader_question",
+    "answer",
+    "quantitative_evidence_and_unit_of_analysis",
+    "figure_table_role",
+    "baseline_comparator_rationale",
+    "consequence",
+]
+
+TYPED_RESULTS_ID_RE = re.compile(r"^RHI-[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 REQUIRED_DISCUSSION_FIELDS = [
     "principal_finding",
@@ -71,6 +83,10 @@ def resolve_storyline_path(root: Path) -> tuple[str, Path] | None:
         if path.exists():
             return display_path(root, path), path
     return None
+
+
+def resolve_results_hierarchy_path(root: Path) -> Path:
+    return root / "_paperops" / "model" / "editorial" / "results-hierarchy.yml"
 
 
 def section_body(text: str, heading: str) -> str:
@@ -161,6 +177,100 @@ def check_results_hierarchy(rel_path: str, body: str, strict: bool) -> list[Find
     return findings
 
 
+def check_typed_results_hierarchy(
+    rel_path: str,
+    data: dict[str, Any],
+    strict: bool,
+) -> list[Finding]:
+    findings: list[Finding] = []
+    finding_severity = severity(strict)
+
+    if type(data.get("schema_version")) is not int or data.get("schema_version") != 1:
+        findings.append(
+            Finding(
+                finding_severity,
+                f"`{rel_path}` の `schema_version` は 1 である必要があります",
+            )
+        )
+
+    items = data.get("items")
+    if not isinstance(items, list) or not items:
+        findings.append(
+            Finding(
+                finding_severity,
+                f"`{rel_path}` の `items` must be a non-empty list",
+            )
+        )
+        return findings
+
+    seen_ids: set[str] = set()
+    for index, item in enumerate(items, start=1):
+        if not isinstance(item, dict):
+            findings.append(
+                Finding(
+                    finding_severity,
+                    f"`{rel_path}` の Results hierarchy item `{index}` must be a mapping",
+                )
+            )
+            continue
+
+        raw_item_id = item.get("id")
+        item_id = raw_item_id if isinstance(raw_item_id, str) else ""
+        item_label = item_id or str(index)
+        if is_blank(item_id) or TYPED_RESULTS_ID_RE.fullmatch(item_id) is None:
+            findings.append(
+                Finding(
+                    finding_severity,
+                    f"`{rel_path}` の Results hierarchy item id `{item_id}` must match `RHI-*` and not be a placeholder",
+                )
+            )
+        if item_id in seen_ids:
+            findings.append(
+                Finding(
+                    finding_severity,
+                    f"`{rel_path}` has duplicate Results hierarchy item id `{item_id}`",
+                )
+            )
+        elif item_id:
+            seen_ids.add(item_id)
+
+        for field in REQUIRED_TYPED_RESULTS_FIELDS:
+            value = item.get(field)
+            if not isinstance(value, str) or is_blank(value):
+                findings.append(
+                    Finding(
+                        finding_severity,
+                        f"`{rel_path}` の Results hierarchy item `{item_label}` で `{field}` が未記入です",
+                    )
+                )
+
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            continue
+        raw_item_id = item.get("id")
+        item_label = raw_item_id if isinstance(raw_item_id, str) and raw_item_id else str(index + 1)
+        next_item_id = item.get("next_item_id")
+        if index + 1 < len(items):
+            next_item = items[index + 1]
+            expected_id = next_item.get("id") if isinstance(next_item, dict) else None
+            if next_item_id != expected_id:
+                findings.append(
+                    Finding(
+                        finding_severity,
+                        f"`{rel_path}` の Results hierarchy item `{item_label}` の next_item_id `{next_item_id}` は配列上の次 item `{expected_id}` と一致する必要があります",
+                    )
+                )
+        elif next_item_id != "":
+            findings.append(
+                Finding(
+                    finding_severity,
+                    f"`{rel_path}` の terminal item `{item_label}` の next_item_id は空である必要があります",
+                )
+            )
+
+    return findings
+
+
 def check_discussion_functions(rel_path: str, body: str, strict: bool) -> list[Finding]:
     findings: list[Finding] = []
     if not body.strip():
@@ -222,7 +332,17 @@ def check_methods_registry(rel_path: str, body: str, strict: bool) -> list[Findi
 
 def check(root: Path, text: str, rel_path: str, strict: bool) -> list[Finding]:
     findings: list[Finding] = []
-    findings.extend(check_results_hierarchy(rel_path, section_body(text, "Results hierarchy"), strict))
+    typed_path = resolve_results_hierarchy_path(root)
+    if typed_path.exists():
+        findings.extend(
+            check_typed_results_hierarchy(
+                display_path(root, typed_path),
+                load_mapping(typed_path),
+                strict,
+            )
+        )
+    else:
+        findings.extend(check_results_hierarchy(rel_path, section_body(text, "Results hierarchy"), strict))
     findings.extend(check_discussion_functions(rel_path, section_body(text, "Discussion functions"), strict))
     findings.extend(check_methods_registry(rel_path, section_body(text, "Methods definition registry"), strict))
     return findings

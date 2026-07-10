@@ -1,0 +1,10 @@
+schema_version: 1
+items:
+  - id: RHI-0001
+    reader_question: 未記入
+    answer: 未記入
+    quantitative_evidence_and_unit_of_analysis: 未記入
+    figure_table_role: 未記入
+    baseline_comparator_rationale: 未記入
+    consequence: 未記入
+    next_item_id: ""

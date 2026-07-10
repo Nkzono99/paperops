@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import unittest
 from pathlib import Path
 
@@ -15,6 +16,8 @@ class StorylineLayerTemplateTest(unittest.TestCase):
     def test_template_has_storyline_contract_skill_view_and_workflow_guards(self) -> None:
         expected_paths = [
             "template/_paperops/defaults/contracts/storyline.yml",
+            "template/_paperops/defaults/schemas/results-hierarchy.schema.json",
+            "template/_paperops/model/editorial/results-hierarchy.yml",
             "template/_paperops/notes/views/storyline.md",
             "template/.agents/skills/design-paper-storyline/SKILL.md",
             "template/.claude/skills/design-paper-storyline/SKILL.md",
@@ -51,6 +54,21 @@ class StorylineLayerTemplateTest(unittest.TestCase):
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, combined)
+
+    def test_template_has_typed_results_schema_and_starter_chain_field(self) -> None:
+        schema_path = "template/_paperops/defaults/schemas/results-hierarchy.schema.json"
+        model_path = "template/_paperops/model/editorial/results-hierarchy.yml"
+
+        self.assertTrue((ROOT / schema_path).exists(), f"{schema_path} is missing")
+        self.assertTrue((ROOT / model_path).exists(), f"{model_path} is missing")
+
+        schema = json.loads(read_template(schema_path))
+        self.assertEqual(schema["properties"]["schema_version"]["const"], 1)
+        self.assertEqual(schema["properties"]["items"]["minItems"], 1)
+        self.assertFalse(schema["additionalProperties"])
+        self.assertFalse(schema["properties"]["items"]["items"]["additionalProperties"])
+        self.assertIn("next_item_id", schema["properties"]["items"]["items"]["required"])
+        self.assertIn("next_item_id", read_template(model_path))
 
     def test_writing_and_review_skills_route_through_editorial_architect_view(self) -> None:
         combined = "\n".join(
