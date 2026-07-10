@@ -9,6 +9,8 @@
 - `pops update-paperops --plan` は、現在の scaffold version から target version までの upgrade chain を表示する。
 - `pops update-paperops --apply-chain` は、各 checkpoint の `pops` を `uvx --from paper-harness-cli==<version>` で順に実行する。
 - 下流 project state の破壊的変更は `pops migrate list/show/apply` の migration item として扱う。
+- `_paperops/defaults/schemas/*` は managed update で配布するが、schema に従う `_paperops/model/editorial/*` は project-owned state として自動上書きしない。
+- 自動 move では安全に判断できない移行は `moves=()` の guide-only migration として登録し、既存の `pops migrate list/show/apply` で手順を案内する。
 - patch version は原則として踏まず、minor ごとの最新 patch を checkpoint とする。
 - major version を跨ぐ chain は `--allow-major` が指定された場合だけ実行する。
 - `apply-chain` の途中で changed managed files が見つかった場合、その step は停止し、`.pops/manifest.toml` の `scaffold.version` は進めない。意図的な project fork は `pops detach` で登録し、上書きしてよい変更だけ review 後に `--force` で進める。

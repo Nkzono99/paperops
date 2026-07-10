@@ -65,9 +65,29 @@ DEFAULTS_SPLIT_MIGRATION = Migration(
     ),
 )
 
+TYPED_RESULTS_HIERARCHY_MIGRATION = Migration(
+    migration_id="M0-0003",
+    title="Adopt the typed Results hierarchy model",
+    checkpoint="v0 checkpoint for typed editorial state",
+    summary=(
+        "Introduces project-owned _paperops/model/editorial/results-hierarchy.yml "
+        "while retaining the legacy Markdown reader for existing projects."
+    ),
+    moves=(),
+    notes=(
+        "New projects receive the typed starter model from pops init.",
+        "Existing projects may keep the legacy storyline.md Results hierarchy during the compatibility checkpoint.",
+        "Adopt the typed file manually from the starter schema, then run make section-contract-check.",
+    ),
+)
+
 
 def registered_migrations() -> tuple[Migration, ...]:
-    return (INTERNAL_LAYOUT_MIGRATION, DEFAULTS_SPLIT_MIGRATION)
+    return (
+        INTERNAL_LAYOUT_MIGRATION,
+        DEFAULTS_SPLIT_MIGRATION,
+        TYPED_RESULTS_HIERARCHY_MIGRATION,
+    )
 
 
 def get_migration(migration_id: str) -> Migration | None:

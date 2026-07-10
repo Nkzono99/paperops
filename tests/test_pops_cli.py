@@ -292,6 +292,18 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue(overlay.is_file())
             self.assertEqual("project: overlay\n", overlay.read_text(encoding="utf-8"))
 
+    def test_migrate_lists_typed_results_hierarchy_guide(self) -> None:
+        code, out, err = run_cli(["migrate", "list"])
+
+        self.assertEqual(code, 0, err)
+        self.assertIn("M0-0003", out)
+
+        code, out, err = run_cli(["migrate", "show", "M0-0003"])
+
+        self.assertEqual(code, 0, err)
+        self.assertIn("results-hierarchy.yml", out)
+        self.assertIn("legacy", out.lower())
+
     def test_migrate_legacy_apply_still_writes_manifest_without_moving_dirs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             before_path_project = Path(tmp) / "before-path"
@@ -449,6 +461,42 @@ class PopsCliTest(unittest.TestCase):
 
             self.assertEqual(code, 0, err)
             self.assertTrue((target / "_paperops" / "defaults" / "workflow" / "machine.yml").is_file())
+
+    def test_update_paperops_can_add_managed_schema_defaults(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            run_cli(["init", str(target)])
+            schema = target / "_paperops" / "defaults" / "schemas" / "results-hierarchy.schema.json"
+            schema.unlink()
+
+            code, out, err = run_cli(
+                [
+                    "update-paperops",
+                    "--dry-run",
+                    "--only",
+                    "_paperops/defaults/schemas/",
+                    str(target),
+                ]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertIn(
+                "+ _paperops/defaults/schemas/results-hierarchy.schema.json [schema]",
+                out,
+            )
+
+            code, _out, err = run_cli(
+                [
+                    "update-paperops",
+                    "--apply",
+                    "--only",
+                    "_paperops/defaults/schemas/",
+                    str(target),
+                ]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertTrue(schema.is_file())
 
     def test_update_paperops_explains_changed_managed_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

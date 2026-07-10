@@ -15,6 +15,8 @@ def managed_update_surface(rel: str) -> str:
         return "make workflow"
     if rel == "TROUBLESHOOTING.md":
         return "operator docs"
+    if rel.startswith("_paperops/defaults/schemas/"):
+        return "schema"
     if (
         rel.startswith("_paperops/defaults/contracts/")
         or rel.startswith("_paperops/contracts/")

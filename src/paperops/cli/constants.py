@@ -93,6 +93,7 @@ MANAGED_UPDATE_PATTERNS = (
     "Makefile",
     "TROUBLESHOOTING.md",
     "_paperops/defaults/contracts/*",
+    "_paperops/defaults/schemas/*",
     "_paperops/defaults/workflow/*",
     "contracts/*",
     "workflow/*",
