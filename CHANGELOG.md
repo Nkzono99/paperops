@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- 新規 scaffold の Results hierarchy 正本を project-owned の `_paperops/model/editorial/results-hierarchy.yml` へ移し、`RHI-*` ID と `next_item_id` chain を strict checker で検証する typed Results hierarchy として downstream interface、skills、docs を揃えた。`storyline.md` は値を複製しない pointer になり、schema は `_paperops/defaults/schemas/*` の paperops-managed default として配布する。既存下流リポジトリで取り込む場合は、まず `pops update-paperops --apply --only _paperops/defaults/schemas/` で managed schema を更新し、project-owned typed state は M0-0003 に従って opt-in で作成する。移行完了までは legacy Markdown fallback を利用でき、`python scripts/check-section-contracts.py --root . --strict` が成功する前に旧 Results hierarchy を削除しない。
 - `develop-manuscript-content` を追加し、claims、storyline、figure story、Results hierarchy、Discussion functions、Methods definition、section compiler、block-flow review、本文 prose だけを進める原稿内容専用入口を用意した。`finish-manuscript` は投稿可能状態までの監督役として残し、ORCID、affiliation、license などの投稿メタデータや submission candidate / round snapshot は `submission-gate` に分ける。既存下流リポジトリで取り込む場合は、新 skill と Claude wrapper、`finish-manuscript`、AGENTS / CLAUDE / README、skill catalog を更新する必要がある。
 
 ## 0.12.0 - 2026-06-28

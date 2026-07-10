@@ -33,7 +33,9 @@
 `_paperops/` の内部は次のように分ける。
 
 - `_paperops/defaults/contracts/`: paperops-managed の Storyline と Introduction / Methods / Results / Discussion / Conclusion / Figure story 標準契約
+- `_paperops/defaults/schemas/`: paperops-managed の typed state schema default
 - `_paperops/defaults/workflow/`: paperops-managed の状態機械、focus policy、subagent roster
+- `_paperops/model/editorial/`: 論文ごとの project-owned typed Editorial state
 - `_paperops/contracts/`: 論文固有の contract overlay
 - `_paperops/workflow/`: 現在状態、review round summary、人間判断、任意の workflow overlay
 - `_paperops/refs/`: 文献サマリー、関連研究調査、外部 source、外部 project link、外部 bundle import state
@@ -58,8 +60,10 @@
 | `_paperops/requests/` | 追加解析や改稿依頼を管理する | AI 内部正本 | `/integrate-writing-feedback`, runops handoff |
 | `_paperops/notes/views/` の pure overview view | 正本カードを俯瞰する | 派生 view | 該当 card 更新後に手動または半自動で更新 |
 | `_paperops/notes/views/` の controlled authoring view | 本文での呼び方、条件名、概念語、読者向け語彙、story spine を統制する | 編集可能な統制 view | `/design-paper-storyline`, `/public-terminology-pass`, `/contextualize-conditions`, `/polish-ai-draft` |
+| `_paperops/model/editorial/results-hierarchy.yml` | Results の reader question、answer、evidence、figure、baseline、consequence と item chain を保持する | project-owned typed Editorial state | `design-paper-storyline` / `compile-results-section` |
 | `paper_ir` | card / view から Writer に渡す材料を section ごとにまとめる | 生成一時物 | `compile-results-section` / `compile-discussion-section` / `compile-methods-section` |
 | `_paperops/defaults/contracts/` | story spine、section ごとの読者質問、入力、出力、禁止構造と figure story の標準契約を定める | managed default | `design-paper-storyline` / section compiler / `plan-figure-story` / audit-section |
+| `_paperops/defaults/schemas/` | typed state の構造を定義する | managed default | `pops update-paperops` |
 | `_paperops/contracts/` | 標準契約から外れる論文固有の差分だけを同名 file で置く | project overlay | 人間または Agent の明示更新 |
 | `manuscript/writing-profile.yml` | 論文種別、投稿先、分野別要求を section 契約へ重ねる | プロジェクト設定 | 初期 setup、投稿先変更時 |
 | `_paperops/defaults/workflow/` | 状態機械、content-first focus policy、subagent role roster の標準規約を管理する | managed default | `pops workflow`, `content-first-gate`, `route-manuscript-feedback`, `orchestrate-manuscript-subagents` |
@@ -70,7 +74,7 @@
 | `_handoff/` | 未整理入力の一時置き場 | Git 管理しない | 人間入力、raw file intake |
 | `_archives/` | sealed scratch archive | 通常読まない封印物 | `pops scratch archive/restart/restore` |
 
-`_paperops/notes/views/storyline.md`、`_paperops/notes/views/concept-terms.md`、`_paperops/notes/views/condition-context-map.md` は controlled authoring view として扱う。ここには「カード正本から見える意味」を、本文の story spine、語彙、条件名へ変換するときの判断を書く。
+`_paperops/notes/views/storyline.md`、`_paperops/notes/views/concept-terms.md`、`_paperops/notes/views/condition-context-map.md` は controlled authoring view として扱う。ここには「カード正本から見える意味」を、本文の story spine、語彙、条件名へ変換するときの判断を書く。ただし Results 項目の値は `_paperops/model/editorial/results-hierarchy.yml` が正本であり、storyline view には複製しない。
 
 `_paperops/notes/views/concept-terms.md` は概念語ビューである。claim / argument / evidence card の意味を強い英語名詞句へ圧縮しすぎていないかを確認し、accepted term、普通の文へほどく語、avoid 語を分ける。`concept-term-check` はこの concept-term compression を検出し、必要なら結果の層へほどくよう促す。
 
@@ -79,7 +83,7 @@
 原稿を書く前の story 設計は一段ではなく、次の三層に分ける。
 
 1. `story/` の story seed: 研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を書く。
-2. `_paperops/notes/views/storyline.md`、`_paperops/defaults/contracts/storyline.yml`、必要な `_paperops/contracts/storyline.yml` overlay: story seed を Results hierarchy、Discussion functions、section 契約へ落とす中間言語にする。
+2. `_paperops/notes/views/storyline.md`、project-owned の `_paperops/model/editorial/results-hierarchy.yml`、`_paperops/defaults/contracts/storyline.yml`、必要な `_paperops/contracts/storyline.yml` overlay: story seed を typed Results hierarchy、Discussion functions、section 契約へ落とす中間言語にする。
 3. `manuscript/`: 実際の結果、図、解析、レビューを反映した読者向け本文を書く。
 
 workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDENCE_READY -> STORY_RECONCILED -> ARCHITECTURE_LOCKED -> SECTION_PLANNED -> ...` を採用する。
@@ -102,7 +106,7 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 6. `content-first-gate`、`_paperops/defaults/workflow/focus-policy.yml`、`make content-first-check` で、次の作業が本文 blocker を減らす intent かを確認する。
 7. subagent を使う場合は `orchestrate-manuscript-subagents` で `_paperops/defaults/workflow/subagent-roster.yml` と必要な project overlay を読み、main agent / orchestrator が role brief、privacy、`subagent_report`、integration decision を管理する。
 8. `_paperops/defaults/contracts/<section>.yml`、必要な `_paperops/contracts/<section>.yml` overlay、`manuscript/writing-profile.yml` を重ねて、section が答える読者質問、必要出力、`section_depth` floor を確認する。
-9. 本文生成前に `design-paper-storyline` で story spine、Results hierarchy、Discussion functions、Methods definition registry を固定する。
+9. 本文生成前に `design-paper-storyline` で story spine、`RHI-*` ID と `next_item_id` を持つ typed Results hierarchy、Discussion functions、Methods definition registry を固定する。
 10. 本文生成前に `plan-figure-story` で中心 claim から visual obligation を作り、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図の欠落を確認する。
 11. 原稿を書く前に、必要な範囲で `paper_ir` と section plan を作る。生成物は `.paperops/cache/` に置き、Git 管理しない。
 12. section compiler が Methods / Results / Discussion それぞれの reader question、answer、evidence、figure、caveat location、sentence budget を決める。
@@ -115,11 +119,11 @@ workflow は C 案として `SCOPED -> STORY_SEEDED -> EVIDENCE_PLANNED -> EVIDE
 
 `paper_ir` は、既存 card と controlled authoring view から作る生成一時物である。新しい手書き正本にはしない。目的は、研究 integrity 層と文章層の間に、読者向けの変換契約を置くことである。
 
-`_paperops/defaults/contracts/` は文章テンプレートではなく、storyline と section ごとの入出力契約である。`_paperops/defaults/contracts/storyline.yml` は reader_promise、central_claim、evidence_ladder、Results hierarchy、Discussion functions を個別 section より上位で固定する。論文固有に変える場合だけ `_paperops/contracts/` に同名 overlay を置く。Introduction は `problem -> unresolved tension -> precise gap -> approach -> contribution -> scope` のような論理機能を持ち、Methods / Results / Discussion はそれぞれ情報配置、subsection 契約、推論型を明示する。`manuscript/writing-profile.yml` は starter では `paper_type: generic_research` とし、必要に応じて `computational_modeling` のような論文種別 overlay と投稿先要求を重ねる。
+`_paperops/defaults/contracts/` は文章テンプレートではなく、storyline と section ごとの入出力契約である。`_paperops/defaults/contracts/storyline.yml` は reader_promise、central_claim、evidence_ladder、Results hierarchy、Discussion functions を個別 section より上位で固定する。Results の値は project-owned の `_paperops/model/editorial/results-hierarchy.yml` に置き、その構造だけを paperops-managed の `_paperops/defaults/schemas/results-hierarchy.schema.json` が定義する。論文固有に変える場合だけ `_paperops/contracts/` に同名 overlay を置く。Introduction は `problem -> unresolved tension -> precise gap -> approach -> contribution -> scope` のような論理機能を持ち、Methods / Results / Discussion はそれぞれ情報配置、subsection 契約、推論型を明示する。`manuscript/writing-profile.yml` は starter では `paper_type: generic_research` とし、必要に応じて `computational_modeling` のような論文種別 overlay と投稿先要求を重ねる。
 
 `_paperops/defaults/contracts/figures.yml` は figure story 標準契約である。`plan-figure-story` は claim card の `visual_obligations` と figure card の `satisfies_visual_obligations` を対応させ、本文生成前に Figure 1、主図、補足図、missing figure の扱いを決める。個別図は `design-paper-figure` で図の設計意図、reader task、takeaway、encoding、scale/denominator、uncertainty/distribution、caption、runops handoff を Figure design brief として固定する。追加シミュレーションが投稿前に実施可能で予測根拠がある場合は、`draft-predicted-results` が `PREDICTED-RESULT` / `SIM-REQUEST` comment、`xx` 置換条件、`_paperops/requests/analysis/` を伴う予測稿を `manuscript/` の authoring source に作り、Future Work や defensive prose へ早すぎる退避を避ける。`check-predicted-results.py` と `submission-gate` は、submission candidate / round snapshot に予測稿、open AREQ、`xx` が残らないことを確認する。論文固有の figure contract は `_paperops/contracts/figures.yml` overlay へ置く。`figure-story-audit` はその後に、既存図の denominator、path criterion、caption、本文参照を監査する。
 
-section compiler は、`finish-manuscript` から呼ばれる専門 skill 群として Writer の前に走る。`section-contract-check` は Results hierarchy、Discussion functions、Methods definition registry が読者質問、baseline/comparator rationale、判定基準定義を持つかを見る semantic coverage gate である。Results / Discussion はさらに `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。DRAFTED section は `review-block-flow` で block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を確認してから AUDITED へ進める。`card-coverage-check` は本文中の図、citation、block ID が `_paperops/evidence/` や関連 card に接続されているかを確認し、source summary を claim_boundary、parameter_choice、reviewer_objection、method_precedent の根拠に使う場合は source card に昇格させる。
+section compiler は、`finish-manuscript` から呼ばれる専門 skill 群として Writer の前に走る。`section-contract-check` は typed Results hierarchy の schema version、`RHI-*` ID、`next_item_id` chain と、Discussion functions、Methods definition registry の semantic coverage を見る。`python scripts/check-section-contracts.py --root . --strict` は typed file があれば legacy Markdown より優先し、不完全な移行を失敗にする。Results / Discussion はさらに `manuscript/writing-profile.yml` の `section_depth` を参照し、JA は TeX noise を除いた `ja_chars`、EN は TeX noise を除いた `en_words`、段落数、one-paragraph subsections を確認する。これは length is floor, not target の advisory / strict gate であり、短い場合は水増しではなく Results hierarchy や Discussion functions の不足へ戻す。DRAFTED section は `review-block-flow` で block operation table を作り、author stance、reader question、why here、move / split / merge / delete / add を確認してから AUDITED へ進める。`card-coverage-check` は本文中の図、citation、block ID が `_paperops/evidence/` や関連 card に接続されているかを確認し、source summary を claim_boundary、parameter_choice、reviewer_objection、method_precedent の根拠に使う場合は source card に昇格させる。
 
 - `compile-methods-section`: method unit ごとに、本文 / supplement / code への配分、非標準性、結果感度、再実装に必要な情報を決める。
 - `compile-results-section`: reader question -> one-sentence answer -> quantitative evidence -> figure -> baseline/comparator rationale -> consequence の順に、結果の読み順を作る。

@@ -41,6 +41,7 @@ section_depth_contract:
       - verification_or_convergence
 
 inputs:
+  - _paperops/model/editorial/results-hierarchy.yml
   - _paperops/notes/views/storyline.md
   - _paperops/notes/views/argument-map.md
   - _paperops/notes/views/result-pattern-map.md
@@ -59,7 +60,7 @@ inputs:
 outputs:
   - reader_promise is explicit before drafting or major revision
   - evidence_ladder separates core evidence, boundary, robustness, and null cases
-  - Results hierarchy is planned before writing the Results section
+  - typed Results hierarchy is planned in the project-owned editorial model before writing the Results section
   - Discussion functions are planned before writing the Discussion section
   - Methods definition registry links central estimands, baselines, criteria, and verification to public manuscript locations
   - title, abstract, Results, Discussion, and Conclusion preserve the same scope boundary
@@ -67,6 +68,8 @@ outputs:
 hard_rules:
   - Do not start section drafting while the story_spine is placeholder-only.
   - Do not treat a list of available results as a Results hierarchy.
+  - Do not duplicate typed Results hierarchy item values in storyline.md.
+  - Existing downstream projects may use the legacy Markdown fallback until they adopt M0-0003.
   - Do not treat limitations alone as Discussion functions.
   - Do not use a baseline, comparator, or decision criterion in Results before its role is defined for public readers.
   - Do not move to Submission hygiene while Results hierarchy or Discussion functions are unresolved.

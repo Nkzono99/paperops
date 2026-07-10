@@ -13,21 +13,27 @@ Results を実施順や保有情報順ではなく、読者の疑問順に変換
 - `_paperops/contracts/results.yml` if project overlay exists
 - `_paperops/defaults/contracts/figures.yml`
 - `_paperops/contracts/figures.yml` if project overlay exists
+- `_paperops/defaults/schemas/results-hierarchy.schema.json`
+- `_paperops/model/editorial/results-hierarchy.yml`
 - `_paperops/notes/views/storyline.md`
 - `_paperops/notes/views/claim-evidence-map.md`
 - `_paperops/notes/views/result-pattern-map.md`
 - `manuscript/writing-profile.yml`
 - necessary claim / evidence / request cards
 
+新規 scaffold では project-owned の `_paperops/model/editorial/results-hierarchy.yml` を必須入力とする。既存下流 project は M0-0003 を採用するまで `storyline.md` の legacy Markdown Results hierarchy を fallback として利用できる。
+
 本文生成前に `plan-figure-story` を通し、state/setup 図、criterion 図、primary evidence 図、mechanism/boundary 図が claim に対して足りているか確認する。既存図だけを監査して `figure_story_fixed` にしない。
 
 ## Compile Rule
 
-`compile-results-section` は、各 subsection を `reader question -> one-sentence answer -> quantitative evidence -> figure -> baseline / comparator rationale -> consequence` の順にする。caveat は主張の意味を変える場合だけ置く。
+`compile-results-section` は typed Results hierarchy の配列順と `next_item_id` chain を一致させ、各 `RHI-*` item を `reader question -> one-sentence answer -> quantitative evidence -> figure -> baseline / comparator rationale -> consequence` の subsection に変換する。caveat は主張の意味を変える場合だけ置く。
 
 Results の subsection plan は、`reader_question`、`answer`、`evidence`、`baseline_or_comparator_rationale`、`scope`、`consequence` を必ず持つ。baseline、control、reference condition、comparator を使う場合は、それが何を隔離し、何を検証していないかを公開読者向けに書く。run inventory、解析を実施した順の列挙、同じ limitation の反復を topic sentence にしない。
 
-Results hierarchy は、`_paperops/notes/views/storyline.md` の `Section depth map`、`Results hierarchy`、`Methods definition registry` に対応する。図表を並べるだけ、代表値だけを置く、baseline の科学的役割や判定基準を Methods に接続しない、境界条件と感度解析を一段落へ圧縮する場合は section-depth blocker として扱う。
+Results hierarchy の値は `_paperops/model/editorial/results-hierarchy.yml` が正本であり、`_paperops/notes/views/storyline.md` には複製しない。storyline view の `Section depth map` と `Methods definition registry` へ接続する。図表を並べるだけ、代表値だけを置く、baseline の科学的役割や判定基準を Methods に接続しない、境界条件と感度解析を一段落へ圧縮する場合は section-depth blocker として扱う。
+
+section plan を作る前に `python scripts/check-section-contracts.py --root . --strict` を実行し、`RHI-*` ID の一意性、各 `next_item_id` が配列上の次 item を指すこと、terminal item が空文字で終わることを確認する。typed file が存在する場合は strict checker が legacy Markdown より優先して読む。
 
 AI Writer が「この claim を強めるために必要な追加作業」「後で埋める」などの authoring intent を Results prose に書きそうな場合は、本文にしない。近傍の `% INTENT:` / `% TODO-PAPER:` comment に残し、追加解析が必要なら `_paperops/requests/` へ切り出す。公開本文として意図的に扱う場合だけ `% paperops: allow-authoring-intent -- reason` を直前に置く。
 

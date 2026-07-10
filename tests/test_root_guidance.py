@@ -75,6 +75,22 @@ class RootGuidanceTest(unittest.TestCase):
         self.assertIn("新規 scaffold の正道ではなく", cli)
         self.assertIn("M0-0002", cli)
 
+    def test_root_docs_index_typed_results_hierarchy_boundary(self) -> None:
+        combined = "\n".join(
+            (ROOT / path).read_text(encoding="utf-8")
+            for path in [
+                "README.md",
+                "docs/architecture.md",
+                "docs/current-specification.md",
+                "docs/skill-catalog.md",
+                "CHANGELOG.md",
+            ]
+        )
+
+        self.assertIn("_paperops/model/editorial/results-hierarchy.yml", combined)
+        self.assertIn("typed Results hierarchy", combined)
+        self.assertIn("legacy Markdown", combined)
+
 
 if __name__ == "__main__":
     unittest.main()

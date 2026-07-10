@@ -14,6 +14,7 @@
 - `story/` は人間向けの構想層である。研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を書く。
 - `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` はカード正本である。
 - `_paperops/notes/views/` は pure overview view と controlled authoring view を含む。`view_type` と `source_of_truth` を確認し、`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
+- `_paperops/model/editorial/results-hierarchy.yml` は project-owned の typed Results hierarchy 正本である。`_paperops/defaults/schemas/*` は paperops-managed schema default であり、model state と混同しない。既存下流 project は M0-0003 採用まで `storyline.md` の legacy Markdown fallback を利用できる。
 - `_paperops/defaults/contracts/` は paperops-managed の標準 section / figure story 契約であり、文章テンプレートではない。論文固有の契約差分だけ `_paperops/contracts/` に同名 overlay として置く。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
 - `_paperops/workflow/` は現在状態、review loop、stale 伝播、人間判断の状態正本である。標準の状態機械、focus policy、subagent roster は `_paperops/defaults/workflow/` にあり、本文編集前に `pops workflow status` を確認する。
 - subagent を使う執筆では通常 `/develop-manuscript-content` または `/finish-manuscript` から必要時に `orchestrate-manuscript-subagents` へ委譲し、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
@@ -57,7 +58,7 @@ make figure-obligation-check
 3. 必要なら `/map-result-patterns` で raw result や figure data を `_paperops/evidence/` の card にする。
 4. 外部 export bundle を使う場合は `_paperops/refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
-6. 原稿内容を進めるときは `/develop-manuscript-content` を入口にし、claims、storyline、figure story、section compiler、予測稿、block-flow review、本文 prose を扱う。`/finish-manuscript` は投稿可能状態までの監督入口として使う。
+6. 原稿内容を進めるときは `/develop-manuscript-content` を入口にし、claims、storyline、figure story、section compiler、予測稿、block-flow review、本文 prose を扱う。Results は `_paperops/model/editorial/results-hierarchy.yml` の `RHI-*` ID と `next_item_id` chain を `python scripts/check-section-contracts.py --root . --strict` で確認してから本文へ変換する。`/finish-manuscript` は投稿可能状態までの監督入口として使う。
 7. 図表が本文の主張を支える場合は `/plan-figure-story` を入口にし、必要な個別図だけ `design-paper-figure` や `figure-story-audit` へ進める。
 8. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/develop-manuscript-content` 内の予測稿 route で扱う。本文内には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` を置き、`xx` と `_paperops/requests/analysis/` を実データ置換まで追跡する。
 9. DRAFTED section は block flow を見直してから AUDITED 扱いにする。直接 `review-block-flow` を呼ぶのは、block 構成の再設計が明示された場合に限る。
@@ -96,7 +97,8 @@ Makefile.project               project-owned の tracked Make target
 manuscript/                    日英原稿、共有アセット、ミラー制御、投稿先情報
 submission/                    投稿先公式テンプレートと最終提出用 TeX
 _paperops/                     AI/ハーネス内部 state
-_paperops/defaults/            paperops-managed の標準 contract と workflow kernel
+_paperops/defaults/            paperops-managed の標準 contract、schema、workflow kernel
+_paperops/model/editorial/     project-owned の typed editorial state
 _paperops/contracts/           project 固有の contract overlay
 _paperops/workflow/            現在状態、review loop、stale 伝播、人間判断、任意の workflow overlay
 _paperops/refs/                文献、外部 source、外部 link、import state、local path alias

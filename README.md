@@ -40,6 +40,8 @@ uvx --from paper-harness-cli pops doctor
 - `_paperops/review/`: 人間レビュー、査読コメント、返答のカード
 - `_paperops/requests/`: 追加解析や改稿依頼のカード
 - `_paperops/notes/views/`: pure overview view と controlled authoring view
+- `_paperops/model/editorial/results-hierarchy.yml`: project-owned の typed Results hierarchy 正本
+- `_paperops/defaults/schemas/`: paperops-managed の schema default
 - `_paperops/defaults/contracts/`: paperops-managed の標準 section / figure story 契約
 - `_paperops/contracts/`: 論文固有の contract overlay
 - `_paperops/workflow/`: 全体状態、section 状態、review loop、stale 伝播
@@ -51,6 +53,8 @@ uvx --from paper-harness-cli pops doctor
 - `_archives/`: 同じ repo で1から書き直すために封印した過去稿 archive
 
 人間は主に原稿レベルのレビューや自然文の指示を出す。Agent はそれを `_paperops/review/feedback/` の card にし、必要なら claim / gate / evidence / request / manuscript へ遡って反映する。本文生成の前には、必要に応じて `pops workflow status`、`_paperops/defaults/contracts/`、`_paperops/contracts/`、`manuscript/writing-profile.yml` を確認し、`plan-figure-story` で visual obligation と主図構成を決めてから、card と controlled view から `paper_ir` を作り、Results / Discussion / Methods の section compiler を通す。
+
+新規 scaffold では typed Results hierarchy を使う。既存下流 project は M0-0003 採用まで legacy Markdown fallback を維持でき、移行時は managed schema default を更新したうえで project-owned typed state を opt-in で作成する。
 
 ## よく使うコマンド
 

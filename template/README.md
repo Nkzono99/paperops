@@ -24,7 +24,7 @@
 1. `/resume-session` で前回の状態を読む。
 2. `story/story-seed.md` で、研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を確認する。
 3. `pops workflow status` と `pops workflow next` で、全体状態と stale section を確認する。
-4. 原稿内容を進めるときは `/develop-manuscript-content` を入口にし、claims、storyline、figure story、section compiler、block-flow review、本文 prose を扱う。`/finish-manuscript` は投稿可能状態までの監督入口として使う。
+4. 原稿内容を進めるときは `/develop-manuscript-content` を入口にし、claims、storyline、figure story、section compiler、block-flow review、本文 prose を扱う。新規 scaffold の Results hierarchy は `_paperops/model/editorial/results-hierarchy.yml` を正本にする。`/finish-manuscript` は投稿可能状態までの監督入口として使う。
 5. 図表が本文の主張を支える場合は `/plan-figure-story` を入口にし、必要な個別図だけ `design-paper-figure` や `figure-story-audit` へ進める。
 6. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/develop-manuscript-content` 内の予測稿 route で扱う。本文には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` と `xx` 置換条件を残し、`_paperops/requests/analysis/` と接続する。
 7. DRAFTED section は block flow を見直してから AUDITED 扱いにする。直接 `review-block-flow` を呼ぶのは、block 構成の再設計が明示された場合に限る。
@@ -43,6 +43,8 @@
 - `_paperops/review/block-flow/`: AUDITED / ACCEPTED 前の block operation table と author stance
 - `_paperops/requests/`: analysis / writing request card の正本
 - `_paperops/notes/views/`: `view_type` / `source_of_truth` つきの pure overview view と controlled authoring view
+- `_paperops/model/editorial/results-hierarchy.yml`: project-owned の typed Results hierarchy 正本。各 item は `RHI-*` ID と `next_item_id` で読者順を表す。
+- `_paperops/defaults/schemas/`: paperops-managed の schema default。project-owned model state は置かない。
 - `_paperops/defaults/contracts/`: paperops-managed の標準 section / figure story 契約
 - `_paperops/contracts/`: project 固有の contract overlay
 - `_paperops/workflow/`: 現在状態、section 状態、issue class、stale 伝播、人間判断
@@ -50,6 +52,8 @@
 - `manuscript/writing-profile.yml`: 論文種別・投稿先ごとの overlay と `section_depth` floor。JA は `ja_chars`、EN は `en_words` として数え、長さは target ではなく floor として扱う。
 
 `paper_ir` は card と controlled authoring view から Writer に渡す context を作る生成一時物であり、手書き正本にはしない。
+
+既存下流 project は M0-0003 を採用するまで `storyline.md` の legacy Markdown Results hierarchy を fallback として利用できる。移行時は `uvx --from paper-harness-cli pops update-paperops --apply --only _paperops/defaults/schemas/` で managed schema を更新し、project-owned の typed file を opt-in で作成する。`python scripts/check-section-contracts.py --root . --strict` が成功する前に legacy Markdown を削除しない。
 
 ## 情報の置き場所
 
@@ -75,7 +79,7 @@
 - `/develop-manuscript-content`: 原稿内容専用の route-level 入口。claims、storyline、figure story、Results hierarchy、Discussion functions、Methods definition、section compiler、`draft-predicted-results`、`review-block-flow`、本文 prose を扱い、ORCID、affiliation、license などの投稿メタデータは扱わない。
 - `/finish-manuscript`: `/goal` で原稿完成まで進める薄い route-level 入口。原稿内容は `/develop-manuscript-content`、投稿候補化は `/submission-gate` へ委譲し、`draft-predicted-results` を含む content route と final checks を監督する。
 - `/submission-gate`: `manuscript/` の authoring source から submission candidate / round snapshot を切り出す前に、予測稿、open AREQ、`xx`、AI intent、submission drift を strict に確認する。
-- `/design-paper-storyline`: 原稿全体の story spine、Results hierarchy、Discussion functions を俯瞰し、Submission hygiene へ逸れる前に本文 blocker を固定する。
+- `/design-paper-storyline`: 原稿全体の story spine、typed Results hierarchy、Discussion functions を俯瞰し、Submission hygiene へ逸れる前に本文 blocker を固定する。
 - `/review-public-manuscript`, `/peer-review-manuscript`: 公開原稿や投稿前原稿を読者・査読者目線で読む。
 - `/respond-to-peer-review`: 実査読コメントへの返答を整理する。
 - `/integrate-writing-feedback`: 人間レビューや指示を上流カードと原稿へ反映する。
@@ -89,7 +93,8 @@
 - `manuscript/`: 日英原稿、共有アセット、ミラー制御、投稿先情報
 - `submission/`: 投稿先公式テンプレートと最終提出用 TeX
 - `_paperops/`: AI/ハーネス内部 state
-- `_paperops/defaults/`: paperops-managed の標準 contract と workflow kernel
+- `_paperops/defaults/`: paperops-managed の標準 contract、schema、workflow kernel
+- `_paperops/model/editorial/`: project-owned の typed editorial state
 - `_paperops/contracts/`: Introduction / Methods / Results / Discussion / Conclusion と figure story の project overlay
 - `_paperops/workflow/`: 現在状態、review round summary、人間判断、任意の workflow overlay
 - `_paperops/refs/`: 文献、外部 source、外部 link、ローカルパス alias

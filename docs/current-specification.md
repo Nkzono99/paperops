@@ -9,6 +9,7 @@
 | scope | source of truth | note |
 | --- | --- | --- |
 | architecture / layer contract | `docs/architecture.md` | root 層、下流論文層、`_paperops/`、`paper_ir`、workflow state、submission axis |
+| typed Editorial state | `template/_paperops/defaults/schemas/results-hierarchy.schema.json`, `template/_paperops/model/editorial/results-hierarchy.yml`, `template/scripts/check-section-contracts.py`, `docs/migrations/v0.md` | schema、starter state、strict checker、M0-0003 compatibility |
 | CLI and checker behavior | `docs/cli.md`, `src/paperops/cli/`, `template/scripts/` | `pops init`、`pops update-paperops`、`pops scratch`、`pops workflow`、Makefile checks |
 | migrations | `docs/migrations/` | 下流互換、legacy path、overlay migration |
 | release and distribution | `docs/distribution.md`, `CHANGELOG.md`, `.agents/skills/release/SKILL.md` | package / tag / PyPI / scaffold version |
@@ -22,6 +23,7 @@
 - root repository はテンプレート管理層であり、`template/` は下流論文 project に配布される scaffold である。
 - 下流作成は `pops init` を正道とする。下流の project-owned extension は `AGENTS.project.md`、`CLAUDE.project.md`、`Makefile.project` に置く。
 - 人間が普段触る入口は `story/`、`manuscript/`、`submission/`、review comments である。AI / harness が使う internal state は `_paperops/` に置く。
+- `_paperops/defaults/schemas/*` は managed default、`_paperops/model/editorial/results-hierarchy.yml` は project-owned typed Results hierarchy である。既存下流は M0-0003 採用まで legacy Markdown fallback を利用できる。
 - 旧 top-level `notes/`、`refs/`、`claims/`、`evidence/`、`contracts/`、`workflow/` などは互換読み取り対象に留める。
 - `paper_ir` と section plan は生成一時物であり、必要な場合だけ `.paperops/cache/` に置く。
 - `manuscript/` は living manuscript / authoring source であり、投稿後や査読後も編集してよい。

@@ -19,6 +19,8 @@ description: Use when a manuscript needs a top-level story spine, Results hierar
 
 - `_paperops/defaults/contracts/storyline.yml`
 - `_paperops/contracts/storyline.yml` if project overlay exists
+- `_paperops/defaults/schemas/results-hierarchy.schema.json`
+- `_paperops/model/editorial/results-hierarchy.yml`
 - `_paperops/notes/views/storyline.md`
 - `_paperops/notes/views/argument-map.md`
 - `_paperops/notes/views/result-pattern-map.md`
@@ -33,11 +35,13 @@ description: Use when a manuscript needs a top-level story spine, Results hierar
 
 1. Public-reader として、本文だけから reader_promise、central_claim、scope_boundary を再構成する。
 2. Repo-aware editor として、claim / evidence / result-pattern map から evidence_ladder を作る。
-3. Results hierarchy を作る。各 subsection は `reader question -> one-sentence answer -> quantity and unit of analysis -> figure/table role -> baseline / comparator rationale -> consequence` を持つ。
+3. project-owned の `_paperops/model/editorial/results-hierarchy.yml` に typed Results hierarchy を作る。各 item は安定した `RHI-*` ID と `reader_question`、`answer`、`quantitative_evidence_and_unit_of_analysis`、`figure_table_role`、`baseline_comparator_rationale`、`consequence`、`next_item_id` を持つ。`next_item_id` は配列上の次 item の ID、terminal item では空文字にする。
 4. Discussion functions を作る。最低限 `principal_finding`、`mechanism_warrant`、`prior_work_delta`、`alternative_or_boundary`、`implication`、`decisive_next_test` を分ける。
 5. Methods definition registry を作る。Results や caption に出る `estimand_and_unit_of_analysis`、`comparison_or_baseline`、`decision_criteria`、`verification_or_convergence` が Methods または初出箇所で定義されるようにする。
-6. `_paperops/notes/views/storyline.md` を更新する場合は、`Section depth map` の function と manuscript block を埋める。block が未作成なら `draft` のままにし、本文生成前の blocker として扱う。
-7. `scripts/check-storyline.py --root . --strict` と `scripts/check-section-contracts.py --root . --strict` が通るまで、STRUCTURE_ACCEPTED や Submission hygiene へ進めない。
+6. `_paperops/notes/views/storyline.md` を更新する場合は、`Section depth map` の function と manuscript block を埋める。Results item の値は typed file から複製しない。block が未作成なら `draft` のままにし、本文生成前の blocker として扱う。
+7. `scripts/check-storyline.py --root . --strict` と `python scripts/check-section-contracts.py --root . --strict` が通るまで、STRUCTURE_ACCEPTED や Submission hygiene へ進めない。
+
+既存下流 project に `_paperops/model/editorial/results-hierarchy.yml` がない場合は、M0-0003 を採用するまで `storyline.md` の legacy Markdown Results hierarchy を fallback として読める。typed file を作成した後は strict checker がその file を優先するため、成功前に legacy Markdown を削除しない。
 
 ## Editorial architect gate
 
@@ -69,7 +73,7 @@ Submission hygiene は最終提出面であり、manuscript content blocker を�
 
 - `Story spine`: reader_promise / central_claim / scope_boundary / reader_payoff
 - `Evidence ladder`: primary_anchor / mechanism_or_boundary / robustness_or_scope / negative_or_null_case
-- `Results hierarchy`: subsection ごとの reader question, answer, quantity, figure/table, baseline/comparator rationale, consequence
+- `Results hierarchy`: `_paperops/model/editorial/results-hierarchy.yml` の `RHI-*` item と `next_item_id` chain
 - `Discussion functions`: principal_finding, mechanism_warrant, prior_work_delta, alternative_or_boundary, implication, decisive_next_test
 - `Methods definition registry`: estimand, baseline/comparator, decision criteria, verification の定義位置
 - `Content blockers before Submission hygiene`

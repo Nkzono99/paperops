@@ -70,6 +70,24 @@ class StorylineLayerTemplateTest(unittest.TestCase):
         self.assertIn("next_item_id", schema["properties"]["items"]["items"]["required"])
         self.assertIn("next_item_id", read_template(model_path))
 
+    def test_downstream_storyline_surfaces_explain_typed_results_migration(self) -> None:
+        combined = "\n".join(
+            read_template(path)
+            for path in [
+                "template/_paperops/notes/views/storyline.md",
+                "template/_paperops/defaults/contracts/storyline.yml",
+                "template/.agents/skills/design-paper-storyline/SKILL.md",
+                "template/.agents/skills/compile-results-section/SKILL.md",
+                "template/AGENTS.md",
+                "template/CLAUDE.md",
+                "template/README.md",
+            ]
+        )
+
+        self.assertIn("_paperops/model/editorial/results-hierarchy.yml", combined)
+        self.assertIn("typed Results hierarchy", combined)
+        self.assertIn("legacy Markdown", combined)
+
     def test_writing_and_review_skills_route_through_editorial_architect_view(self) -> None:
         combined = "\n".join(
             read_template(path)

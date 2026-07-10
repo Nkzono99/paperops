@@ -4,18 +4,18 @@ source_of_truth:
   - _paperops/claims/arguments/
   - _paperops/claims/claims/
   - _paperops/evidence/
+  - _paperops/model/editorial/results-hierarchy.yml
   - _paperops/defaults/contracts/storyline.yml
 authoritative_for:
   - story_spine
   - reader_promise
   - evidence_ladder
-  - results_hierarchy
   - discussion_functions
 ---
 
 # Storyline
 
-このファイルは、個別 claim や result を本文へ流し込む前に、論文全体の読者体験を固定する controlled authoring view である。論拠カードの正本は `_paperops/claims/arguments/`、claim / evidence の正本は `_paperops/claims/` と `_paperops/evidence/` に置く。
+このファイルは、個別 claim や result を本文へ流し込む前に、論文全体の読者体験を固定する controlled authoring view である。論拠カードの正本は `_paperops/claims/arguments/`、claim / evidence の正本は `_paperops/claims/` と `_paperops/evidence/`、typed Results hierarchy の正本は `_paperops/model/editorial/results-hierarchy.yml` に置く。
 
 ## Story spine
 
@@ -54,12 +54,7 @@ authoritative_for:
 
 ## Results hierarchy
 
-- reader question 1:
-- one-sentence answer:
-- quantitative evidence and unit of analysis:
-- figure / table role:
-- baseline / comparator rationale:
-- consequence:
+Results 項目の値はここへ複製せず、project-owned の `_paperops/model/editorial/results-hierarchy.yml` を参照する。既存下流 project は M0-0003 を採用するまで legacy Markdown の Results hierarchy を fallback として利用できる。
 
 ## Discussion functions
 
