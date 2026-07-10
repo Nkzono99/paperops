@@ -109,6 +109,43 @@ class SectionContractCheckTest(unittest.TestCase):
         self.assertIn("Results hierarchy item `1`", result.stdout)
         self.assertIn("one-sentence answer", result.stdout)
 
+    def test_strict_fails_when_legacy_results_hierarchy_has_no_recognizable_bullets(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_text(
+                root / "_paperops" / "notes" / "views" / "storyline.md",
+                """
+                # Storyline
+
+                ## Results hierarchy
+
+                The baseline result is described here as narrative prose only.
+
+                ## Discussion functions
+
+                - principal_finding: Baseline charging changes the work budget.
+                - mechanism_warrant: Retained charge changes the force balance.
+                - prior_work_delta: This separates local control from ambient estimates.
+                - alternative_or_boundary: Coupled illumination is outside this control.
+                - implication: The control defines a lower-complexity reference.
+                - decisive_next_test: Add coupled illumination and reuse the criterion.
+
+                ## Methods definition registry
+
+                | item | definition location | manuscript block | status |
+                | --- | --- | --- | --- |
+                | estimand_and_unit_of_analysis | Methods, paragraph 2 | methods.estimand.01 | locked |
+                | comparison_or_baseline | Methods, paragraph 3 | methods.baseline.01 | locked |
+                | decision_criteria | Methods, paragraph 4 | methods.criteria.01 | locked |
+                | verification_or_convergence | Methods, paragraph 5 | methods.verification.01 | locked |
+                """,
+            )
+            result = run_python_script(SCRIPT, "--root", root, "--strict")
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Results hierarchy item `1`", result.stdout)
+        self.assertIn("reader question", result.stdout)
+
     def test_strict_fails_when_discussion_functions_are_placeholders(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

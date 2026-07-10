@@ -148,7 +148,8 @@ def check_results_hierarchy(rel_path: str, body: str, strict: bool) -> list[Find
                 f"`{rel_path}` に Results hierarchy がありません",
             )
         ]
-    for item_label, values in extract_legacy_results_items(body):
+    items = extract_legacy_results_items(body) or [("1", {})]
+    for item_label, values in items:
         for key, label in REQUIRED_RESULTS_FIELDS:
             if is_blank(values.get(key)):
                 findings.append(
