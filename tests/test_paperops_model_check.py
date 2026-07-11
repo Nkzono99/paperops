@@ -311,7 +311,7 @@ class PaperOpsModelCheckTest(unittest.TestCase):
 
     def test_unregistered_known_model_is_a_stable_registry_finding(self) -> None:
         result = run_python_script(
-            SCRIPT, "--root", ROOT / "template", "--model", "issue"
+            SCRIPT, "--root", ROOT / "template", "--model", "publication"
         )
 
         self.assertEqual(result.returncode, 1)

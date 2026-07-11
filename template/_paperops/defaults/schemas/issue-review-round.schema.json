@@ -1,0 +1,399 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://paperops.local/schemas/issue-review-round.schema.json",
+    "title": "PaperOps Issue review round",
+    "type": "object",
+    "required": [
+        "schema_version",
+        "record_type",
+        "id",
+        "revision",
+        "status",
+        "dependencies",
+        "approvals",
+        "extensions",
+        "metadata",
+        "source",
+        "source_mode",
+        "severity",
+        "route",
+        "targets",
+        "review_round_ref",
+        "confidentiality",
+        "public_summary",
+        "local_reference_id",
+        "closure_criteria",
+        "blocking_dependency_refs",
+        "related_issue_refs",
+        "related_card_refs",
+        "related_block_refs",
+        "scope",
+        "artifact_refs",
+        "feedback_refs",
+        "review_profile",
+        "round_summary",
+        "editorial_architecture_audit",
+        "delegation_ledger",
+        "integration_decisions",
+        "next_routes"
+    ],
+    "properties": {
+        "schema_version": {
+            "const": 1
+        },
+        "record_type": {
+            "const": "review_round"
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^RVW-[0-9]{4,}$"
+        },
+        "revision": {
+            "type": "integer"
+        },
+        "status": {
+            "enum": [
+                "draft",
+                "reviewing",
+                "integrating",
+                "integrated",
+                "closed"
+            ]
+        },
+        "dependencies": {
+            "$ref": "#/$defs/dependencies"
+        },
+        "approvals": {
+            "$ref": "#/$defs/approvals"
+        },
+        "extensions": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "metadata": {
+            "$ref": "#/$defs/metadata"
+        },
+        "source": {
+            "enum": [
+                "human",
+                "editor",
+                "reviewer",
+                "subagent",
+                "system"
+            ]
+        },
+        "source_mode": {
+            "enum": [
+                "prompt",
+                "review",
+                "editor_letter",
+                "subagent_report",
+                "system_check"
+            ]
+        },
+        "severity": {
+            "enum": [
+                "info",
+                "minor",
+                "major",
+                "blocking"
+            ]
+        },
+        "route": {
+            "type": "string",
+            "minLength": 1
+        },
+        "targets": {
+            "$ref": "#/$defs/strings"
+        },
+        "review_round_ref": {
+            "type": "string",
+            "pattern": "^(|RVW-[0-9]{4,})$"
+        },
+        "confidentiality": {
+            "enum": [
+                "public",
+                "internal_summary",
+                "confidential_local_only"
+            ]
+        },
+        "public_summary": {
+            "type": "string",
+            "minLength": 1
+        },
+        "local_reference_id": {
+            "type": "string",
+            "pattern": "^(|LOC-[0-9]{4,})$"
+        },
+        "closure_criteria": {
+            "$ref": "#/$defs/strings"
+        },
+        "blocking_dependency_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_issue_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_card_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_block_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "scope": {
+            "enum": [
+                "manuscript",
+                "section",
+                "block",
+                "figure",
+                "submission"
+            ]
+        },
+        "artifact_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "feedback_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "review_profile": {
+            "type": "string"
+        },
+        "round_summary": {
+            "type": "string",
+            "minLength": 1
+        },
+        "editorial_architecture_audit": {
+            "type": "object",
+            "required": [
+                "story_spine",
+                "results_hierarchy",
+                "discussion_functions",
+                "claim_evidence_mismatch",
+                "highest_priority_route"
+            ],
+            "properties": {
+                "story_spine": {
+                    "type": "string"
+                },
+                "results_hierarchy": {
+                    "type": "string"
+                },
+                "discussion_functions": {
+                    "type": "string"
+                },
+                "claim_evidence_mismatch": {
+                    "type": "string"
+                },
+                "highest_priority_route": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "delegation_ledger": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "delegated_role",
+                    "target_ref",
+                    "subagent_report_ref",
+                    "route_recommendation",
+                    "integration_decision",
+                    "decision_reason"
+                ],
+                "properties": {
+                    "delegated_role": {
+                        "enum": [
+                            "story_architect",
+                            "evidence_auditor",
+                            "results_structure_reviewer",
+                            "discussion_function_reviewer",
+                            "figure_story_reviewer",
+                            "public_reader",
+                            "reviewer_panel",
+                            "submission_hygienist"
+                        ]
+                    },
+                    "target_ref": {
+                        "type": "string"
+                    },
+                    "subagent_report_ref": {
+                        "type": "string"
+                    },
+                    "route_recommendation": {
+                        "enum": [
+                            "story_loop",
+                            "evidence_loop",
+                            "section_loop",
+                            "prose_loop",
+                            "submission_loop"
+                        ]
+                    },
+                    "integration_decision": {
+                        "enum": [
+                            "accepted_to_feedback_card",
+                            "accepted_to_claim_or_evidence_update",
+                            "accepted_to_section_plan",
+                            "deferred_with_reason",
+                            "rejected_with_reason",
+                            "requires_human_decision"
+                        ]
+                    },
+                    "decision_reason": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "integration_decisions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "feedback_ref",
+                    "decision",
+                    "reason"
+                ],
+                "properties": {
+                    "feedback_ref": {
+                        "type": "string"
+                    },
+                    "decision": {
+                        "enum": [
+                            "accepted_to_feedback_card",
+                            "accepted_to_claim_or_evidence_update",
+                            "accepted_to_section_plan",
+                            "deferred_with_reason",
+                            "rejected_with_reason",
+                            "requires_human_decision"
+                        ]
+                    },
+                    "reason": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "next_routes": {
+            "$ref": "#/$defs/strings"
+        }
+    },
+    "additionalProperties": false,
+    "$defs": {
+        "strings": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "minLength": 1
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "updated_at"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "dependencies": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/dependency"
+            }
+        },
+        "dependency": {
+            "type": "object",
+            "required": [
+                "target_id",
+                "relation",
+                "expected_hash"
+            ],
+            "properties": {
+                "target_id": {
+                    "type": "string"
+                },
+                "relation": {
+                    "type": "string"
+                },
+                "expected_revision": {
+                    "type": "integer"
+                },
+                "expected_hash": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                }
+            },
+            "additionalProperties": false
+        },
+        "approvals": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/approval"
+            }
+        },
+        "approval": {
+            "type": "object",
+            "required": [
+                "approval_id",
+                "kind",
+                "decision",
+                "object_revision",
+                "object_hash",
+                "actor",
+                "note"
+            ],
+            "properties": {
+                "approval_id": {
+                    "type": "string",
+                    "pattern": "^APR-[0-9]{4,}$"
+                },
+                "kind": {
+                    "enum": [
+                        "scientific_scope",
+                        "editorial_choice",
+                        "submission",
+                        "authorship",
+                        "license",
+                        "external_share",
+                        "reviewer_response",
+                        "scope_expansion"
+                    ]
+                },
+                "decision": {
+                    "enum": [
+                        "approved",
+                        "rejected",
+                        "superseded"
+                    ]
+                },
+                "object_revision": {
+                    "type": "integer"
+                },
+                "object_hash": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "actor": {
+                    "const": "human"
+                },
+                "note": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

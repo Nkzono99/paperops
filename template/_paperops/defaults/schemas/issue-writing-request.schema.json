@@ -1,0 +1,318 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://paperops.local/schemas/issue-writing-request.schema.json",
+    "title": "PaperOps Issue writing request",
+    "type": "object",
+    "required": [
+        "schema_version",
+        "record_type",
+        "id",
+        "revision",
+        "status",
+        "dependencies",
+        "approvals",
+        "extensions",
+        "metadata",
+        "source",
+        "source_mode",
+        "severity",
+        "route",
+        "targets",
+        "review_round_ref",
+        "confidentiality",
+        "public_summary",
+        "local_reference_id",
+        "closure_criteria",
+        "blocking_dependency_refs",
+        "related_issue_refs",
+        "related_card_refs",
+        "related_block_refs",
+        "requested_by",
+        "target_block_refs",
+        "related_claim_refs",
+        "related_feedback_refs",
+        "claim_evidence_constraints",
+        "editing_policy"
+    ],
+    "properties": {
+        "schema_version": {
+            "const": 1
+        },
+        "record_type": {
+            "const": "writing_request"
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^WREQ-[0-9]{4,}$"
+        },
+        "revision": {
+            "type": "integer"
+        },
+        "status": {
+            "enum": [
+                "draft",
+                "ready",
+                "writing",
+                "completed",
+                "abandoned"
+            ]
+        },
+        "dependencies": {
+            "$ref": "#/$defs/dependencies"
+        },
+        "approvals": {
+            "$ref": "#/$defs/approvals"
+        },
+        "extensions": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "metadata": {
+            "$ref": "#/$defs/metadata"
+        },
+        "source": {
+            "enum": [
+                "human",
+                "editor",
+                "reviewer",
+                "subagent",
+                "system"
+            ]
+        },
+        "source_mode": {
+            "enum": [
+                "prompt",
+                "review",
+                "editor_letter",
+                "subagent_report",
+                "system_check"
+            ]
+        },
+        "severity": {
+            "enum": [
+                "info",
+                "minor",
+                "major",
+                "blocking"
+            ]
+        },
+        "route": {
+            "type": "string",
+            "minLength": 1
+        },
+        "targets": {
+            "$ref": "#/$defs/strings"
+        },
+        "review_round_ref": {
+            "type": "string",
+            "pattern": "^(|RVW-[0-9]{4,})$"
+        },
+        "confidentiality": {
+            "enum": [
+                "public",
+                "internal_summary",
+                "confidential_local_only"
+            ]
+        },
+        "public_summary": {
+            "type": "string",
+            "minLength": 1
+        },
+        "local_reference_id": {
+            "type": "string",
+            "pattern": "^(|LOC-[0-9]{4,})$"
+        },
+        "closure_criteria": {
+            "$ref": "#/$defs/strings"
+        },
+        "blocking_dependency_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_issue_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_card_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_block_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "requested_by": {
+            "type": "string",
+            "minLength": 1
+        },
+        "target_block_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_claim_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_feedback_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "claim_evidence_constraints": {
+            "type": "object",
+            "required": [
+                "claim_ref",
+                "gate_status",
+                "allowed_wording",
+                "forbidden_overclaim"
+            ],
+            "properties": {
+                "claim_ref": {
+                    "type": "string"
+                },
+                "gate_status": {
+                    "type": "string"
+                },
+                "allowed_wording": {
+                    "type": "string"
+                },
+                "forbidden_overclaim": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "editing_policy": {
+            "type": "object",
+            "required": [
+                "source_language",
+                "mirror_policy",
+                "validation_refs"
+            ],
+            "properties": {
+                "source_language": {
+                    "enum": [
+                        "ja",
+                        "en"
+                    ]
+                },
+                "mirror_policy": {
+                    "enum": [
+                        "ja_primary",
+                        "en_primary",
+                        "paired"
+                    ]
+                },
+                "validation_refs": {
+                    "$ref": "#/$defs/strings"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false,
+    "$defs": {
+        "strings": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "minLength": 1
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "updated_at"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "dependencies": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/dependency"
+            }
+        },
+        "dependency": {
+            "type": "object",
+            "required": [
+                "target_id",
+                "relation",
+                "expected_hash"
+            ],
+            "properties": {
+                "target_id": {
+                    "type": "string"
+                },
+                "relation": {
+                    "type": "string"
+                },
+                "expected_revision": {
+                    "type": "integer"
+                },
+                "expected_hash": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                }
+            },
+            "additionalProperties": false
+        },
+        "approvals": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/approval"
+            }
+        },
+        "approval": {
+            "type": "object",
+            "required": [
+                "approval_id",
+                "kind",
+                "decision",
+                "object_revision",
+                "object_hash",
+                "actor",
+                "note"
+            ],
+            "properties": {
+                "approval_id": {
+                    "type": "string",
+                    "pattern": "^APR-[0-9]{4,}$"
+                },
+                "kind": {
+                    "enum": [
+                        "scientific_scope",
+                        "editorial_choice",
+                        "submission",
+                        "authorship",
+                        "license",
+                        "external_share",
+                        "reviewer_response",
+                        "scope_expansion"
+                    ]
+                },
+                "decision": {
+                    "enum": [
+                        "approved",
+                        "rejected",
+                        "superseded"
+                    ]
+                },
+                "object_revision": {
+                    "type": "integer"
+                },
+                "object_hash": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "actor": {
+                    "const": "human"
+                },
+                "note": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

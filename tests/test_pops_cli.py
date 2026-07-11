@@ -56,9 +56,12 @@ class PopsCliTest(unittest.TestCase):
             target = Path(tmp) / "paper-demo"
             code, _out, err = run_cli(["init", str(target)])
             self.assertEqual(code, 0, err)
-            for model_name in ("research", "manuscript"):
+            for model_name, relative in (
+                ("research", "_paperops/model/research/index.yml"),
+                ("manuscript", "_paperops/model/manuscript/index.yml"),
+                ("issue", "_paperops/model/issues/index.yml"),
+            ):
                 with self.subTest(model=model_name):
-                    relative = f"_paperops/model/{model_name}/index.yml"
                     index = target / relative
                     self.assertIn("records: []", index.read_text(encoding="utf-8"))
 

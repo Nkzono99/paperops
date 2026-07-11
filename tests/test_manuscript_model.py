@@ -152,7 +152,7 @@ class ManuscriptModelTest(unittest.TestCase):
         registry = load_registry(ROOT / "template")
         self.assertEqual(
             set(registry.entries),
-            {"editorial", "results_hierarchy", "research", "manuscript"},
+            {"editorial", "results_hierarchy", "research", "manuscript", "issue"},
         )
         entry = registry.entries["manuscript"]
         self.assertEqual(entry.document_kind, "index")

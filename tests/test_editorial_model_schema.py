@@ -33,7 +33,7 @@ class EditorialModelSchemaTest(unittest.TestCase):
         self.assertEqual(registry.validator_profile, "paperops-schema-v1")
         self.assertEqual(
             set(registry.entries),
-            {"editorial", "results_hierarchy", "research", "manuscript"},
+            {"editorial", "results_hierarchy", "research", "manuscript", "issue"},
         )
 
         editorial = registry.entries["editorial"]

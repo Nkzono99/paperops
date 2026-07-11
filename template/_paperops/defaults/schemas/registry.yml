@@ -89,3 +89,39 @@ models:
           - /approvals
           - /metadata/updated_at
     dependency_profile: dependency-v1
+  issue:
+    document_kind: index
+    schema: issue-index.schema.json
+    schema_version: 1
+    authority: project-owned
+    default_path: _paperops/model/issues/index.yml
+    hash_profile: semantic-v1
+    hash_excluded_paths:
+      - /metadata/updated_at
+    record_sets:
+      feedback:
+        schema: issue-feedback.schema.json
+        path_prefix: _paperops/model/issues/feedback/
+        id_pattern: ^FB-[0-9]{4,}$
+        hash_excluded_paths: [/approvals, /metadata/updated_at]
+      analysis_request:
+        schema: issue-analysis-request.schema.json
+        path_prefix: _paperops/model/issues/analysis/
+        id_pattern: ^AREQ-[0-9]{4,}$
+        hash_excluded_paths: [/approvals, /metadata/updated_at]
+      writing_request:
+        schema: issue-writing-request.schema.json
+        path_prefix: _paperops/model/issues/writing/
+        id_pattern: ^WREQ-[0-9]{4,}$
+        hash_excluded_paths: [/approvals, /metadata/updated_at]
+      response:
+        schema: issue-response.schema.json
+        path_prefix: _paperops/model/issues/responses/
+        id_pattern: ^RSP-[0-9]{4,}$
+        hash_excluded_paths: [/approvals, /metadata/updated_at]
+      review_round:
+        schema: issue-review-round.schema.json
+        path_prefix: _paperops/model/issues/rounds/
+        id_pattern: ^RVW-[0-9]{4,}$
+        hash_excluded_paths: [/approvals, /metadata/updated_at]
+    dependency_profile: dependency-v1

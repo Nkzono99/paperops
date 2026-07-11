@@ -12,6 +12,7 @@ from paperops_models import (
     ModelDocument,
     build_object_catalog,
     load_model_document,
+    validate_issue_semantics,
     validate_manuscript_semantics,
     validate_research_semantics,
 )
@@ -473,6 +474,14 @@ def main() -> int:
         and research.schema_clean
     ):
         findings.extend(validate_manuscript_semantics(catalog))
+    issue = loaded.get("issue")
+    if (
+        phase in ("all", "semantics")
+        and "issue" in selected_names
+        and issue is not None
+        and issue.schema_clean
+    ):
+        findings.extend(validate_issue_semantics(catalog))
 
     computed_hashes: dict[str, str] = {}
     if phase in ("all", "hash"):

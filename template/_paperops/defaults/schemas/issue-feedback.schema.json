@@ -1,0 +1,285 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://paperops.local/schemas/issue-feedback.schema.json",
+    "title": "PaperOps Issue feedback",
+    "type": "object",
+    "required": [
+        "schema_version",
+        "record_type",
+        "id",
+        "revision",
+        "status",
+        "dependencies",
+        "approvals",
+        "extensions",
+        "metadata",
+        "source",
+        "source_mode",
+        "severity",
+        "route",
+        "targets",
+        "review_round_ref",
+        "confidentiality",
+        "public_summary",
+        "local_reference_id",
+        "closure_criteria",
+        "blocking_dependency_refs",
+        "related_issue_refs",
+        "related_card_refs",
+        "related_block_refs",
+        "issue_type",
+        "upstream_routes",
+        "route_explanation",
+        "delegation"
+    ],
+    "properties": {
+        "schema_version": {
+            "const": 1
+        },
+        "record_type": {
+            "const": "feedback"
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^FB-[0-9]{4,}$"
+        },
+        "revision": {
+            "type": "integer"
+        },
+        "status": {
+            "enum": [
+                "open",
+                "routed",
+                "addressed",
+                "closed",
+                "superseded"
+            ]
+        },
+        "dependencies": {
+            "$ref": "#/$defs/dependencies"
+        },
+        "approvals": {
+            "$ref": "#/$defs/approvals"
+        },
+        "extensions": {
+            "type": "object",
+            "additionalProperties": true
+        },
+        "metadata": {
+            "$ref": "#/$defs/metadata"
+        },
+        "source": {
+            "enum": [
+                "human",
+                "editor",
+                "reviewer",
+                "subagent",
+                "system"
+            ]
+        },
+        "source_mode": {
+            "enum": [
+                "prompt",
+                "review",
+                "editor_letter",
+                "subagent_report",
+                "system_check"
+            ]
+        },
+        "severity": {
+            "enum": [
+                "info",
+                "minor",
+                "major",
+                "blocking"
+            ]
+        },
+        "route": {
+            "type": "string",
+            "minLength": 1
+        },
+        "targets": {
+            "$ref": "#/$defs/strings"
+        },
+        "review_round_ref": {
+            "type": "string",
+            "pattern": "^(|RVW-[0-9]{4,})$"
+        },
+        "confidentiality": {
+            "enum": [
+                "public",
+                "internal_summary",
+                "confidential_local_only"
+            ]
+        },
+        "public_summary": {
+            "type": "string",
+            "minLength": 1
+        },
+        "local_reference_id": {
+            "type": "string",
+            "pattern": "^(|LOC-[0-9]{4,})$"
+        },
+        "closure_criteria": {
+            "$ref": "#/$defs/strings"
+        },
+        "blocking_dependency_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_issue_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_card_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "related_block_refs": {
+            "$ref": "#/$defs/strings"
+        },
+        "issue_type": {
+            "type": "string",
+            "minLength": 1
+        },
+        "upstream_routes": {
+            "$ref": "#/$defs/strings"
+        },
+        "route_explanation": {
+            "type": "string",
+            "minLength": 1
+        },
+        "delegation": {
+            "type": "object",
+            "required": [
+                "delegated_role",
+                "subagent_report_ref",
+                "integration_decision"
+            ],
+            "properties": {
+                "delegated_role": {
+                    "type": "string"
+                },
+                "subagent_report_ref": {
+                    "type": "string"
+                },
+                "integration_decision": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false,
+    "$defs": {
+        "strings": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "minLength": 1
+            }
+        },
+        "metadata": {
+            "type": "object",
+            "required": [
+                "created_at",
+                "updated_at"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "dependencies": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/dependency"
+            }
+        },
+        "dependency": {
+            "type": "object",
+            "required": [
+                "target_id",
+                "relation",
+                "expected_hash"
+            ],
+            "properties": {
+                "target_id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "relation": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "expected_revision": {
+                    "type": "integer"
+                },
+                "expected_hash": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                }
+            },
+            "additionalProperties": false
+        },
+        "approvals": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/approval"
+            }
+        },
+        "approval": {
+            "type": "object",
+            "required": [
+                "approval_id",
+                "kind",
+                "decision",
+                "object_revision",
+                "object_hash",
+                "actor",
+                "note"
+            ],
+            "properties": {
+                "approval_id": {
+                    "type": "string",
+                    "pattern": "^APR-[0-9]{4,}$"
+                },
+                "kind": {
+                    "enum": [
+                        "scientific_scope",
+                        "editorial_choice",
+                        "submission",
+                        "authorship",
+                        "license",
+                        "external_share",
+                        "reviewer_response",
+                        "scope_expansion"
+                    ]
+                },
+                "decision": {
+                    "enum": [
+                        "approved",
+                        "rejected",
+                        "superseded"
+                    ]
+                },
+                "object_revision": {
+                    "type": "integer"
+                },
+                "object_hash": {
+                    "type": "string",
+                    "pattern": "^sha256:[0-9a-f]{64}$"
+                },
+                "actor": {
+                    "const": "human"
+                },
+                "note": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    }
+}

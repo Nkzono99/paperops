@@ -40,7 +40,7 @@ class PaperOpsModelRegistryTest(unittest.TestCase):
 
         self.assertEqual(
             set(registry.entries),
-            {"editorial", "results_hierarchy", "research", "manuscript"},
+            {"editorial", "results_hierarchy", "research", "manuscript", "issue"},
         )
         for name in ("editorial", "results_hierarchy"):
             entry = registry.entries[name]
@@ -57,6 +57,7 @@ class PaperOpsModelRegistryTest(unittest.TestCase):
             document = self.read_registry(root)
             document["models"].pop("research")
             document["models"].pop("manuscript")
+            document["models"].pop("issue")
             for entry in document["models"].values():
                 entry.pop("document_kind")
             self.write_registry(root, document)

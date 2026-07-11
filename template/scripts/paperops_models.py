@@ -75,6 +75,223 @@ class ObjectCatalog:
     findings: tuple[ModelFinding, ...]
 
 
+def _issue_finding(
+    code: str,
+    obj: CatalogObject,
+    suffix: str,
+    message: str,
+) -> ModelFinding:
+    return ModelFinding(code, f"{obj.pointer}{suffix}", message)
+
+
+def _issue_sensitive_text(value: str) -> bool:
+    """Reject tracked secrets and machine-local paths, not ordinary prose."""
+    stripped = value.strip()
+    if not stripped:
+        return False
+    posix = PurePosixPath(stripped)
+    windows = PureWindowsPath(stripped)
+    if (
+        posix.is_absolute()
+        or windows.is_absolute()
+        or bool(windows.drive)
+        or stripped.casefold().startswith(("file://", "ssh://", "sftp://"))
+    ):
+        return True
+    return re.search(
+        r"(?i)(?:password|passwd|secret|credential|api[_-]?key|access[_-]?token|auth[_-]?token|token)\s*[:=]",
+        stripped,
+    ) is not None
+
+
+def _walk_issue_strings(value: Any, pointer: str = "") -> Iterable[tuple[str, str]]:
+    if isinstance(value, str):
+        yield pointer, value
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            yield from _walk_issue_strings(item, f"{pointer}/{index}")
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            if isinstance(key, str):
+                escaped = key.replace("~", "~0").replace("/", "~1")
+                yield from _walk_issue_strings(item, f"{pointer}/{escaped}")
+
+
+def validate_issue_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
+    """Validate Issue privacy, analysis lifecycle, and response closure."""
+    findings: list[ModelFinding] = []
+    issues = {
+        object_id: obj
+        for object_id, obj in catalog.objects.items()
+        if obj.model_name == "issue"
+    }
+
+    for obj in issues.values():
+        extensions = obj.document.get("extensions")
+        if isinstance(extensions, dict):
+            for extension_finding in validate_extension_keys(extensions):
+                findings.append(
+                    _issue_finding(
+                        extension_finding.code,
+                        obj,
+                        f"/extensions{extension_finding.pointer}",
+                        extension_finding.message,
+                    )
+                )
+            for key in extensions:
+                if isinstance(key, str) and _sensitive_extension_key(key):
+                    findings.append(
+                        _issue_finding(
+                            "semantic.extension",
+                            obj,
+                            f"/extensions/{key.replace('~', '~0').replace('/', '~1')}",
+                            "extension may not store credentials or local paths",
+                        )
+                    )
+        for pointer, value in _walk_issue_strings(obj.document):
+            if _issue_sensitive_text(value):
+                findings.append(
+                    _issue_finding(
+                        "semantic.confidentiality",
+                        obj,
+                        pointer,
+                        "Issue state may contain only public summaries and opaque local-reference IDs",
+                    )
+                )
+
+        if obj.object_type != "analysis_request":
+            continue
+        status = obj.document.get("status")
+        provenance = obj.document.get("execution_provenance")
+        if status in {"executed", "reconciled"}:
+            output_refs: list[Any] = []
+            if isinstance(provenance, dict):
+                for field in ("artifact_refs", "result_refs", "figure_refs"):
+                    values = provenance.get(field)
+                    if isinstance(values, list):
+                        output_refs.extend(values)
+            if not output_refs:
+                findings.append(
+                    _issue_finding(
+                        "semantic.execution_outputs",
+                        obj,
+                        "/execution_provenance",
+                        "executed analysis requires artifact, result, or figure output refs",
+                    )
+                )
+        if status == "reconciled":
+            reconciliation = obj.document.get("reconciliation")
+            complete = (
+                isinstance(reconciliation, dict)
+                and bool(reconciliation.get("observed_result"))
+                and reconciliation.get("outcome") in {"confirmed", "refuted", "mixed", "null"}
+                and reconciliation.get("gate_rerun") in {"completed", "not_required"}
+                and reconciliation.get("human_signoff") in {"approved", "rejected"}
+            )
+            if not complete:
+                findings.append(
+                    _issue_finding(
+                        "semantic.reconciliation",
+                        obj,
+                        "/reconciliation",
+                        "reconciled analysis requires observed reconciliation and human signoff",
+                    )
+                )
+        prediction = obj.document.get("prediction")
+        if (
+            isinstance(prediction, dict)
+            and prediction.get("state") == "predicted"
+            and status not in {"reconciled", "abandoned"}
+        ):
+            findings.append(
+                ModelFinding(
+                    "semantic.predicted_unresolved",
+                    f"{obj.pointer}/prediction/state",
+                    "predicted analysis remains unresolved until reconciliation or abandonment",
+                    severity="warning",
+                )
+            )
+
+    for obj in issues.values():
+        if obj.object_type != "response" or obj.document.get("status") != "closed":
+            continue
+        audit = obj.document.get("closure_audit")
+        if not isinstance(audit, dict):
+            continue
+        if audit.get("closure_status") != "closed" or audit.get("criteria_met") is not True:
+            findings.append(
+                _issue_finding(
+                    "semantic.response_closure",
+                    obj,
+                    "/closure_audit",
+                    "closed response requires a closed audit with all criteria met",
+                )
+            )
+        request_refs = audit.get("related_analysis_request_refs", [])
+        if isinstance(request_refs, list):
+            for index, request_id in enumerate(request_refs):
+                request = issues.get(request_id) if isinstance(request_id, str) else None
+                if (
+                    request is not None
+                    and request.object_type == "analysis_request"
+                    and request.document.get("status") not in {"reconciled", "abandoned"}
+                ):
+                    findings.append(
+                        _issue_finding(
+                            "semantic.response_open_request",
+                            obj,
+                            f"/closure_audit/related_analysis_request_refs/{index}",
+                            f"analysis request `{request_id}` is still open",
+                        )
+                    )
+        human_refs = audit.get("open_human_decision_refs", [])
+        if isinstance(human_refs, list) and human_refs:
+            findings.append(
+                _issue_finding(
+                    "semantic.response_human_decision",
+                    obj,
+                    "/closure_audit/open_human_decision_refs",
+                    "closed response cannot retain an open human decision",
+                )
+            )
+        scope_approval_refs = audit.get("scope_change_approval_refs", [])
+        if obj.document.get("scope_changed") is True:
+            referenced = set(scope_approval_refs) if isinstance(scope_approval_refs, list) else set()
+            approvals = obj.document.get("approvals", [])
+            history = [
+                approval
+                for approval in approvals
+                if isinstance(approval, dict)
+                and approval.get("approval_id") in referenced
+                and approval.get("kind") == "scope_expansion"
+            ] if isinstance(approvals, list) else []
+            current = [
+                approval
+                for approval in history
+                if approval.get("object_revision") == obj.revision
+                and approval.get("object_hash") == obj.object_hash
+            ]
+            if history and not current:
+                findings.append(
+                    _issue_finding(
+                        "approval.stale",
+                        obj,
+                        "/closure_audit/scope_change_approval_refs",
+                        "scope expansion approval does not match the current response revision/hash",
+                    )
+                )
+            elif not current or current[-1].get("decision") != "approved":
+                findings.append(
+                    _issue_finding(
+                        "approval.missing",
+                        obj,
+                        "/closure_audit/scope_change_approval_refs",
+                        "closed response with changed claim scope requires current human scope approval",
+                    )
+                )
+    return findings
+
+
 def _research_finding(code: str, obj: CatalogObject, suffix: str, message: str) -> ModelFinding:
     return ModelFinding(code, f"{obj.pointer}{suffix}", message)
 
