@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- GitHub公式ActionをNode.js 24 runtimeのmajorへ更新した。`checkout@v7`、`setup-python@v6`、`upload-artifact@v7`、`download-artifact@v8`を全workflowで統一し、trigger、permissions、Python 3.12、artifact contract、PyPI Trusted Publishing境界は維持する。
+
 ## 0.13.0 - 2026-07-12
 
 PaperOps 2 P0–P2として、六モデルのschema kernelと、AIを介さず安全にshadow比較・採用・復元できるmodel migration CLIを導入した。既存projectのlegacy artifactとwriterは保持し、typed compiler / Writer boundary（P3）とworkflow writer cutover（P4）は後続releaseへ分離する。
