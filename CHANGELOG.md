@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.13.0 - 2026-07-12
+
+PaperOps 2 P0–P2として、六モデルのschema kernelと、AIを介さず安全にshadow比較・採用・復元できるmodel migration CLIを導入した。既存projectのlegacy artifactとwriterは保持し、typed compiler / Writer boundary（P3）とworkflow writer cutover（P4）は後続releaseへ分離する。
+
 - `pops model rollback`を追加し、latestまたは現在の明示adoption transactionのsnapshot hash、current target hash、manifestをmutation前に検証して復元する。v2 dependentがあれば既定で停止し、`--cascade`時だけPublication→Issue→Manuscript→Editorial / Results hierarchy→Researchの逆依存順を同一rollback journal / snapshotへ含める。rollbackのdry-run / repeat no-op、途中停止からrollback前stateへのrecovery、snapshot破損・欠損、manual edit conflictを扱う。adoptはshadow candidateを消費せず同一filesystem上のreplacement copyを切り替えるため、rollback後も元shadowを再検証・再採用できる。
 
 - `pops model adopt`をdurable transaction化した。adopt直前にsource / candidate byte hashと最新managed checkerを再検証し、依存modelが`v2-authoritative`でない場合、`--yes`がない場合、Publication prerequisiteが未採用の場合はtracked state変更前に停止する。journalは`planned`、`materialized`、`validated`、`snapshotted`、`replacing`、`committed`をatomicに記録し、各境界で中断しても既知hashだけをsnapshotへ復元する。targetまたはmanifestに未知の手編集、snapshot破損があれば`recovery.conflict`として上書きしない。Editorial / Results hierarchyは同一transaction、反復adoptはtarget/journal/hashを検証したno-opになる。

@@ -531,14 +531,13 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             text,
         )
 
-    def test_unreleased_changelog_keeps_p0a_design_separate_from_p1_delivery(
+    def test_changelog_keeps_p0a_design_separate_from_p1_delivery(
         self,
     ) -> None:
         text = self.read("CHANGELOG.md")
-        unreleased = text.split("## Unreleased", 1)[1].split("\n## ", 1)[0]
         entries = [
             line
-            for line in unreleased.splitlines()
+            for line in text.splitlines()
             if line.startswith("- ")
             and "段階再設計" in line
             and "合成 fixture 方針" in line
