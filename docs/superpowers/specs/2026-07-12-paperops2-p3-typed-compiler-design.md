@@ -203,7 +203,9 @@ packetへ入る全inputは、次のいずれかに必ず現れる。
 - catalog object: model、object type、ID、revision（存在する場合）、semantic hash、relation
 - non-catalog snapshot: project-relative identity、contract/profile version、canonical content hash
 
-対象にはsection/block dependenciesだけでなく、Editorial move、Results item、claim/result/source/figure、section contract、project overlay、writing profile、citation registry、terminology、mirror map、TeX block preimageを含む。
+対象にはsection/block dependenciesだけでなく、Editorial move、Results item、claim/result/source/figure、section contract、project overlay、writing profile、citation registry、terminology、mirror map、TeX block preimage、予測稿を許可するlegacy analysis-request cardのcontent snapshotを含む。
+
+P3のauthoritative model入力はResearch、Editorial、Results hierarchy、Manuscriptの4 modelに限定する。予測稿のopen AREQ状態は、既存workflowとの互換bridgeとして `_paperops/requests/analysis/*.md` のfrontmatterから `{id,status,identity,content_hash}` だけをsafe snapshot化して判定し、raw request本文をWriter-facing contextへ複製しない。typed Issue authorityへのcutoverはP4で扱う。
 
 timestamp、absolute path、実行host、credentialをdependency materialへ入れない。入力追加・削除・hash変更は関係するpacketだけをstaleにする。
 

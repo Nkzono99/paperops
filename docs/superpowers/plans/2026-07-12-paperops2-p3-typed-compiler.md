@@ -169,14 +169,14 @@ Commit message: `未承認modelをWriterへ流さないためcompile入力をaut
 
 - Produces `resolve_section_contract(root, section_kind) -> ResolvedContract` with precedence managed default < project overlay < writing profile and an input hash per layer。
 - Rejects unknown/destructive overlay operations; mappings merge recursively, ordered lists replace only when the overlay declares the complete list, and `null` deletion is unsupported。
-- Produces `scan_manuscript(root) -> ManuscriptSnapshot` with full read paths/hashes, `% block:` order/content hashes, map.toml pairs, freshness facts, terminology rules, and duplicate/missing findings。
+- Produces `scan_manuscript(root) -> ManuscriptSnapshot` with full read paths/hashes, `% block:` order/content hashes, map.toml pairs, freshness facts, terminology rules, legacy analysis-request `{id,status,identity,content_hash}` snapshots, and duplicate/missing findings。
 - Produces reusable pure `parse_tex_bytes(identity, content)` and explicit typed-block binding APIs; typed `BLK-*` identity and raw `% block:` identity remain separate, and marker IDs accept the Manuscript schema's `[A-Za-z0-9:._-]+` set。
 - Records exact per-block citation keys, `N of M` quantities, figure labels/references, predicted-result markers/AREQ refs/placeholders, and authoring-intent hits for later conservation checks, without placing raw TeX in generated global context。
 - Does not invoke `mirror-freshness-check --update` or mutate ledger。
 
 - [ ] **Step 1: Write RED tests**
 
-Cover default-only contract, additive overlay, profile override trace, null/unknown destructive input, duplicate `% block:`, reordered pair, one-language drift, `ja_tex_block_id` explicit binding, colon-bearing raw marker IDs, exact citation/quantity/figure/prediction/intent inventories, public DOI preservation, and private absolute-path rejection in Writer-facing terminology。
+Cover default-only contract, additive overlay, profile override trace, null/unknown destructive input, duplicate `% block:`, reordered pair, one-language drift, `ja_tex_block_id` explicit binding, colon-bearing raw marker IDs, exact citation/quantity/figure/prediction/intent inventories, public DOI preservation, private absolute-path rejection in Writer-facing terminology, and safe/unique legacy analysis-request frontmatter capture without exposing its raw body。
 
 - [ ] **Step 2: Run RED**
 
@@ -213,7 +213,7 @@ Commit message: `全体文脈と変更範囲を分けるためcontractとTeX sna
 - Extends catalog `InputSnapshot` with an optional full canonical `content_hash` while retaining the authority/profile-aware semantic `hash`; materialized catalog inputs require both, and generated schemas remain closed。
 - Propagates `LoadedCompileInputs.snapshot_hash` as a non-catalog `compile-snapshot` input into compile-ID material and every Writer packet, so checker/schema/approval-only input changes cannot reuse an earlier packet。
 - Emits `global_context`, one `SectionPlan` per target, and one or more `WriterPacket` objects without writing files。
-- Every packet input is exactly one catalog object snapshot or non-catalog content snapshot; all refs require dependency coverage。
+- Every packet input is exactly one catalog object snapshot or non-catalog content snapshot; all refs require dependency coverage, including the content hash of every analysis-request card used to authorize predicted material。
 - Compile readiness requires selected story, move coverage, current section `editorial_choice` approval, current Research approvals/gates, non-stale dependencies, contract functions, and scope topology。
 - Results/Discussion/Methods projections preserve the field families in the design spec; depth remains a diagnostic floor, never generation target。
 
