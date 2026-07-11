@@ -472,6 +472,7 @@ class ResearchModelTest(unittest.TestCase):
         for key in (
             "x-nlp-tokenizer-version", "x-authors-authorship-note",
             "x-figure-key-order", "x-nlp-token-count", "x-login-auth-method",
+            "x-nlp-token-id-map",
         ):
             changed = source()
             changed["extensions"] = {key: "v1"}

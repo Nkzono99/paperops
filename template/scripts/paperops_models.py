@@ -250,29 +250,28 @@ def _validate_public_provenance(
 
 
 def _sensitive_extension_key(key: str) -> bool:
-    components = {
+    components = [
         component
         for component in re.split(r"[-._]", key.casefold())
         if component
-    }
-    if components.intersection(
-        {"password", "passwd", "secret", "credential", "apikey"}
+    ]
+    if any(
+        component in {"password", "passwd", "secret", "credential", "apikey"}
+        for component in components
     ):
         return True
-    return any(
-        pair.issubset(components)
-        for pair in (
-            {"api", "key"},
-            {"access", "token"},
-            {"auth", "token"},
-            {"bearer", "token"},
-            {"refresh", "token"},
-            {"session", "token"},
-            {"id", "token"},
-            {"local", "path"},
-            {"private", "key"},
-        )
-    )
+    sensitive_pairs = {
+        ("api", "key"),
+        ("access", "token"),
+        ("auth", "token"),
+        ("local", "path"),
+        ("private", "key"),
+        ("bearer", "token"),
+        ("refresh", "token"),
+        ("session", "token"),
+        ("id", "token"),
+    }
+    return any(pair in sensitive_pairs for pair in zip(components, components[1:]))
 
 
 def _valid_public_provenance(value: str) -> bool:
