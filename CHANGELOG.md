@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- PaperOps 2 P2 migration のEditorial adapterとして、Editorial ModelとResults hierarchyを常にpaired candidateとして扱い、既存typed Resultsはschema-cleanな場合だけsemantic valueを再利用する。present-but-malformed typed stateはlegacyへfallbackせず停止し、legacy storylineが残る場合は`migration_editorial` / `migration_results_hierarchy`の明示structured payloadなしにeditorial choiceを推測しない。result ID順序の不一致、source変化、hash非決定性をfixtureで検査し、既存typed pairだけのprojectもstrict validationを経て採用候補にできる。
+
 - PaperOps 2 P2 migration の最初のmodel adapterとして、legacy claim / result / figure / source / scientific gate cardをResearch indexとper-ID documentへ決定的に変換する`ResearchAdapter`を追加した。schema required fieldと明示alias / headingだけを写し、record revision、approval、gate decision、quantity contract、provenanceを推測で補わない。unknown/private field、duplicate ID / quantity、incomplete claim-gate pairingはfindingにし、反復生成のhash安定性と生成candidateのstrict Research validationを合成fixtureで確認する。legacy cardとtracked Research stateはadapter単体では変更しない。
 
 - PaperOps 2 P2 migration のlegacy conservation基盤として、Markdown cardのfront matter、heading内definition、tableだけを依存なしで読み、推論が必要なprose、duplicate key / ID、private / raw値、missing / unsafe sourceをstable findingへ変換するinventory readerを追加した。各legacy field familyは`mapped` / `deferred` / `local-only` / `unsupported`のいずれか一つを必須とし、source drift、存在しないcandidateへのmapping、理由・後続phaseなしのdefer、機密family以外のlocal-only、unsupportedをadopt blockerにする。既存cardは読み取り専用で、変換時に書き換えない。
