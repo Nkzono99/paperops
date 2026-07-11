@@ -124,6 +124,7 @@ def _registry_or_finding(root: Path) -> tuple[SchemaRegistry | None, list[ModelF
 
 def main() -> int:
     args = _parse_args()
+    phase = "all" if args.print_hash else args.phase
     root = args.root.resolve()
     registry, findings = _registry_or_finding(root)
     if registry is None:
@@ -136,7 +137,7 @@ def main() -> int:
     names_to_load = list(selected_names)
     if (
         "editorial" in selected_names
-        and args.phase in ("all", "references")
+        and phase in ("all", "references")
         and "results_hierarchy" not in names_to_load
     ):
         names_to_load.append("results_hierarchy")
@@ -155,12 +156,12 @@ def main() -> int:
         for name in names_to_load
     }
 
-    if args.phase in ("all", "schema"):
+    if phase in ("all", "schema"):
         for name in selected_names:
             findings.extend(loaded[name].schema_findings)
-    elif args.phase in ("references", "semantics"):
+    elif phase in ("references", "semantics"):
         prerequisites = list(selected_names)
-        if args.phase == "references" and "editorial" in selected_names:
+        if phase == "references" and "editorial" in selected_names:
             prerequisites = list(dict.fromkeys([*prerequisites, "results_hierarchy"]))
         failed = [name for name in prerequisites if not loaded[name].schema_clean]
         if failed:
@@ -169,7 +170,7 @@ def main() -> int:
     editorial = loaded.get("editorial")
     results = loaded.get("results_hierarchy")
     if (
-        args.phase in ("all", "references")
+        phase in ("all", "references")
         and "editorial" in selected_names
         and editorial is not None
         and results is not None
@@ -180,7 +181,7 @@ def main() -> int:
             validate_editorial_references(editorial.document, results.document)
         )
     if (
-        args.phase in ("all", "semantics")
+        phase in ("all", "semantics")
         and "editorial" in selected_names
         and editorial is not None
         and editorial.schema_clean
@@ -192,8 +193,6 @@ def main() -> int:
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]
     failed = bool(errors or (args.strict and warnings))
-    if args.print_hash and findings:
-        failed = True
     if args.print_hash and not failed:
         model = loaded[selected_names[0]]
         if model.schema_clean:

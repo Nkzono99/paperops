@@ -215,11 +215,60 @@ class PaperOpsModelCheckTest(unittest.TestCase):
             ROOT / "template",
             "--model",
             "editorial",
+            "--phase",
+            "schema",
+            "--strict",
             "--print-hash",
         )
         self.assertEqual(starter.returncode, 1)
         self.assertIn("semantic.placeholder", starter.stdout)
         self.assertNotRegex(starter.stdout, r"(?m)^sha256:[0-9a-f]{64}$")
+
+    def test_print_hash_runs_references_despite_semantics_phase(self) -> None:
+        editorial, results = valid_documents()
+        editorial["selected_story_id"] = "STY-missing"
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self.run_overrides(
+                Path(tmp),
+                editorial,
+                results,
+                "--phase",
+                "semantics",
+                "--print-hash",
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("reference.dangling", result.stdout)
+        self.assertNotRegex(result.stdout, r"(?m)^sha256:[0-9a-f]{64}$")
+
+    def test_print_hash_runs_schema_despite_references_phase(self) -> None:
+        editorial, results = valid_documents()
+        editorial["unknown_field"] = True
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self.run_overrides(
+                Path(tmp),
+                editorial,
+                results,
+                "--phase",
+                "references",
+                "--print-hash",
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("schema.additional", result.stdout)
+        self.assertNotIn("phase.prerequisite", result.stdout)
+        self.assertNotRegex(result.stdout, r"(?m)^sha256:[0-9a-f]{64}$")
+
+    def test_print_hash_allows_info_only_and_prints_one_line(self) -> None:
+        editorial, results = valid_documents()
+        editorial["argument_moves"][0]["claim_ids"] = ["CLM-0001"]
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self.run_overrides(
+                Path(tmp), editorial, results, "--phase", "schema", "--print-hash"
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertRegex(result.stdout, r"^sha256:[0-9a-f]{64}\n?$")
 
     def test_document_overrides_use_the_supplied_rhi_instead_of_starters(self) -> None:
         editorial, results = valid_documents()
