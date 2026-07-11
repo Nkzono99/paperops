@@ -6,7 +6,11 @@ import argparse
 import sys
 from pathlib import Path
 
-from paperops.cli.manifest import write_manifest
+from paperops.cli.manifest import (
+    applied_migrations,
+    record_applied_migration,
+    write_manifest,
+)
 from paperops.cli.migrations import (
     apply_migration,
     find_migration_root,
@@ -138,6 +142,10 @@ def cmd_migrate_apply(migration_id: str, path: Path, *, dry_run: bool) -> int:
         print("error: this does not look like a paper harness project.", file=sys.stderr)
         return 2
 
+    if migration.migration_id in applied_migrations(root):
+        print(f"Migration {migration.migration_id} is already applied; no changes made.")
+        return 0
+
     plan = plan_migration(root, migration)
     mode = "DRY-RUN" if dry_run else "APPLY"
     print(f"{mode} migration {migration.migration_id}: {migration.title}")
@@ -164,5 +172,6 @@ def cmd_migrate_apply(migration_id: str, path: Path, *, dry_run: bool) -> int:
     if not (root / ".pops" / "manifest.toml").exists():
         write_manifest(root)
         print("Created .pops/manifest.toml")
+    record_applied_migration(root, migration.migration_id)
     print(f"Applied migration {migration.migration_id}")
     return 0

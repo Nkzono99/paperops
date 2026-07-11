@@ -93,8 +93,11 @@ EDITORIAL_MODEL_SCHEMA_KERNEL_MIGRATION = Migration(
     notes=(
         "Run `pops update-paperops --apply` to receive the managed registry, schemas, and checker.",
         "Create _paperops/model/editorial/editorial-model.yml manually; migration apply never creates project-owned state.",
-        "Use `make schema-check` for advisory checks, then run the documented explicit `--strict` command successfully.",
-        "Keep the legacy controlled view through P2; do not switch authority or remove it during this migration.",
+        "Run `make schema-check`, then require strict schema/reference/semantics success before continuing.",
+        "Record the canonical semantic-v1 hash only after strict validation succeeds.",
+        "Obtain human approval for the validated Editorial Model and recorded hash.",
+        "Only after strict success and human approval may an explicit authority switch occur.",
+        "Keep the legacy controlled view through P2; its deletion is forbidden during this migration.",
     ),
 )
 

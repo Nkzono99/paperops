@@ -10,6 +10,7 @@ from tests.helpers import ROOT, run_cli
 
 from paperops import __version__  # noqa: E402
 from paperops.cli.main import write_manifest  # noqa: E402
+from paperops.cli.manifest import applied_migrations  # noqa: E402
 from paperops.cli.migrations import get_migration  # noqa: E402
 from paperops.cli.scaffold import copy_scaffold, is_managed_update  # noqa: E402
 
@@ -344,6 +345,18 @@ class PopsCliTest(unittest.TestCase):
         self.assertIn("schema-check", out)
         self.assertIn("project-owned", out)
 
+        strict = "strict schema/reference/semantics"
+        canonical_hash = "canonical semantic-v1 hash"
+        human_approval = "human approval"
+        authority_switch = "authority switch"
+        legacy_retention = "legacy controlled view"
+        for required in [strict, canonical_hash, human_approval, authority_switch, legacy_retention]:
+            self.assertIn(required, out)
+        self.assertLess(out.index(strict), out.index(canonical_hash))
+        self.assertLess(out.index(canonical_hash), out.index(human_approval))
+        self.assertLess(out.index(human_approval), out.index(authority_switch))
+        self.assertLess(out.index(authority_switch), out.index(legacy_retention))
+
     def test_editorial_model_schema_kernel_migration_is_guide_only(self) -> None:
         migration = get_migration("M0-0004")
 
@@ -363,7 +376,65 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("No file moves are planned.", out)
             self.assertIn("Applied migration M0-0004", out)
             self.assertFalse(editorial_model.exists())
-            self.assertTrue((project / ".pops" / "manifest.toml").is_file())
+            manifest_path = project / ".pops" / "manifest.toml"
+            self.assertTrue(manifest_path.is_file())
+            manifest = tomllib.loads(manifest_path.read_text(encoding="utf-8"))
+            migrations = manifest.get("migrations", {})
+            self.assertIn("M0-0004", migrations.get("applied", []))
+            self.assertEqual(applied_migrations(project), ("M0-0004",))
+
+    def test_migration_dry_run_does_not_change_or_record_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "paper-demo"
+            run_cli(["init", str(project)])
+            manifest_path = project / ".pops" / "manifest.toml"
+            before = manifest_path.read_bytes()
+
+            code, _out, err = run_cli(
+                ["migrate", "apply", "M0-0004", "--dry-run", str(project)]
+            )
+
+            self.assertEqual(code, 0, err)
+            self.assertEqual(manifest_path.read_bytes(), before)
+            self.assertNotIn("M0-0004", applied_migrations(project))
+
+    def test_migration_repeat_apply_is_byte_identical_noop(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "paper-demo"
+            run_cli(["init", str(project)])
+            manifest_path = project / ".pops" / "manifest.toml"
+
+            code, _out, err = run_cli(["migrate", "apply", "M0-0004", str(project)])
+            self.assertEqual(code, 0, err)
+            after_first = manifest_path.read_bytes()
+
+            code, out, err = run_cli(["migrate", "apply", "M0-0004", str(project)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("already applied", out.lower())
+            self.assertEqual(manifest_path.read_bytes(), after_first)
+            self.assertEqual(applied_migrations(project), ("M0-0004",))
+
+    def test_migration_record_preserves_existing_manifest_sections_and_sorts_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "paper-demo"
+            run_cli(["init", str(project)])
+            manifest_path = project / ".pops" / "manifest.toml"
+            with manifest_path.open("a", encoding="utf-8") as handle:
+                handle.write('\n[project_extension]\nowner = "authors"\n')
+
+            for migration_id in ["M0-0004", "M0-0002", "M0-0003"]:
+                code, _out, err = run_cli(
+                    ["migrate", "apply", migration_id, str(project)]
+                )
+                self.assertEqual(code, 0, err)
+
+            parsed = tomllib.loads(manifest_path.read_text(encoding="utf-8"))
+            self.assertEqual(
+                parsed.get("migrations", {}).get("applied"),
+                ["M0-0002", "M0-0003", "M0-0004"],
+            )
+            self.assertEqual(parsed["project_extension"]["owner"], "authors")
 
     def test_editorial_model_migration_checks_strictly_before_authority_switch(self) -> None:
         guide = (ROOT / "docs" / "migrations" / "v0.md").read_text(encoding="utf-8")
@@ -431,6 +502,7 @@ class PopsCliTest(unittest.TestCase):
             self.assertFalse((project / "notes").exists())
             self.assertFalse((project / "refs").exists())
             self.assertTrue((project / ".pops" / "manifest.toml").is_file())
+            self.assertEqual(applied_migrations(project), ("M0-0001",))
 
     def test_migrate_internal_layout_stops_on_conflict_without_deleting_source(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -446,6 +518,7 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("conflict", out + err)
             self.assertTrue((project / "notes" / "legacy.md").is_file())
             self.assertTrue((project / "_paperops" / "notes" / "modern.md").is_file())
+            self.assertNotIn("M0-0001", applied_migrations(project))
 
     def test_doctor_rejects_invalid_link_registry(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

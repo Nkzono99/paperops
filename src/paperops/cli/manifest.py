@@ -26,6 +26,42 @@ def applied_scaffold_version(root: Path) -> str | None:
     return version if isinstance(version, str) and version else None
 
 
+def applied_migrations(root: Path) -> tuple[str, ...]:
+    manifest = read_manifest(root / ".pops" / "manifest.toml")
+    migrations = as_table(manifest.get("migrations"))
+    raw_applied = migrations.get("applied")
+    if not isinstance(raw_applied, list):
+        return ()
+    return tuple(
+        sorted(
+            {
+                migration_id.strip().upper()
+                for migration_id in raw_applied
+                if isinstance(migration_id, str) and migration_id.strip()
+            }
+        )
+    )
+
+
+def record_applied_migration(root: Path, migration_id: str) -> bool:
+    normalized = migration_id.strip().upper()
+    if not normalized:
+        raise ValueError("migration_id must not be empty")
+    if normalized in applied_migrations(root):
+        return False
+
+    manifest_path = root / ".pops" / "manifest.toml"
+    existing = read_manifest(manifest_path)
+    migrations = as_table(existing.get("migrations"))
+    migrations["applied"] = sorted({*applied_migrations(root), normalized})
+
+    merged = dict(existing)
+    merged["migrations"] = migrations
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+    return True
+
+
 def write_manifest(
     root: Path,
     *,
