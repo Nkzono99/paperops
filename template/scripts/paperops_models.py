@@ -884,16 +884,43 @@ def validate_publication_semantics(
                 )
             )
 
+    approvals = document.get("submission_approvals", [])
+    if isinstance(rounds, list):
+        for round_index, round_document in enumerate(rounds):
+            if not isinstance(round_document, dict):
+                continue
+            history = [
+                approval
+                for approval in approvals
+                if isinstance(approval, dict)
+                and approval.get("kind") == "submission"
+                and approval.get("candidate_id") == round_document.get("candidate_id")
+            ] if isinstance(approvals, list) else []
+            bound = [
+                approval
+                for approval in history
+                if approval.get("candidate_revision") == round_document.get("candidate_revision")
+                and approval.get("candidate_hash") == round_document.get("candidate_hash")
+            ]
+            if history and not bound:
+                findings.append(
+                    _publication_finding(
+                        "approval.stale",
+                        f"/rounds/{round_index}/candidate_hash",
+                        "round candidate hash is not bound by its submission approval history",
+                    )
+                )
+            elif not bound or bound[-1].get("decision") != "approved":
+                findings.append(
+                    _publication_finding(
+                        "approval.missing",
+                        f"/rounds/{round_index}/candidate_hash",
+                        "round requires an approved historical submission decision",
+                    )
+                )
+
     current_candidate = document.get("current_candidate")
     if not isinstance(current_candidate, dict):
-        if current_round_id:
-            findings.append(
-                _publication_finding(
-                    "semantic.round_candidate",
-                    "/current_candidate",
-                    "a current round requires its current candidate",
-                )
-            )
         return findings
 
     candidate_id = current_candidate.get("id")
@@ -909,8 +936,7 @@ def validate_publication_semantics(
             )
         )
 
-    if candidate_status == "gated" or current_round_entry is not None:
-        approvals = document.get("submission_approvals", [])
+    if candidate_status == "gated":
         history = [
             approval
             for approval in approvals
@@ -959,20 +985,23 @@ def validate_publication_semantics(
 
     if current_round_entry is not None:
         round_index, current_round = current_round_entry
-        round_matches_candidate = (
+        same_candidate_revision = (
             current_round.get("candidate_id") == candidate_id
             and current_round.get("candidate_revision") == candidate_revision
+        )
+        snapshot_matches_candidate = (
+            current_round.get("candidate_hash") == candidate_hash
             and current_round.get("source_commit") == current_candidate.get("source_commit")
             and current_round.get("gate_report_ref") == current_candidate.get("gate_report_ref")
             and current_round.get("artifact_refs") == current_candidate.get("artifact_refs")
             and current_round.get("snapshot_dependencies") == current_candidate.get("snapshot_dependencies")
         )
-        if not round_matches_candidate:
+        if same_candidate_revision and not snapshot_matches_candidate:
             findings.append(
                 _publication_finding(
-                    "semantic.round_candidate",
-                    f"/rounds/{round_index}",
-                    "current round snapshot does not match the approved candidate",
+                    "immutability.required",
+                    f"/rounds/{round_index}/candidate_hash",
+                    "a submitted candidate revision cannot be rewritten in place",
                 )
             )
 

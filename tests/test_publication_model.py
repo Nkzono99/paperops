@@ -82,6 +82,7 @@ def publication() -> dict:
                 "status": "submitted",
                 "candidate_id": "CAND-0001",
                 "candidate_revision": 1,
+                "candidate_hash": semantic_hash(current),
                 "source_commit": "commit:abcdef1",
                 "gate_report_ref": "artifact:gate-report-1",
                 "artifact_refs": ["artifact:manuscript-pdf"],
@@ -172,7 +173,7 @@ class PublicationModelTest(unittest.TestCase):
     def test_schema_rejects_unknown_fields_and_incomplete_round_snapshot(self) -> None:
         unknown = publication(); unknown["current_candidate"]["candidate_hash"] = HASH
         self.assertIn(("schema.any_of", "/current_candidate"), [(f.code, f.pointer) for f in self.schema_findings(unknown)])
-        for field in ("source_commit", "gate_report_ref", "artifact_refs", "snapshot_path", "snapshot_manifest_ref", "snapshot_dependencies"):
+        for field in ("candidate_hash", "source_commit", "gate_report_ref", "artifact_refs", "snapshot_path", "snapshot_manifest_ref", "snapshot_dependencies"):
             with self.subTest(field=field):
                 missing = publication(); del missing["rounds"][0][field]
                 self.assertIn(("schema.required", f"/rounds/0/{field}"), [(f.code, f.pointer) for f in self.schema_findings(missing)])
@@ -246,6 +247,22 @@ class PublicationModelTest(unittest.TestCase):
         original = publication(); revised = copy.deepcopy(original); revised["authoring"]["manuscript_revision"] += 1
         self.assertEqual(self.codes(original), set())
         self.assertEqual(self.codes(revised), set())
+
+        revision_candidate = copy.deepcopy(original)
+        revision_candidate["current_candidate"]["id"] = "CAND-0002"
+        revision_candidate["current_candidate"]["status"] = "revision_candidate"
+        revision_candidate["current_candidate"]["source_commit"] = "commit:abcdef2"
+        self.assertEqual(self.codes(revision_candidate), set())
+
+    def test_round_candidate_hash_is_historical_and_cannot_be_rewritten_in_place(self) -> None:
+        rewritten = publication()
+        rewritten["current_candidate"]["source_commit"] = "commit:abcdef2"
+        rewritten["submission_approvals"][0]["candidate_hash"] = semantic_hash(rewritten["current_candidate"])
+        self.assertIn("immutability.required", self.codes(rewritten))
+
+        snapshot_drift = publication()
+        snapshot_drift["rounds"][0]["source_commit"] = "commit:abcdef2"
+        self.assertIn("immutability.required", self.codes(snapshot_drift))
 
     def test_checker_dispatches_publication_semantics(self) -> None:
         result = run_python_script(CHECKER, "--root", TEMPLATE, "--model", "publication", "--phase", "all")
