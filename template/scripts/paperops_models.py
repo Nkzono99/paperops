@@ -756,6 +756,375 @@ def validate_manuscript_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
     return findings
 
 
+def _publication_finding(code: str, pointer: str, message: str) -> ModelFinding:
+    return ModelFinding(code, pointer, message)
+
+
+def validate_publication_semantics(
+    document: dict[str, Any],
+    catalog: ObjectCatalog,
+) -> list[ModelFinding]:
+    """Validate candidate approval, round snapshots, and publishable dependencies."""
+    findings: list[ModelFinding] = []
+    extensions = document.get("extensions")
+    if isinstance(extensions, dict):
+        for finding in validate_extension_keys(extensions):
+            findings.append(
+                _publication_finding(
+                    finding.code,
+                    f"/extensions{finding.pointer}",
+                    finding.message,
+                )
+            )
+        for key in extensions:
+            if isinstance(key, str) and _sensitive_extension_key(key):
+                findings.append(
+                    _publication_finding(
+                        "semantic.extension",
+                        f"/extensions/{key.replace('~', '~0').replace('/', '~1')}",
+                        "Publication extension may not store credential or local-path state",
+                    )
+                )
+        for pointer, value in _walk_issue_strings(extensions):
+            if _issue_sensitive_text(value):
+                findings.append(
+                    _publication_finding(
+                        "semantic.confidentiality",
+                        f"/extensions{pointer}",
+                        "Publication extensions may contain only public or opaque references",
+                    )
+                )
+
+    venue = document.get("venue")
+    requirements = venue.get("requirements", []) if isinstance(venue, dict) else []
+    requirement_ids: set[str] = set()
+    if isinstance(requirements, list):
+        for index, requirement in enumerate(requirements):
+            requirement_id = requirement.get("id") if isinstance(requirement, dict) else None
+            if isinstance(requirement_id, str):
+                if requirement_id in requirement_ids:
+                    findings.append(
+                        _publication_finding(
+                            "reference.duplicate",
+                            f"/venue/requirements/{index}/id",
+                            f"duplicate requirement ID `{requirement_id}`",
+                        )
+                    )
+                requirement_ids.add(requirement_id)
+
+    rounds = document.get("rounds", [])
+    round_by_id: dict[str, tuple[int, dict[str, Any]]] = {}
+    snapshot_paths: dict[str, int] = {}
+    if isinstance(rounds, list):
+        for index, round_document in enumerate(rounds):
+            if not isinstance(round_document, dict):
+                continue
+            round_id = round_document.get("id")
+            if isinstance(round_id, str):
+                if round_id in round_by_id:
+                    findings.append(
+                        _publication_finding(
+                            "reference.duplicate",
+                            f"/rounds/{index}/id",
+                            f"duplicate round ID `{round_id}`",
+                        )
+                    )
+                else:
+                    round_by_id[round_id] = (index, round_document)
+            snapshot_path = round_document.get("snapshot_path")
+            if isinstance(snapshot_path, str):
+                path = PurePosixPath(snapshot_path)
+                if path.is_absolute() or ".." in path.parts or not path.parts or path.parts[0] != "submission":
+                    findings.append(
+                        _publication_finding(
+                            "reference.path",
+                            f"/rounds/{index}/snapshot_path",
+                            "snapshot path must stay under the relative submission/ tree",
+                        )
+                    )
+                if snapshot_path in snapshot_paths:
+                    findings.append(
+                        _publication_finding(
+                            "semantic.snapshot_path",
+                            f"/rounds/{index}/snapshot_path",
+                            f"snapshot path duplicates round {snapshot_paths[snapshot_path]}",
+                        )
+                    )
+                else:
+                    snapshot_paths[snapshot_path] = index
+            if round_document.get("status") in {
+                "submitted", "under_review", "resubmitted", "accepted", "rejected", "withdrawn",
+            } and round_document.get("immutable") is not True:
+                findings.append(
+                    _publication_finding(
+                        "immutability.required",
+                        f"/rounds/{index}/immutable",
+                        "submitted-or-later rounds must be marked immutable",
+                    )
+                )
+
+    current_round_id = document.get("current_round_id")
+    current_round_entry = round_by_id.get(current_round_id) if isinstance(current_round_id, str) else None
+    if current_round_id and current_round_entry is None:
+        findings.append(
+            _publication_finding(
+                "reference.dangling",
+                "/current_round_id",
+                f"current round `{current_round_id}` does not exist",
+            )
+        )
+    if current_round_entry is not None:
+        round_index, current_round = current_round_entry
+        if document.get("submission_state") != current_round.get("status"):
+            findings.append(
+                _publication_finding(
+                    "semantic.round_state",
+                    "/submission_state",
+                    "submission state must match the current round status",
+                )
+            )
+
+    current_candidate = document.get("current_candidate")
+    if not isinstance(current_candidate, dict):
+        if current_round_id:
+            findings.append(
+                _publication_finding(
+                    "semantic.round_candidate",
+                    "/current_candidate",
+                    "a current round requires its current candidate",
+                )
+            )
+        return findings
+
+    candidate_id = current_candidate.get("id")
+    candidate_revision = current_candidate.get("revision")
+    candidate_hash = semantic_hash(current_candidate)
+    candidate_status = current_candidate.get("status")
+    if not current_round_id and document.get("submission_state") != candidate_status:
+        findings.append(
+            _publication_finding(
+                "semantic.candidate_state",
+                "/submission_state",
+                "without a frozen round, submission state must match candidate status",
+            )
+        )
+
+    if candidate_status == "gated" or current_round_entry is not None:
+        approvals = document.get("submission_approvals", [])
+        history = [
+            approval
+            for approval in approvals
+            if isinstance(approval, dict)
+            and approval.get("kind") == "submission"
+            and approval.get("candidate_id") == candidate_id
+        ] if isinstance(approvals, list) else []
+        current = [
+            approval
+            for approval in history
+            if approval.get("candidate_revision") == candidate_revision
+            and approval.get("candidate_hash") == candidate_hash
+        ]
+        if history and not current:
+            findings.append(
+                _publication_finding(
+                    "approval.stale",
+                    "/submission_approvals",
+                    "submission approval does not match the current candidate revision/hash",
+                )
+            )
+        elif not current or current[-1].get("decision") != "approved":
+            findings.append(
+                _publication_finding(
+                    "approval.missing",
+                    "/submission_approvals",
+                    "gated or frozen candidate requires current human submission approval",
+                )
+            )
+
+    if candidate_status == "gated" and isinstance(requirements, list):
+        pending = [
+            requirement
+            for requirement in requirements
+            if isinstance(requirement, dict)
+            and requirement.get("status") == "pending"
+        ]
+        if pending:
+            findings.append(
+                _publication_finding(
+                    "semantic.venue_requirement",
+                    "/venue/requirements",
+                    "gated candidate cannot retain pending venue requirements",
+                )
+            )
+
+    if current_round_entry is not None:
+        round_index, current_round = current_round_entry
+        round_matches_candidate = (
+            current_round.get("candidate_id") == candidate_id
+            and current_round.get("candidate_revision") == candidate_revision
+            and current_round.get("source_commit") == current_candidate.get("source_commit")
+            and current_round.get("gate_report_ref") == current_candidate.get("gate_report_ref")
+            and current_round.get("artifact_refs") == current_candidate.get("artifact_refs")
+            and current_round.get("snapshot_dependencies") == current_candidate.get("snapshot_dependencies")
+        )
+        if not round_matches_candidate:
+            findings.append(
+                _publication_finding(
+                    "semantic.round_candidate",
+                    f"/rounds/{round_index}",
+                    "current round snapshot does not match the approved candidate",
+                )
+            )
+
+    reference_contracts = (
+        ("claim_refs", "claim"),
+        ("manuscript_section_refs", "section"),
+        ("manuscript_block_refs", "block"),
+        ("analysis_request_refs", "analysis_request"),
+        ("required_response_refs", "response"),
+    )
+    for field, expected_type in reference_contracts:
+        values = current_candidate.get(field, [])
+        if not isinstance(values, list):
+            continue
+        for index, object_id in enumerate(values):
+            target = catalog.objects.get(object_id) if isinstance(object_id, str) else None
+            pointer = f"/current_candidate/{field}/{index}"
+            if target is None or target.object_type != expected_type:
+                code = "semantic.response_missing" if expected_type == "response" else "reference.dangling"
+                findings.append(
+                    _publication_finding(
+                        code,
+                        pointer,
+                        f"required {expected_type} `{object_id}` is not present",
+                    )
+                )
+                continue
+            if expected_type == "claim":
+                approval_state = _scientific_approval_state(target)
+                if approval_state != "approved":
+                    findings.append(
+                        _publication_finding(
+                            "approval.stale" if approval_state == "stale" else "approval.missing",
+                            pointer,
+                            f"claim `{object_id}` lacks current scientific approval",
+                        )
+                    )
+                if (
+                    target.document.get("status") != "approved"
+                    or target.document.get("gate_status") != "ready_to_write"
+                ):
+                    findings.append(
+                        _publication_finding(
+                            "semantic.claim_not_writable",
+                            pointer,
+                            f"claim `{object_id}` is not approved and ready_to_write",
+                        )
+                    )
+            elif expected_type == "block":
+                if (
+                    target.document.get("status") == "stale"
+                    or target.document.get("dependency_hash")
+                    != target.document.get("last_verified_dependency_hash")
+                ):
+                    findings.append(
+                        _publication_finding(
+                            "dependency.stale",
+                            pointer,
+                            f"manuscript block `{object_id}` is stale",
+                        )
+                    )
+            elif expected_type == "analysis_request":
+                if target.document.get("status") != "reconciled":
+                    findings.append(
+                        _publication_finding(
+                            "semantic.predicted_unresolved",
+                            pointer,
+                            f"analysis request `{object_id}` is not reconciled",
+                        )
+                    )
+            elif expected_type == "response" and target.document.get("status") != "closed":
+                findings.append(
+                    _publication_finding(
+                        "semantic.response_missing",
+                        pointer,
+                        f"required response `{object_id}` is not closed",
+                    )
+                )
+
+    snapshot_dependencies = current_candidate.get("snapshot_dependencies", [])
+    if isinstance(snapshot_dependencies, list):
+        for index, dependency in enumerate(snapshot_dependencies):
+            target_id = dependency.get("target_id") if isinstance(dependency, dict) else None
+            target = catalog.objects.get(target_id) if isinstance(target_id, str) else None
+            if target is None:
+                continue
+            pointer = f"/current_candidate/snapshot_dependencies/{index}/target_id"
+            if target.object_type == "analysis_request" and target.document.get("status") != "reconciled":
+                findings.append(
+                    _publication_finding(
+                        "semantic.predicted_unresolved",
+                        pointer,
+                        f"snapshot analysis request `{target_id}` is not reconciled",
+                    )
+                )
+            elif target.object_type == "claim":
+                approval_state = _scientific_approval_state(target)
+                if approval_state != "approved":
+                    findings.append(
+                        _publication_finding(
+                            "approval.stale" if approval_state == "stale" else "approval.missing",
+                            pointer,
+                            f"snapshot claim `{target_id}` lacks current scientific approval",
+                        )
+                    )
+                if (
+                    target.document.get("status") != "approved"
+                    or target.document.get("gate_status") != "ready_to_write"
+                ):
+                    findings.append(
+                        _publication_finding(
+                            "semantic.claim_not_writable",
+                            pointer,
+                            f"snapshot claim `{target_id}` is not approved and ready_to_write",
+                        )
+                    )
+            elif target.object_type == "block" and (
+                target.document.get("status") == "stale"
+                or target.document.get("dependency_hash")
+                != target.document.get("last_verified_dependency_hash")
+            ):
+                findings.append(
+                    _publication_finding(
+                        "dependency.stale",
+                        pointer,
+                        f"snapshot manuscript block `{target_id}` is stale",
+                    )
+                )
+            elif target.object_type == "response" and target.document.get("status") != "closed":
+                findings.append(
+                    _publication_finding(
+                        "semantic.response_missing",
+                        pointer,
+                        f"snapshot response `{target_id}` is not closed",
+                    )
+                )
+
+    review_round_ref = current_candidate.get("review_round_ref")
+    if review_round_ref:
+        review_round = catalog.objects.get(review_round_ref)
+        if review_round is None or review_round.object_type != "review_round":
+            findings.append(
+                _publication_finding(
+                    "reference.dangling",
+                    "/current_candidate/review_round_ref",
+                    f"review round `{review_round_ref}` is not present",
+                )
+            )
+
+    return findings
+
+
 def _validate_public_provenance(
     obj: CatalogObject,
     values: Any,

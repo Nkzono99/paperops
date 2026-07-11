@@ -135,9 +135,9 @@ class IssueModelTest(unittest.TestCase):
         index = {"model_name": "issue", "schema_version": 1, "index_revision": 1, "records": [{"id": document["id"], "record_type": record_type, "document": relative, "expected_revision": document["revision"], "expected_hash": digest}], "extensions": {}, "metadata": {"updated_at": "2026-07-11"}}
         (project / "_paperops/model/issues/index.yml").write_text(json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    def test_registry_stages_issue_as_fifth_entry_with_all_record_families(self) -> None:
+    def test_registry_includes_issue_with_all_record_families(self) -> None:
         registry = load_registry(ROOT / "template")
-        self.assertEqual(set(registry.entries), {"editorial", "results_hierarchy", "research", "manuscript", "issue"})
+        self.assertEqual(set(registry.entries), {"editorial", "results_hierarchy", "research", "manuscript", "issue", "publication"})
         entry = registry.entries["issue"]
         self.assertEqual(set(entry.record_sets), set(DOCUMENTS))
         self.assertEqual(entry.authority, "project-owned")

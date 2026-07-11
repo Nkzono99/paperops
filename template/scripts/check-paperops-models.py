@@ -14,6 +14,7 @@ from paperops_models import (
     load_model_document,
     validate_issue_semantics,
     validate_manuscript_semantics,
+    validate_publication_semantics,
     validate_research_semantics,
 )
 from paperops_schema import (
@@ -259,6 +260,12 @@ def main() -> int:
         and phase in ("all", "semantics")
         and "research" not in registry.entries
     )
+    publication_support_names = ("research", "manuscript", "issue")
+    publication_requires_missing_support = (
+        "publication" in selected_names
+        and phase in ("all", "semantics")
+        and any(name not in registry.entries for name in publication_support_names)
+    )
     names_to_load = list(selected_names)
     if (
         "editorial" in selected_names
@@ -273,6 +280,10 @@ def main() -> int:
         and "research" not in names_to_load
     ):
         names_to_load.append("research")
+    if "publication" in selected_names and phase in ("all", "semantics"):
+        for support_name in publication_support_names:
+            if support_name in registry.entries and support_name not in names_to_load:
+                names_to_load.append(support_name)
 
     loaded: dict[str, ModelDocument] = {}
     if "editorial" in names_to_load:
@@ -379,6 +390,12 @@ def main() -> int:
             findings.extend(loaded["results_hierarchy"].schema_findings)
         if manuscript_requires_missing_research:
             findings.append(_prerequisite(["research"]))
+        if publication_requires_missing_support:
+            findings.append(
+                _prerequisite(
+                    [name for name in publication_support_names if name not in registry.entries]
+                )
+            )
     elif phase == "hash":
         for name in selected_names:
             model = loaded.get(name)
@@ -395,6 +412,8 @@ def main() -> int:
             prerequisites = list(dict.fromkeys([*prerequisites, "results_hierarchy"]))
         if phase == "semantics" and "manuscript" in selected_names:
             prerequisites = list(dict.fromkeys([*prerequisites, "research"]))
+        if phase == "semantics" and "publication" in selected_names:
+            prerequisites = list(dict.fromkeys([*prerequisites, *publication_support_names]))
         binding_blocks_results = any(
             finding.severity == "error"
             and finding.code in {"reference.document", "reference.path"}
@@ -420,6 +439,15 @@ def main() -> int:
         if phase == "all":
             findings.extend(research_support.schema_findings)
         findings.extend(research_support.catalog_findings)
+
+    if "publication" in selected_names and phase in ("all", "semantics"):
+        for support_name in publication_support_names:
+            if support_name in selected_names or support_name not in loaded:
+                continue
+            support = loaded[support_name]
+            if phase == "all":
+                findings.extend(support.schema_findings)
+            findings.extend(support.catalog_findings)
 
     if phase in ("all", "references"):
         findings.extend(binding_findings)
@@ -482,6 +510,18 @@ def main() -> int:
         and issue.schema_clean
     ):
         findings.extend(validate_issue_semantics(catalog))
+    publication = loaded.get("publication")
+    if (
+        phase in ("all", "semantics")
+        and "publication" in selected_names
+        and publication is not None
+        and publication.schema_clean
+        and all(
+            name in loaded and loaded[name].schema_clean
+            for name in publication_support_names
+        )
+    ):
+        findings.extend(validate_publication_semantics(publication.document, catalog))
 
     computed_hashes: dict[str, str] = {}
     if phase in ("all", "hash"):

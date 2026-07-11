@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paperops.local/schemas/publication-model.schema.json",
+  "title": "PaperOps Publication Model",
+  "type": "object",
+  "required": ["schema_version", "model_id", "revision", "venue", "authoring", "submission_state", "current_candidate", "current_round_id", "rounds", "submission_approvals", "extensions", "metadata"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "model_id": {"type": "string", "pattern": "^PUB-[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "revision": {"type": "integer"},
+    "venue": {"$ref": "#/$defs/venue"},
+    "authoring": {"$ref": "#/$defs/authoring"},
+    "submission_state": {"enum": ["authoring", "candidate", "gated", "revision_candidate", "frozen", "submitted", "under_review", "resubmitted", "accepted", "rejected", "withdrawn"]},
+    "current_candidate": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/candidate"}]},
+    "current_round_id": {"type": "string", "pattern": "^(?:|ROUND-[0-9]{4,})$"},
+    "rounds": {"type": "array", "items": {"$ref": "#/$defs/round"}},
+    "submission_approvals": {"type": "array", "items": {"$ref": "#/$defs/submissionApproval"}},
+    "extensions": {"type": "object", "additionalProperties": true},
+    "metadata": {"$ref": "#/$defs/metadata"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "strings": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "venue": {
+      "type": "object",
+      "required": ["venue_id", "name", "requirements_profile", "requirements"],
+      "properties": {
+        "venue_id": {"type": "string", "pattern": "^VENUE-[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "name": {"type": "string"},
+        "requirements_profile": {"type": "string", "pattern": "^profile:[A-Za-z0-9._-]+$"},
+        "requirements": {"type": "array", "items": {"$ref": "#/$defs/requirement"}}
+      },
+      "additionalProperties": false
+    },
+    "requirement": {
+      "type": "object",
+      "required": ["id", "status", "evidence_refs"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^REQ-[0-9]{4,}$"},
+        "status": {"enum": ["pending", "satisfied", "waived", "not_applicable"]},
+        "evidence_refs": {"$ref": "#/$defs/strings"}
+      },
+      "additionalProperties": false
+    },
+    "authoring": {
+      "type": "object",
+      "required": ["state", "living_manuscript_ref", "manuscript_revision"],
+      "properties": {
+        "state": {"enum": ["authoring", "prediction_staged", "executed", "reconciled", "revision_authoring"]},
+        "living_manuscript_ref": {"type": "string", "pattern": "^manuscript:[A-Za-z0-9._-]+$"},
+        "manuscript_revision": {"type": "integer"}
+      },
+      "additionalProperties": false
+    },
+    "candidate": {
+      "type": "object",
+      "required": ["id", "revision", "status", "manuscript_section_refs", "manuscript_block_refs", "claim_refs", "analysis_request_refs", "required_response_refs", "review_round_ref", "source_commit", "gate_report_ref", "artifact_refs", "snapshot_dependencies"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^CAND-[0-9]{4,}$"},
+        "revision": {"type": "integer"},
+        "status": {"enum": ["candidate", "gated", "revision_candidate"]},
+        "manuscript_section_refs": {"$ref": "#/$defs/strings"},
+        "manuscript_block_refs": {"$ref": "#/$defs/strings"},
+        "claim_refs": {"$ref": "#/$defs/strings"},
+        "analysis_request_refs": {"$ref": "#/$defs/strings"},
+        "required_response_refs": {"$ref": "#/$defs/strings"},
+        "review_round_ref": {"type": "string", "pattern": "^(?:|RVW-[0-9]{4,})$"},
+        "source_commit": {"type": "string", "pattern": "^commit:[A-Fa-f0-9]+$"},
+        "gate_report_ref": {"type": "string", "pattern": "^artifact:[A-Za-z0-9._-]+$"},
+        "artifact_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^artifact:[A-Za-z0-9._-]+$"}},
+        "snapshot_dependencies": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/dependency"}}
+      },
+      "additionalProperties": false
+    },
+    "round": {
+      "type": "object",
+      "required": ["id", "status", "candidate_id", "candidate_revision", "source_commit", "gate_report_ref", "artifact_refs", "snapshot_path", "snapshot_manifest_ref", "snapshot_dependencies", "review_round_ref", "response_package_refs", "immutable"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^ROUND-[0-9]{4,}$"},
+        "status": {"enum": ["frozen", "submitted", "under_review", "resubmitted", "accepted", "rejected", "withdrawn"]},
+        "candidate_id": {"type": "string", "pattern": "^CAND-[0-9]{4,}$"},
+        "candidate_revision": {"type": "integer"},
+        "source_commit": {"type": "string", "pattern": "^commit:[A-Fa-f0-9]+$"},
+        "gate_report_ref": {"type": "string", "pattern": "^artifact:[A-Za-z0-9._-]+$"},
+        "artifact_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^artifact:[A-Za-z0-9._-]+$"}},
+        "snapshot_path": {"type": "string", "pattern": "^submission/[A-Za-z0-9._/-]+$"},
+        "snapshot_manifest_ref": {"type": "string", "pattern": "^manifest:[A-Za-z0-9._-]+$"},
+        "snapshot_dependencies": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/dependency"}},
+        "review_round_ref": {"type": "string", "pattern": "^(?:|RVW-[0-9]{4,})$"},
+        "response_package_refs": {"$ref": "#/$defs/strings"},
+        "immutable": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "dependency": {
+      "type": "object",
+      "required": ["target_id", "relation", "expected_hash"],
+      "properties": {
+        "target_id": {"type": "string", "minLength": 1},
+        "relation": {"type": "string", "minLength": 1},
+        "expected_revision": {"type": "integer"},
+        "expected_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "submissionApproval": {
+      "type": "object",
+      "required": ["approval_id", "kind", "decision", "candidate_id", "candidate_revision", "candidate_hash", "actor", "note"],
+      "properties": {
+        "approval_id": {"type": "string", "pattern": "^APR-[0-9]{4,}$"},
+        "kind": {"const": "submission"},
+        "decision": {"enum": ["approved", "rejected", "superseded"]},
+        "candidate_id": {"type": "string", "pattern": "^CAND-[0-9]{4,}$"},
+        "candidate_revision": {"type": "integer"},
+        "candidate_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "actor": {"const": "human"},
+        "note": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["updated_at"],
+      "properties": {"updated_at": {"type": "string"}},
+      "additionalProperties": false
+    }
+  }
+}

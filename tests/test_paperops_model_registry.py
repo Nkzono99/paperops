@@ -40,7 +40,7 @@ class PaperOpsModelRegistryTest(unittest.TestCase):
 
         self.assertEqual(
             set(registry.entries),
-            {"editorial", "results_hierarchy", "research", "manuscript", "issue"},
+            {"editorial", "results_hierarchy", "research", "manuscript", "issue", "publication"},
         )
         for name in ("editorial", "results_hierarchy"):
             entry = registry.entries[name]

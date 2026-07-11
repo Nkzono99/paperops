@@ -310,9 +310,15 @@ class PaperOpsModelCheckTest(unittest.TestCase):
         self.assertNotIn("Traceback", result.stderr)
 
     def test_unregistered_known_model_is_a_stable_registry_finding(self) -> None:
-        result = run_python_script(
-            SCRIPT, "--root", ROOT / "template", "--model", "publication"
-        )
+        with tempfile.TemporaryDirectory() as tmp:
+            project = copy_template(tmp)
+            registry_path = project / "_paperops/defaults/schemas/registry.yml"
+            registry = load_document(registry_path)
+            registry["models"].pop("publication")
+            registry_path.write_text(json.dumps(registry), encoding="utf-8")
+            result = run_python_script(
+                SCRIPT, "--root", project, "--model", "publication"
+            )
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("[registry.model] /", result.stdout)

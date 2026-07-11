@@ -125,3 +125,12 @@ models:
         id_pattern: ^RVW-[0-9]{4,}$
         hash_excluded_paths: [/approvals, /metadata/updated_at]
     dependency_profile: dependency-v1
+  publication:
+    document_kind: aggregate
+    schema: publication-model.schema.json
+    schema_version: 1
+    authority: project-owned
+    default_path: _paperops/model/publication/publication-model.yml
+    hash_profile: semantic-v1
+    hash_excluded_paths:
+      - /metadata/updated_at

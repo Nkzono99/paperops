@@ -1,0 +1,20 @@
+schema_version: 1
+model_id: PUB-main
+revision: 0
+venue:
+  venue_id: VENUE-main
+  name: ""
+  requirements_profile: profile:generic-research
+  requirements: []
+authoring:
+  state: authoring
+  living_manuscript_ref: manuscript:living
+  manuscript_revision: 0
+submission_state: authoring
+current_candidate: null
+current_round_id: ""
+rounds: []
+submission_approvals: []
+extensions: {}
+metadata:
+  updated_at: starter
