@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import sys
 import tempfile
 import unittest
-from dataclasses import FrozenInstanceError
+from dataclasses import FrozenInstanceError, replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,11 +18,13 @@ from paperops.compiler import (
     AuthoritySnapshot,
     CompileBundle,
     CompileFinding,
+    CompilePaths,
     CompileRequest,
     InputSnapshot,
     SectionPlan,
     WriteScope,
     WriterPacket,
+    WriterPaths,
     atomic_write_json,
     canonical_json_bytes,
     compile_paths,
@@ -98,6 +101,67 @@ class P3CompilerTypesTest(unittest.TestCase):
                 root / ".paperops/writer/session-001/workspace",
             )
             self.assertEqual(writer.patch_path, writer.writer_dir / "patch.json")
+
+    def test_path_dto_direct_construction_enforces_layout_and_safe_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            compiled = compile_paths(root, "compile-001")
+            writer = writer_paths(root, "session-001")
+
+            self.assertIsInstance(compiled, CompilePaths)
+            self.assertIsInstance(writer, WriterPaths)
+            self.assertEqual(
+                compiled.to_dict(),
+                {
+                    "compile_id": "compile-001",
+                    "compile_dir": ".paperops/compile/compile-001",
+                    "bundle_path": ".paperops/compile/compile-001/bundle.json",
+                    "report_path": ".paperops/compile/compile-001/report.json",
+                    "context_dir": ".paperops/compile/compile-001/context",
+                    "global_context_path": (
+                        ".paperops/compile/compile-001/context/global.json"
+                    ),
+                    "plans_dir": ".paperops/compile/compile-001/plans",
+                    "packets_dir": ".paperops/compile/compile-001/packets",
+                },
+            )
+            self.assertEqual(
+                writer.to_dict(),
+                {
+                    "session_id": "session-001",
+                    "writer_dir": ".paperops/writer/session-001",
+                    "workspace_dir": ".paperops/writer/session-001/workspace",
+                    "base_manifest_path": (
+                        ".paperops/writer/session-001/base-manifest.json"
+                    ),
+                    "patch_path": ".paperops/writer/session-001/patch.json",
+                    "report_path": ".paperops/writer/session-001/report.json",
+                    "journal_path": ".paperops/writer/session-001/journal.json",
+                },
+            )
+
+            for invalid in (
+                lambda: replace(compiled, compile_id="../escape"),
+                lambda: replace(
+                    compiled,
+                    compile_dir=root / "outside" / "compile-001",
+                ),
+                lambda: replace(
+                    compiled,
+                    bundle_path=Path("/outside/bundle.json"),
+                ),
+                lambda: replace(writer, session_id="../escape"),
+                lambda: replace(
+                    writer,
+                    writer_dir=root / "outside" / "session-001",
+                ),
+                lambda: replace(
+                    writer,
+                    patch_path=Path("/outside/patch.json"),
+                ),
+            ):
+                with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                    invalid()
 
     def test_generated_paths_reject_escape_and_absolute_ids(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -195,6 +259,45 @@ class P3CompilerTypesTest(unittest.TestCase):
         self.assertEqual(payload["writer_packets"][0]["write_scope"], scope.to_dict())
         self.assertEqual(payload["inputs"][0]["identity"], "CLM-0001")
 
+    def test_ordered_dto_fields_reject_sets_and_mappings(self) -> None:
+        for unordered in ({"ja"}, frozenset({"ja"}), {"ja": True}):
+            with self.subTest(unordered=unordered), self.assertRaises(TypeError):
+                WriteScope(
+                    level="block",
+                    languages=unordered,  # type: ignore[arg-type]
+                    files=("manuscript/ja/results.tex",),
+                )
+
+        scope = WriteScope(
+            level="block",
+            languages=("ja",),
+            files=("manuscript/ja/results.tex",),
+        )
+        authority = AuthoritySnapshot(
+            model_name="research",
+            mode="v2-authoritative",
+            model_hash=HASH,
+        )
+        snapshot = InputSnapshot(
+            identity="CLM-0001",
+            input_type="claim",
+            semantic_hash=HASH,
+            relation="supports",
+        )
+        for unordered in (
+            {authority},
+            frozenset({authority}),
+            {authority: "accidental mapping value"},
+        ):
+            with self.subTest(unordered=unordered), self.assertRaises(TypeError):
+                WriterPacket(
+                    packet_id="packet-001",
+                    compile_id="compile-001",
+                    authority=unordered,  # type: ignore[arg-type]
+                    write_scope=scope,
+                    inputs=(snapshot,),
+                )
+
     def test_atomic_json_is_canonical_and_newline_terminated(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "nested" / "bundle.json"
@@ -215,6 +318,39 @@ class P3CompilerTypesTest(unittest.TestCase):
             with patch(
                 "paperops.compiler.storage.os.replace",
                 side_effect=OSError("injected replace failure"),
+            ):
+                with self.assertRaises(OSError):
+                    atomic_write_json(path, {"new": True})
+
+            self.assertEqual(path.read_bytes(), b"old\n")
+            self.assertEqual(list(path.parent.glob(f".{path.name}.tmp-*")), [])
+
+    def test_atomic_json_fsyncs_same_directory_temp_and_cleans_fsync_failure(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "bundle.json"
+            with (
+                patch(
+                    "paperops.compiler.storage.tempfile.mkstemp",
+                    wraps=tempfile.mkstemp,
+                ) as make_temp,
+                patch("paperops.compiler.storage.os.fsync", wraps=os.fsync) as fsync,
+            ):
+                atomic_write_json(path, {"ok": True})
+
+            self.assertEqual(make_temp.call_args.kwargs["dir"], path.parent)
+            self.assertTrue(
+                make_temp.call_args.kwargs["prefix"].startswith(
+                    f".{path.name}.tmp-"
+                )
+            )
+            fsync.assert_called_once()
+
+            path.write_bytes(b"old\n")
+            with patch(
+                "paperops.compiler.storage.os.fsync",
+                side_effect=OSError("injected fsync failure"),
             ):
                 with self.assertRaises(OSError):
                     atomic_write_json(path, {"new": True})

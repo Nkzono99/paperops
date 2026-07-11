@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from types import MappingProxyType
@@ -47,26 +48,18 @@ def _validate_relative_identity(value: str, field_name: str) -> None:
 
 
 def _string_tuple(value: object, field_name: str) -> tuple[str, ...]:
-    if isinstance(value, str):
+    if isinstance(value, (str, bytes, bytearray)) or not isinstance(value, Sequence):
         raise TypeError(f"{field_name} must be a sequence of strings")
-    try:
-        result = tuple(value)  # type: ignore[arg-type]
-    except TypeError as error:
-        raise TypeError(f"{field_name} must be a sequence of strings") from error
+    result = tuple(value)
     if not all(isinstance(item, str) for item in result):
         raise TypeError(f"{field_name} must contain only strings")
     return result
 
 
 def _typed_tuple(value: object, expected: type[Any], field_name: str) -> tuple[Any, ...]:
-    if isinstance(value, (str, bytes)):
+    if isinstance(value, (str, bytes, bytearray)) or not isinstance(value, Sequence):
         raise TypeError(f"{field_name} must be a sequence of {expected.__name__}")
-    try:
-        result = tuple(value)  # type: ignore[arg-type]
-    except TypeError as error:
-        raise TypeError(
-            f"{field_name} must be a sequence of {expected.__name__}"
-        ) from error
+    result = tuple(value)
     if not all(isinstance(item, expected) for item in result):
         raise TypeError(f"{field_name} must contain only {expected.__name__}")
     return result
@@ -442,6 +435,38 @@ def _relative_paths(paths: tuple[Path, ...], state_dir: Path) -> list[str]:
     return [path.relative_to(project_root).as_posix() for path in paths]
 
 
+def _validate_state_directory(
+    directory: object,
+    identifier: str,
+    state_name: str,
+    field_name: str,
+) -> Path:
+    if not isinstance(directory, Path):
+        raise TypeError(f"{field_name} must be a Path")
+    if (
+        not directory.is_absolute()
+        or ".." in directory.parts
+        or directory.name != identifier
+        or directory.parent.name != state_name
+        or directory.parent.parent.name != ".paperops"
+    ):
+        raise ValueError(
+            f"{field_name} must be below .paperops/{state_name}/{identifier}"
+        )
+    return directory
+
+
+def _require_exact_path(
+    actual: object,
+    expected: Path,
+    field_name: str,
+) -> None:
+    if not isinstance(actual, Path):
+        raise TypeError(f"{field_name} must be a Path")
+    if actual != expected:
+        raise ValueError(f"{field_name} must be {expected.name} below generated state")
+
+
 @dataclass(frozen=True)
 class CompilePaths:
     compile_id: str
@@ -452,6 +477,35 @@ class CompilePaths:
     global_context_path: Path
     plans_dir: Path
     packets_dir: Path
+
+    def __post_init__(self) -> None:
+        _validate_id(self.compile_id, "compile ID")
+        directory = _validate_state_directory(
+            self.compile_dir,
+            self.compile_id,
+            "compile",
+            "compile directory",
+        )
+        _require_exact_path(
+            self.bundle_path, directory / "bundle.json", "compile bundle path"
+        )
+        _require_exact_path(
+            self.report_path, directory / "report.json", "compile report path"
+        )
+        _require_exact_path(
+            self.context_dir, directory / "context", "compile context directory"
+        )
+        _require_exact_path(
+            self.global_context_path,
+            directory / "context" / "global.json",
+            "compile global context path",
+        )
+        _require_exact_path(
+            self.plans_dir, directory / "plans", "compile plans directory"
+        )
+        _require_exact_path(
+            self.packets_dir, directory / "packets", "compile packets directory"
+        )
 
     def to_dict(self) -> dict[str, Any]:
         names = _relative_paths(
@@ -487,6 +541,32 @@ class WriterPaths:
     patch_path: Path
     report_path: Path
     journal_path: Path
+
+    def __post_init__(self) -> None:
+        _validate_id(self.session_id, "Writer session ID")
+        directory = _validate_state_directory(
+            self.writer_dir,
+            self.session_id,
+            "writer",
+            "Writer directory",
+        )
+        _require_exact_path(
+            self.workspace_dir, directory / "workspace", "Writer workspace directory"
+        )
+        _require_exact_path(
+            self.base_manifest_path,
+            directory / "base-manifest.json",
+            "Writer base manifest path",
+        )
+        _require_exact_path(
+            self.patch_path, directory / "patch.json", "Writer patch path"
+        )
+        _require_exact_path(
+            self.report_path, directory / "report.json", "Writer report path"
+        )
+        _require_exact_path(
+            self.journal_path, directory / "journal.json", "Writer journal path"
+        )
 
     def to_dict(self) -> dict[str, Any]:
         names = _relative_paths(
