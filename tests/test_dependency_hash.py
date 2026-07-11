@@ -101,6 +101,24 @@ class DependencyHashTest(unittest.TestCase):
         right = item("RES-0002", 1, {"dependencies": [{"target_id": "RES-0001", "relation": "uses", "expected_hash": left.object_hash}]})
         self.assertIn("dependency.cycle", {f.code for f in validate_dependency_state(graph(left, right))})
 
+    def test_record_dependency_requires_revision_and_duplicate_has_own_code(self) -> None:
+        target = item("RES-0001", 1, {"value": 1})
+        dependency = {
+            "target_id": "RES-0001",
+            "relation": "uses",
+            "expected_hash": target.object_hash,
+        }
+        owner = item(
+            "BLK-0001",
+            1,
+            {"dependencies": [dependency, copy.deepcopy(dependency)]},
+            "block",
+        )
+        findings = validate_dependency_state(graph(owner, target))
+        codes = {finding.code for finding in findings}
+        self.assertIn("dependency.missing_revision", codes)
+        self.assertIn("reference.duplicate", codes)
+
 
 if __name__ == "__main__":
     unittest.main()

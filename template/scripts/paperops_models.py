@@ -93,12 +93,66 @@ REFERENCE_CONTRACTS: dict[str, dict[str, frozenset[str]]] = {
     "visual": {"claim_ids": frozenset({"claim"}), "figure_ids": frozenset({"figure"})},
     "claim": {"gate_id": frozenset({"scientific_gate"}), "result_refs": frozenset({"result"}), "figure_refs": frozenset({"figure"}), "source_refs": frozenset({"source"}), "manuscript_block_refs": frozenset({"block"}), "upstream_feedback_refs": frozenset({"feedback"}), "visual_obligation_refs": frozenset({"visual"})},
     "result": {"claim_refs": frozenset({"claim"}), "figure_refs": frozenset({"figure"}), "source_refs": frozenset({"source"}), "manuscript_block_refs": frozenset({"block"})},
-    "figure": {"claim_refs": frozenset({"claim"}), "result_refs": frozenset({"result"}), "manuscript_block_refs": frozenset({"block"}), "visual_obligation_refs": frozenset({"visual"})},
+    "figure": {"claim_refs": frozenset({"claim"}), "result_refs": frozenset({"result"}), "manuscript_block_refs": frozenset({"block"}), "visual_obligation_refs": frozenset({"visual"}), "claim_or_decision": frozenset({"claim"})},
     "source": {"claim_refs": frozenset({"claim"}), "manuscript_block_refs": frozenset({"block"})},
-    "scientific_gate": {"claim_id": frozenset({"claim"}), "guarded_claim_refs": frozenset({"claim"}), "analysis_request_refs": frozenset({"analysis_request"}), "blocking_feedback_refs": frozenset({"feedback"}), "manuscript_block_refs": frozenset({"block"})},
+    "scientific_gate": {"claim_id": frozenset({"claim"}), "analysis_request_refs": frozenset({"analysis_request"}), "blocking_feedback_refs": frozenset({"feedback"}), "central_assumptions/*/guarded_claim_refs": frozenset({"claim"}), "central_assumptions/*/manuscript_block_refs": frozenset({"block"}), "external_validation_gates/*/blocking_claim_ref": frozenset({"claim"}), "external_validation_gates/*/route_ref": frozenset({"analysis_request"})},
     "section": {"editorial_move_refs": frozenset({"move"}), "research_refs": frozenset({"claim", "result", "figure", "source", "scientific_gate"})},
     "block": {"section_id": frozenset({"section"}), "claim_refs": frozenset({"claim"}), "result_refs": frozenset({"result"}), "figure_refs": frozenset({"figure"}), "source_refs": frozenset({"source"})},
 }
+ISSUE_OBJECT_TYPES = frozenset(
+    {"feedback", "analysis_request", "writing_request", "response", "review_round"}
+)
+ISSUE_REFERENCE_CONTRACTS: dict[str, dict[str, frozenset[str]]] = {
+    record_type: {
+        "review_round_ref": frozenset({"review_round"}),
+        "related_issue_refs": ISSUE_OBJECT_TYPES,
+        "related_block_refs": frozenset({"block"}),
+    }
+    for record_type in ISSUE_OBJECT_TYPES
+}
+ISSUE_REFERENCE_CONTRACTS["analysis_request"].update(
+    {
+        "requested_by": frozenset({"feedback"}),
+        "related_claim_refs": frozenset({"claim"}),
+        "related_result_refs": frozenset({"result"}),
+        "manuscript_refs": frozenset({"section", "block"}),
+        "prediction/basis_source_refs": frozenset({"source"}),
+        "execution_provenance/result_refs": frozenset({"result"}),
+        "execution_provenance/figure_refs": frozenset({"figure"}),
+    }
+)
+ISSUE_REFERENCE_CONTRACTS["writing_request"].update(
+    {
+        "requested_by": frozenset({"feedback"}),
+        "target_block_refs": frozenset({"block"}),
+        "related_claim_refs": frozenset({"claim"}),
+        "related_feedback_refs": frozenset({"feedback"}),
+        "claim_evidence_constraints/claim_ref": frozenset({"claim"}),
+    }
+)
+ISSUE_REFERENCE_CONTRACTS["response"].update(
+    {
+        "feedback_refs": frozenset({"feedback"}),
+        "closure_audit/related_analysis_request_refs": frozenset({"analysis_request"}),
+        "changed_claim_refs": frozenset({"claim"}),
+        "changed_block_refs": frozenset({"block"}),
+        "changed_gate_refs": frozenset({"scientific_gate"}),
+        "changed_result_refs": frozenset({"result"}),
+        "changed_source_refs": frozenset({"source"}),
+        "changed_figure_refs": frozenset({"figure"}),
+        "changed_request_refs": frozenset({"analysis_request", "writing_request"}),
+    }
+)
+ISSUE_REFERENCE_CONTRACTS["review_round"].update(
+    {
+        "feedback_refs": frozenset({"feedback"}),
+        "delegation_ledger/*/target_ref": frozenset().union(
+            *MODEL_OBJECT_TYPES.values()
+        ),
+        "integration_decisions/*/feedback_ref": frozenset({"feedback"}),
+    }
+)
+REFERENCE_CONTRACTS.update(ISSUE_REFERENCE_CONTRACTS)
 ISSUE_TARGET_TYPES = {
     "claim": frozenset({"claim"}), "result": frozenset({"result"}),
     "figure": frozenset({"figure"}), "source": frozenset({"source"}),
@@ -184,6 +238,40 @@ def _cross_reference_finding(
     return None
 
 
+def _contract_reference_values(
+    document: Any,
+    path: str,
+) -> list[tuple[Any, str, str | None]]:
+    """Return leaf reference values, pointers, and duplicate-list pointers."""
+    leaves: list[tuple[Any, str, str | None]] = []
+
+    def walk(value: Any, parts: list[str], pointer: str) -> None:
+        if not parts:
+            if isinstance(value, list):
+                duplicate_pointer = (
+                    pointer
+                    if len({item for item in value if isinstance(item, str)})
+                    != len(value)
+                    else None
+                )
+                for index, item in enumerate(value):
+                    leaves.append((item, f"{pointer}/{index}", duplicate_pointer))
+            else:
+                leaves.append((value, pointer, None))
+            return
+        part, *remaining = parts
+        if part == "*":
+            if isinstance(value, list):
+                for index, item in enumerate(value):
+                    walk(item, remaining, f"{pointer}/{index}")
+            return
+        if isinstance(value, dict) and part in value:
+            walk(value[part], remaining, f"{pointer}/{part}")
+
+    walk(document, path.split("/"), "")
+    return leaves
+
+
 def validate_cross_model_references(
     catalog: ObjectCatalog,
     *,
@@ -201,17 +289,17 @@ def validate_cross_model_references(
                 and expected_types.issubset(research_types)
             ):
                 continue
-            if field not in source.document:
-                continue
-            value = source.document.get(field)
-            values = value if isinstance(value, list) else [value]
-            if isinstance(value, list) and len({item for item in value if isinstance(item, str)}) != len(value):
-                findings.append(ModelFinding(
-                    "reference.cardinality", f"{source.pointer}/{field}",
-                    f"reference field `{field}` must not contain duplicates",
-                ))
-            for index, target_id in enumerate(values):
-                pointer = f"{source.pointer}/{field}" + (f"/{index}" if isinstance(value, list) else "")
+            duplicate_pointers: set[str] = set()
+            for target_id, relative_pointer, duplicate_pointer in (
+                _contract_reference_values(source.document, field)
+            ):
+                if duplicate_pointer is not None and duplicate_pointer not in duplicate_pointers:
+                    duplicate_pointers.add(duplicate_pointer)
+                    findings.append(ModelFinding(
+                        "reference.cardinality", f"{source.pointer}{duplicate_pointer}",
+                        f"reference field `{field}` must not contain duplicates",
+                    ))
+                pointer = f"{source.pointer}{relative_pointer}"
                 finding = _cross_reference_finding(catalog, target_id, expected_types, pointer)
                 if finding is not None:
                     findings.append(finding)
@@ -312,13 +400,15 @@ def validate_dependency_state(catalog: ObjectCatalog) -> list[ModelFinding]:
             relation = entry.get("relation")
             key = (target_id, relation)
             if key in seen:
-                findings.append(ModelFinding("reference.cardinality", f"{obj.pointer}/dependencies/{index}", "duplicate dependency target/relation"))
+                findings.append(ModelFinding("reference.duplicate", f"{obj.pointer}/dependencies/{index}", "duplicate dependency target/relation"))
             seen.add(key)
             target = catalog.objects.get(target_id) if isinstance(target_id, str) else None
             if target is None:
                 unresolved = True
                 findings.append(ModelFinding("reference.dangling", f"{obj.pointer}/dependencies/{index}/target_id", f"dependency target `{target_id}` does not exist"))
                 continue
+            if target.revision is not None and entry.get("expected_revision") is None:
+                findings.append(ModelFinding("dependency.missing_revision", f"{obj.pointer}/dependencies/{index}/expected_revision", "record dependency requires a revision snapshot"))
             if entry.get("expected_revision") is not None and entry.get("expected_revision") != target.revision:
                 findings.append(ModelFinding("dependency.stale_revision", f"{obj.pointer}/dependencies/{index}/expected_revision", "dependency revision snapshot is stale"))
             if entry.get("expected_hash") != target.object_hash:

@@ -62,6 +62,40 @@ class CrossModelValidationTest(unittest.TestCase):
         codes = {finding.code for finding in validate_cross_model_references(catalog)}
         self.assertEqual({"reference.dangling", "reference.type", "reference.cardinality"}, codes)
 
+    def test_nested_gate_and_issue_references_are_resolved(self) -> None:
+        objects = [
+            obj("CLM-0001", "claim", "research", {}),
+            obj("BLK-0001", "block", "manuscript", {}),
+            obj("AREQ-0001", "analysis_request", "issue", {
+                "requested_by": "FB-0001",
+                "related_claim_refs": ["RES-0001"],
+            }),
+            obj("FB-0001", "feedback", "issue", {}),
+            obj("RES-0001", "result", "research", {}),
+            obj("GATE-0001", "scientific_gate", "research", {
+                "claim_id": "CLM-0001",
+                "central_assumptions": [{
+                    "guarded_claim_refs": ["CLM-9999"],
+                    "manuscript_block_refs": ["BLK-0001"],
+                }],
+                "external_validation_gates": [{
+                    "blocking_claim_ref": "CLM-0001",
+                    "route_ref": "AREQ-0001",
+                }],
+            }),
+        ]
+        findings = validate_cross_model_references(
+            ObjectCatalog({item.object_id: item for item in objects}, ())
+        )
+        self.assertIn(
+            ("reference.dangling", "/GATE-0001/central_assumptions/0/guarded_claim_refs/0"),
+            {(finding.code, finding.pointer) for finding in findings},
+        )
+        self.assertIn(
+            ("reference.type", "/AREQ-0001/related_claim_refs/0"),
+            {(finding.code, finding.pointer) for finding in findings},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
