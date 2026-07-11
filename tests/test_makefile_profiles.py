@@ -98,7 +98,7 @@ class MakefileProfileTest(unittest.TestCase):
 
         self.assertIn("schema-check:", root_makefile)
         self.assertIn(
-            "$(PYTHON) template/scripts/check-paperops-models.py --root template",
+            "$(PYTHON) template/scripts/check-paperops-models.py --root template --phase all",
             root_makefile,
         )
         self.assertIn("schema-check", make_var_tokens(root_makefile, "SMOKE_CHECKS"))
@@ -108,7 +108,7 @@ class MakefileProfileTest(unittest.TestCase):
 
         self.assertIn("schema-check:", template_makefile)
         self.assertIn(
-            "$(PYTHON) scripts/check-paperops-models.py --root .", template_makefile
+            "$(PYTHON) scripts/check-paperops-models.py --root . --phase all", template_makefile
         )
         self.assertIn("schema-check", make_var_tokens(template_makefile, "AUDIT_CHECKS"))
         self.assertNotIn(

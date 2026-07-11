@@ -87,16 +87,31 @@ def _mapping_without_duplicates(pairs: list[tuple[Any, Any]]) -> dict[Any, Any]:
     return mapping
 
 
-def _reject_non_finite(value: Any) -> None:
-    if isinstance(value, float) and not math.isfinite(value):
-        raise DocumentLoadError("document.non_finite: non-finite number")
+def _reject_non_json_document_value(value: Any, pointer: str = "") -> None:
+    display_pointer = pointer or "/"
+    if value is None or isinstance(value, (bool, int, str)):
+        return
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise DocumentLoadError(
+                f"document.non_finite: {display_pointer}: non-finite number"
+            )
+        return
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            _reject_non_json_document_value(item, _child_pointer(pointer, index))
+        return
     if isinstance(value, dict):
         for key, item in value.items():
-            _reject_non_finite(key)
-            _reject_non_finite(item)
-    elif isinstance(value, (list, tuple)):
-        for item in value:
-            _reject_non_finite(item)
+            if not isinstance(key, str):
+                raise DocumentLoadError(
+                    f"document.non_json: {display_pointer}: mapping keys must be strings"
+                )
+            _reject_non_json_document_value(item, _child_pointer(pointer, key))
+        return
+    raise DocumentLoadError(
+        f"document.non_json: {display_pointer}: unsupported value type {type(value).__name__}"
+    )
 
 
 def load_document(path: Path) -> Any:
@@ -130,9 +145,16 @@ def load_document(path: Path) -> Any:
             yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
             construct_mapping,
         )
-        document = yaml.load(text, Loader=DuplicateKeySafeLoader)
+        try:
+            document = yaml.load(text, Loader=DuplicateKeySafeLoader)
+        except DocumentLoadError:
+            raise
+        except yaml.YAMLError as error:
+            raise DocumentLoadError(
+                f"document.non_json: /: YAML value is not safely loadable: {error}"
+            ) from error
 
-    _reject_non_finite(document)
+    _reject_non_json_document_value(document)
     return document
 
 
@@ -605,11 +627,20 @@ def _normalize_for_hash(
     excluded_paths: frozenset[str],
     pointer: str,
 ) -> Any:
-    if isinstance(value, float) and not math.isfinite(value):
-        raise ValueError("hash.non_finite: non-finite number")
+    display_pointer = pointer or "/"
+    if value is None or isinstance(value, (bool, int, str)):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError(f"hash.non_finite: {display_pointer}: non-finite number")
+        return value
     if isinstance(value, dict):
-        normalized: dict[Any, Any] = {}
+        normalized: dict[str, Any] = {}
         for key, item in value.items():
+            if not isinstance(key, str):
+                raise ValueError(
+                    f"hash.non_json: {display_pointer}: mapping keys must be strings"
+                )
             child_pointer = _child_pointer(pointer, key)
             if child_pointer in excluded_paths:
                 continue
@@ -619,7 +650,7 @@ def _normalize_for_hash(
                 child_pointer,
             )
         return normalized
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, list):
         normalized_items: list[Any] = []
         for index, item in enumerate(value):
             child_pointer = _child_pointer(pointer, index)
@@ -629,7 +660,9 @@ def _normalize_for_hash(
                 _normalize_for_hash(item, excluded_paths, child_pointer)
             )
         return normalized_items
-    return value
+    raise ValueError(
+        f"hash.non_json: {display_pointer}: unsupported value type {type(value).__name__}"
+    )
 
 
 def _canonical_bytes_at_pointer(

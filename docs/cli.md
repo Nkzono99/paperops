@@ -4,9 +4,11 @@
 
 ## Editorial Model schema check
 
-`make schema-check` は P1-A の paperops-managed registry / schema と project-owned Editorial Model を schema → references → semantics → hash phases の順で advisory 検査する。個別実行は `python scripts/check-paperops-models.py --root . --model editorial --phase all`、authority 切替前の gate は `python scripts/check-paperops-models.py --root . --model editorial --strict` である。
+`make schema-check` は P1-A の paperops-managed registry / schema と project-owned Editorial Model を schema → references → semantics → hash phases の順で advisory 検査する。個別実行は `python scripts/check-paperops-models.py --root . --model editorial --phase all`、hashability だけの独立確認は `--phase hash`、authority 切替前の gate は `python scripts/check-paperops-models.py --root . --model editorial --strict` である。`--phase hash` は通常レポート形状を維持し、digest 自体が必要な場合だけ `--print-hash` を使う。
 
-通常実行は error があれば exit 1、warning / info だけなら exit 0 である。`--strict` は warning も exit 1 にするが、P1-B の Research Model が未提供なため claim target の `reference.deferred` info は失敗にしない。hash phase は schema / references / semantics を通った入力だけ canonical semantic-v1 hash として出力する。P1-B の Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash も未提供である。
+通常実行は error があれば exit 1、warning / info だけなら exit 0 である。`--strict` は warning も exit 1 にするが、P1-B の Research Model が未提供なため claim target の `reference.deferred` info は失敗にしない。`--print-hash` は全 phase を強制し、error / warning がないときだけ一行の canonical semantic-v1 hash を出す。loader と hash は null / bool / integer / finite float / string / list / string-key mapping 以外を安定した `document.non_json` / `hash.non_json` finding として拒否する。
+
+通常の Editorial state では `results_hierarchy.document` を project root 相対で解決し、そのファイルの RHI ID へ接続する。`--document` fixture override だけを指定した場合は override 文書の親 directory 相対、`--results-document` を指定した場合だけその明示 override を使い、成功レポートの `reference.document_source` Info で出所を示す。埋め込み path の絶対指定・traversal、欠損・読取不能は fallback せず安定した reference finding にする。P1-B の Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash は未提供である。
 
 ## 実行方法
 

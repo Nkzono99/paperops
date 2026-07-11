@@ -56,7 +56,7 @@
 
 既存下流 project は M0-0003 を採用するまで `storyline.md` の legacy Markdown Results hierarchy を fallback として利用できる。移行時は `uvx --from paper-harness-cli pops update-paperops --apply --only _paperops/defaults/schemas/` で managed schema を更新し、project-owned の typed file を opt-in で作成する。`python scripts/check-section-contracts.py --root . --strict` が成功する前に legacy Markdown を削除しない。
 
-新規 project は `pops init` で Editorial Model starter を受け取る。既存 project は M0-0004 まで `pops update-paperops` や migration apply から project-owned の `editorial-model.yml` を自動取得せず、managed registry / schema / checker の更新後に手動で opt-in する。`make schema-check` は schema / references / semantics / hash phases の advisory 確認であり、authority 切替前には明示的な `--strict` command を成功させる。P2 までは legacy controlled view と既存 checker を維持する。P1-B の Research / Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash は未提供である。
+新規 project は `pops init` で Editorial Model starter を受け取る。既存 project は M0-0004 まで `pops update-paperops` や migration apply から project-owned の `editorial-model.yml` を自動取得せず、managed registry / schema / checker の更新後に手動で opt-in する。`make schema-check` は schema / references / semantics / hash phases の advisory 確認で、`--phase hash` は schema-valid な値の hashability だけを独立確認する。Editorial の `results_hierarchy.document` は通常 project root 相対、`--document` fixture では fixture directory 相対に解決し、`--results-document` だけが明示 override になる。loader/hash は JSON 互換値だけを受理する。authority 切替前には明示的な `--strict` command を成功させる。P2 までは legacy controlled view と既存 checker を維持する。P1-B の Research / Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash は未提供である。
 
 ## 情報の置き場所
 

@@ -3,5 +3,5 @@ category: negative-result-led
 editorial_document: editorial-model.yml
 results_document: results-hierarchy.yml
 expected_hash: sha256:8223b7937fe8901c8863c2a00e50286c2b05cd4925058a4aad4ac6c989d220d6
-expected_diagnostics: [reference.deferred]
+expected_diagnostics: [reference.deferred, reference.document_source]
 synthetic: true

@@ -95,7 +95,7 @@ storyline-check:
 	$(PYTHON) template/scripts/check-storyline.py --root template
 
 schema-check:
-	$(PYTHON) template/scripts/check-paperops-models.py --root template
+	$(PYTHON) template/scripts/check-paperops-models.py --root template --phase all
 
 section-contract-check:
 	$(PYTHON) template/scripts/check-section-contracts.py --root template

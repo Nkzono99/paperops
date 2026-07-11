@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
+from pathlib import PurePosixPath, PureWindowsPath
 from typing import Any
 
 from paperops_editorial import validate_editorial_references, validate_editorial_semantics
@@ -22,7 +23,7 @@ from paperops_schema import (
 
 
 MODEL_CHOICES = ("all", "editorial", "results_hierarchy")
-PHASE_CHOICES = ("all", "schema", "references", "semantics")
+PHASE_CHOICES = ("all", "schema", "references", "semantics", "hash")
 
 
 @dataclass
@@ -40,7 +41,11 @@ def _error_from_exception(error: Exception, pointer: str) -> ModelFinding:
     message = str(error)
     prefix, separator, detail = message.partition(":")
     if separator and "." in prefix and " " not in prefix:
-        return ModelFinding(prefix, pointer, detail.strip())
+        detail = detail.strip()
+        if detail.startswith("/") and ":" in detail:
+            error_pointer, _, error_detail = detail.partition(":")
+            return ModelFinding(prefix, error_pointer, error_detail.strip())
+        return ModelFinding(prefix, pointer, detail)
     return ModelFinding("document.load", pointer, message)
 
 
@@ -75,6 +80,67 @@ def _document_path(
         if document is not None and requested_model == "results_hierarchy":
             return document
     return entry.default_path
+
+
+def _unsafe_relative_path(value: str) -> bool:
+    posix = PurePosixPath(value)
+    windows = PureWindowsPath(value)
+    return (
+        posix.is_absolute()
+        or windows.is_absolute()
+        or bool(windows.drive)
+        or bool(windows.root)
+        or ".." in posix.parts
+        or ".." in windows.parts
+    )
+
+
+def _embedded_results_path(
+    editorial: LoadedModel,
+    *,
+    root: Path,
+    document_override: Path | None,
+) -> tuple[Path | None, ModelFinding | None]:
+    if not isinstance(editorial.document, dict):
+        return None, _prerequisite(["editorial"])
+    connection = editorial.document.get("results_hierarchy")
+    raw_path = connection.get("document") if isinstance(connection, dict) else None
+    if not isinstance(raw_path, str) or not raw_path or _unsafe_relative_path(raw_path):
+        return None, ModelFinding(
+            "reference.path",
+            "/results_hierarchy/document",
+            "Results hierarchy document must be a safe relative path",
+        )
+    base = document_override.resolve().parent if document_override is not None else root
+    candidate = (base / raw_path).resolve()
+    if not candidate.is_relative_to(base.resolve()):
+        return None, ModelFinding(
+            "reference.path",
+            "/results_hierarchy/document",
+            "Results hierarchy document escapes its binding root",
+        )
+    if not candidate.is_file():
+        return None, ModelFinding(
+            "reference.document",
+            "/results_hierarchy/document",
+            f"Results hierarchy document is missing or unreadable: {candidate}",
+        )
+    return candidate, None
+
+
+def _hash_model(model: LoadedModel) -> tuple[str | None, ModelFinding | None]:
+    if not model.schema_clean:
+        return None, None
+    try:
+        return (
+            semantic_hash(
+                model.document,
+                excluded_paths=model.entry.hash_excluded_paths,
+            ),
+            None,
+        )
+    except Exception as error:
+        return None, _error_from_exception(error, "/")
 
 
 def _prerequisite(model_names: list[str]) -> ModelFinding:
@@ -142,30 +208,126 @@ def main() -> int:
     ):
         names_to_load.append("results_hierarchy")
 
-    loaded = {
-        name: _load_model(
-            registry.entries[name],
+    loaded: dict[str, LoadedModel] = {}
+    if "editorial" in names_to_load:
+        loaded["editorial"] = _load_model(
+            registry.entries["editorial"],
             _document_path(
-                name,
-                registry.entries[name],
+                "editorial",
+                registry.entries["editorial"],
                 requested_model=args.model,
                 document=args.document,
                 results_document=args.results_document,
             ),
         )
-        for name in names_to_load
-    }
+
+    binding_findings: list[ModelFinding] = []
+    if "results_hierarchy" in names_to_load:
+        results_path: Path | None
+        embedded_results = False
+        if args.results_document is not None:
+            results_path = args.results_document
+            if "editorial" in selected_names:
+                binding_findings.append(
+                    ModelFinding(
+                        "reference.document_source",
+                        "/results_hierarchy/document",
+                        f"using explicit --results-document override: {results_path}",
+                        severity="info",
+                    )
+                )
+        elif "editorial" in loaded and loaded["editorial"].schema_clean:
+            embedded_results = True
+            results_path, binding_error = _embedded_results_path(
+                loaded["editorial"],
+                root=root,
+                document_override=args.document,
+            )
+            if binding_error is not None:
+                binding_findings.append(binding_error)
+        else:
+            results_path = _document_path(
+                "results_hierarchy",
+                registry.entries["results_hierarchy"],
+                requested_model=args.model,
+                document=args.document,
+                results_document=args.results_document,
+            )
+        if results_path is not None:
+            loaded_results = _load_model(
+                registry.entries["results_hierarchy"], results_path
+            )
+            if (
+                embedded_results
+                and loaded_results.document is None
+                and any(
+                    finding.code == "document.load"
+                    for finding in loaded_results.schema_findings
+                )
+            ):
+                binding_findings.append(
+                    ModelFinding(
+                        "reference.document",
+                        "/results_hierarchy/document",
+                        f"Results hierarchy document is unreadable: {results_path}",
+                    )
+                )
+            else:
+                loaded["results_hierarchy"] = loaded_results
+
+    for name in names_to_load:
+        if name not in loaded and name != "results_hierarchy":
+            loaded[name] = _load_model(
+                registry.entries[name],
+                _document_path(
+                    name,
+                    registry.entries[name],
+                    requested_model=args.model,
+                    document=args.document,
+                    results_document=args.results_document,
+                ),
+            )
 
     if phase in ("all", "schema"):
         for name in selected_names:
-            findings.extend(loaded[name].schema_findings)
+            model = loaded.get(name)
+            if model is not None:
+                findings.extend(model.schema_findings)
+        if (
+            phase == "all"
+            and "editorial" in selected_names
+            and "results_hierarchy" not in selected_names
+            and "results_hierarchy" in loaded
+            and not loaded["results_hierarchy"].schema_clean
+        ):
+            findings.extend(loaded["results_hierarchy"].schema_findings)
+    elif phase == "hash":
+        for name in selected_names:
+            model = loaded.get(name)
+            if model is None:
+                findings.append(_prerequisite([name]))
+            else:
+                findings.extend(model.schema_findings)
     elif phase in ("references", "semantics"):
         prerequisites = list(selected_names)
         if phase == "references" and "editorial" in selected_names:
             prerequisites = list(dict.fromkeys([*prerequisites, "results_hierarchy"]))
-        failed = [name for name in prerequisites if not loaded[name].schema_clean]
+        binding_blocks_results = any(
+            finding.severity == "error"
+            and finding.code in {"reference.document", "reference.path"}
+            for finding in binding_findings
+        )
+        failed = [
+            name
+            for name in prerequisites
+            if name not in loaded or not loaded[name].schema_clean
+            if not (name == "results_hierarchy" and binding_blocks_results)
+        ]
         if failed:
             findings.append(_prerequisite(failed))
+
+    if phase in ("all", "references"):
+        findings.extend(binding_findings)
 
     editorial = loaded.get("editorial")
     results = loaded.get("results_hierarchy")
@@ -190,18 +352,31 @@ def main() -> int:
             validate_editorial_semantics(editorial.document, strict=args.strict)
         )
 
+    computed_hashes: dict[str, str] = {}
+    if phase in ("all", "hash"):
+        for name in selected_names:
+            model = loaded.get(name)
+            if model is None:
+                continue
+            digest, hash_finding = _hash_model(model)
+            if hash_finding is not None:
+                findings.append(hash_finding)
+            elif digest is not None:
+                computed_hashes[name] = digest
+
+    if any(finding.severity == "error" for finding in findings):
+        findings = [
+            finding
+            for finding in findings
+            if finding.code != "reference.document_source"
+        ]
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]
     failed = bool(errors or ((args.print_hash or args.strict) and warnings))
     if args.print_hash and not failed:
-        model = loaded[selected_names[0]]
-        if model.schema_clean:
-            print(
-                semantic_hash(
-                    model.document,
-                    excluded_paths=model.entry.hash_excluded_paths,
-                )
-            )
+        digest = computed_hashes.get(selected_names[0])
+        if digest is not None:
+            print(digest)
             return 0
         failed = True
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 
@@ -39,6 +40,25 @@ class DocumentLoaderTest(unittest.TestCase):
 
             with self.assertRaisesRegex(DocumentLoadError, "document.non_finite"):
                 load_document(path)
+
+    def test_loader_rejects_yaml_values_that_are_not_json_compatible(self) -> None:
+        cases = {
+            "timestamp": ("extensions:\n  x-test-date: 2026-07-11\n", "/extensions/x-test-date"),
+            "set": ("extensions:\n  x-test-set: !!set {one: null}\n", "/extensions/x-test-set"),
+            "non-string-key": ("extensions:\n  1: value\n", "/extensions"),
+            "binary": ("extensions:\n  x-test-binary: !!binary SGVsbG8=\n", "/extensions/x-test-binary"),
+        }
+
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, (source, pointer) in cases.items():
+                with self.subTest(name=name):
+                    path = Path(tmp) / f"{name}.yml"
+                    path.write_text(source, encoding="utf-8")
+                    with self.assertRaisesRegex(
+                        DocumentLoadError,
+                        rf"document\.non_json: {pointer}",
+                    ):
+                        load_document(path)
 
 
 class SchemaProfileTest(unittest.TestCase):
@@ -256,6 +276,23 @@ class CanonicalHashTest(unittest.TestCase):
     def test_non_finite_number_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "hash.non_finite"):
             canonical_bytes(float("nan"))
+
+    def test_programmatic_non_json_values_have_stable_hash_error(self) -> None:
+        class CustomValue:
+            pass
+
+        cases = (
+            date(2026, 7, 11),
+            {"value"},
+            b"value",
+            ("value",),
+            {1: "value"},
+            CustomValue(),
+        )
+        for value in cases:
+            with self.subTest(value=repr(value)):
+                with self.assertRaisesRegex(ValueError, "hash.non_json"):
+                    canonical_bytes(value)
 
 
 if __name__ == "__main__":

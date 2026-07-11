@@ -113,7 +113,7 @@ storyline-check:
 	$(PYTHON) scripts/check-storyline.py --root .
 
 schema-check:
-	$(PYTHON) scripts/check-paperops-models.py --root .
+	$(PYTHON) scripts/check-paperops-models.py --root . --phase all
 
 section-contract-check:
 	$(PYTHON) scripts/check-section-contracts.py --root .

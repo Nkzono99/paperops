@@ -3,5 +3,5 @@ category: boundary-led
 editorial_document: editorial-model.yml
 results_document: results-hierarchy.yml
 expected_hash: sha256:05617f40ed088b4d6d4fa5133d0579997f3a0e0e109fc6f6bcb1a969d16e24bd
-expected_diagnostics: [reference.deferred]
+expected_diagnostics: [reference.deferred, reference.document_source]
 synthetic: true

@@ -1,13 +1,20 @@
 from __future__ import annotations
 
 import copy
+import importlib.util
 import json
 import re
+import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 from tests.helpers import ROOT, copy_template, run_python_script
+
+from paperops_schema import load_document, semantic_hash
 
 
 SCRIPT = ROOT / "template" / "scripts" / "check-paperops-models.py"
@@ -179,6 +186,52 @@ class PaperOpsModelCheckTest(unittest.TestCase):
         self.assertIn("reference.dangling", result.stdout)
         self.assertNotIn("semantic.story_count", result.stdout)
 
+    def test_hash_phase_is_independent_and_keeps_normal_report_shape(self) -> None:
+        editorial, results = valid_documents()
+        editorial["selected_story_id"] = "STY-missing"
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self.run_overrides(
+                Path(tmp), editorial, results, "--phase", "hash"
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("# paperops-model-check", result.stdout)
+        self.assertNotIn("reference.dangling", result.stdout)
+        self.assertNotIn("semantic.story_selection", result.stdout)
+        self.assertNotRegex(result.stdout, r"(?m)^sha256:[0-9a-f]{64}$")
+
+    def test_checker_reports_non_json_extension_with_pointer_without_traceback(self) -> None:
+        fixture_dir = ROOT / "tests/fixtures/editorial/mechanism-led"
+        base_text = (fixture_dir / "editorial-model.yml").read_text(encoding="utf-8")
+        cases = {
+            "timestamp": ("x-test-date: 2026-07-11", "/extensions/x-test-date"),
+            "set": ("x-test-set: !!set {one: null}", "/extensions/x-test-set"),
+            "non-string-key": ("1: value", "/extensions"),
+            "binary": ("x-test-binary: !!binary SGVsbG8=", "/extensions/x-test-binary"),
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for name, (extension_source, pointer) in cases.items():
+                with self.subTest(name=name):
+                    editorial_path = root / f"{name}.yml"
+                    editorial_path.write_text(
+                        base_text.replace(
+                            "extensions: {}",
+                            "extensions:\n  " + extension_source,
+                        ),
+                        encoding="utf-8",
+                    )
+                    result = run_python_script(
+                        SCRIPT,
+                        "--root", ROOT / "template", "--model", "editorial",
+                        "--document", editorial_path,
+                        "--results-document", fixture_dir / "results-hierarchy.yml",
+                        "--phase", "hash",
+                    )
+                    self.assertEqual(result.returncode, 1)
+                    self.assertIn(f"[document.non_json] {pointer}", result.stdout)
+                    self.assertNotIn("Traceback", result.stderr)
+
     def test_deferred_claim_and_figure_references_are_info_only(self) -> None:
         editorial, results = valid_documents()
         editorial["argument_moves"][0]["claim_ids"] = ["CLM-0001"]
@@ -284,7 +337,102 @@ class PaperOpsModelCheckTest(unittest.TestCase):
         self.assertNotIn("semantic.placeholder", result.stdout)
         self.assertNotIn("reference.dangling", result.stdout)
 
-    def test_editorial_document_override_does_not_replace_default_results(self) -> None:
+    def test_normal_project_uses_embedded_project_relative_results_document(self) -> None:
+        editorial, results = valid_documents()
+        with tempfile.TemporaryDirectory() as tmp:
+            project = copy_template(tmp)
+            alternate = project / "project-state" / "alternate-results.yml"
+            alternate.parent.mkdir()
+            results["items"][0]["id"] = "RHI-alternate"
+            alternate.write_text(json.dumps(results), encoding="utf-8")
+            editorial["results_hierarchy"]["document"] = "project-state/alternate-results.yml"
+            editorial["results_hierarchy"]["item_ids"] = ["RHI-alternate"]
+            for story_item in editorial["story_candidates"]:
+                story_item["result_order"] = ["RHI-alternate"]
+            editorial["argument_moves"][0]["result_item_ids"] = ["RHI-alternate"]
+            default_results = project / "_paperops/model/editorial/results-hierarchy.yml"
+            default_results.write_text(
+                default_results.read_text(encoding="utf-8").replace("RHI-0001", "RHI-default"),
+                encoding="utf-8",
+            )
+            editorial_path = project / "_paperops/model/editorial/editorial-model.yml"
+            editorial_path.write_text(json.dumps(editorial), encoding="utf-8")
+
+            result = run_python_script(
+                project / "scripts/check-paperops-models.py",
+                "--root", project, "--model", "editorial", "--phase", "references",
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("reference.dangling", result.stdout)
+
+    def test_document_override_resolves_embedded_results_next_to_fixture(self) -> None:
+        editorial, results = valid_documents()
+        editorial["results_hierarchy"]["document"] = "results-hierarchy.yml"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            editorial_path, _ = self.write_documents(root, editorial, results)
+            result = run_python_script(
+                SCRIPT,
+                "--root", ROOT / "template", "--model", "editorial",
+                "--document", editorial_path, "--phase", "references",
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("phase.prerequisite", result.stdout)
+
+    def test_missing_embedded_results_document_is_a_stable_reference_error(self) -> None:
+        editorial, results = valid_documents()
+        editorial["results_hierarchy"]["document"] = "missing-results.yml"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            editorial_path, _ = self.write_documents(root, editorial, results)
+            result = run_python_script(
+                SCRIPT,
+                "--root", ROOT / "template", "--model", "editorial",
+                "--document", editorial_path, "--phase", "references",
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("[reference.document] /results_hierarchy/document", result.stdout)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_explicit_results_override_wins_and_reports_its_source(self) -> None:
+        editorial, results = valid_documents()
+        editorial["results_hierarchy"]["document"] = "missing-results.yml"
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self.run_overrides(Path(tmp), editorial, results, "--phase", "references")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("[reference.document_source] /results_hierarchy/document", result.stdout)
+        self.assertIn("--results-document", result.stdout)
+
+    def test_embedded_results_document_controls_actual_rhi_binding(self) -> None:
+        editorial, results = valid_documents()
+        editorial["results_hierarchy"]["document"] = "bound-results.yml"
+        editorial["results_hierarchy"]["item_ids"] = ["RHI-bound"]
+        for story_item in editorial["story_candidates"]:
+            story_item["result_order"] = ["RHI-bound"]
+        editorial["argument_moves"][0]["result_item_ids"] = ["RHI-bound"]
+        results["items"][0]["id"] = "RHI-bound"
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            editorial_path = root / "editorial-model.yml"
+            editorial_path.write_text(json.dumps(editorial), encoding="utf-8")
+            (root / "bound-results.yml").write_text(json.dumps(results), encoding="utf-8")
+            (root / "results-hierarchy.yml").write_text(
+                json.dumps({**results, "items": [{**results["items"][0], "id": "RHI-wrong"}]}),
+                encoding="utf-8",
+            )
+            result = run_python_script(
+                SCRIPT, "--root", ROOT / "template", "--model", "editorial",
+                "--document", editorial_path, "--phase", "references",
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertNotIn("reference.dangling", result.stdout)
+
+    def test_editorial_document_override_does_not_fall_back_to_project_default_results(self) -> None:
         editorial, _ = valid_documents()
         editorial["results_hierarchy"]["item_ids"] = ["RHI-missing"]
         with tempfile.TemporaryDirectory() as tmp:
@@ -305,7 +453,7 @@ class PaperOpsModelCheckTest(unittest.TestCase):
             )
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("reference.dangling", result.stdout)
+        self.assertIn("reference.document", result.stdout)
         self.assertNotIn("phase.prerequisite", result.stdout)
 
     def test_unknown_model_and_phase_are_argparse_usage_errors(self) -> None:
@@ -314,6 +462,57 @@ class PaperOpsModelCheckTest(unittest.TestCase):
                 result = run_python_script(SCRIPT, "--root", ROOT / "template", *args)
                 self.assertEqual(result.returncode, 2)
                 self.assertIn("usage:", result.stderr)
+
+    def test_all_invokes_hash_and_converts_hash_failures_to_findings(self) -> None:
+        spec = importlib.util.spec_from_file_location("paperops_model_checker_test", SCRIPT)
+        assert spec is not None and spec.loader is not None
+        checker = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = checker
+        spec.loader.exec_module(checker)
+        stdout = StringIO()
+        stderr = StringIO()
+        argv = [str(SCRIPT), "--root", str(ROOT / "template"), "--model", "editorial"]
+        try:
+            with patch.object(checker, "semantic_hash", side_effect=ValueError("hash.non_json: /: bad")):
+                with patch.object(sys, "argv", argv), redirect_stdout(stdout), redirect_stderr(stderr):
+                    code = checker.main()
+        finally:
+            sys.modules.pop(spec.name, None)
+
+        self.assertEqual(code, 1)
+        self.assertIn("[hash.non_json] /", stdout.getvalue())
+        self.assertNotIn("Traceback", stderr.getvalue())
+
+
+class EditorialHashMutationTest(unittest.TestCase):
+    def test_all_semantic_editorial_mutations_change_hash_except_updated_at(self) -> None:
+        fixture = ROOT / "tests/fixtures/editorial/mechanism-led/editorial-model.yml"
+        baseline = load_document(fixture)
+        exclusions = ("/metadata/updated_at",)
+        baseline_hash = semantic_hash(baseline, excluded_paths=exclusions)
+
+        mutations = {
+            "schema version": lambda value: value.__setitem__("schema_version", 2),
+            "model id": lambda value: value.__setitem__("model_id", "EDT-mutated"),
+            "thesis": lambda value: value["story_candidates"][0].__setitem__("thesis", "Changed thesis."),
+            "selected story": lambda value: value.__setitem__("selected_story_id", "STY-synthetic-control-mechanism-2"),
+            "claim role": lambda value: value["claim_roles"]["foreground"]["claim_ids"].append("CLM-mutated"),
+            "move order": lambda value: value["argument_moves"].reverse(),
+            "Results item refs": lambda value: value["results_hierarchy"]["item_ids"].reverse(),
+        }
+        for name, mutate in mutations.items():
+            with self.subTest(name=name):
+                changed = copy.deepcopy(baseline)
+                mutate(changed)
+                self.assertNotEqual(
+                    semantic_hash(changed, excluded_paths=exclusions), baseline_hash
+                )
+
+        timestamp_only = copy.deepcopy(baseline)
+        timestamp_only["metadata"]["updated_at"] = "2099-01-01"
+        self.assertEqual(
+            semantic_hash(timestamp_only, excluded_paths=exclusions), baseline_hash
+        )
 
     def test_copied_scaffold_preserves_starter_codes_and_severities(self) -> None:
         source = run_python_script(SCRIPT, "--root", ROOT / "template")

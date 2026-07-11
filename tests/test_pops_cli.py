@@ -650,7 +650,8 @@ class PopsCliTest(unittest.TestCase):
             "_paperops/defaults/schemas/registry.yml",
             "_paperops/defaults/schemas/editorial-model.schema.json",
             "scripts/paperops_schema.py",
-            "scripts/paperops_checks.py",
+            "scripts/paperops_editorial.py",
+            "scripts/check-paperops-models.py",
         ]
         project_owned = "_paperops/model/editorial/editorial-model.yml"
         with tempfile.TemporaryDirectory() as tmp:

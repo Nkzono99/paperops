@@ -3,5 +3,5 @@ category: mechanism-led
 editorial_document: editorial-model.yml
 results_document: results-hierarchy.yml
 expected_hash: sha256:f464a20a15a59e6c9425e62a9f95de04b023e4e5046942e41a7210a6d84767cb
-expected_diagnostics: [reference.deferred]
+expected_diagnostics: [reference.deferred, reference.document_source]
 synthetic: true
