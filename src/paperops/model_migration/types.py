@@ -25,6 +25,7 @@ class InventoryItem:
     disposition: str
     target_id: str = ""
     reason: str = ""
+    followup_phase: str = ""
 
 
 @dataclass(frozen=True)

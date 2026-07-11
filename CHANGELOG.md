@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- PaperOps 2 P2 migration のlegacy conservation基盤として、Markdown cardのfront matter、heading内definition、tableだけを依存なしで読み、推論が必要なprose、duplicate key / ID、private / raw値、missing / unsafe sourceをstable findingへ変換するinventory readerを追加した。各legacy field familyは`mapped` / `deferred` / `local-only` / `unsupported`のいずれか一つを必須とし、source drift、存在しないcandidateへのmapping、理由・後続phaseなしのdefer、機密family以外のlocal-only、unsupportedをadopt blockerにする。既存cardは読み取り専用で、変換時に書き換えない。
+
 - PaperOps 2 P2 migration の transaction 基盤として、immutable な inventory / candidate / report DTO、project-relative pathだけを扱うdeterministic report、秘密情報とabsolute pathを保存しないMarkdown projection、mode / size / SHA-256を検証するbyte-exact snapshotを追加した。path traversal、Windows absolute path、symlink component、special file、snapshot改変はauthority切替前に停止する。これはCLI内部基盤の追加であり、既存下流のtracked stateやauthorityは変更しない。
 
 - PaperOps 2 P2 migration の検証境界として、project-managed `check-paperops-models.py` に versioned `--json` 出力を追加し、package 側から shell を介さず安全に起動して finding / hash / exit status を型付き結果へ変換する runner を追加した。既存の人間向け出力と exit code は維持する。既存下流は managed checker を更新すればよく、project-owned model state の移行や authority 切替はまだ発生しない。
