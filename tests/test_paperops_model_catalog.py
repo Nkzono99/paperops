@@ -278,6 +278,62 @@ class PaperOpsModelCatalogTest(unittest.TestCase):
         self.assertEqual(model.records, ())
         self.assertEqual(catalog.objects, {})
 
+    def test_schema_const_failure_still_reports_index_envelope_mismatch(self) -> None:
+        record = self.record()
+        record["record_type"] = "other"
+        path = self.records_dir / "CLM-0001.yml"
+        self.write_json(path, record)
+        row = self.row("model/research/claims/CLM-0001.yml", record)
+        row["record_type"] = "claim"
+        self.write_index([row])
+
+        model = self.load_one()
+
+        self.assertIn(
+            ("schema.const", "/records/0/document/record_type"),
+            [(finding.code, finding.pointer) for finding in model.findings],
+        )
+        self.assertIn(
+            ("index.type", "/records/0/record_type"),
+            [(finding.code, finding.pointer) for finding in model.findings],
+        )
+        self.assertEqual(model.records, ())
+
+    def test_index_model_name_mismatch_suppresses_all_record_registration(self) -> None:
+        record = self.record()
+        path = self.records_dir / "CLM-0001.yml"
+        self.write_json(path, record)
+        self.write_index([self.row("model/research/claims/CLM-0001.yml", record)])
+        index = json.loads(self.index_path.read_text(encoding="utf-8"))
+        index["model_name"] = "manuscript"
+        self.write_json(self.index_path, index)
+
+        model = self.load_one()
+
+        self.assertEqual(
+            [(finding.code, finding.pointer) for finding in model.findings],
+            [("index.model_name", "/model_name")],
+        )
+        self.assertEqual(model.records, ())
+
+    def test_safe_unregistered_symlink_is_an_orphan(self) -> None:
+        target = self.records_dir / "record-target.txt"
+        self.write_json(target, self.record())
+        (self.records_dir / "CLM-0001.yml").symlink_to(target)
+        self.write_index([])
+
+        advisory = self.load_one()
+        strict = load_model_document(self.root, self.entry, strict=True)
+
+        self.assertEqual(
+            [(finding.code, finding.severity) for finding in advisory.findings],
+            [("reference.orphan", "warning")],
+        )
+        self.assertEqual(
+            [(finding.code, finding.severity) for finding in strict.findings],
+            [("reference.orphan", "error")],
+        )
+
     def test_aggregate_virtual_objects_have_hash_but_no_fabricated_revision(self) -> None:
         editorial = {
             "schema_version": 1,

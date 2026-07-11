@@ -386,6 +386,133 @@ class PaperOpsModelCheckTest(unittest.TestCase):
         finally:
             sys.modules.pop(spec.name, None)
 
+    def test_deduplication_preserves_multiple_orphans_and_models_at_same_pointer(self) -> None:
+        spec = importlib.util.spec_from_file_location(
+            "paperops_model_checker_dedupe_test", SCRIPT
+        )
+        assert spec is not None and spec.loader is not None
+        checker = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = checker
+        try:
+            spec.loader.exec_module(checker)
+            first = checker.ModelFinding(
+                "reference.orphan", "/records", "research orphan A"
+            )
+            second = checker.ModelFinding(
+                "reference.orphan", "/records", "research orphan B"
+            )
+            third = checker.ModelFinding(
+                "reference.orphan", "/records", "manuscript orphan A"
+            )
+
+            deduplicated = checker._deduplicate_findings(
+                [first, first, second, third]
+            )
+
+            self.assertEqual(deduplicated, [first, second, third])
+        finally:
+            sys.modules.pop(spec.name, None)
+
+    def test_record_schema_failure_blocks_references_but_schema_shows_detail(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = copy_template(tmp)
+            schema_dir = project / "_paperops/defaults/schemas"
+            registry_path = schema_dir / "registry.yml"
+            registry = load_document(registry_path)
+            (schema_dir / "claim.schema.json").write_text(
+                json.dumps(
+                    {
+                        "type": "object",
+                        "required": ["id", "record_type", "revision"],
+                        "properties": {
+                            "id": {"type": "string"},
+                            "record_type": {"const": "claim"},
+                            "revision": {"type": "integer"},
+                        },
+                        "additionalProperties": False,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            registry["models"]["research"] = {
+                "document_kind": "index",
+                "schema": "model-index.schema.json",
+                "schema_version": 1,
+                "authority": "project-owned",
+                "default_path": "_paperops/model/research/index.yml",
+                "hash_profile": "semantic-v1",
+                "hash_excluded_paths": [],
+                "record_sets": {
+                    "claim": {
+                        "schema": "claim.schema.json",
+                        "path_prefix": "_paperops/model/research/claims/",
+                        "id_pattern": "^CLM-[0-9]{4,}$",
+                        "hash_excluded_paths": [],
+                    }
+                },
+                "dependency_profile": "dependency-v1",
+            }
+            registry_path.write_text(json.dumps(registry), encoding="utf-8")
+            record = {
+                "id": "CLM-0001",
+                "record_type": "claim",
+                "revision": 1,
+                "unexpected": True,
+            }
+            record_path = project / "_paperops/model/research/claims/CLM-0001.yml"
+            record_path.parent.mkdir(parents=True)
+            record_path.write_text(json.dumps(record), encoding="utf-8")
+            digest = semantic_hash(record)
+            index_path = project / "_paperops/model/research/index.yml"
+            index_path.write_text(
+                json.dumps(
+                    {
+                        "model_name": "research",
+                        "schema_version": 1,
+                        "index_revision": 1,
+                        "records": [
+                            {
+                                "id": "CLM-0001",
+                                "record_type": "claim",
+                                "document": "_paperops/model/research/claims/CLM-0001.yml",
+                                "expected_revision": 1,
+                                "expected_hash": digest,
+                            }
+                        ],
+                        "extensions": {},
+                        "metadata": {"updated_at": "2026-07-11"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            references = run_python_script(
+                project / "scripts/check-paperops-models.py",
+                "--root",
+                project,
+                "--model",
+                "research",
+                "--phase",
+                "references",
+            )
+            schema = run_python_script(
+                project / "scripts/check-paperops-models.py",
+                "--root",
+                project,
+                "--model",
+                "research",
+                "--phase",
+                "schema",
+            )
+
+        self.assertEqual(references.returncode, 1)
+        self.assertIn("[phase.prerequisite] /", references.stdout)
+        self.assertNotIn("schema.additional", references.stdout)
+        self.assertEqual(schema.returncode, 1)
+        self.assertIn(
+            "[schema.additional] /records/0/document/unexpected", schema.stdout
+        )
+
     def test_editorial_and_catalog_duplicate_is_rendered_once(self) -> None:
         editorial, results = valid_documents()
         duplicate = copy.deepcopy(editorial["story_candidates"][0])

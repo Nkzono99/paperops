@@ -174,14 +174,14 @@ def _global_catalog_findings_for_phase(
 
 
 def _deduplicate_findings(findings: list[ModelFinding]) -> list[ModelFinding]:
-    deduplicated: dict[tuple[str, str], ModelFinding] = {}
-    severity_rank = {"info": 0, "warning": 1, "error": 2}
+    deduplicated: list[ModelFinding] = []
+    seen: set[tuple[str, str, str, str]] = set()
     for finding in findings:
-        key = (finding.code, finding.pointer)
-        previous = deduplicated.get(key)
-        if previous is None or severity_rank[finding.severity] > severity_rank[previous.severity]:
-            deduplicated[key] = finding
-    return list(deduplicated.values())
+        key = (finding.code, finding.pointer, finding.message, finding.severity)
+        if key not in seen:
+            seen.add(key)
+            deduplicated.append(finding)
+    return deduplicated
 
 
 def _render(findings: list[ModelFinding]) -> None:

@@ -41,7 +41,14 @@ class ModelDocument:
 
     @property
     def schema_clean(self) -> bool:
-        return self.document is not None and not self.schema_findings
+        return (
+            self.document is not None
+            and not self.schema_findings
+            and not any(
+                finding.code.startswith(("schema.", "document.", "registry."))
+                for finding in self.catalog_findings
+            )
+        )
 
     @property
     def findings(self) -> list[ModelFinding]:
@@ -166,6 +173,15 @@ def _orphan_findings(
                             f"record symlink escapes its registered path prefix: {candidate}",
                         )
                     )
+                elif candidate.suffix.lower() in {".json", ".yml", ".yaml"}:
+                    findings.append(
+                        ModelFinding(
+                            "reference.orphan",
+                            "/records",
+                            f"record file is not listed in the index: {candidate}",
+                            severity,
+                        )
+                    )
                 continue
             if not candidate.is_file():
                 continue
@@ -230,6 +246,44 @@ def _load_index_records(
         except Exception as error:
             findings.append(_exception_finding(error, f"{base}/document"))
             continue
+        envelope_findings: list[ModelFinding] = []
+        actual_id: Any = None
+        actual_type: Any = None
+        actual_revision: Any = None
+        if isinstance(record, dict):
+            actual_id = record.get("id")
+            actual_type = record.get("record_type")
+            actual_revision = record.get("revision")
+            for code, pointer, expected, actual in (
+                ("index.id", "id", row_id, actual_id),
+                ("index.type", "record_type", record_type, actual_type),
+                (
+                    "index.revision",
+                    "expected_revision",
+                    _row_value(row, "expected_revision"),
+                    actual_revision,
+                ),
+            ):
+                if expected != actual:
+                    envelope_findings.append(
+                        ModelFinding(
+                            code,
+                            f"{base}/{pointer}",
+                            f"index value {expected!r} does not match record value {actual!r}",
+                        )
+                    )
+            if (
+                not isinstance(actual_id, str)
+                or re.fullmatch(record_set.id_pattern, actual_id) is None
+            ):
+                envelope_findings.append(
+                    ModelFinding(
+                        "index.id",
+                        f"{base}/id",
+                        f"record ID `{actual_id}` does not match the registered pattern",
+                    )
+                )
+        findings.extend(envelope_findings)
         try:
             schema = load_document(record_set.schema_path)
             schema_findings = validate_schema(record, schema)
@@ -241,21 +295,7 @@ def _load_index_records(
             continue
         if not isinstance(record, dict):
             continue
-        actual_id = record.get("id")
-        actual_type = record.get("record_type")
-        actual_revision = record.get("revision")
-        mismatched = False
-        for code, pointer, expected, actual in (
-            ("index.id", "id", row_id, actual_id),
-            ("index.type", "record_type", record_type, actual_type),
-            ("index.revision", "expected_revision", _row_value(row, "expected_revision"), actual_revision),
-        ):
-            if expected != actual:
-                findings.append(ModelFinding(code, f"{base}/{pointer}", f"index value {expected!r} does not match record value {actual!r}"))
-                mismatched = True
-        if not isinstance(actual_id, str) or re.fullmatch(record_set.id_pattern, actual_id) is None:
-            findings.append(ModelFinding("index.id", f"{base}/id", f"record ID `{actual_id}` does not match the registered pattern"))
-            mismatched = True
+        mismatched = bool(envelope_findings)
         try:
             digest = semantic_hash(record, excluded_paths=record_set.hash_excluded_paths)
         except Exception as error:
@@ -283,6 +323,24 @@ def load_model_document(
     document, schema_findings = _load_base(entry, path)
     if document is None or schema_findings or entry.document_kind != "index":
         return ModelDocument(entry, path, document, tuple(schema_findings))
+    actual_model_name = (
+        document.get("model_name") if isinstance(document, dict) else None
+    )
+    if actual_model_name != entry.name:
+        return ModelDocument(
+            entry,
+            path,
+            document,
+            (),
+            catalog_findings=(
+                ModelFinding(
+                    "index.model_name",
+                    "/model_name",
+                    f"index model_name {actual_model_name!r} does not match "
+                    f"registry model {entry.name!r}",
+                ),
+            ),
+        )
     records, findings = _load_index_records(root.resolve(), entry, document, strict=strict)
     return ModelDocument(entry, path, document, (), tuple(records), tuple(findings))
 
@@ -327,7 +385,13 @@ def build_object_catalog(models: Iterable[ModelDocument]) -> ObjectCatalog:
     findings: list[ModelFinding] = []
     for object_id, occurrences in candidates.items():
         if len(occurrences) > 1:
-            findings.append(ModelFinding("reference.duplicate", occurrences[1].pointer + "/id", f"duplicate ID `{object_id}` across the object catalog"))
+            findings.append(
+                ModelFinding(
+                    "reference.duplicate",
+                    occurrences[1].pointer + "/id",
+                    f"duplicate ID `{object_id}`",
+                )
+            )
         else:
             objects[object_id] = occurrences[0]
     return ObjectCatalog(objects, tuple(findings))
