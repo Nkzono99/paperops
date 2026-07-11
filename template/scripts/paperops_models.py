@@ -286,6 +286,35 @@ def build_object_catalog(models: Iterable[ModelDocument]) -> ObjectCatalog:
         for record in model.records:
             obj = CatalogObject(record.object_id, record.record_type, record.model_name, record.document, record.revision, record.object_hash, record.pointer)
             candidates.setdefault(record.object_id, []).append(obj)
+        if not model.schema_clean or not isinstance(model.document, dict):
+            continue
+        virtual_specs = {
+            "editorial": (
+                ("story_candidates", "story"),
+                ("argument_moves", "move"),
+                ("visual_obligations", "visual"),
+            ),
+            "results_hierarchy": (("items", "results_item"),),
+        }.get(model.entry.name, ())
+        for field, object_type in virtual_specs:
+            values = model.document.get(field, [])
+            if not isinstance(values, list):
+                continue
+            for index, value in enumerate(values):
+                if not isinstance(value, dict) or not isinstance(value.get("id"), str):
+                    continue
+                object_id = value["id"]
+                pointer = f"/{field}/{index}"
+                obj = CatalogObject(
+                    object_id,
+                    object_type,
+                    model.entry.name,
+                    value,
+                    None,
+                    semantic_hash(value),
+                    pointer,
+                )
+                candidates.setdefault(object_id, []).append(obj)
     objects: dict[str, CatalogObject] = {}
     findings: list[ModelFinding] = []
     for object_id, occurrences in candidates.items():

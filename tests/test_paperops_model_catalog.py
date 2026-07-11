@@ -278,5 +278,144 @@ class PaperOpsModelCatalogTest(unittest.TestCase):
         self.assertEqual(model.records, ())
         self.assertEqual(catalog.objects, {})
 
+    def test_aggregate_virtual_objects_have_hash_but_no_fabricated_revision(self) -> None:
+        editorial = {
+            "schema_version": 1,
+            "story_candidates": [{"id": "STY-0001", "revision": 99, "label": "Story"}],
+            "argument_moves": [{"id": "MOV-0001", "position": 1}],
+            "visual_obligations": [{"id": "VIS-0001", "status": "planned"}],
+        }
+        results = {"schema_version": 1, "items": [{"id": "RHI-0001", "answer": "A"}]}
+        models = []
+        for name, document in (("editorial", editorial), ("results_hierarchy", results)):
+            path = self.root / f"{name}.yml"
+            self.write_json(path, document)
+            entry = RegistryEntry(
+                name=name,
+                schema_path=self.aggregate_schema,
+                schema_version=1,
+                authority="project-owned",
+                default_path=path,
+                hash_profile="semantic-v1",
+                hash_excluded_paths=(),
+            )
+            models.append(load_model_document(self.root, entry))
+
+        catalog = build_object_catalog(models)
+
+        self.assertEqual(
+            set(catalog.objects),
+            {"STY-0001", "MOV-0001", "VIS-0001", "RHI-0001"},
+        )
+        self.assertTrue(all(obj.revision is None for obj in catalog.objects.values()))
+        expected = {
+            "STY-0001": (
+                "story",
+                "editorial",
+                "/story_candidates/0",
+                editorial["story_candidates"][0],
+            ),
+            "MOV-0001": (
+                "move",
+                "editorial",
+                "/argument_moves/0",
+                editorial["argument_moves"][0],
+            ),
+            "VIS-0001": (
+                "visual",
+                "editorial",
+                "/visual_obligations/0",
+                editorial["visual_obligations"][0],
+            ),
+            "RHI-0001": (
+                "results_item",
+                "results_hierarchy",
+                "/items/0",
+                results["items"][0],
+            ),
+        }
+        for object_id, (object_type, model_name, pointer, document) in expected.items():
+            with self.subTest(object_id=object_id):
+                obj = catalog.objects[object_id]
+                self.assertEqual(obj.object_type, object_type)
+                self.assertEqual(obj.model_name, model_name)
+                self.assertEqual(obj.pointer, pointer)
+                self.assertEqual(obj.document, document)
+                self.assertEqual(obj.object_hash, semantic_hash(document))
+
+    def test_virtual_object_duplicate_with_record_uses_global_catalog_rule(self) -> None:
+        record = self.record()
+        path = self.records_dir / "CLM-0001.yml"
+        self.write_json(path, record)
+        self.write_index([self.row("model/research/claims/CLM-0001.yml", record)])
+        record_model = self.load_one()
+
+        editorial = {
+            "schema_version": 1,
+            "story_candidates": [{"id": "CLM-0001", "label": "Duplicate"}],
+        }
+        editorial_path = self.root / "editorial.yml"
+        self.write_json(editorial_path, editorial)
+        editorial_entry = RegistryEntry(
+            name="editorial",
+            schema_path=self.aggregate_schema,
+            schema_version=1,
+            authority="project-owned",
+            default_path=editorial_path,
+            hash_profile="semantic-v1",
+            hash_excluded_paths=(),
+        )
+
+        catalog = build_object_catalog(
+            [record_model, load_model_document(self.root, editorial_entry)]
+        )
+
+        self.assertNotIn("CLM-0001", catalog.objects)
+        self.assertEqual(
+            [(finding.code, finding.pointer) for finding in catalog.findings],
+            [("reference.duplicate", "/story_candidates/0/id")],
+        )
+
+    def test_schema_failed_aggregate_does_not_register_virtual_objects(self) -> None:
+        schema = self.schema_dir / "strict-aggregate.schema.json"
+        self.write_json(
+            schema,
+            {
+                "type": "object",
+                "required": ["schema_version", "story_candidates"],
+                "properties": {
+                    "schema_version": {"const": 1},
+                    "story_candidates": {"type": "array"},
+                },
+                "additionalProperties": False,
+            },
+        )
+        document = {
+            "schema_version": 1,
+            "story_candidates": [{"id": "STY-0001"}],
+            "unexpected": True,
+        }
+        path = self.root / "invalid-editorial.yml"
+        self.write_json(path, document)
+        entry = RegistryEntry(
+            name="editorial",
+            schema_path=schema,
+            schema_version=1,
+            authority="project-owned",
+            default_path=path,
+            hash_profile="semantic-v1",
+            hash_excluded_paths=(),
+        )
+
+        model = load_model_document(self.root, entry)
+        catalog = build_object_catalog([model])
+
+        self.assertIn(
+            ("schema.additional", "/unexpected"),
+            [(finding.code, finding.pointer) for finding in model.findings],
+        )
+        self.assertFalse(model.schema_clean)
+        self.assertEqual(catalog.objects, {})
+
 if __name__ == "__main__":
     unittest.main()
