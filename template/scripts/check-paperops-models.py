@@ -4,37 +4,23 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
 from pathlib import Path
 from pathlib import PurePosixPath, PureWindowsPath
-from typing import Any
 
 from paperops_editorial import validate_editorial_references, validate_editorial_semantics
+from paperops_models import ModelDocument, build_object_catalog, load_model_document
 from paperops_schema import (
+    KNOWN_MODEL_VERSIONS,
     ModelFinding,
     RegistryEntry,
     SchemaRegistry,
-    load_document,
     load_registry,
     semantic_hash,
-    validate_document_version,
-    validate_schema,
 )
 
 
-MODEL_CHOICES = ("all", "editorial", "results_hierarchy")
+MODEL_CHOICES = ("all", *KNOWN_MODEL_VERSIONS)
 PHASE_CHOICES = ("all", "schema", "references", "semantics", "hash")
-
-
-@dataclass
-class LoadedModel:
-    entry: RegistryEntry
-    document: Any | None
-    schema_findings: list[ModelFinding]
-
-    @property
-    def schema_clean(self) -> bool:
-        return self.document is not None and not self.schema_findings
 
 
 def _error_from_exception(error: Exception, pointer: str) -> ModelFinding:
@@ -49,19 +35,19 @@ def _error_from_exception(error: Exception, pointer: str) -> ModelFinding:
     return ModelFinding("document.load", pointer, message)
 
 
-def _load_model(entry: RegistryEntry, document_path: Path) -> LoadedModel:
-    try:
-        document = load_document(document_path)
-        schema = load_document(entry.schema_path)
-        validate_document_version(entry, document)
-        findings = validate_schema(document, schema)
-    except Exception as error:
-        return LoadedModel(
-            entry=entry,
-            document=None,
-            schema_findings=[_error_from_exception(error, "/")],
-        )
-    return LoadedModel(entry=entry, document=document, schema_findings=findings)
+def _load_model(
+    root: Path,
+    entry: RegistryEntry,
+    document_path: Path,
+    *,
+    strict: bool,
+) -> ModelDocument:
+    return load_model_document(
+        root,
+        entry,
+        document_path=document_path,
+        strict=strict,
+    )
 
 
 def _document_path(
@@ -96,7 +82,7 @@ def _unsafe_relative_path(value: str) -> bool:
 
 
 def _embedded_results_path(
-    editorial: LoadedModel,
+    editorial: ModelDocument,
     *,
     root: Path,
     document_override: Path | None,
@@ -128,7 +114,7 @@ def _embedded_results_path(
     return candidate, None
 
 
-def _hash_model(model: LoadedModel) -> tuple[str | None, ModelFinding | None]:
+def _hash_model(model: ModelDocument) -> tuple[str | None, ModelFinding | None]:
     if not model.schema_clean:
         return None, None
     try:
@@ -152,6 +138,52 @@ def _prerequisite(model_names: list[str]) -> ModelFinding:
     )
 
 
+def _is_record_schema_finding(finding: ModelFinding) -> bool:
+    return finding.code.startswith(("schema.", "document.", "registry."))
+
+
+def _catalog_findings_for_phase(
+    catalog_findings: tuple[ModelFinding, ...],
+    phase: str,
+) -> list[ModelFinding]:
+    if phase in ("all", "hash"):
+        return list(catalog_findings)
+    if phase == "schema":
+        return [
+            finding
+            for finding in catalog_findings
+            if _is_record_schema_finding(finding)
+        ]
+    if phase == "references":
+        return [
+            finding
+            for finding in catalog_findings
+            if not _is_record_schema_finding(finding)
+            and not finding.code.startswith("hash.")
+        ]
+    return []
+
+
+def _global_catalog_findings_for_phase(
+    catalog_findings: tuple[ModelFinding, ...],
+    phase: str,
+) -> list[ModelFinding]:
+    if phase in ("all", "references", "hash"):
+        return list(catalog_findings)
+    return []
+
+
+def _deduplicate_findings(findings: list[ModelFinding]) -> list[ModelFinding]:
+    deduplicated: dict[tuple[str, str], ModelFinding] = {}
+    severity_rank = {"info": 0, "warning": 1, "error": 2}
+    for finding in findings:
+        key = (finding.code, finding.pointer)
+        previous = deduplicated.get(key)
+        if previous is None or severity_rank[finding.severity] > severity_rank[previous.severity]:
+            deduplicated[key] = finding
+    return list(deduplicated.values())
+
+
 def _render(findings: list[ModelFinding]) -> None:
     sections = (("Errors", "error"), ("Warnings", "warning"), ("Info", "info"))
     print("# paperops-model-check")
@@ -173,10 +205,13 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--phase", choices=PHASE_CHOICES, default="all")
     parser.add_argument("--strict", action="store_true")
     parser.add_argument("--print-hash", action="store_true")
+    parser.add_argument("--object-id")
     parser.add_argument("--document", type=Path)
     parser.add_argument("--results-document", type=Path)
     args = parser.parse_args()
-    if args.print_hash and args.model == "all":
+    if args.object_id is not None and not args.print_hash:
+        parser.error("--object-id requires --print-hash")
+    if args.print_hash and args.model == "all" and args.object_id is None:
         parser.error("--print-hash requires one explicit --model")
     return args
 
@@ -197,6 +232,18 @@ def main() -> int:
         _render(findings)
         return 1
 
+    if args.model != "all" and args.model not in registry.entries:
+        _render(
+            [
+                ModelFinding(
+                    "registry.model",
+                    "/",
+                    f"model `{args.model}` is not registered in this project",
+                )
+            ]
+        )
+        return 1
+
     selected_names = (
         list(registry.entries) if args.model == "all" else [args.model]
     )
@@ -208,9 +255,10 @@ def main() -> int:
     ):
         names_to_load.append("results_hierarchy")
 
-    loaded: dict[str, LoadedModel] = {}
+    loaded: dict[str, ModelDocument] = {}
     if "editorial" in names_to_load:
         loaded["editorial"] = _load_model(
+            root,
             registry.entries["editorial"],
             _document_path(
                 "editorial",
@@ -219,6 +267,7 @@ def main() -> int:
                 document=args.document,
                 results_document=args.results_document,
             ),
+            strict=args.strict,
         )
 
     binding_findings: list[ModelFinding] = []
@@ -255,7 +304,10 @@ def main() -> int:
             )
         if results_path is not None:
             loaded_results = _load_model(
-                registry.entries["results_hierarchy"], results_path
+                root,
+                registry.entries["results_hierarchy"],
+                results_path,
+                strict=args.strict,
             )
             if (
                 embedded_results
@@ -278,6 +330,7 @@ def main() -> int:
     for name in names_to_load:
         if name not in loaded and name != "results_hierarchy":
             loaded[name] = _load_model(
+                root,
                 registry.entries[name],
                 _document_path(
                     name,
@@ -286,6 +339,7 @@ def main() -> int:
                     document=args.document,
                     results_document=args.results_document,
                 ),
+                strict=args.strict,
             )
 
     if phase in ("all", "schema"):
@@ -293,6 +347,9 @@ def main() -> int:
             model = loaded.get(name)
             if model is not None:
                 findings.extend(model.schema_findings)
+                findings.extend(
+                    _catalog_findings_for_phase(model.catalog_findings, phase)
+                )
         if (
             phase == "all"
             and "editorial" in selected_names
@@ -308,6 +365,9 @@ def main() -> int:
                 findings.append(_prerequisite([name]))
             else:
                 findings.extend(model.schema_findings)
+                findings.extend(
+                    _catalog_findings_for_phase(model.catalog_findings, phase)
+                )
     elif phase in ("references", "semantics"):
         prerequisites = list(selected_names)
         if phase == "references" and "editorial" in selected_names:
@@ -328,6 +388,16 @@ def main() -> int:
 
     if phase in ("all", "references"):
         findings.extend(binding_findings)
+
+    catalog = build_object_catalog(loaded.values())
+    findings.extend(_global_catalog_findings_for_phase(catalog.findings, phase))
+    if phase == "references":
+        for name in selected_names:
+            model = loaded.get(name)
+            if model is not None:
+                findings.extend(
+                    _catalog_findings_for_phase(model.catalog_findings, phase)
+                )
 
     editorial = loaded.get("editorial")
     results = loaded.get("results_hierarchy")
@@ -364,6 +434,7 @@ def main() -> int:
             elif digest is not None:
                 computed_hashes[name] = digest
 
+    findings = _deduplicate_findings(findings)
     if any(finding.severity == "error" for finding in findings):
         findings = [
             finding
@@ -374,7 +445,21 @@ def main() -> int:
     warnings = [finding for finding in findings if finding.severity == "warning"]
     failed = bool(errors or ((args.print_hash or args.strict) and warnings))
     if args.print_hash and not failed:
-        digest = computed_hashes.get(selected_names[0])
+        digest: str | None
+        if args.object_id is not None:
+            selected_object = catalog.objects.get(args.object_id)
+            digest = selected_object.object_hash if selected_object is not None else None
+            if selected_object is None:
+                findings.append(
+                    ModelFinding(
+                        "reference.dangling",
+                        "/object-id",
+                        f"object `{args.object_id}` is not present in the validated catalog",
+                    )
+                )
+                failed = True
+        else:
+            digest = computed_hashes.get(selected_names[0])
         if digest is not None:
             print(digest)
             return 0

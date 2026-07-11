@@ -69,7 +69,15 @@ def _exception_finding(error: Exception, pointer: str) -> ModelFinding:
     message = str(error)
     prefix, separator, detail = message.partition(":")
     if separator and "." in prefix and " " not in prefix:
-        return ModelFinding(prefix, pointer, detail.strip())
+        detail = detail.strip()
+        if detail.startswith("/") and ":" in detail:
+            error_pointer, _, error_detail = detail.partition(":")
+            if pointer != "/":
+                error_pointer = pointer + (
+                    "" if error_pointer == "/" else error_pointer
+                )
+            return ModelFinding(prefix, error_pointer, error_detail.strip())
+        return ModelFinding(prefix, pointer, detail)
     return ModelFinding("document.load", pointer, message)
 
 

@@ -277,6 +277,220 @@ class PaperOpsModelCheckTest(unittest.TestCase):
                 self.assertIn("semantic.placeholder", starter.stdout)
                 self.assertNotRegex(starter.stdout, r"(?m)^sha256:[0-9a-f]{64}$")
 
+    def test_print_hash_can_select_virtual_object_without_fabricated_revision(self) -> None:
+        editorial, results = valid_documents()
+        expected = semantic_hash(editorial["story_candidates"][0])
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self.run_overrides(
+                Path(tmp),
+                editorial,
+                results,
+                "--print-hash",
+                "--object-id",
+                "STY-0001",
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.stdout.strip(), expected)
+
+    def test_missing_object_id_is_a_stable_finding(self) -> None:
+        editorial, results = valid_documents()
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self.run_overrides(
+                Path(tmp),
+                editorial,
+                results,
+                "--print-hash",
+                "--object-id",
+                "STY-missing",
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("[reference.dangling] /object-id", result.stdout)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_unregistered_known_model_is_a_stable_registry_finding(self) -> None:
+        result = run_python_script(
+            SCRIPT, "--root", ROOT / "template", "--model", "research"
+        )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("[registry.model] /", result.stdout)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_catalog_findings_are_partitioned_once_by_phase(self) -> None:
+        spec = importlib.util.spec_from_file_location(
+            "paperops_model_checker_phase_test", SCRIPT
+        )
+        assert spec is not None and spec.loader is not None
+        checker = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = checker
+        try:
+            spec.loader.exec_module(checker)
+            local = (
+                checker.ModelFinding("schema.required", "/record/id", "missing"),
+                checker.ModelFinding("document.non_json", "/record", "invalid"),
+                checker.ModelFinding(
+                    "reference.orphan", "/records", "orphan", "warning"
+                ),
+                checker.ModelFinding("index.hash", "/records/0/expected_hash", "stale"),
+                checker.ModelFinding("hash.non_json", "/record", "invalid hash"),
+            )
+            global_findings = (
+                checker.ModelFinding("reference.duplicate", "/record/id", "duplicate"),
+            )
+            expected_local = {
+                "all": [
+                    "schema.required",
+                    "document.non_json",
+                    "reference.orphan",
+                    "index.hash",
+                    "hash.non_json",
+                ],
+                "schema": ["schema.required", "document.non_json"],
+                "references": ["reference.orphan", "index.hash"],
+                "hash": [
+                    "schema.required",
+                    "document.non_json",
+                    "reference.orphan",
+                    "index.hash",
+                    "hash.non_json",
+                ],
+            }
+            expected_global = {
+                "all": ["reference.duplicate"],
+                "schema": [],
+                "references": ["reference.duplicate"],
+                "hash": ["reference.duplicate"],
+            }
+            for phase in ("all", "schema", "references", "hash"):
+                with self.subTest(phase=phase):
+                    self.assertEqual(
+                        [
+                            finding.code
+                            for finding in checker._catalog_findings_for_phase(
+                                local, phase
+                            )
+                        ],
+                        expected_local[phase],
+                    )
+                    self.assertEqual(
+                        [
+                            finding.code
+                            for finding in checker._global_catalog_findings_for_phase(
+                                global_findings, phase
+                            )
+                        ],
+                        expected_global[phase],
+                    )
+        finally:
+            sys.modules.pop(spec.name, None)
+
+    def test_editorial_and_catalog_duplicate_is_rendered_once(self) -> None:
+        editorial, results = valid_documents()
+        duplicate = copy.deepcopy(editorial["story_candidates"][0])
+        duplicate["label"] = "Distinct row with duplicate ID"
+        duplicate["status"] = "rejected"
+        duplicate["selection_reason"] = ""
+        duplicate["rejection_reason"] = "Duplicate ID mutation."
+        editorial["story_candidates"].append(duplicate)
+        with tempfile.TemporaryDirectory() as tmp:
+            result = self.run_overrides(
+                Path(tmp), editorial, results, "--phase", "references"
+            )
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(
+            result.stdout.count("[reference.duplicate] /story_candidates/2/id"),
+            1,
+        )
+
+    def test_index_model_cli_prints_registered_record_hash(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = copy_template(tmp)
+            schema_dir = project / "_paperops/defaults/schemas"
+            registry_path = schema_dir / "registry.yml"
+            registry = load_document(registry_path)
+            record_schema = {
+                "type": "object",
+                "required": ["id", "record_type", "revision", "metadata"],
+                "properties": {
+                    "id": {"const": "CLM-0001"},
+                    "record_type": {"const": "claim"},
+                    "revision": {"const": 1},
+                    "metadata": {"type": "object"},
+                },
+                "additionalProperties": False,
+            }
+            (schema_dir / "claim.schema.json").write_text(
+                json.dumps(record_schema), encoding="utf-8"
+            )
+            registry["models"]["research"] = {
+                "document_kind": "index",
+                "schema": "model-index.schema.json",
+                "schema_version": 1,
+                "authority": "project-owned",
+                "default_path": "_paperops/model/research/index.yml",
+                "hash_profile": "semantic-v1",
+                "hash_excluded_paths": ["/metadata/updated_at"],
+                "record_sets": {
+                    "claim": {
+                        "schema": "claim.schema.json",
+                        "path_prefix": "_paperops/model/research/claims/",
+                        "id_pattern": "^CLM-[0-9]{4,}$",
+                        "hash_excluded_paths": ["/metadata/updated_at"],
+                    }
+                },
+                "dependency_profile": "dependency-v1",
+            }
+            registry_path.write_text(json.dumps(registry), encoding="utf-8")
+            record = {
+                "id": "CLM-0001",
+                "record_type": "claim",
+                "revision": 1,
+                "metadata": {"updated_at": "2026-07-11"},
+            }
+            digest = semantic_hash(record, excluded_paths=("/metadata/updated_at",))
+            record_path = project / "_paperops/model/research/claims/CLM-0001.yml"
+            record_path.parent.mkdir(parents=True)
+            record_path.write_text(json.dumps(record), encoding="utf-8")
+            index_path = project / "_paperops/model/research/index.yml"
+            index_path.write_text(
+                json.dumps(
+                    {
+                        "model_name": "research",
+                        "schema_version": 1,
+                        "index_revision": 1,
+                        "records": [
+                            {
+                                "id": "CLM-0001",
+                                "record_type": "claim",
+                                "document": "_paperops/model/research/claims/CLM-0001.yml",
+                                "expected_revision": 1,
+                                "expected_hash": digest,
+                            }
+                        ],
+                        "extensions": {},
+                        "metadata": {"updated_at": "2026-07-11"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = run_python_script(
+                project / "scripts/check-paperops-models.py",
+                "--root",
+                project,
+                "--model",
+                "research",
+                "--print-hash",
+                "--object-id",
+                "CLM-0001",
+            )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.stdout.strip(), digest)
+
     def test_print_hash_runs_references_despite_semantics_phase(self) -> None:
         editorial, results = valid_documents()
         editorial["selected_story_id"] = "STY-missing"

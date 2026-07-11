@@ -651,6 +651,7 @@ class PopsCliTest(unittest.TestCase):
             "_paperops/defaults/schemas/editorial-model.schema.json",
             "scripts/paperops_schema.py",
             "scripts/paperops_editorial.py",
+            "scripts/paperops_models.py",
             "scripts/check-paperops-models.py",
         ]
         project_owned = "_paperops/model/editorial/editorial-model.yml"
