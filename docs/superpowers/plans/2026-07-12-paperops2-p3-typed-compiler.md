@@ -125,19 +125,21 @@ Commit message: `全体moveをsection計画へ追跡するためP3 schemaを追�
 **Files:**
 
 - Modify: `src/paperops/model_validation.py`
+- Modify: `template/scripts/check-paperops-models.py`
 - Create: `src/paperops/compiler/inputs.py`
 - Create: `tests/test_p3_compile_inputs.py`
 
 **Interfaces:**
 
 - Produces `run_model_hash(root, model, object_id=None) -> ValidationResult` using the same bounded-output, no-shell runner。
+- Produces a whitelisted read-only Manuscript compile-readiness query through the project-managed checker, so Task 5 does not import template scripts or duplicate `validate_manuscript_compile_readiness()`。
 - Produces `load_compile_inputs(root, request) -> LoadedCompileInputs` with validated YAML documents, catalog object snapshots, authority snapshots, and source mode。
 - Authoritative mode calls `plan_adoption` for Research, Editorial, Results hierarchy, Manuscript and rejects non-v2 / inconsistent journal state。
 - Shadow mode overlays only the declared P2 candidate into an isolated temp project, validates it, and marks output non-applicable。
 
 - [ ] **Step 1: Write authority and query RED tests**
 
-Cover missing checker, valid object hash, malformed checker JSON, legacy/shadow/v2 modes, missing transaction, tampered target, model validation failure, and source-tree no-mutation. Build authoritative fixtures by using existing P2 diff/adopt helpers rather than hand-writing manifest state。
+Cover missing checker, valid object hash, compile-readiness target selection, malformed checker JSON, legacy/shadow/v2 modes, missing transaction, tampered target, model validation failure, and source-tree no-mutation. Build authoritative fixtures by using existing P2 diff/adopt helpers rather than hand-writing manifest state。
 
 - [ ] **Step 2: Run RED**
 
@@ -145,7 +147,7 @@ Run `tests.test_p3_compile_inputs`。Expected: missing `run_model_hash` / `load_
 
 - [ ] **Step 3: Implement generalized checker argv and input loader**
 
-Refactor the safe runner to accept only enumerated `--print-hash` and `--object-id` arguments. Never interpolate shell text. Load only paths registered by the validated model index, reject symlink/special files, and retain project-relative identities only。
+Refactor the safe runner to accept only enumerated `--print-hash`, `--object-id`, and Manuscript compile-readiness arguments. Never interpolate shell text. Load only paths registered by the validated model index, reject symlink/special files, and retain project-relative identities only。
 
 - [ ] **Step 4: Run GREEN and safety regression**
 
