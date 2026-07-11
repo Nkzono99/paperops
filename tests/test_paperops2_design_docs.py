@@ -212,22 +212,46 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
     def test_fixture_policy_uses_synthetic_cases_and_reserves_paths(self) -> None:
         text = self.read("docs/paperops2-evaluation-fixtures.md")
         for required in [
-            "mechanism-led",
-            "boundary-led",
-            "negative-result-led",
-            "tests/fixtures/editorial/",
+            "tests/fixtures/editorial/mechanism-led/",
+            "tests/fixtures/editorial/boundary-led/",
+            "tests/fixtures/editorial/negative-result-led/",
             "story candidates",
             "selection reason",
             "rejection reason",
             "Results hierarchy",
+            "claim role",
             "argument move",
+            "期待 diagnostic",
             "合成データ",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, text)
+
+    def test_fixture_policy_keeps_private_raw_data_outside_repo_and_defers_fixtures(
+        self,
+    ) -> None:
+        text = self.read("docs/paperops2-evaluation-fixtures.md")
+        for required in [
+            "private 案件と raw data は repo に追跡しない",
+            "sanitized aggregate だけを残す",
+            "schema 適合 fixture 本体は P1 で追加する",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, text)
 
     def test_current_specification_indexes_paperops2_design_sources(self) -> None:
         text = self.read("docs/current-specification.md")
+        rows = []
+        for line in text.splitlines():
+            if not line.startswith("|"):
+                continue
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if cells and cells[0] == "PaperOps 2 design":
+                rows.append(cells)
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(len(rows[0]), 3)
+        source_of_truth = rows[0][1]
         for path in [
             "docs/rfcs/0001-paperops-2.md",
             "docs/adr/",
@@ -235,4 +259,41 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             "docs/paperops2-evaluation-fixtures.md",
         ]:
             with self.subTest(path=path):
-                self.assertIn(path, text)
+                self.assertIn(path, source_of_truth)
+
+    def test_readme_links_to_paperops2_rfc(self) -> None:
+        text = self.read("README.md")
+        self.assertIn(
+            "[docs/rfcs/0001-paperops-2.md](docs/rfcs/0001-paperops-2.md)",
+            text,
+        )
+
+    def test_unreleased_changelog_keeps_p0a_design_separate_from_p1_delivery(
+        self,
+    ) -> None:
+        text = self.read("CHANGELOG.md")
+        unreleased = text.split("## Unreleased", 1)[1].split("\n## ", 1)[0]
+        entries = [
+            line
+            for line in unreleased.splitlines()
+            if line.startswith("- ") and "PaperOps 2" in line
+        ]
+        self.assertEqual(len(entries), 1)
+        entry = entries[0]
+        for required in [
+            "RFC",
+            "authority / ownership",
+            "CLI / Agent / compiler",
+            "revision / hash",
+            "disposition",
+            "合成 fixture 方針",
+            "設計資料として追加した",
+            "P1 以降",
+            "提供済みとするものではない",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, entry)
+        self.assertNotRegex(
+            entry,
+            r"P1 以降.{0,120}(?:提供済み|実装済み)(?!とするものではない)",
+        )

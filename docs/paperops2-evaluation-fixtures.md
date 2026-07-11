@@ -1,6 +1,6 @@
 # PaperOps 2 評価 fixture 方針
 
-この文書は、PaperOps 2 の新旧 pipeline を同じ入力で比較する評価 fixture の保存場所と必須項目を定める。fixture 自体と schema は P1 で実装し、この方針追加だけで P1 以降の機能を提供済みとは扱わない。
+この文書は、PaperOps 2 の新旧 pipeline を同じ入力で比較する評価 fixture の保存場所と必須項目を定める。schema 適合 fixture 本体は P1 で追加する。この方針追加だけで P1 以降の機能を提供済みとは扱わない。
 
 ## 予約パス
 
@@ -28,4 +28,4 @@ story 選択と却下の根拠は同じ case 内で追跡できるようにし�
 
 ## Private 案件
 
-private 案件の入力、出力、中間 state は repo 外で評価する。この repo には、案件、人物、研究内容を再識別できない sanitized aggregate だけを残す。private 案件から合成 fixture を作る場合も、値の置換だけではなく、固有の論理構造や文言を引き継がない。
+private 案件の入力、出力、中間 state は repo 外で評価する。private 案件と raw data は repo に追跡しない。この repo には、案件、人物、研究内容を再識別できない sanitized aggregate だけを残す。private 案件から合成 fixture を作る場合も、値の置換だけではなく、固有の論理構造や文言を引き継がない。
