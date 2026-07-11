@@ -226,7 +226,11 @@ class P3CompilerTypesTest(unittest.TestCase):
             section_kind="results",
             ordered_block_ids=("BLK-0001",),
             inputs=(snapshot,),
-            projection={"reader_question": "What changes?"},
+            projection={
+                "schema_version": 1,
+                "move_bindings": [],
+                "extensions": {"x-test-reader-question": "What changes?"},
+            },
         )
         packet = WriterPacket(
             packet_id="packet-001",
@@ -234,7 +238,16 @@ class P3CompilerTypesTest(unittest.TestCase):
             authority=(authority,),
             write_scope=scope,
             inputs=(snapshot,),
-            read_context={"paths": ["manuscript/ja/results.tex"]},
+            read_context={
+                "schema_version": 1,
+                "global": ".paperops/compile/compile-001/context/global.json",
+                "extensions": {"x-test-paths": ["manuscript/ja/results.tex"]},
+            },
+            payload={
+                "schema_version": 1,
+                "section_plan": "SEC-RESULTS",
+                "extensions": {},
+            },
         )
         finding = CompileFinding(
             code="compile.example",

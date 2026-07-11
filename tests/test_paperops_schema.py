@@ -213,6 +213,23 @@ class SchemaProfileTest(unittest.TestCase):
         ):
             validate_schema("value", {"pattern": "["})
 
+    def test_minimum_accepts_boundary_and_rejects_smaller_numbers(self) -> None:
+        schema = {"type": "integer", "minimum": 1}
+
+        self.assertEqual(validate_schema(1, schema), [])
+        findings = validate_schema(0, schema)
+        self.assertEqual(
+            [(finding.code, finding.pointer) for finding in findings],
+            [("schema.minimum", "")],
+        )
+
+        for minimum in (True, "1"):
+            with self.subTest(minimum=minimum), self.assertRaisesRegex(
+                SchemaDefinitionError,
+                "schema.invalid_definition",
+            ):
+                validate_schema(1, {"type": "integer", "minimum": minimum})
+
 
 class CanonicalHashTest(unittest.TestCase):
     def test_mapping_order_does_not_change_hash(self) -> None:

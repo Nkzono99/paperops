@@ -17,22 +17,13 @@
   "properties": {
     "schema_version": {"const": 1},
     "section_id": {"$ref": "#/$defs/safeId"},
-    "revision": {"type": "integer"},
+    "revision": {"type": "integer", "minimum": 1},
     "semantic_hash": {"$ref": "#/$defs/hash"},
     "section_kind": {"$ref": "#/$defs/safeId"},
-    "ordered_block_ids": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/safeId"}
-    },
-    "inputs": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/input"}
-    },
-    "projection": {"type": "object", "additionalProperties": true},
-    "findings": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/finding"}
-    }
+    "ordered_block_ids": {"$ref": "#/$defs/strings"},
+    "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
+    "projection": {"$ref": "#/$defs/sectionProjection"},
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
   },
   "additionalProperties": false,
   "$defs": {
@@ -46,7 +37,38 @@
     },
     "relativePath": {
       "type": "string",
-      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*//).+$"
+      "pattern": "^(?!.*\\x00)(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*//).+$"
+    },
+    "strings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/safeId"}
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "projectionMoveBinding": {
+      "type": "object",
+      "required": ["move_id", "role", "reason"],
+      "properties": {
+        "move_id": {"type": "string", "pattern": "^MOV-[0-9]{4,}$"},
+        "role": {"enum": ["primary", "echo"]},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "sectionProjection": {
+      "type": "object",
+      "required": ["schema_version", "move_bindings", "extensions"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "move_bindings": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/projectionMoveBinding"}
+        },
+        "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
     },
     "input": {
       "type": "object",
@@ -58,7 +80,7 @@
         "hash": {"$ref": "#/$defs/hash"},
         "relation": {"$ref": "#/$defs/safeId"},
         "model": {"$ref": "#/$defs/safeId"},
-        "revision": {"type": "integer"}
+        "revision": {"type": "integer", "minimum": 1}
       },
       "additionalProperties": false
     },

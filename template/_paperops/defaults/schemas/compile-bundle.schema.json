@@ -29,13 +29,26 @@
   },
   "additionalProperties": false,
   "$defs": {
-    "safeId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
-    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "safeId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
     "relativePath": {
       "type": "string",
-      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*//).+$"
+      "pattern": "^(?!.*\\x00)(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*//).+$"
     },
-    "strings": {"type": "array", "items": {"$ref": "#/$defs/safeId"}},
+    "strings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/safeId"}
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    },
     "finding": {
       "type": "object",
       "required": ["code", "pointer", "message", "severity", "identity"],
@@ -44,7 +57,12 @@
         "pointer": {"type": "string", "pattern": "^(?:$|/)"},
         "message": {"type": "string"},
         "severity": {"enum": ["error", "warning", "info"]},
-        "identity": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/relativePath"}]}
+        "identity": {
+          "anyOf": [
+            {"const": ""},
+            {"$ref": "#/$defs/relativePath"}
+          ]
+        }
       },
       "additionalProperties": false
     },
@@ -58,7 +76,7 @@
         "hash": {"$ref": "#/$defs/hash"},
         "relation": {"$ref": "#/$defs/safeId"},
         "model": {"$ref": "#/$defs/safeId"},
-        "revision": {"type": "integer"}
+        "revision": {"type": "integer", "minimum": 1}
       },
       "additionalProperties": false
     },
@@ -69,13 +87,25 @@
         "model": {"$ref": "#/$defs/safeId"},
         "mode": {"$ref": "#/$defs/safeId"},
         "hash": {"$ref": "#/$defs/hash"},
-        "transaction_id": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/safeId"}]}
+        "transaction_id": {
+          "anyOf": [
+            {"const": ""},
+            {"$ref": "#/$defs/safeId"}
+          ]
+        }
       },
       "additionalProperties": false
     },
     "writeScope": {
       "type": "object",
-      "required": ["level", "languages", "files", "section_ids", "block_ids", "allowed_operations"],
+      "required": [
+        "level",
+        "languages",
+        "files",
+        "section_ids",
+        "block_ids",
+        "allowed_operations"
+      ],
       "properties": {
         "level": {"enum": ["block", "section", "manuscript"]},
         "languages": {"$ref": "#/$defs/strings"},
@@ -96,25 +126,80 @@
         "targets": {"$ref": "#/$defs/strings"},
         "write_scope": {"$ref": "#/$defs/writeScope"},
         "source_mode": {"enum": ["authoritative", "shadow"]},
-        "shadow_transaction_id": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/safeId"}]}
+        "shadow_transaction_id": {
+          "anyOf": [
+            {"const": ""},
+            {"$ref": "#/$defs/safeId"}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "projectionMoveBinding": {
+      "type": "object",
+      "required": ["move_id", "role", "reason"],
+      "properties": {
+        "move_id": {"type": "string", "pattern": "^MOV-[0-9]{4,}$"},
+        "role": {"enum": ["primary", "echo"]},
+        "reason": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "sectionProjection": {
+      "type": "object",
+      "required": ["schema_version", "move_bindings", "extensions"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "move_bindings": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/projectionMoveBinding"}
+        },
+        "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
+    },
+    "readContext": {
+      "type": "object",
+      "required": ["schema_version", "global", "extensions"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "global": {"$ref": "#/$defs/relativePath"},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
+    },
+    "writerPayload": {
+      "type": "object",
+      "required": ["schema_version", "section_plan", "extensions"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "section_plan": {"$ref": "#/$defs/safeId"},
+        "extensions": {"$ref": "#/$defs/extensions"}
       },
       "additionalProperties": false
     },
     "sectionPlan": {
       "type": "object",
       "required": [
-        "schema_version", "section_id", "revision", "semantic_hash", "section_kind",
-        "ordered_block_ids", "inputs", "projection", "findings"
+        "schema_version",
+        "section_id",
+        "revision",
+        "semantic_hash",
+        "section_kind",
+        "ordered_block_ids",
+        "inputs",
+        "projection",
+        "findings"
       ],
       "properties": {
         "schema_version": {"const": 1},
         "section_id": {"$ref": "#/$defs/safeId"},
-        "revision": {"type": "integer"},
+        "revision": {"type": "integer", "minimum": 1},
         "semantic_hash": {"$ref": "#/$defs/hash"},
         "section_kind": {"$ref": "#/$defs/safeId"},
         "ordered_block_ids": {"$ref": "#/$defs/strings"},
         "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
-        "projection": {"type": "object", "additionalProperties": true},
+        "projection": {"$ref": "#/$defs/sectionProjection"},
         "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
       },
       "additionalProperties": false
@@ -122,8 +207,14 @@
     "writerPacket": {
       "type": "object",
       "required": [
-        "schema_version", "packet_id", "compile_id", "authority", "write_scope",
-        "inputs", "read_context", "payload"
+        "schema_version",
+        "packet_id",
+        "compile_id",
+        "authority",
+        "write_scope",
+        "inputs",
+        "read_context",
+        "payload"
       ],
       "properties": {
         "schema_version": {"const": 1},
@@ -132,8 +223,8 @@
         "authority": {"type": "array", "items": {"$ref": "#/$defs/authority"}},
         "write_scope": {"$ref": "#/$defs/writeScope"},
         "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
-        "read_context": {"type": "object", "additionalProperties": true},
-        "payload": {"type": "object", "additionalProperties": true}
+        "read_context": {"$ref": "#/$defs/readContext"},
+        "payload": {"$ref": "#/$defs/writerPayload"}
       },
       "additionalProperties": false
     }

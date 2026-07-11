@@ -17,17 +17,11 @@
     "schema_version": {"const": 1},
     "packet_id": {"$ref": "#/$defs/safeId"},
     "compile_id": {"$ref": "#/$defs/safeId"},
-    "authority": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/authority"}
-    },
+    "authority": {"type": "array", "items": {"$ref": "#/$defs/authority"}},
     "write_scope": {"$ref": "#/$defs/writeScope"},
-    "inputs": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/input"}
-    },
-    "read_context": {"type": "object", "additionalProperties": true},
-    "payload": {"type": "object", "additionalProperties": true}
+    "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
+    "read_context": {"$ref": "#/$defs/readContext"},
+    "payload": {"$ref": "#/$defs/writerPayload"}
   },
   "additionalProperties": false,
   "$defs": {
@@ -41,7 +35,15 @@
     },
     "relativePath": {
       "type": "string",
-      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*//).+$"
+      "pattern": "^(?!.*\\x00)(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*//).+$"
+    },
+    "strings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/safeId"}
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
     },
     "authority": {
       "type": "object",
@@ -71,10 +73,10 @@
       ],
       "properties": {
         "level": {"enum": ["block", "section", "manuscript"]},
-        "languages": {"type": "array", "items": {"$ref": "#/$defs/safeId"}},
+        "languages": {"$ref": "#/$defs/strings"},
         "files": {"type": "array", "items": {"$ref": "#/$defs/relativePath"}},
-        "section_ids": {"type": "array", "items": {"$ref": "#/$defs/safeId"}},
-        "block_ids": {"type": "array", "items": {"$ref": "#/$defs/safeId"}},
+        "section_ids": {"$ref": "#/$defs/strings"},
+        "block_ids": {"$ref": "#/$defs/strings"},
         "allowed_operations": {
           "type": "array",
           "items": {"enum": ["keep", "compress", "move", "merge", "split", "cut", "rewrite", "add"]}
@@ -92,7 +94,27 @@
         "hash": {"$ref": "#/$defs/hash"},
         "relation": {"$ref": "#/$defs/safeId"},
         "model": {"$ref": "#/$defs/safeId"},
-        "revision": {"type": "integer"}
+        "revision": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "readContext": {
+      "type": "object",
+      "required": ["schema_version", "global", "extensions"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "global": {"$ref": "#/$defs/relativePath"},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
+    },
+    "writerPayload": {
+      "type": "object",
+      "required": ["schema_version", "section_plan", "extensions"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "section_plan": {"$ref": "#/$defs/safeId"},
+        "extensions": {"$ref": "#/$defs/extensions"}
       },
       "additionalProperties": false
     }

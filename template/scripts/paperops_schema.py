@@ -130,6 +130,7 @@ SUPPORTED_KEYWORDS = frozenset(
         "const",
         "pattern",
         "minLength",
+        "minimum",
         "$defs",
         "$ref",
         "allOf",
@@ -591,6 +592,14 @@ def _walk_schema_definition(schema: Any) -> None:
     for keyword in ("minItems", "maxItems", "minLength"):
         if keyword in schema and not _is_non_negative_integer(schema[keyword]):
             raise _invalid_definition(keyword, "must be a non-negative integer")
+    if "minimum" in schema:
+        minimum = schema["minimum"]
+        if (
+            isinstance(minimum, bool)
+            or not isinstance(minimum, (int, float))
+            or not math.isfinite(minimum)
+        ):
+            raise _invalid_definition("minimum", "must be a finite number")
     if "uniqueItems" in schema and not isinstance(schema["uniqueItems"], bool):
         raise _invalid_definition("uniqueItems", "must be a boolean")
     if "enum" in schema and not isinstance(schema["enum"], list):
@@ -719,6 +728,15 @@ def _validate_value(
         findings.append(_finding("schema.enum", pointer, "value is not in enum"))
     if "const" in schema and not _json_equal(document, schema["const"]):
         findings.append(_finding("schema.const", pointer, "value does not match const"))
+    if (
+        "minimum" in schema
+        and isinstance(document, (int, float))
+        and not isinstance(document, bool)
+        and document < schema["minimum"]
+    ):
+        findings.append(
+            _finding("schema.minimum", pointer, "number is below minimum")
+        )
 
     if isinstance(document, dict):
         required = schema.get("required", [])

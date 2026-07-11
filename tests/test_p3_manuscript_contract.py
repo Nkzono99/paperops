@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import copy
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
-from tests.helpers import ROOT, run_python_script
+from tests.helpers import ROOT, copy_template, run_python_script
 
 
 SCRIPTS = ROOT / "template/scripts"
@@ -17,6 +19,7 @@ sys.path.insert(0, str(SCRIPTS))
 from paperops.compiler import (  # noqa: E402
     AuthoritySnapshot,
     CompileBundle,
+    CompileFinding,
     CompileRequest,
     InputSnapshot,
     SectionPlan,
@@ -135,6 +138,39 @@ def add_current_editorial_approval(section: dict[str, object]) -> None:
     )
 
 
+def ready_section(
+    section_id: str,
+    role: str,
+    *,
+    move_id: str = "MOV-0001",
+) -> dict[str, object]:
+    section = valid_section(section_id, move_id=move_id)
+    section["move_bindings"] = [
+        {
+            "move_id": move_id,
+            "role": role,
+            "reason": f"{role} placement",
+        }
+    ]
+    section["dependencies"] = [
+        {
+            "target_id": move_id,
+            "relation": "guided_by",
+            "expected_hash": HASH,
+        }
+    ]
+    add_current_editorial_approval(section)
+    return section
+
+
+def finding_rows(findings: object) -> list[tuple[str, str, str]]:
+    assert isinstance(findings, list)
+    return [
+        (finding.code, finding.pointer, finding.message)
+        for finding in findings
+    ]
+
+
 def generated_documents() -> dict[str, dict[str, object]]:
     scope = WriteScope(
         level="section",
@@ -166,7 +202,17 @@ def generated_documents() -> dict[str, dict[str, object]]:
         section_kind="results",
         ordered_block_ids=("BLK-0001",),
         inputs=(snapshot,),
-        projection={"move_bindings": [{"move_id": "MOV-0001", "role": "primary"}]},
+        projection={
+            "schema_version": 1,
+            "move_bindings": [
+                {
+                    "move_id": "MOV-0001",
+                    "role": "primary",
+                    "reason": "principal result",
+                }
+            ],
+            "extensions": {},
+        },
     )
     packet = WriterPacket(
         packet_id="packet-001",
@@ -174,8 +220,33 @@ def generated_documents() -> dict[str, dict[str, object]]:
         authority=(authority,),
         write_scope=scope,
         inputs=(snapshot,),
-        read_context={"global": ".paperops/compile/compile-001/context/global.json"},
-        payload={"section_plan": "SEC-0001"},
+        read_context={
+            "schema_version": 1,
+            "global": ".paperops/compile/compile-001/context/global.json",
+            "extensions": {},
+        },
+        payload={
+            "schema_version": 1,
+            "section_plan": "SEC-0001",
+            "extensions": {},
+        },
+    )
+    finding = CompileFinding(
+        code="compile.example",
+        pointer="/inputs/0",
+        message="example diagnostic",
+        severity="info",
+        identity="_paperops/model/manuscript/sections/SEC-0001.yml",
+    )
+    plan = SectionPlan(
+        section_id=plan.section_id,
+        revision=plan.revision,
+        semantic_hash=plan.semantic_hash,
+        section_kind=plan.section_kind,
+        ordered_block_ids=plan.ordered_block_ids,
+        inputs=plan.inputs,
+        projection=plan.projection,
+        findings=(finding,),
     )
     bundle = CompileBundle(
         compile_id="compile-001",
@@ -185,6 +256,7 @@ def generated_documents() -> dict[str, dict[str, object]]:
         inputs=(snapshot,),
         section_plans=(plan,),
         writer_packets=(packet,),
+        findings=(finding,),
     )
     patch = {
         "schema_version": 1,
@@ -199,7 +271,7 @@ def generated_documents() -> dict[str, dict[str, object]]:
                 "replacement_hash": "sha256:" + "b" * 64,
             }
         ],
-        "findings": [],
+        "findings": [finding.to_dict()],
     }
     return {
         "compile-bundle": bundle.to_dict(),
@@ -225,7 +297,9 @@ class P3ManuscriptContractTest(unittest.TestCase):
         )
         return validator(catalog(*documents))
 
-    def test_generated_dto_schemas_accept_task1_wire_shapes(self) -> None:
+    def test_generated_schemas_accept_task1_and_provisional_patch_v1_shapes(
+        self,
+    ) -> None:
         documents = generated_documents()
         for schema_name in GENERATED_SCHEMA_NAMES:
             with self.subTest(schema=schema_name):
@@ -234,7 +308,157 @@ class P3ManuscriptContractTest(unittest.TestCase):
                 self.assertIs(schema["additionalProperties"], False)
                 self.assertEqual(validate_schema(documents[schema_name], schema), [])
 
-    def test_generated_dto_schemas_reject_unknown_top_level_fields(self) -> None:
+    def test_versioned_payload_envelopes_are_closed_except_extensions(self) -> None:
+        mutations = (
+            ("section-plan", ("projection",), "/projection/unknown"),
+            ("writer-packet", ("read_context",), "/read_context/unknown"),
+            ("writer-packet", ("payload",), "/payload/unknown"),
+            (
+                "compile-bundle",
+                ("section_plans", 0, "projection"),
+                "/section_plans/0/projection/unknown",
+            ),
+            (
+                "compile-bundle",
+                ("writer_packets", 0, "read_context"),
+                "/writer_packets/0/read_context/unknown",
+            ),
+            (
+                "compile-bundle",
+                ("writer_packets", 0, "payload"),
+                "/writer_packets/0/payload/unknown",
+            ),
+        )
+        for schema_name, path, pointer in mutations:
+            with self.subTest(schema=schema_name, path=path):
+                candidate = copy.deepcopy(generated_documents()[schema_name])
+                target: object = candidate
+                for token in path:
+                    target = target[token]  # type: ignore[index]
+                assert isinstance(target, dict)
+                target["unknown"] = True
+                self.assertIn(
+                    ("schema.additional", pointer),
+                    [
+                        (finding.code, finding.pointer)
+                        for finding in self.schema_findings(schema_name, candidate)
+                    ],
+                )
+
+        for schema_name, path in (
+            ("section-plan", ("projection", "extensions")),
+            ("writer-packet", ("read_context", "extensions")),
+            ("writer-packet", ("payload", "extensions")),
+        ):
+            with self.subTest(schema=schema_name, extension=path):
+                candidate = copy.deepcopy(generated_documents()[schema_name])
+                target: object = candidate
+                for token in path:
+                    target = target[token]  # type: ignore[index]
+                assert isinstance(target, dict)
+                target["x-lab-provisional"] = {"opaque": [1, "two"]}
+                self.assertEqual(self.schema_findings(schema_name, candidate), [])
+
+    def test_major_nested_generated_objects_reject_unknown_fields(self) -> None:
+        mutations = (
+            ("compile-bundle", ("request",), "/request/unknown"),
+            ("compile-bundle", ("authority", 0), "/authority/0/unknown"),
+            (
+                "compile-bundle",
+                ("request", "write_scope"),
+                "/request/write_scope/unknown",
+            ),
+            ("compile-bundle", ("findings", 0), "/findings/0/unknown"),
+            (
+                "compile-bundle",
+                ("section_plans", 0),
+                "/section_plans/0/unknown",
+            ),
+            (
+                "compile-bundle",
+                ("writer_packets", 0),
+                "/writer_packets/0/unknown",
+            ),
+            ("section-plan", ("inputs", 0), "/inputs/0/unknown"),
+            ("writer-packet", ("authority", 0), "/authority/0/unknown"),
+            ("writer-patch", ("changes", 0), "/changes/0/unknown"),
+            ("writer-patch", ("findings", 0), "/findings/0/unknown"),
+        )
+        for schema_name, path, pointer in mutations:
+            with self.subTest(schema=schema_name, path=path):
+                candidate = copy.deepcopy(generated_documents()[schema_name])
+                target: object = candidate
+                for token in path:
+                    target = target[token]  # type: ignore[index]
+                assert isinstance(target, dict)
+                target["unknown"] = True
+                self.assertIn(
+                    ("schema.additional", pointer),
+                    [
+                        (finding.code, finding.pointer)
+                        for finding in self.schema_findings(schema_name, candidate)
+                    ],
+                )
+
+    def test_generated_schema_revisions_are_positive(self) -> None:
+        mutations = (
+            ("section-plan", ("revision",)),
+            ("section-plan", ("inputs", 0, "revision")),
+            ("writer-packet", ("inputs", 0, "revision")),
+            ("compile-bundle", ("inputs", 0, "revision")),
+            ("compile-bundle", ("section_plans", 0, "revision")),
+            ("compile-bundle", ("section_plans", 0, "inputs", 0, "revision")),
+        )
+        for schema_name, path in mutations:
+            for invalid in (0, -1):
+                with self.subTest(schema=schema_name, path=path, revision=invalid):
+                    candidate = copy.deepcopy(generated_documents()[schema_name])
+                    target: object = candidate
+                    for token in path[:-1]:
+                        target = target[token]  # type: ignore[index]
+                    target[path[-1]] = invalid  # type: ignore[index]
+                    pointer = "/" + "/".join(str(token) for token in path)
+                    self.assertIn(
+                        ("schema.minimum", pointer),
+                        [
+                            (finding.code, finding.pointer)
+                            for finding in self.schema_findings(schema_name, candidate)
+                        ],
+                    )
+
+    def test_shared_generated_schema_definitions_remain_structurally_equal(
+        self,
+    ) -> None:
+        schemas = {
+            name: load_document(SCHEMAS / f"{name}.schema.json")
+            for name in GENERATED_SCHEMA_NAMES
+        }
+        for definition in ("safeId", "hash", "relativePath"):
+            values = [schemas[name]["$defs"][definition] for name in GENERATED_SCHEMA_NAMES]
+            self.assertTrue(all(value == values[0] for value in values[1:]), definition)
+        for definition, names in (
+            ("input", ("compile-bundle", "section-plan", "writer-packet")),
+            ("finding", ("compile-bundle", "section-plan", "writer-patch")),
+            ("authority", ("compile-bundle", "writer-packet")),
+            ("writeScope", ("compile-bundle", "writer-packet")),
+        ):
+            values = [schemas[name]["$defs"][definition] for name in names]
+            self.assertTrue(all(value == values[0] for value in values[1:]), definition)
+
+        for standalone, embedded in (
+            ("section-plan", "sectionPlan"),
+            ("writer-packet", "writerPacket"),
+        ):
+            standalone_shape = {
+                key: schemas[standalone][key]
+                for key in ("type", "required", "properties", "additionalProperties")
+            }
+            self.assertEqual(
+                standalone_shape,
+                schemas["compile-bundle"]["$defs"][embedded],
+            )
+
+    def test_generated_schemas_reject_unknown_top_level_fields(self) -> None:
         for schema_name, document in generated_documents().items():
             with self.subTest(schema=schema_name):
                 candidate = copy.deepcopy(document)
@@ -262,7 +486,12 @@ class P3ManuscriptContractTest(unittest.TestCase):
         )
 
     def test_generated_read_and_write_paths_must_be_project_relative(self) -> None:
-        for invalid in ("/absolute/results.tex", "../escape.tex", "C:\\escape.tex"):
+        for invalid in (
+            "/absolute/results.tex",
+            "../escape.tex",
+            "C:\\escape.tex",
+            "manuscript/ja/results\x00.tex",
+        ):
             with self.subTest(kind="read", path=invalid):
                 packet = generated_documents()["writer-packet"]
                 packet["inputs"][0]["identity"] = invalid
@@ -315,22 +544,64 @@ class P3ManuscriptContractTest(unittest.TestCase):
             [(finding.code, finding.pointer) for finding in findings],
         )
 
-    def test_duplicate_primary_move_placement_has_stable_finding(self) -> None:
-        first = valid_section("SEC-0001")
-        second = valid_section("SEC-0002")
-        for section in (first, second):
-            section["move_bindings"] = [
-                {
-                    "move_id": "MOV-0001",
-                    "role": "primary",
-                    "reason": "principal placement",
-                }
-            ]
-        findings = validate_manuscript_semantics(catalog(first, second))
-        primary_findings = [
-            finding for finding in findings if finding.code == "compile.move_primary"
+    def test_primary_placement_is_compile_only_and_primary_plus_echo_is_valid(
+        self,
+    ) -> None:
+        primary = ready_section("SEC-0001", "primary")
+        echo = ready_section("SEC-0002", "echo")
+        self.assertEqual(validate_manuscript_semantics(catalog(primary, echo)), [])
+        self.assertEqual(self.compile_readiness(primary, echo), [])
+
+    def test_echo_only_and_duplicate_primary_have_one_canonical_finding_per_move(
+        self,
+    ) -> None:
+        echo = ready_section("SEC-0001", "echo")
+        self.assertEqual(
+            finding_rows(self.compile_readiness(echo)),
+            [
+                (
+                    "compile.move_primary",
+                    "/SEC-0001/editorial_move_refs/0",
+                    "move `MOV-0001` requires exactly one primary section placement; found 0",
+                )
+            ],
+        )
+
+        first = ready_section("SEC-0001", "primary")
+        second = ready_section("SEC-0002", "primary")
+        expected = [
+            (
+                "compile.move_primary",
+                "/SEC-0001/editorial_move_refs/0",
+                "move `MOV-0001` requires exactly one primary section placement; found 2",
+            )
         ]
-        self.assertEqual(len(primary_findings), 2)
+        self.assertEqual(finding_rows(self.compile_readiness(first, second)), expected)
+        self.assertEqual(finding_rows(self.compile_readiness(second, first)), expected)
+        self.assertNotIn(
+            "compile.move_primary",
+            [finding.code for finding in validate_manuscript_semantics(catalog(first, second))],
+        )
+
+    def test_readiness_orders_distinct_primary_findings_by_move_id(self) -> None:
+        second_move = ready_section("SEC-0002", "echo", move_id="MOV-0002")
+        first_move = ready_section("SEC-0001", "echo", move_id="MOV-0001")
+        expected = [
+            (
+                "compile.move_primary",
+                "/SEC-0001/editorial_move_refs/0",
+                "move `MOV-0001` requires exactly one primary section placement; found 0",
+            ),
+            (
+                "compile.move_primary",
+                "/SEC-0002/editorial_move_refs/0",
+                "move `MOV-0002` requires exactly one primary section placement; found 0",
+            ),
+        ]
+        self.assertEqual(
+            finding_rows(self.compile_readiness(second_move, first_move)),
+            expected,
+        )
 
     def test_compile_readiness_requires_primary_approval_and_dependency_coverage(
         self,
@@ -397,6 +668,61 @@ class P3ManuscriptContractTest(unittest.TestCase):
             "all",
         )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_ordinary_checker_does_not_apply_compile_only_primary_rule(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = copy_template(tmp)
+            sections = (
+                ready_section("SEC-0001", "primary"),
+                ready_section("SEC-0002", "primary"),
+            )
+            section_dir = root / "_paperops/model/manuscript/sections"
+            section_dir.mkdir(parents=True, exist_ok=True)
+            records: list[dict[str, object]] = []
+            for section in sections:
+                relative = (
+                    f"_paperops/model/manuscript/sections/{section['id']}.yml"
+                )
+                (root / relative).write_text(
+                    json.dumps(section, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                records.append(
+                    {
+                        "id": section["id"],
+                        "record_type": "section",
+                        "document": relative,
+                        "expected_revision": section["revision"],
+                        "expected_hash": semantic_hash(
+                            section,
+                            excluded_paths=HASH_EXCLUSIONS,
+                        ),
+                    }
+                )
+            index = {
+                "model_name": "manuscript",
+                "schema_version": 1,
+                "index_revision": 1,
+                "records": records,
+                "extensions": {},
+                "metadata": {"updated_at": "2026-07-12"},
+            }
+            (root / "_paperops/model/manuscript/index.yml").write_text(
+                json.dumps(index, ensure_ascii=False),
+                encoding="utf-8",
+            )
+
+            result = run_python_script(
+                CHECKER,
+                "--root",
+                root,
+                "--model",
+                "manuscript",
+                "--phase",
+                "semantics",
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertNotIn("compile.move_primary", result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

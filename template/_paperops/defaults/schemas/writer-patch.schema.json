@@ -2,6 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://paperops.local/schemas/writer-patch.schema.json",
   "title": "PaperOps generated Writer patch",
+  "description": "Provisional version 1 patch contract pending the Writer patch DTO task.",
   "type": "object",
   "required": ["schema_version", "session_id", "compile_id", "changes", "findings"],
   "properties": {
@@ -29,7 +30,7 @@
     },
     "relativePath": {
       "type": "string",
-      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*//).+$"
+      "pattern": "^(?!.*\\x00)(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*//).+$"
     },
     "change": {
       "type": "object",

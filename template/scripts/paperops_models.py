@@ -917,9 +917,8 @@ def _move_primary_placements(
 def _validate_move_binding_projection(
     sections: Iterable[CatalogObject],
 ) -> list[ModelFinding]:
-    section_list = list(sections)
     findings: list[ModelFinding] = []
-    for section in section_list:
+    for section in sorted(sections, key=lambda item: item.object_id):
         bindings = section.document.get("move_bindings")
         if not isinstance(bindings, list):
             continue
@@ -936,19 +935,6 @@ def _validate_move_binding_projection(
                     section,
                     "/move_bindings",
                     "move binding IDs must exactly project editorial_move_refs order",
-                )
-            )
-
-    for move_id, placements in _move_primary_placements(section_list).items():
-        if len(placements) <= 1:
-            continue
-        for section, index in placements:
-            findings.append(
-                _manuscript_finding(
-                    "compile.move_primary",
-                    section,
-                    f"/move_bindings/{index}/role",
-                    f"move `{move_id}` has more than one primary section placement",
                 )
             )
     return findings
@@ -1210,18 +1196,24 @@ def validate_manuscript_compile_readiness(
         if obj.model_name == "manuscript" and obj.object_type == "block"
     }
     if section_ids is None:
-        selected = [
-            section
-            for section in sections.values()
-            if section.document.get("status") != "unplanned"
-        ]
+        selected = sorted(
+            (
+                section
+                for section in sections.values()
+                if section.document.get("status") != "unplanned"
+            ),
+            key=lambda item: item.object_id,
+        )
     else:
         requested = {section_ids} if isinstance(section_ids, str) else set(section_ids)
-        selected = [
-            section
-            for object_id, section in sections.items()
-            if object_id in requested
-        ]
+        selected = sorted(
+            (
+                section
+                for object_id, section in sections.items()
+                if object_id in requested
+            ),
+            key=lambda item: item.object_id,
+        )
 
     if not selected:
         return []
@@ -1229,21 +1221,34 @@ def validate_manuscript_compile_readiness(
     findings = _validate_move_binding_projection(sections.values())
     primary_placements = _move_primary_placements(sections.values())
 
+    canonical_move_references: dict[str, tuple[CatalogObject, int]] = {}
+    for section in selected:
+        editorial_refs = section.document.get("editorial_move_refs", [])
+        if not isinstance(editorial_refs, list):
+            continue
+        for index, move_id in enumerate(editorial_refs):
+            if isinstance(move_id, str):
+                canonical_move_references.setdefault(move_id, (section, index))
+
+    for move_id in sorted(canonical_move_references):
+        placements = primary_placements.get(move_id, [])
+        if len(placements) == 1:
+            continue
+        section, index = canonical_move_references[move_id]
+        findings.append(
+            _manuscript_finding(
+                "compile.move_primary",
+                section,
+                f"/editorial_move_refs/{index}",
+                f"move `{move_id}` requires exactly one primary section placement; "
+                f"found {len(placements)}",
+            )
+        )
+
     for section in selected:
         editorial_refs = section.document.get("editorial_move_refs", [])
         if not isinstance(editorial_refs, list):
             editorial_refs = []
-        for index, move_id in enumerate(editorial_refs):
-            placements = primary_placements.get(move_id, []) if isinstance(move_id, str) else []
-            if len(placements) != 1:
-                findings.append(
-                    _manuscript_finding(
-                        "compile.move_primary",
-                        section,
-                        f"/editorial_move_refs/{index}",
-                        f"move `{move_id}` requires exactly one primary section placement",
-                    )
-                )
 
         approval_state = _editorial_plan_approval_state(section)
         if approval_state != "approved":
