@@ -26,7 +26,7 @@
 
 Cover:
 
-- six exact registry entries: Research, Editorial, Results hierarchy, Manuscript, Issue, Publication;
+- the supported six-name contract: Research, Editorial, Results hierarchy, Manuscript, Issue, Publication, using a complete temporary registry fixture;
 - aggregate entries remain backward-compatible;
 - index entries require `document_kind: index`, `record_sets`, safe `path_prefix`, record schema file, ID pattern, and `dependency-v1`;
 - missing/unknown record set fields and escaping schema/path values fail as `registry.*` definition errors;
@@ -44,9 +44,9 @@ Expected: FAIL because `RegistryEntry` has no index/record-set contract.
 
 Add immutable `RecordSetEntry`; extend `RegistryEntry` with `document_kind`, `record_sets`, record-level hash exclusions, and `dependency_profile`. Keep aggregate P1-A fields valid. Resolve schema and path prefix without project-root escape, validate regex definitions eagerly, and reject unknown registry keys needed to avoid silent typo acceptance.
 
-### Step 3: Add shared index schema and six-entry registry
+### Step 3: Add shared index schema and registry support
 
-The generic index schema validates only the common envelope. Model-specific allowed record types are enforced by registry/catalog validation so the same managed schema can be reused without unsupported JSON Schema conditionals.
+The generic index schema validates only the common envelope. Model-specific allowed record types are enforced by registry/catalog validation so the same managed schema can be reused without unsupported JSON Schema conditionals. Keep the checked-in template registry on its currently resolvable entries until the corresponding model schema and starter are added in Tasks 3–6; every intermediate commit must remain green. Add each real entry atomically with its schema/starter, reaching the exact six-entry registry by Task 6.
 
 ### Step 4: Run focused tests and commit
 
