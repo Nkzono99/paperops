@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+import stat
+import tempfile
 import tomllib
 from datetime import UTC, datetime
 from pathlib import Path
@@ -57,8 +60,7 @@ def record_applied_migration(root: Path, migration_id: str) -> bool:
 
     merged = dict(existing)
     merged["migrations"] = migrations
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+    write_manifest_data_atomic(manifest_path, merged)
     return True
 
 
@@ -96,7 +98,7 @@ def write_manifest(
         legacy_install_spec=cli_install_spec,
     )
 
-    manifest.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+    write_manifest_data_atomic(manifest, merged)
 
 
 def write_cli_metadata(root: Path) -> None:
@@ -107,7 +109,7 @@ def write_cli_metadata(root: Path) -> None:
     now = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     merged = dict(existing)
     merged["cli"] = cli_manifest_table(existing.get("cli"), now=now)
-    manifest.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+    write_manifest_data_atomic(manifest, merged)
 
 
 def detached_records(root: Path) -> dict[str, dict[str, str]]:
@@ -158,8 +160,7 @@ def record_detached_file(root: Path, rel: str, *, reason: str) -> None:
 
     merged = dict(existing)
     merged["detached"] = detached
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+    write_manifest_data_atomic(manifest_path, merged)
 
 
 def remove_detached_file(root: Path, rel: str) -> bool:
@@ -183,9 +184,37 @@ def remove_detached_file(root: Path, rel: str) -> bool:
 
     merged = dict(existing)
     merged["detached"] = detached
-    manifest_path.parent.mkdir(parents=True, exist_ok=True)
-    manifest_path.write_text(dumps_manifest_toml(merged), encoding="utf-8")
+    write_manifest_data_atomic(manifest_path, merged)
     return True
+
+
+def write_manifest_data_atomic(path: Path, data: dict[str, Any]) -> None:
+    """Durably replace a manifest without exposing a partially written TOML file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = dumps_manifest_toml(data).encode("utf-8")
+    existing_mode = (
+        stat.S_IMODE(path.stat().st_mode) if path.exists() else None
+    )
+    fd, raw_temp = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+    )
+    temp_path = Path(raw_temp)
+    try:
+        with os.fdopen(fd, "wb") as stream:
+            stream.write(payload)
+            stream.flush()
+            os.fsync(stream.fileno())
+        if existing_mode is not None:
+            os.chmod(temp_path, existing_mode)
+        os.replace(temp_path, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    except BaseException:
+        temp_path.unlink(missing_ok=True)
+        raise
 
 
 def cli_manifest_table(
@@ -246,7 +275,7 @@ def dumps_manifest_toml(data: dict[str, Any]) -> str:
 
 
 def ordered_manifest_sections(data: dict[str, Any]) -> list[str]:
-    preferred = ["project", "scaffold", "upgrade", "cli"]
+    preferred = ["project", "scaffold", "upgrade", "cli", "models"]
     return [item for item in preferred if item in data] + [
         item for item in data if item not in preferred
     ]
