@@ -2,6 +2,6 @@ fixture_version: 1
 category: boundary-led
 editorial_document: editorial-model.yml
 results_document: results-hierarchy.yml
-expected_hash: sha256:e769e03e95780622965bada8ebc70475be53755f28b5ae72958eca285967a0d2
+expected_hash: sha256:05617f40ed088b4d6d4fa5133d0579997f3a0e0e109fc6f6bcb1a969d16e24bd
 expected_diagnostics: [reference.deferred]
 synthetic: true

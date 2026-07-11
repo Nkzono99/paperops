@@ -18,20 +18,20 @@ FIXTURE_ROOT = ROOT / "tests" / "fixtures" / "editorial"
 CATEGORIES = ("mechanism-led", "boundary-led", "negative-result-led")
 CHECKER = ROOT / "template" / "scripts" / "check-paperops-models.py"
 INVALID_CASES = {
-    "duplicate-key.yml": "document.duplicate_key",
-    "duplicate-id.yml": "reference.duplicate",
-    "invalid-stance.yml": "schema.enum",
-    "dangling-story.yml": "reference.dangling",
-    "dangling-result.yml": "reference.dangling",
-    "move-cycle.yml": "reference.cycle",
-    "move-order-gap.yml": "reference.order",
-    "empty-role-reason.yml": "semantic.claim_role",
-    "single-story-no-reason.yml": "semantic.story_count",
-    "absolute-results-path.yml": "reference.path",
-    "traversal-results-path.yml": "reference.path",
-    "unknown-field.yml": "schema.additional",
-    "non-finite.yml": "document.non_finite",
-    "unsupported-schema-keyword.yml": "schema.unsupported_keyword",
+    "duplicate-key.yml": {"document.duplicate_key"},
+    "duplicate-id.yml": {"reference.duplicate"},
+    "invalid-stance.yml": {"schema.enum"},
+    "dangling-story.yml": {"reference.dangling", "semantic.story_selection"},
+    "dangling-result.yml": {"reference.dangling"},
+    "move-cycle.yml": {"reference.cycle", "reference.order"},
+    "move-order-gap.yml": {"reference.order"},
+    "empty-role-reason.yml": {"semantic.claim_role", "semantic.placeholder"},
+    "single-story-no-reason.yml": {"semantic.placeholder", "semantic.story_count"},
+    "absolute-results-path.yml": {"reference.path"},
+    "traversal-results-path.yml": {"reference.path"},
+    "unknown-field.yml": {"schema.additional"},
+    "non-finite.yml": {"document.non_finite"},
+    "unsupported-schema-keyword.yml": {"schema.unsupported_keyword"},
 }
 
 
@@ -62,6 +62,20 @@ def unsupported_schema_override_code(case_path):
     return ""
 
 
+def structural_difference_count(left, right):
+    if isinstance(left, dict) and isinstance(right, dict):
+        shared = left.keys() & right.keys()
+        return len(left.keys() ^ right.keys()) + sum(
+            structural_difference_count(left[key], right[key]) for key in shared
+        )
+    if isinstance(left, list) and isinstance(right, list):
+        return abs(len(left) - len(right)) + sum(
+            structural_difference_count(left_item, right_item)
+            for left_item, right_item in zip(left, right)
+        )
+    return int(left != right)
+
+
 class EditorialFixtureContractTest(unittest.TestCase):
     def test_valid_fixture_manifests_and_documents_satisfy_contract(self) -> None:
         for category in CATEGORIES:
@@ -79,6 +93,14 @@ class EditorialFixtureContractTest(unittest.TestCase):
                 self.assertIs(manifest["synthetic"], True)
 
                 editorial = load_document(case_dir / manifest["editorial_document"])
+                results_reference = editorial["results_hierarchy"]["document"]
+                self.assertEqual(results_reference, manifest["results_document"])
+                self.assertFalse(Path(results_reference).is_absolute())
+                self.assertNotIn("..", Path(results_reference).parts)
+                referenced_results = case_dir / results_reference
+                override_results = case_dir / manifest["results_document"]
+                self.assertTrue(referenced_results.is_file())
+                self.assertEqual(referenced_results.resolve(), override_results.resolve())
                 self.assertGreaterEqual(len(editorial["story_candidates"]), 2)
                 selected = [
                     story
@@ -119,15 +141,60 @@ class EditorialFixtureContractTest(unittest.TestCase):
 
 
 class EditorialInvalidCorpusTest(unittest.TestCase):
+    def test_invalid_documents_are_one_mutation_from_valid_baseline(self) -> None:
+        invalid_dir = FIXTURE_ROOT / "invalid"
+        baseline = load_document(invalid_dir / "baseline.yml")
+        baseline_result = run_python_script(
+            CHECKER,
+            "--root",
+            ROOT / "template",
+            "--model",
+            "editorial",
+            "--document",
+            invalid_dir / "baseline.yml",
+            "--results-document",
+            invalid_dir / "results-hierarchy.yml",
+            "--strict",
+        )
+        self.assertEqual(
+            baseline_result.returncode,
+            0,
+            baseline_result.stdout + baseline_result.stderr,
+        )
+        loader_or_schema_cases = {
+            "duplicate-key.yml",
+            "non-finite.yml",
+            "unsupported-schema-keyword.yml",
+        }
+        for filename in INVALID_CASES.keys() - loader_or_schema_cases:
+            with self.subTest(filename=filename):
+                invalid = load_document(invalid_dir / filename)
+                self.assertEqual(structural_difference_count(baseline, invalid), 1)
+        baseline_text = (invalid_dir / "baseline.yml").read_text(encoding="utf-8")
+        duplicate_key_text = (invalid_dir / "duplicate-key.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(
+            duplicate_key_text.replace("revision: 1\nrevision: 1", "revision: 1"),
+            baseline_text,
+        )
+        non_finite_text = (invalid_dir / "non-finite.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(
+            non_finite_text.replace("revision: .nan", "revision: 1"),
+            baseline_text,
+        )
+
     def test_invalid_corpus_reports_expected_finding_codes(self) -> None:
         invalid_dir = FIXTURE_ROOT / "invalid"
-        results_path = FIXTURE_ROOT / "mechanism-led" / "results-hierarchy.yml"
-        for filename, expected_code in INVALID_CASES.items():
+        results_path = FIXTURE_ROOT / "invalid" / "results-hierarchy.yml"
+        for filename, expected_codes in INVALID_CASES.items():
             with self.subTest(filename=filename):
                 case_path = invalid_dir / filename
                 if filename == "unsupported-schema-keyword.yml":
                     self.assertEqual(
-                        unsupported_schema_override_code(case_path), expected_code
+                        {unsupported_schema_override_code(case_path)}, expected_codes
                     )
                     continue
                 result = run_python_script(
@@ -143,7 +210,12 @@ class EditorialInvalidCorpusTest(unittest.TestCase):
                     "--strict",
                 )
                 self.assertNotEqual(result.returncode, 0, result.stdout + result.stderr)
-                self.assertIn(f"[{expected_code}]", result.stdout + result.stderr)
+                actual_codes = set(
+                    re.findall(
+                        r"\[([a-z_]+\.[a-z_]+)\]", result.stdout + result.stderr
+                    )
+                )
+                self.assertEqual(actual_codes, expected_codes)
 
 
 class EditorialFixturePrivacyTest(unittest.TestCase):

@@ -1,0 +1,10 @@
+schema_version: 1
+items:
+  - id: RHI-synthetic-control-invalid-1
+    reader_question: What is the synthetic-control-invalid result?
+    answer: synthetic-control-invalid result is available
+    quantitative_evidence_and_unit_of_analysis: synthetic-control-invalid contrast per synthetic unit
+    figure_table_role: synthetic-control-invalid comparison panel
+    baseline_comparator_rationale: synthetic-control-invalid comparator defines the reference
+    consequence: synthetic-control-invalid baseline is internally consistent
+    next_item_id: ""

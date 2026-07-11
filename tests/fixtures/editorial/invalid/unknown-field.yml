@@ -1,2 +1,23 @@
 schema_version: 1
-synthetic-control-unknown-field: true
+model_id: EDT-synthetic-control-invalid-baseline
+revision: 1
+reader_transformation: {reader_before: synthetic-control-invalid before, reader_after: synthetic-control-invalid after, why_it_matters: synthetic-control-invalid matters}
+story_candidates:
+  - {id: STY-synthetic-control-invalid-selected, label: synthetic-control-invalid selected, thesis: synthetic-control-invalid selected thesis, result_order: [RHI-synthetic-control-invalid-1], argument_move_ids: [MOV-synthetic-control-invalid-1, MOV-synthetic-control-invalid-2], status: selected, selection_reason: synthetic-control-invalid direct support, rejection_reason: ""}
+  - {id: STY-synthetic-control-invalid-rejected, label: synthetic-control-invalid rejected, thesis: synthetic-control-invalid rejected thesis, result_order: [RHI-synthetic-control-invalid-1], argument_move_ids: [MOV-synthetic-control-invalid-1, MOV-synthetic-control-invalid-2], status: rejected, selection_reason: "", rejection_reason: synthetic-control-invalid alternative is rejected}
+selected_story_id: STY-synthetic-control-invalid-selected
+single_candidate_reason: ""
+claim_roles:
+  foreground: {claim_ids: [], none_reason: synthetic-control-invalid no foreground claim}
+  supporting: {claim_ids: [], none_reason: synthetic-control-invalid no supporting claim}
+  supplement: {claim_ids: [], none_reason: synthetic-control-invalid no supplement claim}
+  cut: {claim_ids: [], none_reason: synthetic-control-invalid no cut claim}
+argument_moves:
+  - {id: MOV-synthetic-control-invalid-1, position: 1, stance: assert, reader_question: synthetic-control-invalid question one, assertion: synthetic-control-invalid assertion one, claim_ids: [], result_item_ids: [RHI-synthetic-control-invalid-1], next_move_id: MOV-synthetic-control-invalid-2}
+  - {id: MOV-synthetic-control-invalid-2, position: 2, stance: hold, reader_question: synthetic-control-invalid question two, assertion: synthetic-control-invalid assertion two, claim_ids: [], result_item_ids: [RHI-synthetic-control-invalid-1], next_move_id: ""}
+visual_obligations:
+  - {id: VIS-synthetic-control-invalid-1, reader_task: synthetic-control-invalid task, takeaway: synthetic-control-invalid takeaway, claim_ids: [], preferred_form: synthetic-control-invalid plot, status: planned, waiver_reason: "", figure_ids: []}
+results_hierarchy: {document: results-hierarchy.yml, item_ids: [RHI-synthetic-control-invalid-1]}
+synthetic_control_unknown_field: true
+extensions: {}
+metadata: {updated_at: synthetic-control-invalid-revision-1}

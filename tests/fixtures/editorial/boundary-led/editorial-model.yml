@@ -64,7 +64,7 @@ visual_obligations:
     waiver_reason: ""
     figure_ids: [FIG-synthetic-control-boundary-1]
 results_hierarchy:
-  document: synthetic-control-boundary/results-hierarchy.yml
+  document: results-hierarchy.yml
   item_ids: [RHI-synthetic-control-boundary-1, RHI-synthetic-control-boundary-2, RHI-synthetic-control-boundary-3]
 extensions: {}
 metadata:
