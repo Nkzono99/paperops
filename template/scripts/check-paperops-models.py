@@ -12,6 +12,7 @@ from paperops_models import (
     ModelDocument,
     build_object_catalog,
     load_model_document,
+    validate_manuscript_semantics,
     validate_research_semantics,
 )
 from paperops_schema import (
@@ -259,6 +260,13 @@ def main() -> int:
         and "results_hierarchy" not in names_to_load
     ):
         names_to_load.append("results_hierarchy")
+    if (
+        "manuscript" in selected_names
+        and phase in ("all", "semantics")
+        and "research" in registry.entries
+        and "research" not in names_to_load
+    ):
+        names_to_load.append("research")
 
     loaded: dict[str, ModelDocument] = {}
     if "editorial" in names_to_load:
@@ -363,6 +371,14 @@ def main() -> int:
             and not loaded["results_hierarchy"].schema_clean
         ):
             findings.extend(loaded["results_hierarchy"].schema_findings)
+        if (
+            phase == "all"
+            and "manuscript" in selected_names
+            and "research" not in selected_names
+            and "research" in loaded
+            and not loaded["research"].schema_clean
+        ):
+            findings.extend(loaded["research"].findings)
     elif phase == "hash":
         for name in selected_names:
             model = loaded.get(name)
@@ -377,6 +393,8 @@ def main() -> int:
         prerequisites = list(selected_names)
         if phase == "references" and "editorial" in selected_names:
             prerequisites = list(dict.fromkeys([*prerequisites, "results_hierarchy"]))
+        if phase == "semantics" and "manuscript" in selected_names:
+            prerequisites = list(dict.fromkeys([*prerequisites, "research"]))
         binding_blocks_results = any(
             finding.severity == "error"
             and finding.code in {"reference.document", "reference.path"}
@@ -434,6 +452,16 @@ def main() -> int:
         and research.schema_clean
     ):
         findings.extend(validate_research_semantics(catalog))
+    manuscript = loaded.get("manuscript")
+    if (
+        phase in ("all", "semantics")
+        and "manuscript" in selected_names
+        and manuscript is not None
+        and manuscript.schema_clean
+        and research is not None
+        and research.schema_clean
+    ):
+        findings.extend(validate_manuscript_semantics(catalog))
 
     computed_hashes: dict[str, str] = {}
     if phase in ("all", "hash"):

@@ -185,14 +185,8 @@ def validate_research_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                     f"claim `{claim.object_id}` is not approved",
                 )
             )
-        approvals = claim.document.get("approvals", [])
-        scientific_history = [
-            approval
-            for approval in approvals
-            if isinstance(approval, dict)
-            and approval.get("kind") == "scientific_scope"
-        ] if isinstance(approvals, list) else []
-        if not scientific_history:
+        approval_state = _scientific_approval_state(claim)
+        if approval_state == "missing":
             findings.append(
                 _research_finding(
                     "approval.missing",
@@ -201,31 +195,243 @@ def validate_research_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                     "current scientific_scope approval is required",
                 )
             )
-        else:
-            current = [
-                approval
-                for approval in scientific_history
-                if approval.get("object_revision") == claim.revision
-                and approval.get("object_hash") == claim.object_hash
-            ]
-            if not current:
+        elif approval_state == "stale":
+            findings.append(
+                _research_finding(
+                    "approval.stale",
+                    claim,
+                    "/approvals",
+                    "scientific_scope approval does not match current revision/hash",
+                )
+            )
+        elif approval_state == "rejected":
+            findings.append(
+                _research_finding(
+                    "approval.missing",
+                    claim,
+                    "/approvals",
+                    "latest current scientific_scope decision is not approved",
+                )
+            )
+    return findings
+
+
+def _manuscript_finding(
+    code: str,
+    obj: CatalogObject,
+    suffix: str,
+    message: str,
+) -> ModelFinding:
+    return ModelFinding(code, f"{obj.pointer}{suffix}", message)
+
+
+def _scientific_approval_state(claim: CatalogObject) -> str:
+    approvals = claim.document.get("approvals", [])
+    history = [
+        approval
+        for approval in approvals
+        if isinstance(approval, dict)
+        and approval.get("kind") == "scientific_scope"
+    ] if isinstance(approvals, list) else []
+    current = [
+        approval
+        for approval in history
+        if approval.get("object_revision") == claim.revision
+        and approval.get("object_hash") == claim.object_hash
+    ]
+    if not history:
+        return "missing"
+    if not current:
+        return "stale"
+    if current[-1].get("decision") != "approved":
+        return "rejected"
+    return "approved"
+
+
+def validate_manuscript_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
+    """Validate Manuscript structure and its Research write-readiness boundary."""
+    findings: list[ModelFinding] = []
+    manuscript = {
+        object_id: obj
+        for object_id, obj in catalog.objects.items()
+        if obj.model_name == "manuscript"
+    }
+    sections = {
+        object_id: obj
+        for object_id, obj in manuscript.items()
+        if obj.object_type == "section"
+    }
+    blocks = {
+        object_id: obj
+        for object_id, obj in manuscript.items()
+        if obj.object_type == "block"
+    }
+    research = {
+        object_id: obj
+        for object_id, obj in catalog.objects.items()
+        if obj.model_name == "research"
+    }
+
+    for obj in manuscript.values():
+        extensions = obj.document.get("extensions")
+        if isinstance(extensions, dict):
+            for finding in validate_extension_keys(extensions):
                 findings.append(
-                    _research_finding(
-                        "approval.stale",
-                        claim,
-                        "/approvals",
-                        "scientific_scope approval does not match current revision/hash",
+                    _manuscript_finding(
+                        finding.code,
+                        obj,
+                        f"/extensions{finding.pointer}",
+                        finding.message,
                     )
                 )
-            elif current[-1].get("decision") != "approved":
+        dependency_hash = obj.document.get("dependency_hash")
+        verified_hash = obj.document.get("last_verified_dependency_hash")
+        if dependency_hash and verified_hash and dependency_hash != verified_hash:
+            findings.append(
+                _manuscript_finding(
+                    "dependency.stale",
+                    obj,
+                    "/last_verified_dependency_hash",
+                    "verified dependency hash does not match the current dependency hash",
+                )
+            )
+
+    for section in sections.values():
+        ordered_ids = section.document.get("ordered_block_ids", [])
+        if not isinstance(ordered_ids, list):
+            continue
+        if len(set(ordered_ids)) != len(ordered_ids):
+            findings.append(
+                _manuscript_finding(
+                    "semantic.block_order",
+                    section,
+                    "/ordered_block_ids",
+                    "ordered block IDs must be unique",
+                )
+            )
+        for expected_position, block_id in enumerate(ordered_ids, start=1):
+            block = blocks.get(block_id) if isinstance(block_id, str) else None
+            if block is None or block.document.get("section_id") != section.object_id:
                 findings.append(
-                    _research_finding(
-                        "approval.missing",
-                        claim,
-                        "/approvals",
-                        "latest current scientific_scope decision is not approved",
+                    _manuscript_finding(
+                        "semantic.section_membership",
+                        section,
+                        f"/ordered_block_ids/{expected_position - 1}",
+                        f"block `{block_id}` is not a member of section `{section.object_id}`",
                     )
                 )
+                continue
+            if block.document.get("position") != expected_position:
+                findings.append(
+                    _manuscript_finding(
+                        "semantic.block_order",
+                        block,
+                        "/position",
+                        f"block position must be {expected_position} in its section",
+                    )
+                )
+
+    for block in blocks.values():
+        section_id = block.document.get("section_id")
+        section = sections.get(section_id) if isinstance(section_id, str) else None
+        ordered_ids = section.document.get("ordered_block_ids", []) if section else []
+        if section is None or block.object_id not in ordered_ids:
+            findings.append(
+                _manuscript_finding(
+                    "semantic.section_membership",
+                    block,
+                    "/section_id",
+                    f"block `{block.object_id}` is not listed by its section `{section_id}`",
+                )
+            )
+
+        compiled_from = block.document.get("compiled_from")
+        requires_compilation = block.document.get("status") in {
+            "compiled", "drafted", "verified",
+        }
+        if compiled_from is None and not requires_compilation:
+            continue
+        complete_compilation = (
+            isinstance(compiled_from, dict)
+            and isinstance(compiled_from.get("compiler_version"), str)
+            and bool(compiled_from.get("compiler_version"))
+            and isinstance(compiled_from.get("schema_versions"), dict)
+            and bool(compiled_from.get("schema_versions"))
+            and isinstance(compiled_from.get("input_ids"), list)
+            and bool(compiled_from.get("input_ids"))
+            and isinstance(compiled_from.get("input_hashes"), list)
+            and len(compiled_from.get("input_ids"))
+            == len(compiled_from.get("input_hashes"))
+        )
+        if not complete_compilation:
+            findings.append(
+                _manuscript_finding(
+                    "semantic.compiled_from",
+                    block,
+                    "/compiled_from",
+                    "compiled blocks require complete compiler, schema, input ID, and input hash provenance",
+                )
+            )
+
+        for index, claim_id in enumerate(block.document.get("claim_refs", [])):
+            claim = research.get(claim_id) if isinstance(claim_id, str) else None
+            if claim is None or claim.object_type != "claim":
+                findings.append(
+                    _manuscript_finding(
+                        "reference.dangling",
+                        block,
+                        f"/claim_refs/{index}",
+                        f"Research claim `{claim_id}` is not present",
+                    )
+                )
+                continue
+            approval_state = _scientific_approval_state(claim)
+            if approval_state != "approved":
+                code = "approval.stale" if approval_state == "stale" else "approval.missing"
+                findings.append(
+                    _manuscript_finding(
+                        code,
+                        block,
+                        f"/claim_refs/{index}",
+                        f"claim `{claim_id}` lacks a current approved scientific_scope decision",
+                    )
+                )
+            gate_id = claim.document.get("gate_id")
+            gate = research.get(gate_id) if isinstance(gate_id, str) else None
+            if (
+                claim.document.get("status") != "approved"
+                or claim.document.get("gate_status") != "ready_to_write"
+                or gate is None
+                or gate.object_type != "scientific_gate"
+                or gate.document.get("claim_id") != claim.object_id
+                or gate.document.get("gate_decision") != "ready_to_write"
+            ):
+                findings.append(
+                    _manuscript_finding(
+                        "semantic.claim_not_writable",
+                        block,
+                        f"/claim_refs/{index}",
+                        f"claim `{claim_id}` has not passed its ready_to_write gate",
+                    )
+                )
+
+        reference_fields = {
+            "result_refs": "result",
+            "source_refs": "source",
+            "figure_refs": "figure",
+        }
+        for field, expected_type in reference_fields.items():
+            for index, object_id in enumerate(block.document.get(field, [])):
+                target = research.get(object_id) if isinstance(object_id, str) else None
+                if target is None or target.object_type != expected_type:
+                    findings.append(
+                        _manuscript_finding(
+                            "reference.dangling",
+                            block,
+                            f"/{field}/{index}",
+                            f"Research {expected_type} `{object_id}` is not present",
+                        )
+                    )
     return findings
 
 

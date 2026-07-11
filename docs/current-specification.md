@@ -26,7 +26,7 @@
 - 人間が普段触る入口は `story/`、`manuscript/`、`submission/`、review comments である。AI / harness が使う internal state は `_paperops/` に置く。
 - `_paperops/defaults/schemas/*` は managed default、`_paperops/model/editorial/editorial-model.yml` と `results-hierarchy.yml` は project-owned Editorial state である。既存下流は M0-0004 の strict opt-in と人間承認まで legacy controlled view を維持する。
 - P1-A の合成 fixture は mechanism-led、boundary-led、negative-result-led の三 category で、期待値に canonical semantic-v1 hash を持つ。
-- Research / Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash は P1-B の範囲であり未提供である。
+- Research / Manuscript Model の schema、空 starter、個別 semantics は P1-B Task 3 / 4 で提供済みである。Issue / Publication Model、全 model cross-reference、dependency target 解決は後続 P1-B の範囲であり未提供である。
 - 旧 top-level `notes/`、`refs/`、`claims/`、`evidence/`、`contracts/`、`workflow/` などは互換読み取り対象に留める。
 - `paper_ir` と section plan は生成一時物であり、必要な場合だけ `.paperops/cache/` に置く。
 - `manuscript/` は living manuscript / authoring source であり、投稿後や査読後も編集してよい。

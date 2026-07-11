@@ -260,7 +260,8 @@ class ResearchModelTest(unittest.TestCase):
     def test_registry_atomically_adds_research_and_empty_starter_passes(self) -> None:
         registry = load_registry(ROOT / "template")
         self.assertEqual(
-            set(registry.entries), {"editorial", "results_hierarchy", "research"}
+            set(registry.entries),
+            {"editorial", "results_hierarchy", "research", "manuscript"},
         )
         entry = registry.entries["research"]
         self.assertEqual(entry.document_kind, "index")

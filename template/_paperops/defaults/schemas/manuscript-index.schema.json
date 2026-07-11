@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://paperops.local/schemas/manuscript-index.schema.json", "title": "PaperOps Manuscript index", "type": "object",
+  "required": ["model_name", "schema_version", "index_revision", "records", "extensions", "metadata"],
+  "properties": {
+    "model_name": {"const": "manuscript"}, "schema_version": {"const": 1}, "index_revision": {"type": "integer"},
+    "records": {"type": "array", "items": {"$ref": "#/$defs/row"}}, "extensions": {"type": "object", "additionalProperties": true},
+    "metadata": {"type": "object", "required": ["updated_at"], "properties": {"updated_at": {"type": "string"}}, "additionalProperties": false}
+  }, "additionalProperties": false,
+  "$defs": {"row": {"type": "object", "required": ["id", "record_type", "document", "expected_revision", "expected_hash"], "properties": {"id": {"type": "string", "pattern": "^(SEC|BLK)-[0-9]{4,}$"}, "record_type": {"enum": ["section", "block"]}, "document": {"type": "string", "minLength": 1}, "expected_revision": {"type": "integer"}, "expected_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}}, "additionalProperties": false}}
+}

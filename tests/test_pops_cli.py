@@ -51,26 +51,29 @@ class PopsCliTest(unittest.TestCase):
                 (target / "_paperops" / "model" / "editorial" / "editorial-model.yml").is_file()
             )
 
-    def test_init_contains_empty_research_index_but_update_does_not_manage_it(self) -> None:
+    def test_init_contains_empty_model_indexes_but_update_does_not_manage_them(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
             code, _out, err = run_cli(["init", str(target)])
             self.assertEqual(code, 0, err)
-            index = target / "_paperops/model/research/index.yml"
-            self.assertIn("records: []", index.read_text(encoding="utf-8"))
+            for model_name in ("research", "manuscript"):
+                with self.subTest(model=model_name):
+                    relative = f"_paperops/model/{model_name}/index.yml"
+                    index = target / relative
+                    self.assertIn("records: []", index.read_text(encoding="utf-8"))
 
-            project_owned = index.read_text(encoding="utf-8") + "\n# project-owned\n"
-            index.write_text(project_owned, encoding="utf-8")
-            code, out, err = run_cli(["update-paperops", "--apply", str(target)])
-            self.assertEqual(code, 0, err)
-            self.assertEqual(index.read_text(encoding="utf-8"), project_owned)
-            self.assertNotIn("_paperops/model/research/index.yml", out)
+                    project_owned = index.read_text(encoding="utf-8") + "\n# project-owned\n"
+                    index.write_text(project_owned, encoding="utf-8")
+                    code, out, err = run_cli(["update-paperops", "--apply", str(target)])
+                    self.assertEqual(code, 0, err)
+                    self.assertEqual(index.read_text(encoding="utf-8"), project_owned)
+                    self.assertNotIn(relative, out)
 
-            index.unlink()
-            code, out, err = run_cli(["update-paperops", "--apply", str(target)])
-            self.assertEqual(code, 0, err)
-            self.assertFalse(index.exists())
-            self.assertNotIn("_paperops/model/research/index.yml", out)
+                    index.unlink()
+                    code, out, err = run_cli(["update-paperops", "--apply", str(target)])
+                    self.assertEqual(code, 0, err)
+                    self.assertFalse(index.exists())
+                    self.assertNotIn(relative, out)
 
     def test_init_creates_project_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

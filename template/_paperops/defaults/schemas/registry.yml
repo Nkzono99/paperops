@@ -64,3 +64,28 @@ models:
           - /approvals
           - /metadata/updated_at
     dependency_profile: dependency-v1
+  manuscript:
+    document_kind: index
+    schema: manuscript-index.schema.json
+    schema_version: 1
+    authority: project-owned
+    default_path: _paperops/model/manuscript/index.yml
+    hash_profile: semantic-v1
+    hash_excluded_paths:
+      - /metadata/updated_at
+    record_sets:
+      section:
+        schema: manuscript-section.schema.json
+        path_prefix: _paperops/model/manuscript/sections/
+        id_pattern: ^SEC-[0-9]{4,}$
+        hash_excluded_paths:
+          - /approvals
+          - /metadata/updated_at
+      block:
+        schema: manuscript-block.schema.json
+        path_prefix: _paperops/model/manuscript/blocks/
+        id_pattern: ^BLK-[0-9]{4,}$
+        hash_excluded_paths:
+          - /approvals
+          - /metadata/updated_at
+    dependency_profile: dependency-v1

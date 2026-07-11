@@ -19,9 +19,9 @@
 
 ## PaperOps 2 P1-A schema kernel
 
-P1-A は Editorial Model だけを schema kernel の縦切りとして実装する。`_paperops/defaults/schemas/registry.yml`、JSON Schema、validator / checker は paperops-managed であり、`_paperops/model/editorial/editorial-model.yml` と Results hierarchy は project-owned である。検証は schema、references、semantics、canonical semantic-v1 hash の phase 順を固定し、既存 Results checker と legacy controlled view を削除しない。
+P1-A は Editorial Model を schema kernel の縦切りとして実装し、P1-B Task 3 / 4 は同じ kernel に Research / Manuscript Model を追加する。`_paperops/defaults/schemas/registry.yml`、JSON Schema、validator / checker は paperops-managed であり、`_paperops/model/` の model state は project-owned である。検証は schema、references、semantics、canonical semantic-v1 hash の phase 順を固定し、既存 Results checker、TeX、legacy controlled view を削除しない。
 
-Research / Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash は P1-B の範囲であり未提供である。したがって P1-A の完了を shadow migration、Writer、workflow cutover、v2-authoritative の完了として扱わない。
+Research / Manuscript Model の schema、空 starter、個別 semantics は提供済みである。Issue / Publication Model、全 model cross-reference、dependency target 解決は後続 P1-B の範囲であり未提供である。したがって Task 4 の完了を shadow migration、Writer、workflow cutover、v2-authoritative の完了として扱わない。
 
 ## 下流論文層
 
@@ -41,7 +41,7 @@ Research / Manuscript / Issue / Publication Model、全 model cross-reference、
 - `_paperops/defaults/contracts/`: paperops-managed の Storyline と Introduction / Methods / Results / Discussion / Conclusion / Figure story 標準契約
 - `_paperops/defaults/schemas/`: paperops-managed の typed state schema default
 - `_paperops/defaults/workflow/`: paperops-managed の状態機械、focus policy、subagent roster
-- `_paperops/model/editorial/`: 論文ごとの project-owned typed Editorial state
+- `_paperops/model/`: 論文ごとの project-owned typed Editorial / Research / Manuscript state
 - `_paperops/contracts/`: 論文固有の contract overlay
 - `_paperops/workflow/`: 現在状態、review round summary、人間判断、任意の workflow overlay
 - `_paperops/refs/`: 文献サマリー、関連研究調査、外部 source、外部 project link、外部 bundle import state
@@ -67,6 +67,8 @@ Research / Manuscript / Issue / Publication Model、全 model cross-reference、
 | `_paperops/notes/views/` の pure overview view | 正本カードを俯瞰する | 派生 view | 該当 card 更新後に手動または半自動で更新 |
 | `_paperops/notes/views/` の controlled authoring view | 本文での呼び方、条件名、概念語、読者向け語彙、story spine を統制する | 編集可能な統制 view | `/design-paper-storyline`, `/public-terminology-pass`, `/contextualize-conditions`, `/polish-ai-draft` |
 | `_paperops/model/editorial/results-hierarchy.yml` | Results の reader question、answer、evidence、figure、baseline、consequence と item chain を保持する | project-owned typed Editorial state | `design-paper-storyline` / `compile-results-section` |
+| `_paperops/model/research/` | claim / result / figure / source / scientific gate の typed record と index を保持する | project-owned typed Research state | 人間承認済み migration / 後続 writer |
+| `_paperops/model/manuscript/` | prose を持たず section / block 構造、参照、compile provenance を保持する | project-owned typed Manuscript state | 人間承認済み migration / 後続 compiler |
 | `paper_ir` | card / view から Writer に渡す材料を section ごとにまとめる | 生成一時物 | `compile-results-section` / `compile-discussion-section` / `compile-methods-section` |
 | `_paperops/defaults/contracts/` | story spine、section ごとの読者質問、入力、出力、禁止構造と figure story の標準契約を定める | managed default | `design-paper-storyline` / section compiler / `plan-figure-story` / audit-section |
 | `_paperops/defaults/schemas/` | typed state の構造を定義する | managed default | `pops update-paperops` |

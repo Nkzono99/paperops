@@ -35,11 +35,12 @@ MODEL_NAMES = {
 
 
 class PaperOpsModelRegistryTest(unittest.TestCase):
-    def test_checked_in_registry_adds_research_without_changing_core_aggregates(self) -> None:
+    def test_checked_in_registry_adds_index_models_without_changing_core_aggregates(self) -> None:
         registry = load_registry(TEMPLATE)
 
         self.assertEqual(
-            set(registry.entries), {"editorial", "results_hierarchy", "research"}
+            set(registry.entries),
+            {"editorial", "results_hierarchy", "research", "manuscript"},
         )
         for name in ("editorial", "results_hierarchy"):
             entry = registry.entries[name]
@@ -55,6 +56,7 @@ class PaperOpsModelRegistryTest(unittest.TestCase):
             shutil.copytree(SCHEMA_DIR, destination)
             document = self.read_registry(root)
             document["models"].pop("research")
+            document["models"].pop("manuscript")
             for entry in document["models"].values():
                 entry.pop("document_kind")
             self.write_registry(root, document)

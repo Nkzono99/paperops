@@ -56,7 +56,7 @@ uvx --from paper-harness-cli pops doctor
 
 新規 scaffold では typed Results hierarchy を使う。既存下流 project は M0-0003 採用まで legacy Markdown fallback を維持でき、移行時は managed schema default を更新したうえで project-owned typed state を opt-in で作成する。
 
-PaperOps 2 P1-A は Editorial Model の縦切りだけを提供する。paperops-managed の `registry.yml` / JSON Schema / checker と、project-owned の `editorial-model.yml` / Results hierarchy を分離し、schema → references → semantics → canonical semantic-v1 hash の順で検証する。評価 corpus は mechanism-led、boundary-led、negative-result-led の三つの合成 fixture である。P1-B の Research / Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash は未提供である。
+PaperOps 2 は P1-A の Editorial Model 縦切りに加え、P1-B Task 3 / 4 の Research / Manuscript Model schema、空 starter index、意味検証を提供する。paperops-managed の `registry.yml` / JSON Schema / checker と、project-owned の model state を分離し、schema → references → semantics → canonical semantic-v1 hash の順で検証する。評価 corpus は mechanism-led、boundary-led、negative-result-led の三つの合成 fixture である。Issue / Publication Model、全 model cross-reference、dependency target 解決は未提供である。
 
 ## よく使うコマンド
 

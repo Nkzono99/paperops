@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://paperops.local/schemas/manuscript-block.schema.json", "title": "PaperOps Manuscript block", "type": "object",
+  "required": ["schema_version", "record_type", "id", "revision", "status", "dependencies", "approvals", "extensions", "metadata", "section_id", "position", "block_kind", "reader_task", "operation", "ja_tex_block_id", "en_tex_block_id", "claim_refs", "result_refs", "source_refs", "figure_refs", "citation_keys", "compiled_from", "dependency_hash", "last_verified_dependency_hash", "allowed_operations", "forbidden_scope_expansion"],
+  "properties": {
+    "schema_version": {"const": 1}, "record_type": {"const": "block"}, "id": {"type": "string", "pattern": "^BLK-[0-9]{4,}$"}, "revision": {"type": "integer"},
+    "status": {"enum": ["unplanned", "planned", "compiled", "drafted", "verified", "stale", "removed"]},
+    "dependencies": {"type": "array", "items": {"$ref": "#/$defs/dependency"}}, "approvals": {"type": "array", "items": {"$ref": "#/$defs/approval"}}, "extensions": {"type": "object", "additionalProperties": true}, "metadata": {"$ref": "#/$defs/metadata"},
+    "section_id": {"type": "string", "pattern": "^SEC-[0-9]{4,}$"}, "position": {"type": "integer"}, "block_kind": {"enum": ["claim", "evidence", "method", "transition", "synthesis", "limitation", "conclusion"]}, "reader_task": {"type": "string", "minLength": 1},
+    "operation": {"enum": ["keep", "compress", "move", "merge", "split", "cut", "rewrite"]}, "ja_tex_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"}, "en_tex_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"},
+    "claim_refs": {"$ref": "#/$defs/strings"}, "result_refs": {"$ref": "#/$defs/strings"}, "source_refs": {"$ref": "#/$defs/strings"}, "figure_refs": {"$ref": "#/$defs/strings"}, "citation_keys": {"$ref": "#/$defs/strings"},
+    "compiled_from": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/compiledFrom"}]}, "dependency_hash": {"$ref": "#/$defs/hashOrEmpty"}, "last_verified_dependency_hash": {"$ref": "#/$defs/hashOrEmpty"},
+    "allowed_operations": {"type": "array", "items": {"enum": ["keep", "compress", "move", "merge", "split", "cut", "rewrite"]}}, "forbidden_scope_expansion": {"$ref": "#/$defs/strings"}
+  }, "additionalProperties": false,
+  "$defs": {
+    "strings": {"type": "array", "items": {"type": "string", "minLength": 1}}, "hashOrEmpty": {"anyOf": [{"const": ""}, {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}]},
+    "metadata": {"type": "object", "required": ["updated_at"], "properties": {"updated_at": {"type": "string"}}, "additionalProperties": false},
+    "dependency": {"type": "object", "required": ["target_id", "relation", "expected_hash"], "properties": {"target_id": {"type": "string"}, "relation": {"type": "string"}, "expected_revision": {"type": "integer"}, "expected_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}}, "additionalProperties": false},
+    "approval": {"type": "object", "required": ["approval_id", "kind", "decision", "object_revision", "object_hash", "actor", "note"], "properties": {"approval_id": {"type": "string", "pattern": "^APR-[0-9]{4,}$"}, "kind": {"enum": ["scientific_scope", "editorial_choice", "submission", "authorship", "license", "external_share", "reviewer_response", "scope_expansion"]}, "decision": {"enum": ["approved", "rejected", "superseded"]}, "object_revision": {"type": "integer"}, "object_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "actor": {"const": "human"}, "note": {"type": "string"}}, "additionalProperties": false},
+    "compiledFrom": {"type": "object", "required": ["compiler_version", "schema_versions", "input_ids", "input_hashes"], "properties": {"compiler_version": {"type": "string", "minLength": 1}, "schema_versions": {"type": "object", "additionalProperties": {"type": "integer"}}, "input_ids": {"$ref": "#/$defs/strings"}, "input_hashes": {"type": "array", "items": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}}}, "additionalProperties": false}
+  }
+}
