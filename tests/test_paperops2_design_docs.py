@@ -104,11 +104,9 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             "`_paperops/defaults/contracts/` | paperops-managed default",
             "`_paperops/contracts/` | project-owned contract overlay",
             "`_paperops/model/editorial/` | project-owned typed state",
-            "`_paperops/notes/views/` | project-owned card/view state",
             "`.paperops/cache/` | generated cache",
             "repo 外 | local/confidential state",
             "`manuscript/` | living human-edited manuscript source",
-            "`submission/` | immutable submission snapshot",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, current_layout)
@@ -119,6 +117,44 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
                 self.assertIn(required, future_layout)
         self.assertIn("非規範的", future_layout)
         self.assertIn("後続の migration ADR", future_layout)
+
+    def test_current_layout_splits_mixed_view_and_submission_authorities(self) -> None:
+        text = self.read("docs/adr/0001-authority-ownership-layout.md")
+        rows = {
+            cells[0].removeprefix("`").removesuffix("`"): cells
+            for cells in self.disposition_rows(text, "## Current physical layout")
+            if len(cells) == 3
+        }
+        expected = {
+            "_paperops/notes/views/ (pure overview views)": "generated read-only projection",
+            "_paperops/notes/views/ (controlled authoring views)": "project-owned editable decision",
+            "submission/ (mutable candidate)": "derived replaceable artifact",
+            "submission/ (submitted round snapshots)": "immutable publication evidence",
+        }
+        for asset, authority in expected.items():
+            with self.subTest(asset=asset):
+                self.assertIn(asset, rows)
+                if asset in rows:
+                    self.assertEqual(rows[asset][1], authority)
+
+        if not expected.keys() <= rows.keys():
+            return
+
+        view_notes = " ".join(
+            rows[asset][2]
+            for asset in expected
+            if asset.startswith("_paperops/notes/views/")
+        )
+        self.assertIn("同一 container", view_notes)
+        self.assertIn("file type ごとに authority が異なる", view_notes)
+        self.assertIn(
+            "living `manuscript/` とは別",
+            rows["submission/ (mutable candidate)"][2],
+        )
+        self.assertIn(
+            "candidate と authority を混同しない",
+            rows["submission/ (submitted round snapshots)"][2],
+        )
 
     def test_writer_and_macro_state_have_single_authority_boundaries(self) -> None:
         expected = {
@@ -178,18 +214,24 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
         downstream_families = {
             "template/_paperops/defaults/schemas/",
             "template/_paperops/defaults/contracts/",
+            "template/_paperops/defaults/workflow/",
+            "template/_paperops/contracts/",
             "template/_paperops/model/",
             "template/_paperops/claims/",
             "template/_paperops/evidence/",
             "template/_paperops/evidence/figures/",
             "template/_paperops/evidence/results/",
             "template/_paperops/evidence/sources/",
+            "template/_paperops/refs/",
             "template/_paperops/notes/views/ (pure overview views)",
             "template/_paperops/notes/views/ (controlled authoring views)",
             "template/_paperops/review/",
             "template/_paperops/requests/",
             "template/_paperops/workflow/",
+            "template/story/",
             "template/manuscript/",
+            "template/submission/ (mutable candidate)",
+            "template/submission/ (submitted round snapshots)",
             "template/.agents/skills/",
             "template/.claude/skills/",
             "template/scripts/check-*.py",
@@ -283,6 +325,71 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
         self.assertIn("P1", controlled[5])
         self.assertIn("compatibility readers", controlled[6])
         self.assertIn("strict validation", controlled[7])
+
+        adr_rows = {
+            cells[0].removeprefix("`").removesuffix("`"): cells
+            for cells in self.disposition_rows(
+                self.read("docs/adr/0001-authority-ownership-layout.md"),
+                "## Current physical layout",
+            )
+            if len(cells) == 3
+        }
+        for asset in [
+            "_paperops/notes/views/ (pure overview views)",
+            "_paperops/notes/views/ (controlled authoring views)",
+        ]:
+            with self.subTest(adr_asset=asset):
+                self.assertIn(asset, adr_rows)
+        if not {
+            "_paperops/notes/views/ (pure overview views)",
+            "_paperops/notes/views/ (controlled authoring views)",
+        } <= adr_rows.keys():
+            return
+        self.assertEqual(
+            overview[2],
+            adr_rows["_paperops/notes/views/ (pure overview views)"][1],
+        )
+        self.assertEqual(
+            controlled[2],
+            adr_rows["_paperops/notes/views/ (controlled authoring views)"][1],
+        )
+
+    def test_disposition_has_all_current_downstream_authority_families(self) -> None:
+        text = self.read("docs/paperops2-disposition.md")
+        rows = {
+            cells[0].removeprefix("`").removesuffix("`"): cells
+            for cells in self.disposition_rows(text, "## Downstream template layer")
+            if len(cells) == 8
+        }
+        expected_authorities = {
+            "template/_paperops/defaults/workflow/": "paperops-managed workflow default",
+            "template/_paperops/contracts/": "project-owned contract overlay",
+            "template/_paperops/refs/": "project-owned research/provenance state",
+            "template/story/": "project-owned human story concept",
+            "template/submission/ (mutable candidate)": "derived replaceable artifact",
+            "template/submission/ (submitted round snapshots)": "immutable publication evidence",
+        }
+        for asset, authority in expected_authorities.items():
+            with self.subTest(asset=asset):
+                self.assertIn(asset, rows)
+                if asset in rows:
+                    self.assertEqual(len(rows[asset]), 8)
+                    self.assertEqual(rows[asset][2], authority)
+                    self.assertTrue(all(rows[asset]))
+
+        if not expected_authorities.keys() <= rows.keys():
+            return
+
+        self.assertIn("raw/private/local", rows["template/_paperops/refs/"][6])
+        self.assertIn("追跡外", rows["template/_paperops/refs/"][6])
+        self.assertIn(
+            "living manuscript と分離",
+            rows["template/submission/ (mutable candidate)"][6],
+        )
+        self.assertIn(
+            "candidate と authority を混同しない",
+            rows["template/submission/ (submitted round snapshots)"][6],
+        )
 
     def test_checker_inventory_covers_every_deterministic_make_gate(self) -> None:
         text = self.read("docs/paperops2-disposition.md")

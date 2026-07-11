@@ -42,11 +42,13 @@ human-edited manuscript source について、Writer は patch を生成する�
 | `_paperops/contracts/` | project-owned contract overlay | 標準 contract から外れる論文固有差分。managed contract ではない |
 | `_paperops/model/editorial/` | project-owned typed state | 現行の typed Results hierarchy を含む |
 | `_paperops/claims/`、`_paperops/evidence/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/workflow/` | project-owned card/model/workflow state | 論文固有の card、review、request、workflow fact |
-| `_paperops/notes/views/` | project-owned card/view state | pure overview と controlled authoring view を含む。個別 disposition は matrix で分ける |
+| `_paperops/notes/views/ (pure overview views)` | generated read-only projection | 同一 container (`_paperops/notes/views/`) でも file type ごとに authority が異なる。pure overview は card / typed state から再生成でき、正本にしない |
+| `_paperops/notes/views/ (controlled authoring views)` | project-owned editable decision | 同一 container (`_paperops/notes/views/`) でも file type ごとに authority が異なる。story spine、概念語、条件名など人間が編集する判断を保持する |
 | `.paperops/cache/` | generated cache | compile packet、judge output、materialized view。未追跡で正本にしない |
 | repo 外 | local/confidential state | credential、絶対 path、raw reviewer text、未公開 raw data を追跡しない |
 | `manuscript/` | living human-edited manuscript source | 投稿後や査読後も更新できる authoring source |
-| `submission/` | immutable submission snapshot | submission candidate は可変な派生成果物、submitted round snapshot は作成後に変更しない証跡として、両方を living source から分離する |
+| `submission/ (mutable candidate)` | derived replaceable artifact | living `manuscript/` とは別の投稿先向け派生物で、再buildまたは差し替え可能。submitted round snapshot の authority にはしない |
+| `submission/ (submitted round snapshots)` | immutable publication evidence | 作成後に変更しない提出証跡。mutable candidate と authority を混同しない。living `manuscript/` の継続編集からも分離する |
 
 ## Future layout candidates
 
