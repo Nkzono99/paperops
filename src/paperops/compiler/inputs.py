@@ -8,7 +8,6 @@ import json
 import math
 import re
 import shutil
-import stat
 import tempfile
 from dataclasses import dataclass, field
 from collections.abc import Mapping
@@ -32,6 +31,7 @@ from paperops.model_validation import (
     run_model_hash,
 )
 
+from .safe_fs import CapturedFile, SafeCaptureError, SafeProjectReader
 from .types import AuthoritySnapshot, CompileFinding, CompileRequest
 
 
@@ -120,6 +120,7 @@ class LoadedCompileInputs:
     applicable: bool
     authority: tuple[AuthoritySnapshot, ...]
     readiness: ValidationResult
+    snapshot_hash: str
     documents: tuple["LoadedModelDocument", ...] = ()
     objects: tuple["LoadedCatalogObject", ...] = ()
 
@@ -130,6 +131,7 @@ class LoadedModelDocument:
     identity: str
     document_type: str
     semantic_hash: str
+    content_hash: str
     document: Mapping[str, object] = field(repr=False)
 
 
@@ -141,6 +143,7 @@ class LoadedCatalogObject:
     identity: str
     revision: int | None
     semantic_hash: str
+    content_hash: str
     document: Mapping[str, object] = field(repr=False)
 
 
@@ -187,26 +190,26 @@ def _registered_identity(value: str) -> Path:
     return Path(*posix.parts)
 
 
-def _read_registered_bytes(root: Path, identity: str) -> bytes:
+def _read_registered_bytes(
+    root: Path,
+    identity: str,
+    *,
+    _before_final_open: Any | None = None,
+) -> bytes:
     relative = _registered_identity(identity)
-    project = root.expanduser().absolute()
-    current = project
+
+    def capture_hook(stage: str, opened_identity: str) -> None:
+        if (
+            stage == "before_final_open"
+            and opened_identity == relative.as_posix()
+            and _before_final_open is not None
+        ):
+            _before_final_open()
+
     try:
-        root_metadata = project.lstat()
-        if stat.S_ISLNK(root_metadata.st_mode) or not stat.S_ISDIR(root_metadata.st_mode):
-            raise OSError("unsafe project root")
-        for index, part in enumerate(relative.parts):
-            current = current / part
-            metadata = current.lstat()
-            if stat.S_ISLNK(metadata.st_mode):
-                raise OSError("symlink component")
-            is_last = index == len(relative.parts) - 1
-            if is_last and not stat.S_ISREG(metadata.st_mode):
-                raise OSError("document is not a regular file")
-            if not is_last and not stat.S_ISDIR(metadata.st_mode):
-                raise OSError("parent component is not a directory")
-        return current.read_bytes()
-    except OSError as error:
+        with SafeProjectReader(root, hook=capture_hook) as reader:
+            return reader.read_bytes(relative.as_posix())
+    except (OSError, SafeCaptureError) as error:
         raise _input_error(
             "compile.input_path",
             f"/{identity}",
@@ -266,8 +269,9 @@ def _frozen_mapping(value: dict[str, Any], identity: str) -> Mapping[str, object
 
 
 _PRIVATE_KEY_COMPONENT = re.compile(r"[^a-z0-9]+")
+_CAMEL_CASE_BOUNDARY = re.compile(r"(?<=[a-z0-9])(?=[A-Z])")
 _CREDENTIAL_URL = re.compile(
-    r"(?i)https?://[^\s/@:]+:[^\s/@]+@"
+    r"(?i)\b[a-z][a-z0-9+.-]*://[^\s/@:]+:[^\s/@]+@"
 )
 _EMBEDDED_POSIX_PATH = re.compile(
     r"(?<![A-Za-z0-9._:/-])/(?:[^\s/]+/)*[^\s,;:)\]}>\"']+"
@@ -289,28 +293,56 @@ _BEARER_CREDENTIAL = re.compile(
 _SECRET_ASSIGNMENT = re.compile(
     r"(?i)(?:token|api[_-]?key|password|passwd|secret|credential)\s*[:=]\s*\S+"
 )
+_PRIVATE_RAW_SENTINEL = re.compile(
+    r"(?i)(?:^|[\s._-])(?:raw[\s._-]+review(?:er)?|private[\s._-]+raw)"
+    r"(?:[\s:._-]|$)"
+)
+
+
+def _sensitive_document_key(value: str) -> bool:
+    separated = _CAMEL_CASE_BOUNDARY.sub("_", value)
+    components = tuple(
+        part
+        for part in _PRIVATE_KEY_COMPONENT.split(separated.casefold())
+        if part
+    )
+    if any(
+        part
+        in {
+            "password",
+            "passwd",
+            "secret",
+            "credential",
+            "apikey",
+            "authorization",
+        }
+        for part in components
+    ):
+        return True
+    sensitive_pairs = {
+        ("api", "key"),
+        ("access", "token"),
+        ("auth", "token"),
+        ("bearer", "token"),
+        ("refresh", "token"),
+        ("session", "token"),
+        ("id", "token"),
+        ("private", "key"),
+        ("local", "path"),
+        ("raw", "review"),
+        ("raw", "reviewer"),
+        ("private", "raw"),
+    }
+    return any(
+        pair in sensitive_pairs for pair in zip(components, components[1:])
+    )
 
 
 def _reject_private_document_values(value: object, identity: str) -> None:
-    sensitive_keys = {
-        "password",
-        "passwd",
-        "secret",
-        "credential",
-        "apikey",
-        "token",
-        "authorization",
-    }
-
     def walk(item: object) -> bool:
         if isinstance(item, dict):
             for key, child in item.items():
-                components = {
-                    part
-                    for part in _PRIVATE_KEY_COMPONENT.split(str(key).lower())
-                    if part
-                }
-                if components.intersection(sensitive_keys) or walk(child):
+                if _sensitive_document_key(str(key)) or walk(child):
                     return True
             return False
         if isinstance(item, list):
@@ -334,6 +366,7 @@ def _reject_private_document_values(value: object, identity: str) -> None:
                 or _AUTHORIZATION_CREDENTIAL.search(stripped) is not None
                 or _BEARER_CREDENTIAL.search(stripped) is not None
                 or _SECRET_ASSIGNMENT.search(stripped) is not None
+                or _PRIVATE_RAW_SENTINEL.search(stripped) is not None
             )
         )
 
@@ -435,9 +468,17 @@ def _load_index_records(
                 f"/{identity}",
                 "registered record changed after checker validation",
             )
+        content_hash = _semantic_hash(document)
         frozen = _frozen_mapping(document, identity)
         documents.append(
-            LoadedModelDocument(model, identity, object_type, actual_hash, frozen)
+            LoadedModelDocument(
+                model,
+                identity,
+                object_type,
+                actual_hash,
+                content_hash,
+                frozen,
+            )
         )
         objects.append(
             LoadedCatalogObject(
@@ -447,6 +488,7 @@ def _load_index_records(
                 identity,
                 revision,
                 actual_hash,
+                content_hash,
                 frozen,
             )
         )
@@ -475,9 +517,17 @@ def _load_model_inputs(
                 f"/{identity}",
                 "model document changed after authority validation",
             )
+        content_hash = _semantic_hash(document)
         frozen = _frozen_mapping(document, identity)
         documents.append(
-            LoadedModelDocument(model, identity, document_type, digest, frozen)
+            LoadedModelDocument(
+                model,
+                identity,
+                document_type,
+                digest,
+                content_hash,
+                frozen,
+            )
         )
         if document_type == "index":
             record_documents, record_objects = _load_index_records(root, model, document)
@@ -499,6 +549,7 @@ def _load_model_inputs(
                         "validated aggregate object is malformed",
                     )
                 object_identity = f"{identity}#/{field}/{index}"
+                object_hash = _semantic_hash(value)
                 objects.append(
                     LoadedCatalogObject(
                         object_id=value["id"],
@@ -506,7 +557,8 @@ def _load_model_inputs(
                         model_name=model,
                         identity=object_identity,
                         revision=None,
-                        semantic_hash=_semantic_hash(value),
+                        semantic_hash=object_hash,
+                        content_hash=object_hash,
                         document=_frozen_mapping(value, object_identity),
                     )
                 )
@@ -1087,89 +1139,375 @@ def _strict_shadow_report(root: Path, transaction_id: str) -> _ShadowReport:
     return _ShadowReport(model, affected, tuple(loaded_candidates))
 
 
-def _copy_shadow_project(source: Path, destination: Path) -> None:
-    """Copy only checker inputs, refusing every symlink and special file."""
-    project = source.expanduser().absolute()
+_SNAPSHOT_MODEL_IDENTITIES = (
+    "_paperops/model/research",
+    "_paperops/model/editorial",
+    "_paperops/model/manuscript",
+)
+_CHECKER_SCRIPT_IDENTITIES = frozenset(
+    {
+        "scripts/check-paperops-models.py",
+        "scripts/paperops_editorial.py",
+        "scripts/paperops_models.py",
+        "scripts/paperops_schema.py",
+    }
+)
+_SCHEMA_ROOT_IDENTITY = "_paperops/defaults/schemas"
+_REGISTRY_IDENTITY = f"{_SCHEMA_ROOT_IDENTITY}/registry.yml"
+
+
+def _install_snapshot_file(
+    root: Path,
+    captured: CapturedFile,
+    content: bytes,
+) -> None:
+    destination = root / _registered_identity(captured.identity)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with destination.open("wb") as stream:
+        stream.write(content)
+    destination.chmod(captured.mode)
+
+
+def _merge_captured(
+    collected: dict[str, CapturedFile],
+    additions: tuple[CapturedFile, ...],
+) -> None:
+    for item in additions:
+        previous = collected.get(item.identity)
+        if previous is not None and previous != item:
+            raise SafeCaptureError("snapshot input changed during capture")
+        collected[item.identity] = item
+
+
+def _capture_compile_project_inputs(
+    reader: SafeProjectReader,
+    target: Path,
+    collected: dict[str, CapturedFile],
+) -> None:
+    _merge_captured(
+        collected,
+        reader.capture((_REGISTRY_IDENTITY,), target),
+    )
+    _, schema_identities = _compile_registry_projection(target)
+    identities = (
+        *sorted(_CHECKER_SCRIPT_IDENTITIES),
+        *_SNAPSHOT_MODEL_IDENTITIES,
+        *sorted(schema_identities),
+    )
+    _merge_captured(collected, reader.capture(identities, target))
+
+
+def _journal_identities(
+    root: Path,
+    states: dict[str, ModelAuthorityState],
+) -> tuple[str, ...]:
+    identities: list[str] = []
+    for model in _COMPILE_MODELS:
+        state = states[model]
+        if state.mode != "v2-authoritative" or not state.last_adopt_transaction:
+            continue
+        try:
+            paths = transaction_paths(root, state.last_adopt_transaction)
+            identity = paths.journal_path.relative_to(root.absolute()).as_posix()
+        except (StagingError, ValueError) as error:
+            raise _input_error(
+                "compile.authority_journal",
+                f"/authority/{model}",
+                "committed authority journal has an unsafe transaction identity",
+            ) from error
+        if identity not in identities:
+            identities.append(identity)
+    return tuple(identities)
+
+
+def _capture_manifest(
+    reader: SafeProjectReader,
+    target: Path,
+) -> tuple[dict[str, ModelAuthorityState], CapturedFile]:
     try:
-        project_metadata = project.lstat()
-    except OSError as error:
-        raise _shadow_failure(
-            "compile.shadow_copy", "/", "shadow project root is missing or unsafe"
+        content, captured = reader.read_file(".pops/manifest.toml")
+        _install_snapshot_file(target, captured, content)
+        states = read_model_states(target)
+    except (OSError, SafeCaptureError, ModelStateError, ValueError) as error:
+        raise _input_error(
+            "compile.authority_state",
+            "/authority",
+            "model authority state is missing, unsafe, or invalid",
         ) from error
-    if stat.S_ISLNK(project_metadata.st_mode) or not stat.S_ISDIR(
-        project_metadata.st_mode
-    ):
-        raise _shadow_failure(
-            "compile.shadow_copy", "/", "shadow project root is missing or unsafe"
-        )
+    return states, captured
 
-    def copy_entry(source_path: Path, target_path: Path, pointer: str) -> None:
-        try:
-            metadata = source_path.lstat()
-        except OSError as error:
-            raise _shadow_failure(
-                "compile.shadow_copy",
-                pointer,
-                "required shadow checker input is missing",
-            ) from error
-        if stat.S_ISLNK(metadata.st_mode):
-            raise _shadow_failure(
-                "compile.shadow_copy",
-                pointer,
-                "shadow checker input contains a symlink",
-            )
-        if stat.S_ISDIR(metadata.st_mode):
-            target_path.mkdir(parents=True, exist_ok=True)
-            for child in sorted(source_path.iterdir(), key=lambda item: item.name):
-                copy_entry(
-                    child,
-                    target_path / child.name,
-                    f"{pointer.rstrip('/')}/{child.name}",
+
+def _capture_authoritative_project(
+    source: Path,
+    target: Path,
+) -> tuple[CapturedFile, ...]:
+    target.mkdir(parents=True, exist_ok=False)
+    collected: dict[str, CapturedFile] = {}
+    try:
+        with SafeProjectReader(source) as reader:
+            states, manifest = _capture_manifest(reader, target)
+            _merge_captured(collected, (manifest,))
+            if any(
+                states[name].mode != "v2-authoritative"
+                for name in _COMPILE_MODELS
+            ):
+                raise _input_error(
+                    "compile.authority_state",
+                    "/authority",
+                    "compile requires v2-authoritative Research, Editorial, Results, and Manuscript models",
                 )
-            return
-        if not stat.S_ISREG(metadata.st_mode):
-            raise _shadow_failure(
-                "compile.shadow_copy",
-                pointer,
-                "shadow checker input contains a special file",
-            )
-        try:
-            content = source_path.read_bytes()
-        except OSError as error:
-            raise _shadow_failure(
-                "compile.shadow_copy",
-                pointer,
-                "shadow checker input cannot be read",
-            ) from error
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-        target_path.write_bytes(content)
-        target_path.chmod(stat.S_IMODE(metadata.st_mode))
-
-    destination.mkdir(parents=True, exist_ok=False)
-    for relative_text in (
-        "scripts",
-        "_paperops/defaults/schemas",
-        "_paperops/model",
-    ):
-        relative = _registered_identity(relative_text)
-        current = project
-        for part in relative.parts:
-            current = current / part
+            _capture_compile_project_inputs(reader, target, collected)
+            journals = _journal_identities(target, states)
             try:
-                metadata = current.lstat()
-            except OSError as error:
-                raise _shadow_failure(
-                    "compile.shadow_copy",
-                    f"/{relative_text}",
-                    "required shadow checker tree is missing",
+                _merge_captured(collected, reader.capture(journals, target))
+            except (OSError, SafeCaptureError) as error:
+                raise _input_error(
+                    "compile.authority_journal",
+                    "/authority/journal",
+                    "committed authority journal is missing or unsafe",
                 ) from error
-            if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISDIR(metadata.st_mode):
+    except CompileInputError:
+        raise
+    except (OSError, SafeCaptureError) as error:
+        raise _input_error(
+            "compile.input_path",
+            "/snapshot",
+            "required compile snapshot input is missing or unsafe",
+        ) from error
+    return tuple(collected[key] for key in sorted(collected))
+
+
+def _report_capture_paths(payload: object) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    if not isinstance(payload, dict):
+        return (), ()
+    sources: list[str] = []
+    inventory = payload.get("inventory")
+    if isinstance(inventory, list):
+        for item in inventory:
+            value = item.get("source_path") if isinstance(item, dict) else None
+            if not isinstance(value, str):
+                continue
+            try:
+                identity = _registered_identity(value).as_posix()
+            except CompileInputError:
+                continue
+            if identity not in sources:
+                sources.append(identity)
+    candidates: list[str] = []
+    raw_candidates = payload.get("candidates")
+    if isinstance(raw_candidates, list):
+        for item in raw_candidates:
+            value = item.get("relative_path") if isinstance(item, dict) else None
+            if not isinstance(value, str):
+                continue
+            try:
+                identity = _registered_identity(value).as_posix()
+            except CompileInputError:
+                continue
+            if identity not in candidates:
+                candidates.append(identity)
+    return tuple(sources), tuple(candidates)
+
+
+def _capture_shadow_project(
+    source: Path,
+    target: Path,
+    transaction_id: str,
+) -> tuple[CapturedFile, ...]:
+    target.mkdir(parents=True, exist_ok=False)
+    collected: dict[str, CapturedFile] = {}
+    try:
+        project = target.absolute()
+        paths = transaction_paths(project, transaction_id)
+        report_identity = paths.report_json_path.relative_to(project).as_posix()
+    except (StagingError, ValueError) as error:
+        raise _shadow_failure(
+            "compile.shadow_report",
+            "/shadow_transaction_id",
+            "shadow transaction identity is unsafe",
+        ) from error
+    try:
+        with SafeProjectReader(source) as reader:
+            states, manifest = _capture_manifest(reader, target)
+            _merge_captured(collected, (manifest,))
+            try:
+                report_content, report_file = reader.read_file(report_identity)
+            except (OSError, SafeCaptureError) as error:
+                raise _shadow_failure(
+                    "compile.shadow_report",
+                    "/shadow_transaction_id",
+                    "shadow report is missing or unsafe",
+                ) from error
+            _install_snapshot_file(target, report_file, report_content)
+            _merge_captured(collected, (report_file,))
+            try:
+                report_payload: object = json.loads(report_content.decode("utf-8"))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                report_payload = None
+
+            try:
+                _capture_compile_project_inputs(reader, target, collected)
+            except (OSError, SafeCaptureError) as error:
                 raise _shadow_failure(
                     "compile.shadow_copy",
-                    f"/{relative_text}",
-                    "shadow checker tree has an unsafe path component",
+                    "/",
+                    "required shadow checker input is missing or unsafe",
+                ) from error
+
+            journals = _journal_identities(target, states)
+            try:
+                _merge_captured(collected, reader.capture(journals, target))
+            except (OSError, SafeCaptureError) as error:
+                raise _input_error(
+                    "compile.authority_journal",
+                    "/authority/journal",
+                    "committed authority journal is missing or unsafe",
+                ) from error
+
+            sources, candidates = _report_capture_paths(report_payload)
+            try:
+                _merge_captured(collected, reader.capture(sources, target))
+            except (OSError, SafeCaptureError) as error:
+                raise _shadow_failure(
+                    "compile.shadow_source",
+                    "/inventory/source_path",
+                    "shadow source is missing or unsafe",
+                ) from error
+            candidate_prefix = paths.candidate_dir.relative_to(project).as_posix()
+            candidate_identities = tuple(
+                f"{candidate_prefix}/{identity}" for identity in candidates
+            )
+            try:
+                _merge_captured(
+                    collected,
+                    reader.capture(candidate_identities, target),
                 )
-        copy_entry(current, destination / relative, f"/{relative_text}")
+            except (OSError, SafeCaptureError) as error:
+                raise _shadow_failure(
+                    "compile.shadow_candidate",
+                    "/candidates/relative_path",
+                    "declared shadow candidate is missing or unsafe",
+                ) from error
+    except CompileInputError:
+        raise
+    except (OSError, SafeCaptureError) as error:
+        raise _shadow_failure(
+            "compile.shadow_copy",
+            "/",
+            "required shadow snapshot input is missing or unsafe",
+        ) from error
+    return tuple(collected[key] for key in sorted(collected))
+
+
+def _compile_registry_projection(
+    root: Path,
+) -> tuple[str, frozenset[str]]:
+    registry = _read_registered_yaml(root, _REGISTRY_IDENTITY)
+    raw_models = registry.get("models")
+    if not isinstance(raw_models, dict) or any(
+        not isinstance(raw_models.get(name), dict) for name in _COMPILE_MODELS
+    ):
+        raise _input_error(
+            "compile.input_document",
+            f"/{_REGISTRY_IDENTITY}",
+            "schema registry does not define the compile-authority models",
+        )
+    projected_models = {
+        name: copy.deepcopy(raw_models[name]) for name in _COMPILE_MODELS
+    }
+    schema_identities: set[str] = set()
+
+    def register_schema(value: object) -> None:
+        if not isinstance(value, str):
+            raise _input_error(
+                "compile.input_document",
+                f"/{_REGISTRY_IDENTITY}",
+                "compile schema registry entry has no safe schema identity",
+            )
+        relative = _registered_identity(value).as_posix()
+        schema_identities.add(f"{_SCHEMA_ROOT_IDENTITY}/{relative}")
+
+    for entry in projected_models.values():
+        register_schema(entry.get("schema"))
+        record_sets = entry.get("record_sets", {})
+        if not isinstance(record_sets, dict):
+            raise _input_error(
+                "compile.input_document",
+                f"/{_REGISTRY_IDENTITY}",
+                "compile schema registry record sets are malformed",
+            )
+        for record_entry in record_sets.values():
+            if not isinstance(record_entry, dict):
+                raise _input_error(
+                    "compile.input_document",
+                    f"/{_REGISTRY_IDENTITY}",
+                    "compile schema registry record set is malformed",
+                )
+            register_schema(record_entry.get("schema"))
+    projection = {
+        "registry_version": registry.get("registry_version"),
+        "validator_profile": registry.get("validator_profile"),
+        "models": projected_models,
+    }
+    return _semantic_hash(projection), frozenset(schema_identities)
+
+
+def _effective_snapshot_hash(
+    *,
+    root: Path,
+    source_mode: str,
+    authority: tuple[AuthoritySnapshot, ...],
+    documents: tuple[LoadedModelDocument, ...],
+    captured: tuple[CapturedFile, ...],
+    shadow_transaction_id: str = "",
+) -> str:
+    registry_hash, schema_identities = _compile_registry_projection(root)
+    compile_prefixes = tuple(
+        f"{value.rstrip('/')}/" for value in dict.fromkeys(
+            target
+            for targets in _AUTHORITY_TARGETS.values()
+            for target in targets
+        )
+    )
+    managed_input_prefixes = (
+        "scripts/",
+        f"{_SCHEMA_ROOT_IDENTITY}/",
+    )
+    support_inputs = [
+        {
+            "identity": item.identity,
+            "mode": item.mode,
+            "content_hash": item.content_hash,
+        }
+        for item in captured
+        if item.identity in _CHECKER_SCRIPT_IDENTITIES
+        or item.identity in schema_identities
+        or (
+            item.identity != ".pops/manifest.toml"
+            and not item.identity.endswith("/journal.json")
+            and not item.identity.startswith(compile_prefixes)
+            and not item.identity.startswith(managed_input_prefixes)
+        )
+    ]
+    payload = {
+        "schema_version": 1,
+        "source_mode": source_mode,
+        "shadow_transaction_id": shadow_transaction_id,
+        "compile_registry_hash": registry_hash,
+        "authority": [item.to_dict() for item in authority],
+        "documents": [
+            {
+                "model": item.model_name,
+                "identity": item.identity,
+                "document_type": item.document_type,
+                "semantic_hash": item.semantic_hash,
+                "content_hash": item.content_hash,
+            }
+            for item in documents
+        ],
+        "support_inputs": support_inputs,
+    }
+    return _semantic_hash(payload)
 
 
 def _candidate_owner(identity: str) -> str | None:
@@ -1190,11 +1528,11 @@ def _shadow_inputs(
     request: CompileRequest,
 ) -> LoadedCompileInputs:
     transaction_id = request.shadow_transaction_id
-    report = _strict_shadow_report(root, transaction_id)
-    states = _read_states(root)
     with tempfile.TemporaryDirectory(prefix="pops-compile-shadow-") as tmp:
         target = Path(tmp) / "project"
-        _copy_shadow_project(root, target)
+        captured = _capture_shadow_project(root, target, transaction_id)
+        report = _strict_shadow_report(target, transaction_id)
+        states = _read_states(target)
         for relative in dict.fromkeys(
             _AUTHORITY_TARGETS[name][0] for name in report.affected_models
         ):
@@ -1269,16 +1607,25 @@ def _shadow_inputs(
                     )
                 )
             else:
-                authority.append(_authoritative_snapshot(root, model, states))
+                authority.append(_authoritative_snapshot(target, model, states))
         authority_tuple = tuple(authority)
         documents, objects = _load_model_inputs(target, authority_tuple)
         targets = _compile_targets(request, objects)
         readiness = _run_readiness(target, targets)
+        snapshot_hash = _effective_snapshot_hash(
+            root=target,
+            source_mode="shadow",
+            authority=authority_tuple,
+            documents=documents,
+            captured=captured,
+            shadow_transaction_id=transaction_id,
+        )
         return LoadedCompileInputs(
             source_mode="shadow",
             applicable=False,
             authority=authority_tuple,
             readiness=readiness,
+            snapshot_hash=snapshot_hash,
             documents=documents,
             objects=objects,
         )
@@ -1288,18 +1635,29 @@ def load_compile_inputs(root: Path, request: CompileRequest) -> LoadedCompileInp
     """Return a detached snapshot only after its model authority is validated."""
     _reject_source_mode(request)
     if request.source_mode == "authoritative":
-        authority = _authoritative_snapshots(root)
-        documents, objects = _load_model_inputs(root, authority)
-        targets = _compile_targets(request, objects)
-        readiness = _run_readiness(root, targets)
-        return LoadedCompileInputs(
-            source_mode="authoritative",
-            applicable=True,
-            authority=authority,
-            readiness=readiness,
-            documents=documents,
-            objects=objects,
-        )
+        with tempfile.TemporaryDirectory(prefix="pops-compile-authority-") as tmp:
+            target = Path(tmp) / "project"
+            captured = _capture_authoritative_project(root, target)
+            authority = _authoritative_snapshots(target)
+            documents, objects = _load_model_inputs(target, authority)
+            targets = _compile_targets(request, objects)
+            readiness = _run_readiness(target, targets)
+            snapshot_hash = _effective_snapshot_hash(
+                root=target,
+                source_mode="authoritative",
+                authority=authority,
+                documents=documents,
+                captured=captured,
+            )
+            return LoadedCompileInputs(
+                source_mode="authoritative",
+                applicable=True,
+                authority=authority,
+                readiness=readiness,
+                snapshot_hash=snapshot_hash,
+                documents=documents,
+                objects=objects,
+            )
     return _shadow_inputs(root, request)
 
 

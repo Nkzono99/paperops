@@ -398,7 +398,11 @@ def _load_record_sets(
     return record_sets
 
 
-def load_registry(root: Path) -> SchemaRegistry:
+def load_registry(
+    root: Path,
+    *,
+    model_names: frozenset[str] | None = None,
+) -> SchemaRegistry:
     """Load and validate the managed schema registry below a project root."""
     resolved_root = root.resolve()
     registry_dir = resolved_root / "_paperops" / "defaults" / "schemas"
@@ -430,7 +434,37 @@ def load_registry(root: Path) -> SchemaRegistry:
             "model_unknown",
             f"unsupported models: {', '.join(sorted(unknown_names))}",
         )
-    missing_names = set(REQUIRED_MODEL_NAMES) - set(models)
+    if model_names is not None:
+        if not model_names or not all(isinstance(name, str) for name in model_names):
+            raise _registry_error(
+                "model_invalid",
+                "selected registry models must be a non-empty string set",
+            )
+        unsupported_selected = set(model_names) - supported_names
+        if unsupported_selected:
+            raise _registry_error(
+                "model_unknown",
+                "unsupported selected models: "
+                + ", ".join(sorted(unsupported_selected)),
+            )
+        missing_selected = set(model_names) - set(models)
+        if missing_selected:
+            raise _registry_error(
+                "model_missing",
+                "selected models are missing: "
+                + ", ".join(sorted(missing_selected)),
+            )
+        models = {
+            name: value
+            for name, value in models.items()
+            if name in model_names
+        }
+    required_names = (
+        set(REQUIRED_MODEL_NAMES)
+        if model_names is None
+        else set(REQUIRED_MODEL_NAMES).intersection(model_names)
+    )
+    missing_names = required_names - set(models)
     if missing_names:
         raise _registry_error(
             "model_missing",

@@ -1119,26 +1119,28 @@ class P3RegisteredInputSafetyTest(unittest.TestCase):
 
     def test_shadow_copy_rejects_symlink_and_special_checker_components(self) -> None:
         inputs_module = importlib.import_module("paperops.compiler.inputs")
-        copier = getattr(inputs_module, "_copy_shadow_project")
         for unsafe in ("symlink", "special"):
             with self.subTest(unsafe=unsafe), tempfile.TemporaryDirectory() as tmp:
                 root = Path(tmp)
-                source = root / "source"
+                source, transaction_id = shadow_project(root)
                 destination = root / "destination"
-                outside = root / "outside"
-                outside.mkdir()
-                (outside / "check-paperops-models.py").write_text("pass\n")
                 if unsafe == "symlink":
-                    source.mkdir()
-                    (source / "scripts").symlink_to(
-                        outside,
+                    scripts = source / "scripts"
+                    scripts.rename(root / "original-scripts")
+                    scripts.symlink_to(
+                        root / "original-scripts",
                         target_is_directory=True,
                     )
                 else:
-                    (source / "scripts").mkdir(parents=True)
-                    os.mkfifo(source / "scripts/check-paperops-models.py")
+                    checker = source / "scripts/check-paperops-models.py"
+                    checker.unlink()
+                    os.mkfifo(checker)
                 with self.assertRaises(inputs_module.CompileInputError) as raised:
-                    copier(source, destination)
+                    inputs_module._capture_shadow_project(
+                        source,
+                        destination,
+                        transaction_id,
+                    )
                 self.assertEqual(
                     raised.exception.finding.code,
                     "compile.shadow_copy",

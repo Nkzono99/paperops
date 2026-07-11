@@ -18,6 +18,9 @@ _MAX_CHECKER_OUTPUT_BYTES = 1024 * 1024
 _SAFE_QUERY_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 _SECTION_ID = re.compile(r"^SEC-[0-9]{4,}$")
 _SEMANTIC_HASH = re.compile(r"^sha256:[0-9a-f]{64}$")
+_COMPILE_QUERY_MODELS = frozenset(
+    {"research", "editorial", "results_hierarchy", "manuscript"}
+)
 
 
 @dataclass(frozen=True)
@@ -96,6 +99,7 @@ def _run_checker(
         )
     argv = [
         sys.executable,
+        "-B",
         str(checker),
         "--root",
         str(resolved),
@@ -108,11 +112,11 @@ def _run_checker(
     if strict:
         argv.append("--strict")
     if query == "hash":
-        argv.append("--print-hash")
+        argv.extend(("--print-hash", "--internal-compile-query"))
         if object_id is not None:
             argv.extend(("--object-id", object_id))
     elif query == "compile_readiness":
-        argv.append("--compile-readiness")
+        argv.extend(("--compile-readiness", "--internal-compile-query"))
         for section_id in section_ids:
             argv.extend(("--section-id", section_id))
     try:
@@ -266,13 +270,17 @@ def run_model_hash(
     timeout: float = 120.0,
 ) -> ValidationResult:
     """Return a checker-validated model or catalog-object semantic hash."""
-    if not isinstance(model, str) or _SAFE_QUERY_ID.fullmatch(model) is None:
+    if (
+        not isinstance(model, str)
+        or _SAFE_QUERY_ID.fullmatch(model) is None
+        or model not in _COMPILE_QUERY_MODELS
+    ):
         return _failure(
             model,
             "all",
             "validation.request",
             "/model",
-            "model must be a safe identifier",
+            "model must identify a compile-authority model",
         )
     if object_id is not None and (
         not isinstance(object_id, str)

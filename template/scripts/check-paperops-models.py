@@ -35,6 +35,12 @@ from paperops_schema import (
 
 MODEL_CHOICES = ("all", *KNOWN_MODEL_VERSIONS)
 PHASE_CHOICES = ("all", "schema", "references", "semantics", "approvals", "dependencies", "hash")
+COMPILE_QUERY_MODELS = (
+    "research",
+    "editorial",
+    "results_hierarchy",
+    "manuscript",
+)
 
 
 def _error_from_exception(error: Exception, pointer: str) -> ModelFinding:
@@ -277,6 +283,11 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--results-document", type=Path)
     parser.add_argument("--compile-readiness", action="store_true")
     parser.add_argument("--section-id", action="append")
+    parser.add_argument(
+        "--internal-compile-query",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
     args = parser.parse_args()
     if args.object_id is not None and not args.print_hash:
         parser.error("--object-id requires --print-hash")
@@ -297,12 +308,31 @@ def _parse_args() -> argparse.Namespace:
         or args.results_document is not None
     ):
         parser.error("--compile-readiness cannot be combined with hash or document queries")
+    if args.internal_compile_query:
+        if args.model not in COMPILE_QUERY_MODELS:
+            parser.error("internal compile query requires a compile-authority model")
+        if not args.json:
+            parser.error("internal compile query requires --json")
+        if args.phase != "all":
+            parser.error("internal compile query requires --phase all")
+        if args.strict:
+            parser.error("internal compile query does not accept --strict")
+        if args.print_dependency_hash is not None:
+            parser.error("internal compile query does not accept dependency hash queries")
+        if args.document is not None or args.results_document is not None:
+            parser.error("internal compile query does not accept document overrides")
+        if int(args.print_hash) + int(args.compile_readiness) != 1:
+            parser.error("internal compile query requires exactly one closed query")
     return args
 
 
-def _registry_or_finding(root: Path) -> tuple[SchemaRegistry | None, list[ModelFinding]]:
+def _registry_or_finding(
+    root: Path,
+    *,
+    model_names: frozenset[str] | None = None,
+) -> tuple[SchemaRegistry | None, list[ModelFinding]]:
     try:
-        return load_registry(root), []
+        return load_registry(root, model_names=model_names), []
     except Exception as error:
         return None, [_error_from_exception(error, "/")]
 
@@ -315,7 +345,14 @@ def main() -> int:
         else args.phase
     )
     root = args.root.resolve()
-    registry, findings = _registry_or_finding(root)
+    registry, findings = _registry_or_finding(
+        root,
+        model_names=(
+            frozenset(COMPILE_QUERY_MODELS)
+            if args.internal_compile_query
+            else None
+        ),
+    )
     if registry is None:
         return _render_result(args, findings, failed=True, phase=phase)
     findings.extend(validate_reference_contract_definition(registry))
@@ -349,7 +386,11 @@ def main() -> int:
         and any(name not in registry.entries for name in publication_support_names)
     )
     names_to_load = list(selected_names)
-    if phase in ("all", "references", "approvals", "dependencies"):
+    if args.internal_compile_query:
+        names_to_load = [
+            name for name in COMPILE_QUERY_MODELS if name in registry.entries
+        ]
+    elif phase in ("all", "references", "approvals", "dependencies"):
         for graph_name in registry.entries:
             if graph_name not in names_to_load:
                 names_to_load.append(graph_name)
