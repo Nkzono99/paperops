@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 import stat
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 from .types import MigrationFinding
 
@@ -23,7 +24,7 @@ _PRIVATE_NAME = re.compile(r"(?:raw|private|local).*(?:path|location)|password|s
 
 @dataclass(frozen=True)
 class LegacyValue:
-    value: str | tuple[str, ...]
+    value: Any
     pointer: str
     line: int
 
@@ -43,6 +44,7 @@ class LegacySection:
     line: int
     definitions: dict[str, LegacyValue]
     tables: tuple[LegacyTable, ...]
+    prose: str = ""
 
 
 @dataclass(frozen=True)
@@ -70,10 +72,19 @@ def _pointer_token(value: str) -> str:
     return value.replace("~", "~0").replace("/", "~1")
 
 
-def _parse_scalar(value: str) -> str | tuple[str, ...]:
+def _parse_scalar(value: str) -> Any:
     rendered = value.strip()
     if len(rendered) >= 2 and rendered[0] == rendered[-1] and rendered[0] in {'"', "'"}:
         return rendered[1:-1]
+    if re.fullmatch(r"-?(?:0|[1-9][0-9]*)", rendered):
+        return int(rendered)
+    if rendered in {"true", "false"}:
+        return rendered == "true"
+    if rendered.startswith(("[", "{")):
+        try:
+            return json.loads(rendered)
+        except json.JSONDecodeError:
+            pass
     if rendered.startswith("[") and rendered.endswith("]"):
         inner = rendered[1:-1].strip()
         if not inner:
@@ -82,11 +93,17 @@ def _parse_scalar(value: str) -> str | tuple[str, ...]:
     return rendered
 
 
-def _values(value: str | tuple[str, ...]) -> Iterable[str]:
-    return value if isinstance(value, tuple) else (value,)
+def _values(value: Any) -> Iterable[str]:
+    if isinstance(value, str):
+        return (value,)
+    if isinstance(value, dict):
+        return tuple(item for nested in value.values() for item in _values(nested))
+    if isinstance(value, (list, tuple)):
+        return tuple(item for nested in value for item in _values(nested))
+    return ()
 
 
-def _confidential(name: str, value: str | tuple[str, ...]) -> bool:
+def _confidential(name: str, value: Any) -> bool:
     return any(
         item
         and (
@@ -149,7 +166,7 @@ def load_legacy_card(path: Path, *, project_root: Path | None = None) -> LegacyC
                 )
             )
             end = len(lines)
-        def store_frontmatter(name: str, value: str | tuple[str, ...], line: int) -> None:
+        def store_frontmatter(name: str, value: Any, line: int) -> None:
             pointer = f"/frontmatter/{_pointer_token(name)}"
             if name in frontmatter:
                 findings.append(
@@ -241,7 +258,7 @@ def load_legacy_card(path: Path, *, project_root: Path | None = None) -> LegacyC
     section_pointer = "/document"
     definitions: dict[str, LegacyValue] = {}
     tables: list[LegacyTable] = []
-    unknown_lines: list[int] = []
+    unknown_lines: list[tuple[int, str]] = []
 
     def finish_section() -> None:
         nonlocal definitions, tables, unknown_lines
@@ -253,9 +270,10 @@ def load_legacy_card(path: Path, *, project_root: Path | None = None) -> LegacyC
                     section_line,
                     dict(definitions),
                     tuple(tables),
+                    "\n".join(text for _, text in unknown_lines),
                 )
             )
-        for line in unknown_lines:
+        for line, _ in unknown_lines:
             findings.append(
                 _finding(
                     "migration.unknown_field",
@@ -337,7 +355,7 @@ def load_legacy_card(path: Path, *, project_root: Path | None = None) -> LegacyC
                 continue
         stripped = raw.strip()
         if stripped and not stripped.startswith(("```", "<!--")):
-            unknown_lines.append(index + 1)
+            unknown_lines.append((index + 1, stripped))
         index += 1
     finish_section()
     return LegacyCard(

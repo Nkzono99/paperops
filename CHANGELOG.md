@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- PaperOps 2 P2 migration の最初のmodel adapterとして、legacy claim / result / figure / source / scientific gate cardをResearch indexとper-ID documentへ決定的に変換する`ResearchAdapter`を追加した。schema required fieldと明示alias / headingだけを写し、record revision、approval、gate decision、quantity contract、provenanceを推測で補わない。unknown/private field、duplicate ID / quantity、incomplete claim-gate pairingはfindingにし、反復生成のhash安定性と生成candidateのstrict Research validationを合成fixtureで確認する。legacy cardとtracked Research stateはadapter単体では変更しない。
+
 - PaperOps 2 P2 migration のlegacy conservation基盤として、Markdown cardのfront matter、heading内definition、tableだけを依存なしで読み、推論が必要なprose、duplicate key / ID、private / raw値、missing / unsafe sourceをstable findingへ変換するinventory readerを追加した。各legacy field familyは`mapped` / `deferred` / `local-only` / `unsupported`のいずれか一つを必須とし、source drift、存在しないcandidateへのmapping、理由・後続phaseなしのdefer、機密family以外のlocal-only、unsupportedをadopt blockerにする。既存cardは読み取り専用で、変換時に書き換えない。
 
 - PaperOps 2 P2 migration の transaction 基盤として、immutable な inventory / candidate / report DTO、project-relative pathだけを扱うdeterministic report、秘密情報とabsolute pathを保存しないMarkdown projection、mode / size / SHA-256を検証するbyte-exact snapshotを追加した。path traversal、Windows absolute path、symlink component、special file、snapshot改変はauthority切替前に停止する。これはCLI内部基盤の追加であり、既存下流のtracked stateやauthorityは変更しない。
