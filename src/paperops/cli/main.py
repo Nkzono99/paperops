@@ -24,6 +24,7 @@ from paperops.cli.manifest import (
     write_manifest,
 )
 from paperops.cli.migration_commands import add_migrate_parser
+from paperops.cli.model_commands import add_model_parser
 from paperops.cli.notices import maybe_print_update_notice, warn_ignored_bootstrap_options
 from paperops.cli.output import print_copy_summary, print_next_steps, print_update_plan
 from paperops.cli.paths import internal_file
@@ -161,6 +162,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     add_migrate_parser(subcommands)
+    add_model_parser(subcommands)
 
     feedback_parser = subcommands.add_parser(
         "feedback",

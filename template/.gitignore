@@ -2,6 +2,8 @@
 .venv/
 .tools/
 .paperops/cache/
+.paperops/migrations/
+.paperops/snapshots/
 .claude/settings.local.json
 Makefile.local
 _handoff/*

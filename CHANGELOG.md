@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `pops model status|validate|diff|adopt|rollback`の単一入口を追加し、Task 9ではstatus / validate / diffを実装した。human / `--json`は同じdomain resultを描画し、checker tracebackやabsolute pathを出さない。`diff`はlegacy inventory→deterministic adapter→conservation→strict candidate validation→reportを一度に実行し、tracked modelを変更せずignored `.paperops/migrations/<transaction>/candidate`へshadowを保存する。成功時だけCLI-owned manifestを`shadow-compare`へ進め、`--refresh`なしは既存shadowを再利用する。adopt / rollbackのparserは先行提供するが、recoverable transaction実装までは明示的に停止する。既存下流はmanaged `.gitignore` を更新するか、`.paperops/migrations/` と `.paperops/snapshots/` をproject側ignoreへ追加してから`diff`を使う。
+
 - PaperOps 2 P2 migration のIssue / Publication adapterを追加した。Issueはfeedback、analysis / writing request、response、review roundのprediction→execution→reconciliation、closure、delegation / integration、human decisionをtyped recordへ写す一方、raw reviewer text、absolute/local path、credentialをcandidateから除外してlocal-only dispositionにする。Publicationはauthoring / candidate / round軸、source commit、gate report、artifact hash参照、snapshot manifest、response refsをledgerから写すがartifact本体をコピー・変更しない。submitted roundのimmutable marker / provenance欠落と未reconcile analysis requestはadopt blockerになる。
 
 - PaperOps 2 P2 migration のManuscript adapterとして、明示structural manifestからsection / block identity、全section kind、block順序、JA/EN marker、operation、compile manifest / input hash、dependency snapshotだけを変換する。TeX本文や`prose` / `content` fieldはcandidateへ入れず、手編集したTeXを変更しない。marker欠落、order不整合、compile lineage欠落、存在せずstrict承認も確認できないResearch参照はadopt blockerにする。
