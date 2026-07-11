@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- PaperOps 2 P2 migration のManuscript adapterとして、明示structural manifestからsection / block identity、全section kind、block順序、JA/EN marker、operation、compile manifest / input hash、dependency snapshotだけを変換する。TeX本文や`prose` / `content` fieldはcandidateへ入れず、手編集したTeXを変更しない。marker欠落、order不整合、compile lineage欠落、存在せずstrict承認も確認できないResearch参照はadopt blockerにする。
+
 - PaperOps 2 P2 migration のEditorial adapterとして、Editorial ModelとResults hierarchyを常にpaired candidateとして扱い、既存typed Resultsはschema-cleanな場合だけsemantic valueを再利用する。present-but-malformed typed stateはlegacyへfallbackせず停止し、legacy storylineが残る場合は`migration_editorial` / `migration_results_hierarchy`の明示structured payloadなしにeditorial choiceを推測しない。result ID順序の不一致、source変化、hash非決定性をfixtureで検査し、既存typed pairだけのprojectもstrict validationを経て採用候補にできる。
 
 - PaperOps 2 P2 migration の最初のmodel adapterとして、legacy claim / result / figure / source / scientific gate cardをResearch indexとper-ID documentへ決定的に変換する`ResearchAdapter`を追加した。schema required fieldと明示alias / headingだけを写し、record revision、approval、gate decision、quantity contract、provenanceを推測で補わない。unknown/private field、duplicate ID / quantity、incomplete claim-gate pairingはfindingにし、反復生成のhash安定性と生成candidateのstrict Research validationを合成fixtureで確認する。legacy cardとtracked Research stateはadapter単体では変更しない。
