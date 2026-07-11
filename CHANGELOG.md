@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- PaperOps 2 P2 migration の検証境界として、project-managed `check-paperops-models.py` に versioned `--json` 出力を追加し、package 側から shell を介さず安全に起動して finding / hash / exit status を型付き結果へ変換する runner を追加した。既存の人間向け出力と exit code は維持する。既存下流は managed checker を更新すればよく、project-owned model state の移行や authority 切替はまだ発生しない。
+
 - PaperOps 2 P1-B の六モデル kernel を完成し、Research / Editorial / Results hierarchy / Manuscript / Issue / Publication をschema-clean global catalogへ接続した。checkerに`approvals` / `dependencies` phase、cross-model type/cardinality検査、`dependency-v1`と`--print-dependency-hash`、candidateとsubmitted roundを分離するPublication semanticsを追加した。新規`pops init`は空indexと未提出Publication starterを含むが、既存projectの`_paperops/model/`はmanaged updateやM0-0005から生成・上書き・削除しない。P2 migration、P3 compiler、P4 workflow cutoverまではlegacy authorityを維持する。
 
 - PaperOps 2 P1-B Task 5 として Issue Model を registry の5番目の entry として追加し、空 starter index と feedback / analysis request / writing request / response / review round schemaを配布する。legacy targetは`kind` / `id`のtyped pair、analysis acceptance criteriaはartifact・metric / estimand・denominator・unit / independence・scope・provenance・result-card updateとして保持し、tracked stateを公開可能summaryとopaque local-reference IDに限定した。checkerはnarrative中のembedded local path / credential、executed output、reconciliation / human signoff、closed responseの非空closure criteria・blocking dependency・open analysis dependency、明示scope change approvalを別codeで検査し、未解決predictionはIssue単独ではwarningとして報告する。managed updateはschema/checkerだけを更新し、project-owned Issue stateやlegacy cardを生成・上書き・削除しない。

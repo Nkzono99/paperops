@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from pathlib import PurePosixPath, PureWindowsPath
 
@@ -210,12 +211,64 @@ def _render(findings: list[ModelFinding]) -> None:
             print(f"- `[{finding.code}] {pointer}`: {finding.message}")
 
 
+def _render_json(
+    findings: list[ModelFinding],
+    *,
+    ok: bool,
+    model: str,
+    phase: str,
+    hashes: dict[str, str] | None = None,
+) -> None:
+    print(json.dumps(
+        {
+            "schema_version": 1,
+            "ok": ok,
+            "model": model,
+            "phase": phase,
+            "findings": [
+                {
+                    "code": finding.code,
+                    "pointer": finding.pointer or "/",
+                    "message": finding.message,
+                    "severity": finding.severity,
+                }
+                for finding in findings
+            ],
+            "hashes": dict(sorted((hashes or {}).items())),
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    ))
+
+
+def _render_result(
+    args: argparse.Namespace,
+    findings: list[ModelFinding],
+    *,
+    failed: bool,
+    phase: str,
+    hashes: dict[str, str] | None = None,
+) -> int:
+    if args.json:
+        _render_json(
+            findings,
+            ok=not failed,
+            model=args.model,
+            phase=phase,
+            hashes=hashes,
+        )
+    else:
+        _render(findings)
+    return 1 if failed else 0
+
+
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("."))
     parser.add_argument("--model", choices=MODEL_CHOICES, default="all")
     parser.add_argument("--phase", choices=PHASE_CHOICES, default="all")
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument("--json", action="store_true")
     parser.add_argument("--print-hash", action="store_true")
     parser.add_argument("--object-id")
     parser.add_argument("--print-dependency-hash")
@@ -244,21 +297,22 @@ def main() -> int:
     root = args.root.resolve()
     registry, findings = _registry_or_finding(root)
     if registry is None:
-        _render(findings)
-        return 1
+        return _render_result(args, findings, failed=True, phase=phase)
     findings.extend(validate_reference_contract_definition(registry))
 
     if args.model != "all" and args.model not in registry.entries:
-        _render(
+        return _render_result(
+            args,
             [
                 ModelFinding(
                     "registry.model",
                     "/",
                     f"model `{args.model}` is not registered in this project",
                 )
-            ]
+            ],
+            failed=True,
+            phase=phase,
         )
-        return 1
 
     selected_names = (
         list(registry.entries) if args.model == "all" else [args.model]
@@ -601,8 +655,11 @@ def main() -> int:
     failed = bool(errors or ((args.print_hash or args.strict) and warnings))
     if args.print_dependency_hash is not None and not failed:
         try:
-            print(dependency_hash(args.print_dependency_hash, catalog))
-            return 0
+            digest = dependency_hash(args.print_dependency_hash, catalog)
+            computed_hashes[f"dependency:{args.print_dependency_hash}"] = digest
+            if not args.json:
+                print(digest)
+                return 0
         except Exception as error:
             findings.append(_error_from_exception(error, "/object-id"))
             failed = True
@@ -623,12 +680,22 @@ def main() -> int:
         else:
             digest = computed_hashes.get(selected_names[0])
         if digest is not None:
-            print(digest)
-            return 0
-        failed = True
+            computed_hashes[
+                args.object_id if args.object_id is not None else selected_names[0]
+            ] = digest
+            if not args.json:
+                print(digest)
+                return 0
+        else:
+            failed = True
 
-    _render(findings)
-    return 1 if failed else 0
+    return _render_result(
+        args,
+        findings,
+        failed=failed,
+        phase=phase,
+        hashes=computed_hashes,
+    )
 
 
 if __name__ == "__main__":

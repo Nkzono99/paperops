@@ -103,6 +103,37 @@ def valid_documents() -> tuple[dict[str, object], dict[str, object]]:
 
 
 class PaperOpsModelCheckTest(unittest.TestCase):
+    def test_json_output_is_versioned_and_contains_no_markdown(self) -> None:
+        result = run_python_script(
+            SCRIPT,
+            "--root", ROOT / "template",
+            "--model", "research",
+            "--phase", "all",
+            "--json",
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], 1)
+        self.assertTrue(payload["ok"])
+        self.assertEqual(payload["model"], "research")
+        self.assertEqual(payload["phase"], "all")
+        self.assertEqual(payload["findings"], [])
+
+    def test_json_print_hash_reports_a_successful_hash_result(self) -> None:
+        result = run_python_script(
+            SCRIPT,
+            "--root", ROOT / "template",
+            "--model", "research",
+            "--json",
+            "--print-hash",
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertTrue(payload["ok"])
+        self.assertRegex(payload["hashes"]["research"], r"^sha256:[0-9a-f]{64}$")
+        self.assertIsInstance(payload["hashes"], dict)
+        self.assertNotIn("# paperops-model-check", result.stdout)
+
     def write_documents(
         self,
         root: Path,
