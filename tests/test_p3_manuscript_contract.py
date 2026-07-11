@@ -345,6 +345,32 @@ class P3ManuscriptContractTest(unittest.TestCase):
                     ],
                 )
 
+        for schema_name, path, _pointer in mutations:
+            for mutation, expected_code in (
+                ("missing", "schema.required"),
+                ("wrong", "schema.const"),
+            ):
+                with self.subTest(schema=schema_name, path=path, version=mutation):
+                    candidate = copy.deepcopy(generated_documents()[schema_name])
+                    target: object = candidate
+                    for token in path:
+                        target = target[token]  # type: ignore[index]
+                    assert isinstance(target, dict)
+                    if mutation == "missing":
+                        del target["schema_version"]
+                    else:
+                        target["schema_version"] = 2
+                    version_pointer = (
+                        "/" + "/".join(str(token) for token in path) + "/schema_version"
+                    )
+                    self.assertIn(
+                        (expected_code, version_pointer),
+                        [
+                            (finding.code, finding.pointer)
+                            for finding in self.schema_findings(schema_name, candidate)
+                        ],
+                    )
+
         for schema_name, path in (
             ("section-plan", ("projection", "extensions")),
             ("writer-packet", ("read_context", "extensions")),
@@ -437,10 +463,16 @@ class P3ManuscriptContractTest(unittest.TestCase):
             values = [schemas[name]["$defs"][definition] for name in GENERATED_SCHEMA_NAMES]
             self.assertTrue(all(value == values[0] for value in values[1:]), definition)
         for definition, names in (
+            ("strings", ("compile-bundle", "section-plan", "writer-packet")),
+            ("extensions", ("compile-bundle", "section-plan", "writer-packet")),
             ("input", ("compile-bundle", "section-plan", "writer-packet")),
             ("finding", ("compile-bundle", "section-plan", "writer-patch")),
             ("authority", ("compile-bundle", "writer-packet")),
             ("writeScope", ("compile-bundle", "writer-packet")),
+            ("projectionMoveBinding", ("compile-bundle", "section-plan")),
+            ("sectionProjection", ("compile-bundle", "section-plan")),
+            ("readContext", ("compile-bundle", "writer-packet")),
+            ("writerPayload", ("compile-bundle", "writer-packet")),
         ):
             values = [schemas[name]["$defs"][definition] for name in names]
             self.assertTrue(all(value == values[0] for value in values[1:]), definition)
@@ -491,6 +523,7 @@ class P3ManuscriptContractTest(unittest.TestCase):
             "../escape.tex",
             "C:\\escape.tex",
             "manuscript/ja/results\x00.tex",
+            "manuscript/ja/",
         ):
             with self.subTest(kind="read", path=invalid):
                 packet = generated_documents()["writer-packet"]
@@ -675,6 +708,7 @@ class P3ManuscriptContractTest(unittest.TestCase):
             sections = (
                 ready_section("SEC-0001", "primary"),
                 ready_section("SEC-0002", "primary"),
+                valid_section("SEC-0003"),
             )
             section_dir = root / "_paperops/model/manuscript/sections"
             section_dir.mkdir(parents=True, exist_ok=True)
