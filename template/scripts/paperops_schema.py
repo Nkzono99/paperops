@@ -45,6 +45,12 @@ class SchemaRegistry:
     entries: dict[str, RegistryEntry]
 
 
+SUPPORTED_MODEL_VERSIONS = {
+    "editorial": 1,
+    "results_hierarchy": 1,
+}
+
+
 SUPPORTED_KEYWORDS = frozenset(
     {
         "$schema",
@@ -134,6 +140,16 @@ def _registry_error(code: str, message: str) -> SchemaDefinitionError:
     return SchemaDefinitionError(f"registry.{code}: {message}")
 
 
+def validate_document_version(entry: RegistryEntry, document: Any) -> None:
+    """Require a loaded document to match its registry entry schema version."""
+    actual = document.get("schema_version") if isinstance(document, dict) else None
+    if actual != entry.schema_version or isinstance(actual, bool):
+        raise _registry_error(
+            "document_version",
+            f"{entry.name} requires schema_version {entry.schema_version}, got {actual!r}",
+        )
+
+
 def _registry_mapping(value: Any, field: str) -> dict[str, Any]:
     if not isinstance(value, dict) or not all(isinstance(key, str) for key in value):
         raise _registry_error("invalid", f"{field} must be an object with string keys")
@@ -145,6 +161,22 @@ def _registry_string(entry: dict[str, Any], field: str, model: str) -> str:
     if not isinstance(value, str) or not value:
         raise _registry_error("invalid", f"models.{model}.{field} must be a string")
     return value
+
+
+def _valid_json_pointer(pointer: str) -> bool:
+    if pointer == "":
+        return True
+    if not pointer.startswith("/"):
+        return False
+    index = 0
+    while index < len(pointer):
+        if pointer[index] != "~":
+            index += 1
+            continue
+        if index + 1 >= len(pointer) or pointer[index + 1] not in "01":
+            return False
+        index += 2
+    return True
 
 
 def _resolve_registry_schema(registry_dir: Path, raw_path: str, model: str) -> Path:
@@ -176,7 +208,9 @@ def load_registry(root: Path) -> SchemaRegistry:
     registry_path = registry_dir / "registry.yml"
     try:
         document = load_document(registry_path)
-    except (OSError, DocumentLoadError) as error:
+    except SchemaDefinitionError:
+        raise
+    except Exception as error:
         raise _registry_error("invalid", f"cannot load {registry_path}: {error}") from error
     registry = _registry_mapping(document, "registry")
 
@@ -191,18 +225,28 @@ def load_registry(root: Path) -> SchemaRegistry:
         )
 
     models = _registry_mapping(registry.get("models"), "models")
+    supported_names = set(SUPPORTED_MODEL_VERSIONS)
+    unknown_names = set(models) - supported_names
+    if unknown_names:
+        raise _registry_error(
+            "model_unknown",
+            f"unsupported models: {', '.join(sorted(unknown_names))}",
+        )
+    missing_names = supported_names - set(models)
+    if missing_names:
+        raise _registry_error(
+            "model_missing",
+            f"required models are missing: {', '.join(sorted(missing_names))}",
+        )
     entries: dict[str, RegistryEntry] = {}
     for name, raw_entry in models.items():
         entry = _registry_mapping(raw_entry, f"models.{name}")
         schema_version = entry.get("schema_version")
-        if (
-            not isinstance(schema_version, int)
-            or isinstance(schema_version, bool)
-            or schema_version < 1
-        ):
+        expected_version = SUPPORTED_MODEL_VERSIONS[name]
+        if schema_version != expected_version or isinstance(schema_version, bool):
             raise _registry_error(
-                "invalid",
-                f"models.{name}.schema_version must be a positive integer",
+                "model_version",
+                f"models.{name} requires schema_version {expected_version}, got {schema_version!r}",
             )
         authority = _registry_string(entry, "authority", name)
         if authority != "project-owned":
@@ -212,12 +256,24 @@ def load_registry(root: Path) -> SchemaRegistry:
             raise _registry_error("invalid", f"unsupported hash_profile: {hash_profile!r}")
         raw_exclusions = entry.get("hash_excluded_paths", [])
         if not isinstance(raw_exclusions, list) or not all(
-            isinstance(pointer, str) and pointer.startswith("/")
-            for pointer in raw_exclusions
+            isinstance(pointer, str) for pointer in raw_exclusions
         ):
             raise _registry_error(
-                "invalid",
+                "hash_pointer",
                 f"models.{name}.hash_excluded_paths must be JSON Pointer strings",
+            )
+        invalid_pointers = [
+            pointer for pointer in raw_exclusions if not _valid_json_pointer(pointer)
+        ]
+        if invalid_pointers:
+            raise _registry_error(
+                "hash_pointer",
+                f"models.{name} has invalid JSON Pointer: {invalid_pointers[0]!r}",
+            )
+        if len(set(raw_exclusions)) != len(raw_exclusions):
+            raise _registry_error(
+                "hash_duplicate",
+                f"models.{name}.hash_excluded_paths contains duplicates",
             )
         entries[name] = RegistryEntry(
             name=name,
