@@ -14,9 +14,8 @@ P1 で `tests/fixtures/editorial/` 配下に次のカテゴリを作成する。
 
 ## Case の必須項目
 
-各 case は実案件の複製ではなく、再配布できる合成データとする。次をすべて保持する。
+各 case は実案件の複製ではなく、再配布できる合成データとする。各 case は最低2つの story candidates を持つ。さらに次をすべて保持する。
 
-- 最低2つの `story candidates`
 - 採用候補ごとの `selection reason`
 - 不採用候補ごとの `rejection reason`
 - 期待する `Results hierarchy`

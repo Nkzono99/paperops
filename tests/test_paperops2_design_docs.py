@@ -211,6 +211,7 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
 
     def test_fixture_policy_uses_synthetic_cases_and_reserves_paths(self) -> None:
         text = self.read("docs/paperops2-evaluation-fixtures.md")
+        self.assertIn("各 case は最低2つの story candidates を持つ", text)
         for required in [
             "tests/fixtures/editorial/mechanism-led/",
             "tests/fixtures/editorial/boundary-led/",
@@ -276,7 +277,9 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
         entries = [
             line
             for line in unreleased.splitlines()
-            if line.startswith("- ") and "PaperOps 2" in line
+            if line.startswith("- ")
+            and "段階再設計" in line
+            and "合成 fixture 方針" in line
         ]
         self.assertEqual(len(entries), 1)
         entry = entries[0]
