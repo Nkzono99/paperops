@@ -1,4 +1,4 @@
-.PHONY: venv smoke cli-smoke scaffold-package-boundary-check build-submission lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check block-flow-review-check figure-reference-check figure-obligation-check figure-design-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check research-request-handoff-live-check external-import-check external-import-live-check collect-context template-readiness-check
+.PHONY: venv smoke cli-smoke scaffold-package-boundary-check build-submission lint-bib citation-check mirror-check mirror-freshness-check public-terms-check concept-term-check argument-focus-check authoring-intent-check storyline-check schema-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check block-flow-review-check figure-reference-check figure-obligation-check figure-design-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check research-request-handoff-live-check external-import-check external-import-live-check collect-context template-readiness-check
 
 PYTHON_FALLBACK = $(shell bash template/scripts/resolve-python.sh "$(CURDIR)" 2>/dev/null || echo python3.11)
 PYTHON ?= $(PYTHON_FALLBACK)
@@ -15,6 +15,7 @@ SMOKE_CHECKS = \
 	argument-focus-check \
 	authoring-intent-check \
 	storyline-check \
+	schema-check \
 	section-contract-check \
 	section-depth-check \
 	quantity-integrity-check \
@@ -92,6 +93,9 @@ authoring-intent-check:
 
 storyline-check:
 	$(PYTHON) template/scripts/check-storyline.py --root template
+
+schema-check:
+	$(PYTHON) template/scripts/check-paperops-models.py --root template
 
 section-contract-check:
 	$(PYTHON) template/scripts/check-section-contracts.py --root template

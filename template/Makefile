@@ -1,4 +1,4 @@
-.PHONY: venv build-ja build-en build-submission lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check storyline-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check submission-gate block-flow-review-check figure-reference-check figure-obligation-check figure-design-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check research-request-handoff-live-check external-import-check external-import-live-check collect-context readiness-check export-arxiv ci audit pre-submit
+.PHONY: venv build-ja build-en build-submission lint-bib lint-bib-pre-submit citation-check mirror-check mirror-freshness-check mirror-strict-check public-terms-check concept-term-check argument-focus-check storyline-check schema-check section-contract-check section-depth-check quantity-integrity-check predicted-results-check content-first-check finish-manuscript-check submission-gate block-flow-review-check figure-reference-check figure-obligation-check figure-design-check claim-evidence-check paper-layer-card-check card-coverage-check workflow-check archive-seal-check submission-drift-check skill-mirror-check links-check research-request-handoff-check research-request-handoff-live-check external-import-check external-import-live-check collect-context readiness-check export-arxiv ci audit pre-submit
 
 PYTHON_FALLBACK = $(shell bash scripts/resolve-python.sh "$(CURDIR)" 2>/dev/null || echo python3.11)
 PYTHON ?= $(PYTHON_FALLBACK)
@@ -22,6 +22,7 @@ AUDIT_CHECKS = \
 	argument-focus-check \
 	authoring-intent-check \
 	storyline-check \
+	schema-check \
 	section-contract-check \
 	section-depth-check \
 	quantity-integrity-check \
@@ -110,6 +111,9 @@ authoring-intent-check:
 
 storyline-check:
 	$(PYTHON) scripts/check-storyline.py --root .
+
+schema-check:
+	$(PYTHON) scripts/check-paperops-models.py --root .
 
 section-contract-check:
 	$(PYTHON) scripts/check-section-contracts.py --root .
