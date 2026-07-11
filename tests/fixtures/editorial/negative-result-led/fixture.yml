@@ -2,6 +2,8 @@ fixture_version: 1
 category: negative-result-led
 editorial_document: editorial-model.yml
 results_document: results-hierarchy.yml
-expected_hash: sha256:8223b7937fe8901c8863c2a00e50286c2b05cd4925058a4aad4ac6c989d220d6
+expected_hash: sha256:79a97d840d69447d6d9db803fd33e54a487dca82dc1c2bdf22a21805cfe94165
+expected_research_hash: sha256:86056a163f1d72e41e053d4e46fc4996ce7693611361c857d8d41da550718788
+expected_dependency_hash: sha256:c16a93309adc8102d353806fcc6ce4db65b63135ab4b4d1087a6148fdc5b5bd2
 expected_diagnostics: [reference.deferred, reference.document_source]
 synthetic: true

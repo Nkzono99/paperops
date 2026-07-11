@@ -1,0 +1,10 @@
+fixture_version: 1
+single_mutation: true
+description: The submission candidate retains a predicted analysis request.
+document: _paperops/model/issues/analysis/AREQ-0001.yml
+pointer: /status
+value: predicted
+reindex_model: issue
+model: publication
+phase: semantics
+expected_codes: [semantic.predicted_unresolved]

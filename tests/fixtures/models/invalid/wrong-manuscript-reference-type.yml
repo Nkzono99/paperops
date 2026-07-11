@@ -1,0 +1,9 @@
+fixture_version: 1
+single_mutation: true
+description: A Manuscript claim reference points to a Research result.
+document: _paperops/model/manuscript/blocks/BLK-0001.yml
+pointer: /claim_refs/0
+value: RES-0001
+reindex_model: manuscript
+phase: references
+expected_codes: [reference.type]

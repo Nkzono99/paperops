@@ -1,0 +1,8 @@
+fixture_version: 1
+single_mutation: true
+description: One Editorial move points to an absent Research claim.
+document: _paperops/model/editorial/editorial-model.yml
+pointer: /argument_moves/0/claim_ids/0
+value: CLM-9999
+phase: references
+expected_codes: [reference.dangling]

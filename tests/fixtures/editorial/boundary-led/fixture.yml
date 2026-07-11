@@ -2,6 +2,8 @@ fixture_version: 1
 category: boundary-led
 editorial_document: editorial-model.yml
 results_document: results-hierarchy.yml
-expected_hash: sha256:05617f40ed088b4d6d4fa5133d0579997f3a0e0e109fc6f6bcb1a969d16e24bd
+expected_hash: sha256:d014c1c6456c971989dbbf1fc06aed6ebc6face79a1e0a446b2abc1231aae315
+expected_research_hash: sha256:dd6cb6a6804a27f2a53a6217cfa0c1b169caa2a03dcf5aa8ac9c69b9701691fd
+expected_dependency_hash: sha256:00cac8d5bb31661da0fa6901a4959ad73d2fe013be029bdf442ba6d37c495ce7
 expected_diagnostics: [reference.deferred, reference.document_source]
 synthetic: true

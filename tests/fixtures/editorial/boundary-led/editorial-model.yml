@@ -25,17 +25,17 @@ story_candidates:
 selected_story_id: STY-synthetic-control-boundary-selected
 single_candidate_reason: ""
 claim_roles:
-  foreground: {claim_ids: [CLM-synthetic-control-boundary-foreground], none_reason: ""}
-  supporting: {claim_ids: [CLM-synthetic-control-boundary-supporting], none_reason: ""}
-  supplement: {claim_ids: [CLM-synthetic-control-boundary-supplement], none_reason: ""}
-  cut: {claim_ids: [CLM-synthetic-control-boundary-cut], none_reason: ""}
+  foreground: {claim_ids: [CLM-0001], none_reason: ""}
+  supporting: {claim_ids: [CLM-0002], none_reason: ""}
+  supplement: {claim_ids: [CLM-0003], none_reason: ""}
+  cut: {claim_ids: [CLM-0004], none_reason: ""}
 argument_moves:
   - id: MOV-synthetic-control-boundary-1
     position: 1
     stance: assert
     reader_question: Where does the synthetic-control-boundary effect appear?
     assertion: synthetic-control-boundary effect appears within the tested regime
-    claim_ids: [CLM-synthetic-control-boundary-supporting]
+    claim_ids: [CLM-0002]
     result_item_ids: [RHI-synthetic-control-boundary-1]
     next_move_id: MOV-synthetic-control-boundary-2
   - id: MOV-synthetic-control-boundary-2
@@ -43,7 +43,7 @@ argument_moves:
     stance: boundary
     reader_question: Where does the synthetic-control-boundary effect stop?
     assertion: synthetic-control-boundary transition marks the validity limit
-    claim_ids: [CLM-synthetic-control-boundary-foreground]
+    claim_ids: [CLM-0001]
     result_item_ids: [RHI-synthetic-control-boundary-2]
     next_move_id: MOV-synthetic-control-boundary-3
   - id: MOV-synthetic-control-boundary-3
@@ -51,18 +51,18 @@ argument_moves:
     stance: hold
     reader_question: What remains unresolved beyond the synthetic-control-boundary?
     assertion: synthetic-control-boundary extrapolation is held pending evidence
-    claim_ids: [CLM-synthetic-control-boundary-supplement]
+    claim_ids: [CLM-0003]
     result_item_ids: [RHI-synthetic-control-boundary-3]
     next_move_id: ""
 visual_obligations:
   - id: VIS-synthetic-control-boundary-1
     reader_task: locate the synthetic-control-boundary transition
     takeaway: synthetic-control-boundary separates supported and unsupported regimes
-    claim_ids: [CLM-synthetic-control-boundary-foreground]
+    claim_ids: [CLM-0001]
     preferred_form: synthetic-control-boundary regime map
     status: planned
     waiver_reason: ""
-    figure_ids: [FIG-synthetic-control-boundary-1]
+    figure_ids: [FIG-0001]
 results_hierarchy:
   document: results-hierarchy.yml
   item_ids: [RHI-synthetic-control-boundary-1, RHI-synthetic-control-boundary-2, RHI-synthetic-control-boundary-3]

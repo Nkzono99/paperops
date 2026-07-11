@@ -25,17 +25,17 @@ story_candidates:
 selected_story_id: STY-synthetic-control-negative-selected
 single_candidate_reason: ""
 claim_roles:
-  foreground: {claim_ids: [CLM-synthetic-control-negative-foreground], none_reason: ""}
-  supporting: {claim_ids: [CLM-synthetic-control-negative-supporting], none_reason: ""}
-  supplement: {claim_ids: [CLM-synthetic-control-negative-supplement], none_reason: ""}
-  cut: {claim_ids: [CLM-synthetic-control-negative-cut], none_reason: ""}
+  foreground: {claim_ids: [CLM-0001], none_reason: ""}
+  supporting: {claim_ids: [CLM-0002], none_reason: ""}
+  supplement: {claim_ids: [CLM-0003], none_reason: ""}
+  cut: {claim_ids: [CLM-0004], none_reason: ""}
 argument_moves:
   - id: MOV-synthetic-control-negative-1
     position: 1
     stance: assert
     reader_question: Was the synthetic-control-negative test sensitive enough?
     assertion: synthetic-control-negative positive control establishes sensitivity
-    claim_ids: [CLM-synthetic-control-negative-supporting]
+    claim_ids: [CLM-0002]
     result_item_ids: [RHI-synthetic-control-negative-1]
     next_move_id: MOV-synthetic-control-negative-2
   - id: MOV-synthetic-control-negative-2
@@ -43,7 +43,7 @@ argument_moves:
     stance: reject
     reader_question: Is the synthetic-control-negative predicted response present?
     assertion: synthetic-control-negative predicted response is absent
-    claim_ids: [CLM-synthetic-control-negative-cut]
+    claim_ids: [CLM-0004]
     result_item_ids: [RHI-synthetic-control-negative-2]
     next_move_id: MOV-synthetic-control-negative-3
   - id: MOV-synthetic-control-negative-3
@@ -51,18 +51,18 @@ argument_moves:
     stance: assert
     reader_question: What does the synthetic-control-negative absence constrain?
     assertion: synthetic-control-negative absence rejects the predicted explanation
-    claim_ids: [CLM-synthetic-control-negative-foreground]
+    claim_ids: [CLM-0001]
     result_item_ids: [RHI-synthetic-control-negative-3]
     next_move_id: ""
 visual_obligations:
   - id: VIS-synthetic-control-negative-1
     reader_task: compare synthetic-control-negative detection limit and observed response
     takeaway: synthetic-control-negative absence lies below the supported prediction
-    claim_ids: [CLM-synthetic-control-negative-foreground]
+    claim_ids: [CLM-0001]
     preferred_form: synthetic-control-negative interval and threshold plot
     status: planned
     waiver_reason: ""
-    figure_ids: [FIG-synthetic-control-negative-1]
+    figure_ids: [FIG-0001]
 results_hierarchy:
   document: results-hierarchy.yml
   item_ids: [RHI-synthetic-control-negative-1, RHI-synthetic-control-negative-2, RHI-synthetic-control-negative-3]

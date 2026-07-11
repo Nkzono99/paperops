@@ -2,6 +2,8 @@ fixture_version: 1
 category: mechanism-led
 editorial_document: editorial-model.yml
 results_document: results-hierarchy.yml
-expected_hash: sha256:f464a20a15a59e6c9425e62a9f95de04b023e4e5046942e41a7210a6d84767cb
+expected_hash: sha256:27225d09b0f55956d6c52ac9b7f6ffa27ab6f06dd0505676a2a604a3d5820fba
+expected_research_hash: sha256:8f2d4873a5c40a2526074a435d74131f55b502204c57a8e18135ed0a988b89ed
+expected_dependency_hash: sha256:59dd0fe2fa58232de496000fe5e5a7b2aa0d536c8f2ef09e0a2c1e4e7c533eed
 expected_diagnostics: [reference.deferred, reference.document_source]
 synthetic: true

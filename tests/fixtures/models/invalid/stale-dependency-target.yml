@@ -1,0 +1,9 @@
+fixture_version: 1
+single_mutation: true
+description: A dependency target changes after the Manuscript snapshot.
+document: _paperops/model/research/claims/CLM-0001.yml
+pointer: /statement
+value: The bounded synthetic claim changed after dependency verification.
+reindex_model: research
+phase: dependencies
+expected_codes: [dependency.stale, dependency.stale_hash]
