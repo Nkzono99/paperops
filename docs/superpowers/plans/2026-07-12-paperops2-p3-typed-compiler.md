@@ -198,6 +198,10 @@ Commit message: `全体文脈と変更範囲を分けるためcontractとTeX sna
 
 **Files:**
 
+- Modify: `src/paperops/compiler/types.py`
+- Modify: `template/_paperops/defaults/schemas/compile-bundle.schema.json`
+- Modify: `template/_paperops/defaults/schemas/section-plan.schema.json`
+- Modify: `template/_paperops/defaults/schemas/writer-packet.schema.json`
 - Create: `src/paperops/compiler/materialize.py`
 - Create: `src/paperops/compiler/privacy.py`
 - Create: `tests/test_p3_compile_materialize.py`
@@ -206,6 +210,8 @@ Commit message: `全体文脈と変更範囲を分けるためcontractとTeX sna
 **Interfaces:**
 
 - Produces `materialize_compile(inputs, contract_snapshot, manuscript_snapshot, request) -> CompileBundleCandidate`。
+- Extends catalog `InputSnapshot` with an optional full canonical `content_hash` while retaining the authority/profile-aware semantic `hash`; materialized catalog inputs require both, and generated schemas remain closed。
+- Propagates `LoadedCompileInputs.snapshot_hash` as a non-catalog `compile-snapshot` input into compile-ID material and every Writer packet, so checker/schema/approval-only input changes cannot reuse an earlier packet。
 - Emits `global_context`, one `SectionPlan` per target, and one or more `WriterPacket` objects without writing files。
 - Every packet input is exactly one catalog object snapshot or non-catalog content snapshot; all refs require dependency coverage。
 - Compile readiness requires selected story, move coverage, current section `editorial_choice` approval, current Research approvals/gates, non-stale dependencies, contract functions, and scope topology。
@@ -213,11 +219,11 @@ Commit message: `全体文脈と変更範囲を分けるためcontractとTeX sna
 
 - [ ] **Step 1: Build approved fixture and RED assertions**
 
-Materialize complete Research, Editorial/Results, Manuscript records, model authority journals, contracts, JA/EN TeX, mirror map/ledger, terminology, and writing profile. Assert exact global story, rejected reasons, claim roles, move order, section plan, packet inputs, read context, write scope, forbidden terms, and no raw TeX duplication in global context。
+Materialize complete Research, Editorial/Results, Manuscript records, model authority journals, contracts, JA/EN TeX, mirror map/ledger, terminology, and writing profile. Assert exact global story, rejected reasons, claim roles, move order, section plan, packet inputs, semantic/content hashes, compile snapshot dependency, read context, write scope, forbidden terms, and no raw TeX duplication in global context。
 
 - [ ] **Step 2: Add one-mutation RED corpus**
 
-Cover missing/rejected/stale approval, not-ready gate, dangling/wrong type, stale dependency, missing move primary, unbound contract, missing block marker, private value, predicted evidence without AREQ, and unplanned topology。
+Cover missing/rejected/stale approval, not-ready gate, dangling/wrong type, stale dependency, missing move primary, unbound contract, missing block marker, private value, predicted evidence without AREQ, unplanned topology, and an approval-only mutation that keeps the model semantic hash stable but changes object content hash, compile ID, and packet dependency hash。
 
 - [ ] **Step 3: Run RED**
 
