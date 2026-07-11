@@ -192,7 +192,7 @@ def main() -> int:
 
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]
-    failed = bool(errors or (args.strict and warnings))
+    failed = bool(errors or ((args.print_hash or args.strict) and warnings))
     if args.print_hash and not failed:
         model = loaded[selected_names[0]]
         if model.schema_clean:

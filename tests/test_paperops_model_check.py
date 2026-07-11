@@ -209,20 +209,20 @@ class PaperOpsModelCheckTest(unittest.TestCase):
         self.assertEqual(invalid.returncode, 1)
         self.assertNotRegex(invalid.stdout, r"(?m)^sha256:[0-9a-f]{64}$")
 
-        starter = run_python_script(
-            SCRIPT,
-            "--root",
-            ROOT / "template",
-            "--model",
-            "editorial",
-            "--phase",
-            "schema",
-            "--strict",
-            "--print-hash",
-        )
-        self.assertEqual(starter.returncode, 1)
-        self.assertIn("semantic.placeholder", starter.stdout)
-        self.assertNotRegex(starter.stdout, r"(?m)^sha256:[0-9a-f]{64}$")
+        for phase_args in ((), ("--phase", "schema")):
+            with self.subTest(phase_args=phase_args):
+                starter = run_python_script(
+                    SCRIPT,
+                    "--root",
+                    ROOT / "template",
+                    "--model",
+                    "editorial",
+                    *phase_args,
+                    "--print-hash",
+                )
+                self.assertEqual(starter.returncode, 1)
+                self.assertIn("semantic.placeholder", starter.stdout)
+                self.assertNotRegex(starter.stdout, r"(?m)^sha256:[0-9a-f]{64}$")
 
     def test_print_hash_runs_references_despite_semantics_phase(self) -> None:
         editorial, results = valid_documents()
