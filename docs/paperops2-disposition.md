@@ -8,6 +8,23 @@ P1 は schema・canonical hash・migration 基盤、P2–P3 は story / claim / 
 
 checker inventory は、名前が `check-` で始まるかにかかわらず、deterministic gate として Makefile から起動される Python entrypoint を個別 asset として含める。release/package gate も含める一方、test runner、collector、migration utility、build helper は、それ自体が deterministic gate でない限り checker に分類しない。
 
+## 受信フィードバックの統合判断
+
+2026-07-11 時点の open feedback は、独立した leaf skill / checker を増やすのではなく、次の既存実装または PaperOps 2 の責務へ統合する。`absorbed` は機能の放棄ではなく、Issue を閉じてこの設計とローカル実装計画を追跡正本にすることを意味する。
+
+| Issue | 判断 | 統合先 | 完了条件 |
+|---|---|---|---|
+| #72 Methods の local tool 語 | absorbed | P3 Writer packet の public-language contract と P5 public terminology gate。既存 `public-terminology-pass` / `public-terms-check` を適合する | 公開 software 名の allowlist を保ちつつ、local tool / option / provenance 語を advisory で検出する |
+| #73 authoring note 漏出 | implemented | `check-authoring-intent.py`、`authoring-intent-check`、finish gate（`7d65d17`） | strict / advisory、TeX comment、明示 suppression の回帰テストを維持する |
+| #74 図中 public label | absorbed | P3 Figure record / compiler contract と figure audit | main figure に public-label audit、label source、replacement または waiver を要求し、OCR は必須にしない |
+| #75 derived quantity contract | implemented | legacy `quantity-integrity-check` と P1-B Research Result の typed quantity contract | value、denominator、unit of analysis、estimand、aggregation、independence、source、manuscript refs を保存する |
+| #76 Python fallback | implemented | `resolve-python.sh` と root/downstream Makefile（`c5765b9`） | `.venv` → `python3.11` → `python3` → `python` の順で Python 3.11+ のみ選ぶ |
+| #77 claim/gate 語の公開本文漏出 | absorbed | #72 と同じ P3/P5 public-language contract | workflow 語は internal-only とし、読者向け scope / next-test 語への mapping を managed default に持つ |
+| #78 main-figure role budget | absorbed | P3 typed figure-story compile と Editorial visual obligation | project contract が要求した場合だけ、primary role の順序と secondary-before-primary を advisory 診断する |
+| #79 narrative weight pass | absorbed | P3 section/figure compile と P6 semantic fixture | central proof path、mechanism/scope、secondary extension を明示し、defensive negation、secondary salience、同順位 next-test を advisory 評価する |
+
+#78 は #79 の figure-order 特化 acceptance case として扱う。#72 と #77 は一つの public-language contract として実装し、用語ごとの checker を増やさない。
+
 ## Root governance layer
 
 | asset | current responsibility | target model/gate | disposition | writer before | writer after | compatibility/migration | removal condition |
