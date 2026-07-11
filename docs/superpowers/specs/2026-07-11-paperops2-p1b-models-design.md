@@ -324,7 +324,7 @@ research:
   dependency_profile: dependency-v1
 ```
 
-registry definition error は project document finding と混ぜず `schema.registry_*` として停止する。P1-A の exact model-set test は P1-B の six-entry contract（五論理モデル + Results hierarchy submodel）へ更新する。
+registry definition error は P1-A 互換の正式 code `registry.*` として停止し、project document finding とは混ぜない。P1-A の exact model-set test は P1-B の six-entry contract（五論理モデル + Results hierarchy submodel）へ更新する。
 
 ## CLI と gate
 

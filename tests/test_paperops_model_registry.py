@@ -188,16 +188,9 @@ class PaperOpsModelRegistryTest(unittest.TestCase):
             with self.assertRaisesRegex(SchemaDefinitionError, "registry.path"):
                 load_registry(root)
 
-    def test_shared_model_index_schema_accepts_empty_index_only(self) -> None:
+    def test_shared_model_index_schema_accepts_empty_and_populated_index(self) -> None:
         schema = load_document(SCHEMA_DIR / "model-index.schema.json")
-        document = {
-            "model_name": "research",
-            "schema_version": 1,
-            "index_revision": 1,
-            "records": [],
-            "extensions": {},
-            "metadata": {"updated_at": ""},
-        }
+        document = self.valid_index()
 
         self.assertEqual(validate_schema(document, schema), [])
         with_row = dict(document)
@@ -226,6 +219,97 @@ class PaperOpsModelRegistryTest(unittest.TestCase):
             ],
             [("schema.additional", "/unknown")],
         )
+
+    def test_shared_model_index_schema_rejects_nested_unknown_and_invalid_hash(self) -> None:
+        schema = load_document(SCHEMA_DIR / "model-index.schema.json")
+        cases = {
+            "nested unknown": ("unknown", True, "schema.additional", "/records/0/unknown"),
+            "invalid hash": (
+                "expected_hash",
+                "sha256:not-a-hash",
+                "schema.pattern",
+                "/records/0/expected_hash",
+            ),
+        }
+        for label, (field, value, code, pointer) in cases.items():
+            with self.subTest(label=label):
+                document = self.valid_index(with_record=True)
+                document["records"][0][field] = value
+
+                self.assertEqual(
+                    [
+                        (finding.code, finding.pointer)
+                        for finding in validate_schema(document, schema)
+                    ],
+                    [(code, pointer)],
+                )
+
+    def test_shared_model_index_schema_rejects_metadata_unknown_and_missing(self) -> None:
+        schema = load_document(SCHEMA_DIR / "model-index.schema.json")
+        cases = {
+            "unknown": ("schema.additional", "/metadata/unknown"),
+            "missing": ("schema.required", "/metadata/updated_at"),
+        }
+        for label, expected in cases.items():
+            with self.subTest(label=label):
+                document = self.valid_index()
+                if label == "unknown":
+                    document["metadata"]["unknown"] = True
+                else:
+                    del document["metadata"]["updated_at"]
+
+                self.assertEqual(
+                    [
+                        (finding.code, finding.pointer)
+                        for finding in validate_schema(document, schema)
+                    ],
+                    [expected],
+                )
+
+    def test_shared_model_index_schema_requires_every_top_level_field(self) -> None:
+        schema = load_document(SCHEMA_DIR / "model-index.schema.json")
+        for field in (
+            "model_name",
+            "schema_version",
+            "index_revision",
+            "records",
+            "extensions",
+            "metadata",
+        ):
+            with self.subTest(field=field):
+                document = self.valid_index()
+                del document[field]
+
+                self.assertEqual(
+                    [
+                        (finding.code, finding.pointer)
+                        for finding in validate_schema(document, schema)
+                    ],
+                    [("schema.required", f"/{field}")],
+                )
+
+    def test_shared_model_index_schema_rejects_representative_wrong_types(self) -> None:
+        schema = load_document(SCHEMA_DIR / "model-index.schema.json")
+        cases = {
+            "model_name": 1,
+            "schema_version": True,
+            "index_revision": "1",
+            "records": {},
+            "extensions": [],
+            "metadata": [],
+        }
+        for field, value in cases.items():
+            with self.subTest(field=field):
+                document = self.valid_index()
+                document[field] = value
+
+                self.assertEqual(
+                    [
+                        (finding.code, finding.pointer)
+                        for finding in validate_schema(document, schema)
+                    ],
+                    [("schema.type", f"/{field}")],
+                )
 
     def make_registry_root(self, root: Path) -> Path:
         schema_dir = self.schema_dir(root)
@@ -303,6 +387,28 @@ class PaperOpsModelRegistryTest(unittest.TestCase):
     @staticmethod
     def schema_dir(root: Path) -> Path:
         return root / "_paperops" / "defaults" / "schemas"
+
+    @staticmethod
+    def valid_index(*, with_record: bool = False) -> dict[str, object]:
+        records: list[dict[str, object]] = []
+        if with_record:
+            records.append(
+                {
+                    "id": "CLM-0001",
+                    "record_type": "claim",
+                    "document": "_paperops/model/research/claims/CLM-0001.yml",
+                    "expected_revision": 1,
+                    "expected_hash": "sha256:" + "a" * 64,
+                }
+            )
+        return {
+            "model_name": "research",
+            "schema_version": 1,
+            "index_revision": 1,
+            "records": records,
+            "extensions": {},
+            "metadata": {"updated_at": ""},
+        }
 
 
 if __name__ == "__main__":
