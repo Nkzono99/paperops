@@ -18,6 +18,7 @@ from paperops_models import (
     validate_dependency_state,
     validate_reference_contract_definition,
     validate_issue_semantics,
+    validate_manuscript_compile_readiness,
     validate_manuscript_semantics,
     validate_publication_semantics,
     validate_research_semantics,
@@ -274,6 +275,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--print-dependency-hash")
     parser.add_argument("--document", type=Path)
     parser.add_argument("--results-document", type=Path)
+    parser.add_argument("--compile-readiness", action="store_true")
+    parser.add_argument("--section-id", action="append")
     args = parser.parse_args()
     if args.object_id is not None and not args.print_hash:
         parser.error("--object-id requires --print-hash")
@@ -281,6 +284,19 @@ def _parse_args() -> argparse.Namespace:
         parser.error("--print-hash and --print-dependency-hash are mutually exclusive")
     if args.print_hash and args.model == "all" and args.object_id is None:
         parser.error("--print-hash requires one explicit --model")
+    if args.section_id is not None and not args.compile_readiness:
+        parser.error("--section-id requires --compile-readiness")
+    if args.compile_readiness and args.model != "manuscript":
+        parser.error("--compile-readiness requires --model manuscript")
+    if args.compile_readiness and not args.section_id:
+        parser.error("--compile-readiness requires at least one --section-id")
+    if args.compile_readiness and (
+        args.print_hash
+        or args.print_dependency_hash is not None
+        or args.document is not None
+        or args.results_document is not None
+    ):
+        parser.error("--compile-readiness cannot be combined with hash or document queries")
     return args
 
 
@@ -293,7 +309,11 @@ def _registry_or_finding(root: Path) -> tuple[SchemaRegistry | None, list[ModelF
 
 def main() -> int:
     args = _parse_args()
-    phase = "all" if args.print_hash or args.print_dependency_hash else args.phase
+    phase = (
+        "all"
+        if args.print_hash or args.print_dependency_hash or args.compile_readiness
+        else args.phase
+    )
     root = args.root.resolve()
     registry, findings = _registry_or_finding(root)
     if registry is None:
@@ -631,6 +651,16 @@ def main() -> int:
             approval_findings.extend(validate_publication_semantics(publication.document, catalog))
         findings.extend(finding for finding in approval_findings if finding.code.startswith("approval."))
 
+    if (
+        args.compile_readiness
+        and manuscript is not None
+        and manuscript.schema_clean
+        and not any(not model.schema_clean for model in loaded.values())
+    ):
+        findings.extend(
+            validate_manuscript_compile_readiness(catalog, args.section_id)
+        )
+
     computed_hashes: dict[str, str] = {}
     if phase in ("all", "hash"):
         for name in selected_names:
@@ -667,13 +697,24 @@ def main() -> int:
         digest: str | None
         if args.object_id is not None:
             selected_object = catalog.objects.get(args.object_id)
-            digest = selected_object.object_hash if selected_object is not None else None
-            if selected_object is None:
+            digest = (
+                selected_object.object_hash
+                if selected_object is not None
+                and (
+                    args.model == "all"
+                    or selected_object.model_name == args.model
+                )
+                else None
+            )
+            if digest is None:
                 findings.append(
                     ModelFinding(
                         "reference.dangling",
                         "/object-id",
-                        f"object `{args.object_id}` is not present in the validated catalog",
+                        (
+                            f"object `{args.object_id}` is not present in the "
+                            f"validated `{args.model}` catalog"
+                        ),
                     )
                 )
                 failed = True

@@ -1195,6 +1195,7 @@ def validate_manuscript_compile_readiness(
         for object_id, obj in catalog.objects.items()
         if obj.model_name == "manuscript" and obj.object_type == "block"
     }
+    findings: list[ModelFinding] = []
     if section_ids is None:
         selected = sorted(
             (
@@ -1206,6 +1207,14 @@ def validate_manuscript_compile_readiness(
         )
     else:
         requested = {section_ids} if isinstance(section_ids, str) else set(section_ids)
+        for missing_id in sorted(requested - set(sections)):
+            findings.append(
+                ModelFinding(
+                    "compile.target_missing",
+                    "/section_ids",
+                    f"requested Manuscript section `{missing_id}` is not present",
+                )
+            )
         selected = sorted(
             (
                 section
@@ -1216,9 +1225,9 @@ def validate_manuscript_compile_readiness(
         )
 
     if not selected:
-        return []
+        return findings
 
-    findings = _validate_move_binding_projection(sections.values())
+    findings.extend(_validate_move_binding_projection(selected))
     primary_placements = _move_primary_placements(sections.values())
 
     canonical_move_references: dict[str, tuple[CatalogObject, int]] = {}
