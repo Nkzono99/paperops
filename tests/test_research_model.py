@@ -28,6 +28,13 @@ from paperops_schema import load_document, load_registry, semantic_hash, validat
 
 
 HASH_EXCLUSIONS = ("/approvals", "/metadata/updated_at")
+STATUS_ENUMS = {
+    "claim": {"draft", "proposed", "validated", "approved", "rejected", "superseded"},
+    "result": {"draft", "observed", "validated", "rejected", "superseded"},
+    "figure": {"draft", "planned", "designed", "validated", "accepted", "rejected", "superseded"},
+    "source": {"draft", "verified", "promoted", "rejected", "superseded"},
+    "gate": {"draft", "active", "superseded"},
+}
 
 
 def envelope(record_type: str, object_id: str, status: str = "draft") -> dict[str, object]:
@@ -411,6 +418,52 @@ class ResearchModelTest(unittest.TestCase):
             ],
         )
 
+    def test_dependency_revision_is_optional_but_hash_is_always_required(self) -> None:
+        documents = {
+            "claim": claim(), "result": result(), "figure": figure(),
+            "source": source(), "gate": gate(),
+        }
+        for record_type, document in documents.items():
+            virtual = copy.deepcopy(document)
+            virtual["dependencies"] = [{
+                "target_id": "MOV-0001", "relation": "guided_by",
+                "expected_hash": "sha256:" + "1" * 64,
+            }]
+            self.assertEqual(self.schema_findings(record_type, virtual), [])
+            record_target = copy.deepcopy(document)
+            record_target["dependencies"] = [{
+                "target_id": "RES-0001", "relation": "supported_by",
+                "expected_revision": 2, "expected_hash": "sha256:" + "2" * 64,
+            }]
+            self.assertEqual(self.schema_findings(record_type, record_target), [])
+            missing_hash = copy.deepcopy(document)
+            missing_hash["dependencies"] = [
+                {"target_id": "MOV-0001", "relation": "guided_by"}
+            ]
+            self.assertIn(
+                ("schema.required", "/dependencies/0/expected_hash"),
+                [(f.code, f.pointer) for f in self.schema_findings(record_type, missing_hash)],
+            )
+
+    def test_status_enum_tables_are_exact(self) -> None:
+        for record_type, expected in STATUS_ENUMS.items():
+            schema = load_document(SCHEMAS / f"research-{record_type}.schema.json")
+            self.assertEqual(set(schema["properties"]["status"]["enum"]), expected)
+
+    def test_research_extensions_require_namespaced_non_sensitive_keys(self) -> None:
+        documents = {
+            "claim": claim(), "result": result(), "figure": figure(),
+            "source": source(), "scientific_gate": gate(),
+        }
+        for record_type, document in documents.items():
+            for key in ("invalid", "x-lab-credential", "x-lab-local_path"):
+                changed = copy.deepcopy(document)
+                changed["extensions"] = {key: "opaque:value"}
+                findings = validate_research_semantics(
+                    self.catalog([(record_type, changed)])
+                )
+                self.assertIn("semantic.extension", [f.code for f in findings])
+
     def test_ready_gate_requires_current_scientific_scope_approval(self) -> None:
         approved_claim = claim()
         subject_hash = semantic_hash(approved_claim, excluded_paths=HASH_EXCLUSIONS)
@@ -444,6 +497,45 @@ class ResearchModelTest(unittest.TestCase):
             self.catalog([("claim", stale_claim), ("scientific_gate", gate())])
         )
         self.assertIn("approval.stale", [finding.code for finding in stale])
+
+        for final_decision in ("rejected", "superseded"):
+            withdrawn = copy.deepcopy(approved_claim)
+            withdrawn["approvals"].append({
+                "approval_id": "APR-0002", "kind": "scientific_scope",
+                "decision": final_decision, "object_revision": 1,
+                "object_hash": subject_hash, "actor": "human",
+                "note": "Latest decision controls.",
+            })
+            findings = validate_research_semantics(
+                self.catalog([("claim", withdrawn), ("scientific_gate", gate())])
+            )
+            self.assertIn("approval.missing", [f.code for f in findings])
+
+    def test_provenance_schemes_reject_disguised_paths_and_credentials(self) -> None:
+        valid = [
+            "artifact:ART-0001", "commit:abcdef0",
+            "url:https://example.org/data?id=1", "doi:10.1234/example.1",
+        ]
+        invalid = [
+            "artifact:../private", r"artifact:C:\\private", "artifact:has space",
+            "commit:not-hex", "url:https://user:pass@example.org/data",
+            "url:https:///private/capture", r"url:https://C:\\private",
+            "url:https://example.org/data?token=secret",
+            "url:https://example.org/data?api_key=secret",
+            "url:https://example.org/data?client_secret=secret",
+            "url:https://example.org/data?access-key=secret",
+            "doi:not-a-doi", "doi:10.1234/bad doi", "doi:10.1234/bad\nvalue",
+        ]
+        for value in valid:
+            document = source()
+            document["public_provenance_refs"] = [value]
+            findings = validate_research_semantics(self.catalog([("source", document)]))
+            self.assertNotIn("semantic.public_provenance", [f.code for f in findings])
+        for value in invalid:
+            document = source()
+            document["public_provenance_refs"] = [value]
+            findings = validate_research_semantics(self.catalog([("source", document)]))
+            self.assertIn("semantic.public_provenance", [f.code for f in findings])
 
     def test_checker_dispatches_research_semantics_phase(self) -> None:
         spec = importlib.util.spec_from_file_location("research_checker_test", CHECKER)

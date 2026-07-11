@@ -74,7 +74,7 @@ metadata:
 ```
 
 - `target_id` と `relation` は semantic field である。
-- `expected_revision` と `expected_hash` は参照を確定した時点の dependency snapshot である。
+- `expected_revision` と `expected_hash` は参照を確定した時点の dependency snapshot である。schema では virtual object の hash-only dependency を許すため `expected_revision` は任意、`expected_hash` は必須とする。target 解決後に独立 revision を持つ record だと判明した場合の `expected_revision` 必須性は Task 7 の dependency semantics で検査する。
 - `expected_hash` は常に必須とする。target が独立した `revision` を持つ場合は `expected_revision` も必須とし、現在値のどちらかが違えば `dependency.stale` とする。Editorial の move や Results item のように独立 revision を持たない subrecord は object-level hash だけで固定し、所有 document の revision を捏造しない。
 - dependency の配列順は意味を持たない。hash 計算では `(target_id, relation)` で整列する。
 - 同じ `(target_id, relation)` の重複は `reference.duplicate` とする。

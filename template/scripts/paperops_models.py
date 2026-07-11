@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from urllib.parse import parse_qsl, urlsplit
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
@@ -14,6 +15,7 @@ from paperops_schema import (
     load_document,
     semantic_hash,
     validate_document_version,
+    validate_extension_keys,
     validate_schema,
 )
 
@@ -87,6 +89,39 @@ def validate_research_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
     quantity_ids: dict[str, tuple[CatalogObject, int]] = {}
     for obj in research.values():
         document = obj.document
+        extensions = document.get("extensions")
+        if isinstance(extensions, dict):
+            for extension_finding in validate_extension_keys(extensions):
+                findings.append(
+                    _research_finding(
+                        extension_finding.code,
+                        obj,
+                        f"/extensions{extension_finding.pointer}",
+                        extension_finding.message,
+                    )
+                )
+            sensitive = (
+                "credential",
+                "password",
+                "secret",
+                "token",
+                "local_path",
+                "local-path",
+                "private_key",
+                "private-key",
+                "api_key",
+                "api-key",
+            )
+            for key in extensions:
+                if isinstance(key, str) and any(term in key.casefold() for term in sensitive):
+                    findings.append(
+                        _research_finding(
+                            "semantic.extension",
+                            obj,
+                            f"/extensions/{key.replace('~', '~0').replace('/', '~1')}",
+                            f"extension key `{key}` may not store credential or local-path state",
+                        )
+                    )
         if obj.object_type == "result":
             quantities = document.get("quantity_contracts", [])
             if isinstance(quantities, list):
@@ -162,14 +197,13 @@ def validate_research_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                 )
             )
         approvals = claim.document.get("approvals", [])
-        scientific = [
+        scientific_history = [
             approval
             for approval in approvals
             if isinstance(approval, dict)
             and approval.get("kind") == "scientific_scope"
-            and approval.get("decision") == "approved"
         ] if isinstance(approvals, list) else []
-        if not scientific:
+        if not scientific_history:
             findings.append(
                 _research_finding(
                     "approval.missing",
@@ -178,19 +212,31 @@ def validate_research_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                     "current scientific_scope approval is required",
                 )
             )
-        elif not any(
-            approval.get("object_revision") == claim.revision
-            and approval.get("object_hash") == claim.object_hash
-            for approval in scientific
-        ):
-            findings.append(
-                _research_finding(
-                    "approval.stale",
-                    claim,
-                    "/approvals",
-                    "scientific_scope approval does not match current revision/hash",
+        else:
+            current = [
+                approval
+                for approval in scientific_history
+                if approval.get("object_revision") == claim.revision
+                and approval.get("object_hash") == claim.object_hash
+            ]
+            if not current:
+                findings.append(
+                    _research_finding(
+                        "approval.stale",
+                        claim,
+                        "/approvals",
+                        "scientific_scope approval does not match current revision/hash",
+                    )
                 )
-            )
+            elif current[-1].get("decision") != "approved":
+                findings.append(
+                    _research_finding(
+                        "approval.missing",
+                        claim,
+                        "/approvals",
+                        "latest current scientific_scope decision is not approved",
+                    )
+                )
     return findings
 
 
@@ -200,11 +246,10 @@ def _validate_public_provenance(
     suffix: str,
     findings: list[ModelFinding],
 ) -> None:
-    allowed = ("doi:", "url:https://", "artifact:", "commit:")
     if not isinstance(values, list):
         return
     for index, value in enumerate(values):
-        if not isinstance(value, str) or not value.startswith(allowed):
+        if not isinstance(value, str) or not _valid_public_provenance(value):
             findings.append(
                 _research_finding(
                     "semantic.public_provenance",
@@ -213,6 +258,50 @@ def _validate_public_provenance(
                     "provenance must use a public or opaque identifier, not a local/raw path",
                 )
             )
+
+
+def _valid_public_provenance(value: str) -> bool:
+    if any(ord(character) < 32 or character.isspace() for character in value):
+        return False
+    if value.startswith("artifact:"):
+        return re.fullmatch(r"artifact:[A-Za-z0-9][A-Za-z0-9._-]*", value) is not None
+    if value.startswith("commit:"):
+        return re.fullmatch(r"commit:[0-9a-fA-F]{7,64}", value) is not None
+    if value.startswith("doi:"):
+        return (
+            re.fullmatch(
+                r"doi:10\.[0-9]{4,9}/[-._;()/:A-Za-z0-9]+",
+                value,
+            )
+            is not None
+        )
+    if value.startswith("url:"):
+        if "\\" in value:
+            return False
+        try:
+            parsed = urlsplit(value[4:])
+        except ValueError:
+            return False
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+        ):
+            return False
+        sensitive_query_keys = {
+            "token", "key", "password", "passwd", "secret", "credential",
+            "api_key", "apikey", "access_token", "auth",
+        }
+        for key, _ in parse_qsl(parsed.query, keep_blank_values=True):
+            normalized = key.casefold().replace("-", "_")
+            components = set(re.split(r"[._]", normalized))
+            if normalized in sensitive_query_keys or components.intersection(
+                {"token", "key", "password", "passwd", "secret", "credential", "auth"}
+            ):
+                return False
+        return True
+    return False
 
 
 def _exception_finding(error: Exception, pointer: str) -> ModelFinding:

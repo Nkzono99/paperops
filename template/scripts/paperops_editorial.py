@@ -6,12 +6,7 @@ import re
 from pathlib import PurePosixPath, PureWindowsPath
 from typing import Any
 
-from paperops_schema import ModelFinding
-
-
-EXTENSION_KEY_PATTERN = re.compile(
-    r"^x-[a-z0-9][a-z0-9._-]*-[a-z0-9][a-z0-9._-]*$"
-)
+from paperops_schema import ModelFinding, validate_extension_keys
 MOVE_STANCES = frozenset({"assert", "reject", "boundary", "hold"})
 PLACEHOLDER_VALUES = frozenset(
     {
@@ -406,23 +401,6 @@ def validate_editorial_references(
     if moves is not None and move_index is not None and not duplicate_moves:
         _check_move_order(moves, findings)
         _check_move_cycles(moves, move_index, duplicate_moves, findings)
-    return findings
-
-
-def validate_extension_keys(extensions: dict[str, Any]) -> list[ModelFinding]:
-    """Validate extension names without interpreting extension values."""
-    if not isinstance(extensions, dict):
-        return []
-    findings: list[ModelFinding] = []
-    for key in extensions:
-        if isinstance(key, str) and not EXTENSION_KEY_PATTERN.fullmatch(key):
-            findings.append(
-                _finding(
-                    "semantic.extension",
-                    f"/{_pointer_token(key)}",
-                    f"extension key `{key}` must use x-<owner>-<name> format",
-                )
-            )
     return findings
 
 

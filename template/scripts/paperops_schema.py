@@ -58,6 +58,29 @@ class SchemaRegistry:
     entries: dict[str, RegistryEntry]
 
 
+EXTENSION_KEY_PATTERN = re.compile(
+    r"^x-[a-z0-9][a-z0-9._-]*-[a-z0-9][a-z0-9._-]*$"
+)
+
+
+def validate_extension_keys(extensions: dict[str, Any]) -> list[ModelFinding]:
+    """Validate extension names without interpreting extension values."""
+    if not isinstance(extensions, dict):
+        return []
+    findings: list[ModelFinding] = []
+    for key in extensions:
+        if isinstance(key, str) and not EXTENSION_KEY_PATTERN.fullmatch(key):
+            token = key.replace("~", "~0").replace("/", "~1")
+            findings.append(
+                ModelFinding(
+                    "semantic.extension",
+                    f"/{token}",
+                    f"extension key `{key}` must use x-<owner>-<name> format",
+                )
+            )
+    return findings
+
+
 KNOWN_MODEL_VERSIONS = {
     "research": 1,
     "editorial": 1,
