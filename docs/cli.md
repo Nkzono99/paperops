@@ -2,6 +2,12 @@
 
 `pops` は、`paperops` の scaffold を初期化・診断・更新する薄い CLI である。研究判断や原稿編集は Agent / skill が担当し、`pops` は決定的なファイル操作を担当する。
 
+## Editorial Model schema check
+
+`make schema-check` は P1-A の paperops-managed registry / schema と project-owned Editorial Model を schema → references → semantics → hash phases の順で advisory 検査する。個別実行は `python scripts/check-paperops-models.py --root . --model editorial --phase all`、authority 切替前の gate は `python scripts/check-paperops-models.py --root . --model editorial --strict` である。
+
+通常実行は error があれば exit 1、warning / info だけなら exit 0 である。`--strict` は warning も exit 1 にするが、P1-B の Research Model が未提供なため claim target の `reference.deferred` info は失敗にしない。hash phase は schema / references / semantics を通った入力だけ canonical semantic-v1 hash として出力する。P1-B の Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash も未提供である。
+
 ## 実行方法
 
 標準実行は常に `uvx` 経由にする。

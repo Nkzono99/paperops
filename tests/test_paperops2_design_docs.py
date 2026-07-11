@@ -308,6 +308,20 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
         self.assertEqual(model_row[3], "investigate")
         self.assertIn("modelごとに単一writerをP1で決定する必要がある", model_row[6])
 
+        for asset in [
+            "template/scripts/check-paperops-models.py",
+            "template/Makefile::schema-check",
+        ]:
+            with self.subTest(asset=asset, check="P1-A explicit inventory"):
+                self.assertIn(asset, downstream_rows)
+
+        root_rows = {
+            cells[0].removeprefix("`").removesuffix("`"): cells
+            for cells in self.disposition_rows(text, "## Root governance layer")
+            if len(cells) == 8
+        }
+        self.assertIn("Makefile::schema-check", root_rows)
+
     def test_disposition_splits_overview_and_controlled_authoring_views(self) -> None:
         text = self.read("docs/paperops2-disposition.md")
         rows = {

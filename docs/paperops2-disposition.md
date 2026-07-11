@@ -50,6 +50,7 @@ checker inventory は、名前が `check-` で始まるかにかかわらず、d
 | `Makefile::argument-focus-check` | 論旨焦点検査 | P2–P5 editorial diagnostic | adapt | Make / checker | Make / checker over approved typed input | editorial 判断を deterministic 合否へ偽装しない | fixture 同等性と利用ゼロ後のみ |
 | `Makefile::authoring-intent-check` | authoring intent 検査 | P4/P5 authoring gate | retain | Make / checker | Make / checker | invariant を維持 | 置換 checker の同等性確認後のみ |
 | `Makefile::storyline-check` | storyline 整合性 | P2 typed story gate | adapt | Make / checker | Make / checker over story records | malformed v2 を legacy fallback で隠さない | v2 checker への全 caller 移行後のみ |
+| `Makefile::schema-check` | template の schema kernel を advisory 検査 | P1-A schema / reference / semantics / hash gate | retain | Make / checker | Make / checker | project-owned state を書かず shadow check に留める | 全 model gate の同等入口へ移行後のみ |
 | `Makefile::section-contract-check` | section contract / hierarchy 検査 | P2–P5 typed section gate | adapt | Make / checker | Make / checker over typed records | legacy-authoritative 中は比較し opt-in 後に v2 を正本化 | legacy reader 利用ゼロ確認後のみ |
 | `Makefile::section-depth-check` | section depth 検査 | P4/P5 editorial diagnostic | adapt | Make / checker | Make / checker | advisory と strict を区別 | 後継 diagnostic の評価同等性確認後のみ |
 | `Makefile::quantity-integrity-check` | 数量整合性 | P3–P6 quantity gate | retain | Make / checker | Make / checker | quantity invariant を維持 | 置換 checker の同等性確認後のみ |
@@ -191,6 +192,7 @@ checker inventory は、名前が `check-` で始まるかにかかわらず、d
 | `template/scripts/mirror-check.py` | JA/EN block 対応検査 | P4/P6 mirror gate | retain | checker is read-only | checker is read-only | block ID と mirror invariant を維持 | 置換 checker 同等性確認後のみ |
 | `template/scripts/mirror-freshness-check.py` | JA/EN mirror freshness 検査 | P4/P6 mirror stale gate | retain | checker is read-only | checker is read-only | advisory / strict と selective stale を維持 | 置換 checker 同等性確認後のみ |
 | `template/scripts/readiness-check.py` | starter / project / submission readiness 検査 | P1–P7 readiness gate | adapt | checker is read-only | checker is read-only | starter と strict submission profile を区別 | v2 readiness checker 同等性確認後のみ |
+| `template/scripts/check-paperops-models.py` | schema registry に従う phase 別 model 検査 | P1-A schema / reference / semantics / hash gate | retain | checker is read-only | checker is read-only | managed schema と project-owned model の境界を維持 | 全 model checker の同等性確認後のみ |
 
 ### Downstream Make targets
 
@@ -212,6 +214,7 @@ checker inventory は、名前が `check-` で始まるかにかかわらず、d
 | `template/Makefile::argument-focus-check` | argument focus | P2–P5 diagnostic | adapt | Make / checker | Make / checker | editorial choice と分離 | fixture 同等性確認後のみ |
 | `template/Makefile::authoring-intent-check` | authoring intent | P4/P5 gate | retain | Make / checker | Make / checker | invariant 維持 | 置換 checker 同等性確認後のみ |
 | `template/Makefile::storyline-check` | storyline | P2 story gate | adapt | Make / checker | Make / typed checker | no-fallback を維持 | legacy reader 利用ゼロ後のみ |
+| `template/Makefile::schema-check` | project model の advisory schema 検査 | P1-A schema / reference / semantics / hash gate | retain | Make / checker | Make / checker | audit にだけ接続し finish / pre-submit へは未接続 | P1-B 後の統合 gate へ移行後のみ |
 | `template/Makefile::section-contract-check` | section contract | P2–P5 section gate | adapt | Make / checker | Make / typed checker | atomic migration 後に authority 切替 | legacy reader 利用ゼロ後のみ |
 | `template/Makefile::section-depth-check` | section depth | P4/P5 diagnostic | adapt | Make / checker | Make / checker | strict/advisory を区別 | fixture 同等性確認後のみ |
 | `template/Makefile::quantity-integrity-check` | quantity integrity | P3–P6 gate | retain | Make / checker | Make / checker | invariant 維持 | 置換 checker 同等性確認後のみ |

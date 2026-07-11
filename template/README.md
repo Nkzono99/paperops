@@ -44,7 +44,8 @@
 - `_paperops/requests/`: analysis / writing request card の正本
 - `_paperops/notes/views/`: `view_type` / `source_of_truth` つきの pure overview view と controlled authoring view
 - `_paperops/model/editorial/results-hierarchy.yml`: project-owned の typed Results hierarchy 正本。各 item は `RHI-*` ID と `next_item_id` で読者順を表す。
-- `_paperops/defaults/schemas/`: paperops-managed の schema default。project-owned model state は置かない。
+- `_paperops/model/editorial/editorial-model.yml`: project-owned の story candidate、選択・棄却理由、argument move の正本。
+- `_paperops/defaults/schemas/registry.yml` と JSON Schema: paperops-managed の registry / schema default。project-owned model state は置かない。
 - `_paperops/defaults/contracts/`: paperops-managed の標準 section / figure story 契約
 - `_paperops/contracts/`: project 固有の contract overlay
 - `_paperops/workflow/`: 現在状態、section 状態、issue class、stale 伝播、人間判断
@@ -54,6 +55,8 @@
 `paper_ir` は card と controlled authoring view から Writer に渡す context を作る生成一時物であり、手書き正本にはしない。
 
 既存下流 project は M0-0003 を採用するまで `storyline.md` の legacy Markdown Results hierarchy を fallback として利用できる。移行時は `uvx --from paper-harness-cli pops update-paperops --apply --only _paperops/defaults/schemas/` で managed schema を更新し、project-owned の typed file を opt-in で作成する。`python scripts/check-section-contracts.py --root . --strict` が成功する前に legacy Markdown を削除しない。
+
+新規 project は `pops init` で Editorial Model starter を受け取る。既存 project は M0-0004 まで `pops update-paperops` や migration apply から project-owned の `editorial-model.yml` を自動取得せず、managed registry / schema / checker の更新後に手動で opt-in する。`make schema-check` は schema / references / semantics / hash phases の advisory 確認であり、authority 切替前には明示的な `--strict` command を成功させる。P2 までは legacy controlled view と既存 checker を維持する。P1-B の Research / Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash は未提供である。
 
 ## 情報の置き場所
 

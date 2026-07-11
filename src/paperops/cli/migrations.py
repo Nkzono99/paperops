@@ -81,12 +81,30 @@ TYPED_RESULTS_HIERARCHY_MIGRATION = Migration(
     ),
 )
 
+EDITORIAL_MODEL_SCHEMA_KERNEL_MIGRATION = Migration(
+    migration_id="M0-0004",
+    title="Adopt the Editorial Model schema kernel",
+    checkpoint="v0 checkpoint for the PaperOps 2 P1-A schema kernel",
+    summary=(
+        "Guides existing projects to adopt the project-owned Editorial Model "
+        "without generating or overwriting project-owned state."
+    ),
+    moves=(),
+    notes=(
+        "Run `pops update-paperops --apply` to receive the managed registry, schemas, and checker.",
+        "Create _paperops/model/editorial/editorial-model.yml manually; migration apply never creates project-owned state.",
+        "Use `make schema-check` for advisory checks, then run the documented explicit `--strict` command successfully.",
+        "Keep the legacy controlled view through P2; do not switch authority or remove it during this migration.",
+    ),
+)
+
 
 def registered_migrations() -> tuple[Migration, ...]:
     return (
         INTERNAL_LAYOUT_MIGRATION,
         DEFAULTS_SPLIT_MIGRATION,
         TYPED_RESULTS_HIERARCHY_MIGRATION,
+        EDITORIAL_MODEL_SCHEMA_KERNEL_MIGRATION,
     )
 
 

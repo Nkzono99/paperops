@@ -17,6 +17,12 @@
 
 この層の役割は、ハーネスを安全に進化させることである。
 
+## PaperOps 2 P1-A schema kernel
+
+P1-A は Editorial Model だけを schema kernel の縦切りとして実装する。`_paperops/defaults/schemas/registry.yml`、JSON Schema、validator / checker は paperops-managed であり、`_paperops/model/editorial/editorial-model.yml` と Results hierarchy は project-owned である。検証は schema、references、semantics、canonical semantic-v1 hash の phase 順を固定し、既存 Results checker と legacy controlled view を削除しない。
+
+Research / Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash は P1-B の範囲であり未提供である。したがって P1-A の完了を shadow migration、Writer、workflow cutover、v2-authoritative の完了として扱わない。
+
 ## 下流論文層
 
 `template/` は個別論文リポジトリに展開される。主な層は次の通り。

@@ -10,6 +10,7 @@ from tests.helpers import ROOT, run_cli
 
 from paperops import __version__  # noqa: E402
 from paperops.cli.main import write_manifest  # noqa: E402
+from paperops.cli.migrations import get_migration  # noqa: E402
 from paperops.cli.scaffold import copy_scaffold, is_managed_update  # noqa: E402
 
 
@@ -328,6 +329,54 @@ class PopsCliTest(unittest.TestCase):
             "`make section-contract-check` を実行し、strict checker",
             m0_0003_guide,
         )
+
+    def test_migrate_lists_editorial_model_schema_kernel_guide(self) -> None:
+        code, out, err = run_cli(["migrate", "list"])
+
+        self.assertEqual(code, 0, err)
+        self.assertIn("M0-0004", out)
+        self.assertIn("Editorial Model", out)
+
+        code, out, err = run_cli(["migrate", "show", "M0-0004"])
+
+        self.assertEqual(code, 0, err)
+        self.assertIn("Editorial Model", out)
+        self.assertIn("schema-check", out)
+        self.assertIn("project-owned", out)
+
+    def test_editorial_model_schema_kernel_migration_is_guide_only(self) -> None:
+        migration = get_migration("M0-0004")
+
+        self.assertIsNotNone(migration)
+        assert migration is not None
+        self.assertEqual(migration.moves, ())
+
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "paper-demo"
+            run_cli(["init", str(project)])
+            editorial_model = project / "_paperops" / "model" / "editorial" / "editorial-model.yml"
+            editorial_model.unlink()
+
+            code, out, err = run_cli(["migrate", "apply", "M0-0004", str(project)])
+
+            self.assertEqual(code, 0, err)
+            self.assertIn("No file moves are planned.", out)
+            self.assertIn("Applied migration M0-0004", out)
+            self.assertFalse(editorial_model.exists())
+            self.assertTrue((project / ".pops" / "manifest.toml").is_file())
+
+    def test_editorial_model_migration_checks_strictly_before_authority_switch(self) -> None:
+        guide = (ROOT / "docs" / "migrations" / "v0.md").read_text(encoding="utf-8")
+        m0_0004_guide = guide.split("## M0-0004:", 1)[1]
+        strict_command = "python scripts/check-paperops-models.py --root . --model editorial --strict"
+        authority_switch = "Editorial Model へ authority を切り替える"
+        legacy_retention = "legacy controlled view を維持する"
+
+        self.assertIn(strict_command, m0_0004_guide)
+        self.assertIn(authority_switch, m0_0004_guide)
+        self.assertIn(legacy_retention, m0_0004_guide)
+        self.assertLess(m0_0004_guide.index(strict_command), m0_0004_guide.index(authority_switch))
+        self.assertLess(m0_0004_guide.index(strict_command), m0_0004_guide.index(legacy_retention))
 
     def test_migrate_legacy_apply_still_writes_manifest_without_moving_dirs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

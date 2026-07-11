@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | PaperOps 2 design | `docs/rfcs/0001-paperops-2.md`, `docs/adr/`, `docs/paperops2-disposition.md`, `docs/paperops2-evaluation-fixtures.md` | 段階再設計の目標と導入、authority / ownership、CLI / Agent / compiler 境界、revision / hash、現行資産の判断、P1 fixture 方針 |
 | architecture / layer contract | `docs/architecture.md` | root 層、下流論文層、`_paperops/`、`paper_ir`、workflow state、submission axis |
-| typed Editorial state | `template/_paperops/defaults/schemas/results-hierarchy.schema.json`, `template/_paperops/model/editorial/results-hierarchy.yml`, `template/scripts/check-section-contracts.py`, `docs/migrations/v0.md` | schema、starter state、strict checker、M0-0003 compatibility |
+| PaperOps 2 P1-A Editorial schema kernel | `template/_paperops/defaults/schemas/registry.yml`, `template/_paperops/defaults/schemas/*.schema.json`, `template/scripts/paperops_schema.py`, `template/scripts/paperops_editorial.py`, `template/scripts/check-paperops-models.py`, `docs/migrations/v0.md` | managed registry/schema/checker、project-owned Editorial Model、schema / references / semantics / canonical semantic-v1 hash、M0-0004 compatibility |
 | CLI and checker behavior | `docs/cli.md`, `src/paperops/cli/`, `template/scripts/` | `pops init`、`pops update-paperops`、`pops scratch`、`pops workflow`、Makefile checks |
 | migrations | `docs/migrations/` | 下流互換、legacy path、overlay migration |
 | release and distribution | `docs/distribution.md`, `CHANGELOG.md`, `.agents/skills/release/SKILL.md` | package / tag / PyPI / scaffold version |
@@ -24,7 +24,9 @@
 - root repository はテンプレート管理層であり、`template/` は下流論文 project に配布される scaffold である。
 - 下流作成は `pops init` を正道とする。下流の project-owned extension は `AGENTS.project.md`、`CLAUDE.project.md`、`Makefile.project` に置く。
 - 人間が普段触る入口は `story/`、`manuscript/`、`submission/`、review comments である。AI / harness が使う internal state は `_paperops/` に置く。
-- `_paperops/defaults/schemas/*` は managed default、`_paperops/model/editorial/results-hierarchy.yml` は project-owned typed Results hierarchy である。既存下流は M0-0003 採用まで legacy Markdown fallback を利用できる。
+- `_paperops/defaults/schemas/*` は managed default、`_paperops/model/editorial/editorial-model.yml` と `results-hierarchy.yml` は project-owned Editorial state である。既存下流は M0-0004 の strict opt-in と人間承認まで legacy controlled view を維持する。
+- P1-A の合成 fixture は mechanism-led、boundary-led、negative-result-led の三 category で、期待値に canonical semantic-v1 hash を持つ。
+- Research / Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash は P1-B の範囲であり未提供である。
 - 旧 top-level `notes/`、`refs/`、`claims/`、`evidence/`、`contracts/`、`workflow/` などは互換読み取り対象に留める。
 - `paper_ir` と section plan は生成一時物であり、必要な場合だけ `.paperops/cache/` に置く。
 - `manuscript/` は living manuscript / authoring source であり、投稿後や査読後も編集してよい。

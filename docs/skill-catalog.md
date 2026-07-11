@@ -112,6 +112,8 @@ Writer には card 正本や gate 語彙を直接読み込ませすぎない。`
 
 ## 重要な境界
 
+PaperOps 2 P1-A では paperops-managed の `registry.yml` / JSON Schema / checker と、project-owned の Editorial Model state を分離する。`make schema-check` は schema → references → semantics → canonical semantic-v1 hash の順で検査し、mechanism-led、boundary-led、negative-result-led の三つの合成 fixture を回帰 corpus とする。legacy controlled view と既存 Results checker は P2 まで維持する。P1-B の Research / Manuscript / Issue / Publication Model、全 model cross-reference、dependency hash は未提供である。
+
 - 人間向けの高次構想は `story/` に置く。
 - カード正本は `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`。
 - source summary は背景だけなら hold に留め、claim_boundary、parameter_choice、reviewer_objection、method_precedent に使う場合だけ source card に昇格する。
