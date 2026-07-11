@@ -232,7 +232,7 @@ class PaperOpsModelCheckTest(unittest.TestCase):
                     self.assertIn(f"[document.non_json] {pointer}", result.stdout)
                     self.assertNotIn("Traceback", result.stderr)
 
-    def test_deferred_claim_and_figure_references_are_info_only(self) -> None:
+    def test_empty_research_starter_keeps_external_refs_deferred(self) -> None:
         editorial, results = valid_documents()
         editorial["argument_moves"][0]["claim_ids"] = ["CLM-0001"]
         editorial["visual_obligations"][0]["figure_ids"] = ["FIG-0001"]
@@ -242,9 +242,8 @@ class PaperOpsModelCheckTest(unittest.TestCase):
             )
 
         self.assertEqual(result.returncode, 0, result.stdout)
-        self.assertRegex(result.stdout, r"(?s)## Info.*reference\.deferred")
-        errors_section = result.stdout.split("## Warnings", 1)[0]
-        self.assertNotIn("reference.deferred", errors_section)
+        self.assertIn("reference.deferred", result.stdout)
+        self.assertNotIn("reference.dangling", result.stdout)
 
     def test_print_hash_requires_a_clean_single_model(self) -> None:
         editorial, results = valid_documents()
@@ -323,6 +322,23 @@ class PaperOpsModelCheckTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("[registry.model] /", result.stdout)
         self.assertNotIn("Traceback", result.stderr)
+
+    def test_approval_and_dependency_phases_accept_clean_starter(self) -> None:
+        for phase in ("approvals", "dependencies"):
+            with self.subTest(phase=phase):
+                result = run_python_script(
+                    SCRIPT, "--root", ROOT / "template", "--phase", phase
+                )
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_print_dependency_hash_emits_one_clean_line(self) -> None:
+        result = run_python_script(
+            SCRIPT,
+            "--root", ROOT / "template",
+            "--print-dependency-hash", "RHI-0001",
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertRegex(result.stdout, r"^sha256:[0-9a-f]{64}\n?$")
 
     def test_catalog_findings_are_partitioned_once_by_phase(self) -> None:
         spec = importlib.util.spec_from_file_location(
@@ -558,6 +574,11 @@ class PaperOpsModelCheckTest(unittest.TestCase):
             (schema_dir / "claim.schema.json").write_text(
                 json.dumps(record_schema), encoding="utf-8"
             )
+            registry["models"] = {
+                name: entry
+                for name, entry in registry["models"].items()
+                if name in {"editorial", "results_hierarchy", "research"}
+            }
             registry["models"]["manuscript"] = {
                 "document_kind": "index",
                 "schema": "model-index.schema.json",
@@ -661,7 +682,6 @@ class PaperOpsModelCheckTest(unittest.TestCase):
 
     def test_print_hash_allows_info_only_and_prints_one_line(self) -> None:
         editorial, results = valid_documents()
-        editorial["argument_moves"][0]["claim_ids"] = ["CLM-0001"]
         with tempfile.TemporaryDirectory() as tmp:
             result = self.run_overrides(
                 Path(tmp), editorial, results, "--phase", "schema", "--print-hash"

@@ -11,7 +11,11 @@ from paperops_editorial import validate_editorial_references, validate_editorial
 from paperops_models import (
     ModelDocument,
     build_object_catalog,
+    dependency_hash,
     load_model_document,
+    validate_cross_model_references,
+    validate_dependency_state,
+    validate_reference_contract_definition,
     validate_issue_semantics,
     validate_manuscript_semantics,
     validate_publication_semantics,
@@ -28,7 +32,7 @@ from paperops_schema import (
 
 
 MODEL_CHOICES = ("all", *KNOWN_MODEL_VERSIONS)
-PHASE_CHOICES = ("all", "schema", "references", "semantics", "hash")
+PHASE_CHOICES = ("all", "schema", "references", "semantics", "approvals", "dependencies", "hash")
 
 
 def _error_from_exception(error: Exception, pointer: str) -> ModelFinding:
@@ -214,11 +218,14 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--strict", action="store_true")
     parser.add_argument("--print-hash", action="store_true")
     parser.add_argument("--object-id")
+    parser.add_argument("--print-dependency-hash")
     parser.add_argument("--document", type=Path)
     parser.add_argument("--results-document", type=Path)
     args = parser.parse_args()
     if args.object_id is not None and not args.print_hash:
         parser.error("--object-id requires --print-hash")
+    if args.print_dependency_hash is not None and args.print_hash:
+        parser.error("--print-hash and --print-dependency-hash are mutually exclusive")
     if args.print_hash and args.model == "all" and args.object_id is None:
         parser.error("--print-hash requires one explicit --model")
     return args
@@ -233,12 +240,13 @@ def _registry_or_finding(root: Path) -> tuple[SchemaRegistry | None, list[ModelF
 
 def main() -> int:
     args = _parse_args()
-    phase = "all" if args.print_hash else args.phase
+    phase = "all" if args.print_hash or args.print_dependency_hash else args.phase
     root = args.root.resolve()
     registry, findings = _registry_or_finding(root)
     if registry is None:
         _render(findings)
         return 1
+    findings.extend(validate_reference_contract_definition(registry))
 
     if args.model != "all" and args.model not in registry.entries:
         _render(
@@ -267,6 +275,10 @@ def main() -> int:
         and any(name not in registry.entries for name in publication_support_names)
     )
     names_to_load = list(selected_names)
+    if phase in ("all", "references", "approvals", "dependencies"):
+        for graph_name in registry.entries:
+            if graph_name not in names_to_load:
+                names_to_load.append(graph_name)
     if (
         "editorial" in selected_names
         and phase in ("all", "references")
@@ -396,6 +408,14 @@ def main() -> int:
                     [name for name in publication_support_names if name not in registry.entries]
                 )
             )
+        if phase == "all":
+            for name, model in loaded.items():
+                if name in selected_names:
+                    continue
+                findings.extend(model.schema_findings)
+                findings.extend(
+                    _catalog_findings_for_phase(model.catalog_findings, phase)
+                )
     elif phase == "hash":
         for name in selected_names:
             model = loaded.get(name)
@@ -406,7 +426,7 @@ def main() -> int:
                 findings.extend(
                     _catalog_findings_for_phase(model.catalog_findings, phase)
                 )
-    elif phase in ("references", "semantics"):
+    elif phase in ("references", "semantics", "approvals", "dependencies"):
         prerequisites = list(selected_names)
         if phase == "references" and "editorial" in selected_names:
             prerequisites = list(dict.fromkeys([*prerequisites, "results_hierarchy"]))
@@ -414,6 +434,8 @@ def main() -> int:
             prerequisites = list(dict.fromkeys([*prerequisites, "research"]))
         if phase == "semantics" and "publication" in selected_names:
             prerequisites = list(dict.fromkeys([*prerequisites, *publication_support_names]))
+        if phase in ("references", "approvals", "dependencies"):
+            prerequisites = list(loaded)
         binding_blocks_results = any(
             finding.severity == "error"
             and finding.code in {"reference.document", "reference.path"}
@@ -453,6 +475,9 @@ def main() -> int:
         findings.extend(binding_findings)
 
     catalog = build_object_catalog(loaded.values())
+    research_objects_available = any(
+        obj.model_name == "research" for obj in catalog.objects.values()
+    )
     findings.extend(_global_catalog_findings_for_phase(catalog.findings, phase))
     if phase == "references":
         for name in selected_names:
@@ -461,6 +486,16 @@ def main() -> int:
                 findings.extend(
                     _catalog_findings_for_phase(model.catalog_findings, phase)
                 )
+
+    if phase in ("all", "references") and not any(
+        not model.schema_clean for model in loaded.values()
+    ):
+        findings.extend(
+            validate_cross_model_references(
+                catalog,
+                defer_empty_editorial_research=not research_objects_available,
+            )
+        )
 
     editorial = loaded.get("editorial")
     results = loaded.get("results_hierarchy")
@@ -475,6 +510,8 @@ def main() -> int:
         findings.extend(
             validate_editorial_references(editorial.document, results.document)
         )
+        if research_objects_available:
+            findings = [finding for finding in findings if finding.code != "reference.deferred"]
     if (
         phase in ("all", "semantics")
         and "editorial" in selected_names
@@ -523,6 +560,23 @@ def main() -> int:
     ):
         findings.extend(validate_publication_semantics(publication.document, catalog))
 
+    if phase in ("all", "dependencies") and not any(
+        not model.schema_clean for model in loaded.values()
+    ):
+        findings.extend(validate_dependency_state(catalog))
+
+    if phase == "approvals":
+        approval_findings: list[ModelFinding] = []
+        if research is not None and research.schema_clean:
+            approval_findings.extend(validate_research_semantics(catalog))
+        if manuscript is not None and manuscript.schema_clean and research is not None and research.schema_clean:
+            approval_findings.extend(validate_manuscript_semantics(catalog))
+        if issue is not None and issue.schema_clean:
+            approval_findings.extend(validate_issue_semantics(catalog))
+        if publication is not None and publication.schema_clean:
+            approval_findings.extend(validate_publication_semantics(publication.document, catalog))
+        findings.extend(finding for finding in approval_findings if finding.code.startswith("approval."))
+
     computed_hashes: dict[str, str] = {}
     if phase in ("all", "hash"):
         for name in selected_names:
@@ -545,6 +599,13 @@ def main() -> int:
     errors = [finding for finding in findings if finding.severity == "error"]
     warnings = [finding for finding in findings if finding.severity == "warning"]
     failed = bool(errors or ((args.print_hash or args.strict) and warnings))
+    if args.print_dependency_hash is not None and not failed:
+        try:
+            print(dependency_hash(args.print_dependency_hash, catalog))
+            return 0
+        except Exception as error:
+            findings.append(_error_from_exception(error, "/object-id"))
+            failed = True
     if args.print_hash and not failed:
         digest: str | None
         if args.object_id is not None:

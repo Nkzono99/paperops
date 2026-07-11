@@ -13,6 +13,7 @@ from urllib.parse import parse_qsl, urlsplit
 from paperops_schema import (
     ModelFinding,
     RegistryEntry,
+    SchemaRegistry,
     load_document,
     semantic_hash,
     validate_document_version,
@@ -73,6 +74,261 @@ class CatalogObject:
 class ObjectCatalog:
     objects: dict[str, CatalogObject]
     findings: tuple[ModelFinding, ...]
+
+
+REFERENCE_CONTRACT_VERSION = 1
+MODEL_OBJECT_TYPES: dict[str, frozenset[str]] = {
+    "editorial": frozenset({"story", "move", "visual"}),
+    "results_hierarchy": frozenset({"results_item"}),
+    "research": frozenset({"claim", "result", "figure", "source", "scientific_gate"}),
+    "manuscript": frozenset({"section", "block"}),
+    "issue": frozenset(
+        {"feedback", "analysis_request", "writing_request", "response", "review_round"}
+    ),
+    "publication": frozenset(),
+}
+REFERENCE_CONTRACTS: dict[str, dict[str, frozenset[str]]] = {
+    "story": {"argument_move_ids": frozenset({"move"}), "result_order": frozenset({"results_item"})},
+    "move": {"claim_ids": frozenset({"claim"}), "result_item_ids": frozenset({"results_item"})},
+    "visual": {"claim_ids": frozenset({"claim"}), "figure_ids": frozenset({"figure"})},
+    "claim": {"gate_id": frozenset({"scientific_gate"}), "result_refs": frozenset({"result"}), "figure_refs": frozenset({"figure"}), "source_refs": frozenset({"source"}), "manuscript_block_refs": frozenset({"block"}), "upstream_feedback_refs": frozenset({"feedback"}), "visual_obligation_refs": frozenset({"visual"})},
+    "result": {"claim_refs": frozenset({"claim"}), "figure_refs": frozenset({"figure"}), "source_refs": frozenset({"source"}), "manuscript_block_refs": frozenset({"block"})},
+    "figure": {"claim_refs": frozenset({"claim"}), "result_refs": frozenset({"result"}), "manuscript_block_refs": frozenset({"block"}), "visual_obligation_refs": frozenset({"visual"})},
+    "source": {"claim_refs": frozenset({"claim"}), "manuscript_block_refs": frozenset({"block"})},
+    "scientific_gate": {"claim_id": frozenset({"claim"}), "guarded_claim_refs": frozenset({"claim"}), "analysis_request_refs": frozenset({"analysis_request"}), "blocking_feedback_refs": frozenset({"feedback"}), "manuscript_block_refs": frozenset({"block"})},
+    "section": {"editorial_move_refs": frozenset({"move"}), "research_refs": frozenset({"claim", "result", "figure", "source", "scientific_gate"})},
+    "block": {"section_id": frozenset({"section"}), "claim_refs": frozenset({"claim"}), "result_refs": frozenset({"result"}), "figure_refs": frozenset({"figure"}), "source_refs": frozenset({"source"})},
+}
+ISSUE_TARGET_TYPES = {
+    "claim": frozenset({"claim"}), "result": frozenset({"result"}),
+    "figure": frozenset({"figure"}), "source": frozenset({"source"}),
+    "scientific_gate": frozenset({"scientific_gate"}),
+    "manuscript_section": frozenset({"section"}), "manuscript_block": frozenset({"block"}),
+    "editorial_move": frozenset({"move"}), "results_item": frozenset({"results_item"}),
+    "feedback": frozenset({"feedback"}), "analysis_request": frozenset({"analysis_request"}),
+    "writing_request": frozenset({"writing_request"}), "response": frozenset({"response"}),
+    "review_round": frozenset({"review_round"}),
+}
+
+
+def validate_reference_contract_definition(
+    registry: SchemaRegistry,
+) -> list[ModelFinding]:
+    """Ensure the versioned reference contract only names registered object types."""
+    known_types = set().union(*MODEL_OBJECT_TYPES.values())
+    findings: list[ModelFinding] = []
+    if REFERENCE_CONTRACT_VERSION != 1:
+        findings.append(
+            ModelFinding(
+                "registry.reference_contract",
+                "/reference_contract_version",
+                f"unsupported reference contract version `{REFERENCE_CONTRACT_VERSION}`",
+            )
+        )
+    named_types = set(REFERENCE_CONTRACTS)
+    named_types.update(
+        target_type
+        for fields in REFERENCE_CONTRACTS.values()
+        for target_types in fields.values()
+        for target_type in target_types
+    )
+    named_types.update(
+        target_type
+        for target_types in ISSUE_TARGET_TYPES.values()
+        for target_type in target_types
+    )
+    for object_type in sorted(named_types - known_types):
+        findings.append(
+            ModelFinding(
+                "registry.reference_contract",
+                "/reference_contracts",
+                f"object type `{object_type}` is not registered",
+            )
+        )
+    complete_registry = set(MODEL_OBJECT_TYPES).issubset(registry.entries)
+    for model_name, entry in registry.entries.items():
+        expected_types = MODEL_OBJECT_TYPES.get(model_name)
+        if (
+            not complete_registry
+            or expected_types is None
+            or entry.document_kind != "index"
+        ):
+            continue
+        actual_types = frozenset(entry.record_sets)
+        if actual_types != expected_types:
+            findings.append(
+                ModelFinding(
+                    "registry.reference_contract",
+                    f"/models/{model_name}/record_sets",
+                    f"registered types {sorted(actual_types)} do not match "
+                    f"reference-contract types {sorted(expected_types)}",
+                )
+            )
+    return findings
+
+
+def _cross_reference_finding(
+    catalog: ObjectCatalog,
+    target_id: Any,
+    expected_types: frozenset[str],
+    pointer: str,
+) -> ModelFinding | None:
+    target = catalog.objects.get(target_id) if isinstance(target_id, str) else None
+    if target is None:
+        return ModelFinding("reference.dangling", pointer, f"target `{target_id}` does not exist")
+    if target.object_type not in expected_types:
+        return ModelFinding(
+            "reference.type", pointer,
+            f"target `{target_id}` has type `{target.object_type}`, expected {sorted(expected_types)}",
+        )
+    return None
+
+
+def validate_cross_model_references(
+    catalog: ObjectCatalog,
+    *,
+    defer_empty_editorial_research: bool = False,
+) -> list[ModelFinding]:
+    """Resolve version-1 field contracts against the schema-clean global catalog."""
+    findings: list[ModelFinding] = []
+    research_types = MODEL_OBJECT_TYPES["research"]
+    for source in catalog.objects.values():
+        contracts = REFERENCE_CONTRACTS.get(source.object_type, {})
+        for field, expected_types in contracts.items():
+            if (
+                defer_empty_editorial_research
+                and source.model_name == "editorial"
+                and expected_types.issubset(research_types)
+            ):
+                continue
+            if field not in source.document:
+                continue
+            value = source.document.get(field)
+            values = value if isinstance(value, list) else [value]
+            if isinstance(value, list) and len({item for item in value if isinstance(item, str)}) != len(value):
+                findings.append(ModelFinding(
+                    "reference.cardinality", f"{source.pointer}/{field}",
+                    f"reference field `{field}` must not contain duplicates",
+                ))
+            for index, target_id in enumerate(values):
+                pointer = f"{source.pointer}/{field}" + (f"/{index}" if isinstance(value, list) else "")
+                finding = _cross_reference_finding(catalog, target_id, expected_types, pointer)
+                if finding is not None:
+                    findings.append(finding)
+        targets = source.document.get("targets")
+        if source.model_name == "issue" and isinstance(targets, list):
+            for index, target_spec in enumerate(targets):
+                if not isinstance(target_spec, dict):
+                    continue
+                kind = target_spec.get("kind")
+                expected_types = ISSUE_TARGET_TYPES.get(kind) if isinstance(kind, str) else None
+                if expected_types is None:
+                    continue
+                pointer = f"{source.pointer}/targets/{index}/id"
+                finding = _cross_reference_finding(
+                    catalog, target_spec.get("id"), expected_types, pointer,
+                )
+                if finding is not None:
+                    findings.append(finding)
+    return findings
+
+
+def _dependency_entries(obj: CatalogObject) -> list[dict[str, Any]]:
+    dependencies = obj.document.get("dependencies", [])
+    return [entry for entry in dependencies if isinstance(entry, dict)] if isinstance(dependencies, list) else []
+
+
+def _dependency_cycles(catalog: ObjectCatalog) -> set[str]:
+    graph = {
+        object_id: [
+            entry.get("target_id") for entry in _dependency_entries(obj)
+            if isinstance(entry.get("target_id"), str) and entry.get("target_id") in catalog.objects
+        ]
+        for object_id, obj in catalog.objects.items()
+    }
+    state: dict[str, int] = {object_id: 0 for object_id in graph}
+    cyclic: set[str] = set()
+    for start in graph:
+        if state[start] != 0:
+            continue
+        stack: list[tuple[str, int]] = [(start, 0)]
+        trail: list[str] = []
+        while stack:
+            node, edge_index = stack[-1]
+            if state[node] == 0:
+                state[node] = 1
+                trail.append(node)
+            edges = graph[node]
+            if edge_index >= len(edges):
+                state[node] = 2
+                stack.pop()
+                if trail and trail[-1] == node:
+                    trail.pop()
+                continue
+            target = edges[edge_index]
+            stack[-1] = (node, edge_index + 1)
+            if state.get(target) == 0:
+                stack.append((target, 0))
+            elif state.get(target) == 1:
+                if target in trail:
+                    cyclic.update(trail[trail.index(target):])
+    return cyclic
+
+
+def dependency_hash(object_id: str, catalog: ObjectCatalog) -> str:
+    """Compute dependency-v1 from resolved current target identity snapshots."""
+    obj = catalog.objects.get(object_id)
+    if obj is None:
+        raise ValueError(f"reference.dangling: /object-id: object `{object_id}` does not exist")
+    if object_id in _dependency_cycles(catalog):
+        raise ValueError(f"dependency.cycle: {obj.pointer}/dependencies: dependency cycle")
+    resolved: list[dict[str, Any]] = []
+    for entry in _dependency_entries(obj):
+        target_id = entry.get("target_id")
+        target = catalog.objects.get(target_id) if isinstance(target_id, str) else None
+        if target is None:
+            raise ValueError(f"reference.dangling: {obj.pointer}/dependencies: target `{target_id}` does not exist")
+        resolved.append({
+            "target_id": target.object_id,
+            "relation": entry.get("relation"),
+            "revision": target.revision,
+            "hash": target.object_hash,
+        })
+    resolved.sort(key=lambda item: (str(item["target_id"]), str(item["relation"])))
+    return semantic_hash({"profile": "dependency-v1", "dependencies": resolved})
+
+
+def validate_dependency_state(catalog: ObjectCatalog) -> list[ModelFinding]:
+    findings: list[ModelFinding] = []
+    cyclic = _dependency_cycles(catalog)
+    for object_id in sorted(cyclic):
+        obj = catalog.objects[object_id]
+        findings.append(ModelFinding("dependency.cycle", f"{obj.pointer}/dependencies", "dependency graph contains a cycle"))
+    for obj in catalog.objects.values():
+        seen: set[tuple[Any, Any]] = set()
+        unresolved = False
+        for index, entry in enumerate(_dependency_entries(obj)):
+            target_id = entry.get("target_id")
+            relation = entry.get("relation")
+            key = (target_id, relation)
+            if key in seen:
+                findings.append(ModelFinding("reference.cardinality", f"{obj.pointer}/dependencies/{index}", "duplicate dependency target/relation"))
+            seen.add(key)
+            target = catalog.objects.get(target_id) if isinstance(target_id, str) else None
+            if target is None:
+                unresolved = True
+                findings.append(ModelFinding("reference.dangling", f"{obj.pointer}/dependencies/{index}/target_id", f"dependency target `{target_id}` does not exist"))
+                continue
+            if entry.get("expected_revision") is not None and entry.get("expected_revision") != target.revision:
+                findings.append(ModelFinding("dependency.stale_revision", f"{obj.pointer}/dependencies/{index}/expected_revision", "dependency revision snapshot is stale"))
+            if entry.get("expected_hash") != target.object_hash:
+                findings.append(ModelFinding("dependency.stale_hash", f"{obj.pointer}/dependencies/{index}/expected_hash", "dependency semantic hash snapshot is stale"))
+        if obj.object_id in cyclic or unresolved:
+            continue
+        expected = obj.document.get("last_verified_dependency_hash")
+        if isinstance(expected, str) and expected and expected != dependency_hash(obj.object_id, catalog):
+            findings.append(ModelFinding("dependency.stale", f"{obj.pointer}/last_verified_dependency_hash", "last verified dependency hash is stale"))
+    return findings
 
 
 def _issue_finding(
