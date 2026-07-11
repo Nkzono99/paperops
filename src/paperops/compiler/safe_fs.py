@@ -158,7 +158,7 @@ class SafeProjectReader:
                     "/".join(traversed),
                 )
                 opened.append(parent)
-        except Exception:
+        except BaseException:
             for descriptor in reversed(opened):
                 os.close(descriptor)
             raise

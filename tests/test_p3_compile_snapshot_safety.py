@@ -242,6 +242,55 @@ class P3CompileSnapshotConsistencyTest(unittest.TestCase):
 
 
 class P3CompileFdTraversalTest(unittest.TestCase):
+    def test_nested_parent_baseexception_closes_ancestor_descriptors(self) -> None:
+        safe_fs = importlib.import_module("paperops.compiler.safe_fs")
+        for exception_type in (KeyboardInterrupt, SystemExit):
+            with self.subTest(
+                exception=exception_type.__name__
+            ), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                nested = root / "first/second"
+                nested.mkdir(parents=True)
+                (nested / "model.yml").write_bytes(b"safe: true\n")
+                opened: list[int] = []
+                closed: list[int] = []
+                original_open = safe_fs.os.open
+                original_close = safe_fs.os.close
+
+                def tracking_open(path, flags, *args, **kwargs):
+                    descriptor = original_open(path, flags, *args, **kwargs)
+                    opened.append(descriptor)
+                    return descriptor
+
+                def tracking_close(descriptor):
+                    closed.append(descriptor)
+                    return original_close(descriptor)
+
+                def injected_hook(stage: str, identity: str) -> None:
+                    if (
+                        stage == "after_dir_fd_open"
+                        and identity == "first/second"
+                    ):
+                        raise exception_type()
+
+                with patch.object(
+                    safe_fs.os,
+                    "open",
+                    side_effect=tracking_open,
+                ), patch.object(
+                    safe_fs.os,
+                    "close",
+                    side_effect=tracking_close,
+                ):
+                    with safe_fs.SafeProjectReader(
+                        root,
+                        hook=injected_hook,
+                    ) as reader:
+                        with self.assertRaises(exception_type):
+                            reader.read_bytes("first/second/model.yml")
+
+                self.assertCountEqual(opened, closed)
+
     def test_fstat_and_post_open_hook_failures_close_owned_descriptors(self) -> None:
         safe_fs = importlib.import_module("paperops.compiler.safe_fs")
         failures = (
