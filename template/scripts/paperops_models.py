@@ -284,9 +284,16 @@ def validate_manuscript_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                         finding.message,
                     )
                 )
-        requires_compiled_state = obj.document.get("status") in {
-            "compiled", "drafted", "verified", "stale", "removed",
-        }
+        has_block_lineage = (
+            obj.object_type == "block"
+            and obj.document.get("compiled_from") is not None
+        )
+        requires_compiled_state = (
+            obj.document.get("status") in {
+                "compiled", "drafted", "verified", "stale", "removed",
+            }
+            or has_block_lineage
+        )
         if (
             requires_compiled_state
             and obj.object_type == "section"

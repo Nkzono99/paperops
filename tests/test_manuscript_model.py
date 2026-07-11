@@ -134,10 +134,13 @@ class ManuscriptModelTest(unittest.TestCase):
             )
         return ObjectCatalog(objects, ())
 
-    def complete_catalog(self) -> ObjectCatalog:
+    def complete_catalog(
+        self,
+        block_document: dict[str, object] | None = None,
+    ) -> ObjectCatalog:
         return self.catalog([
             ("manuscript", "section", section()),
-            ("manuscript", "block", block()),
+            ("manuscript", "block", block_document or block()),
             ("research", "claim", research_claim()),
             ("research", "scientific_gate", research_gate()),
             ("research", "result", {**envelope("result", "RES-0001", "validated")}),
@@ -275,6 +278,27 @@ class ManuscriptModelTest(unittest.TestCase):
         self.assertIn(
             ("semantic.operation", "/BLK-0001/operation"),
             [(finding.code, finding.pointer) for finding in findings],
+        )
+
+    def test_planned_block_with_compiled_lineage_requires_both_dependency_hashes(self) -> None:
+        planned = block()
+        planned["status"] = "planned"
+        planned["dependency_hash"] = ""
+        planned["last_verified_dependency_hash"] = ""
+        findings = validate_manuscript_semantics(self.complete_catalog(planned))
+        pairs = {(finding.code, finding.pointer) for finding in findings}
+        self.assertIn(("dependency.missing", "/BLK-0001/dependency_hash"), pairs)
+        self.assertIn(
+            ("dependency.missing", "/BLK-0001/last_verified_dependency_hash"),
+            pairs,
+        )
+        self.assertNotIn("semantic.compiled_from", {finding.code for finding in findings})
+
+        planned["dependency_hash"] = "sha256:" + "4" * 64
+        planned["last_verified_dependency_hash"] = "sha256:" + "4" * 64
+        self.assertEqual(
+            validate_manuscript_semantics(self.complete_catalog(planned)),
+            [],
         )
 
     def test_status_enums_extensions_and_common_envelope_are_exact(self) -> None:
