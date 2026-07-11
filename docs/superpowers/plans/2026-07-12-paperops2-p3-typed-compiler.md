@@ -163,6 +163,7 @@ Commit message: `未承認modelをWriterへ流さないためcompile入力をaut
 
 - Create: `src/paperops/compiler/contracts.py`
 - Create: `src/paperops/compiler/tex.py`
+- Create: `src/paperops/compiler/privacy.py`
 - Create: `tests/test_p3_compile_context.py`
 
 **Interfaces:**
@@ -172,6 +173,7 @@ Commit message: `未承認modelをWriterへ流さないためcompile入力をaut
 - Produces `scan_manuscript(root) -> ManuscriptSnapshot` with full read paths/hashes, `% block:` order/content hashes, map.toml pairs, freshness facts, terminology rules, the existing shared/imported/curated BibTeX registries as `{identity,content_hash,sorted keys}`, legacy analysis-request `{id,status,identity,content_hash}` snapshots, and duplicate/missing findings。
 - Produces reusable pure `parse_tex_bytes(identity, content)` and explicit typed-block binding APIs; typed `BLK-*` identity and raw `% block:` identity remain separate, and marker IDs accept the Manuscript schema's `[A-Za-z0-9:._-]+` set。
 - Records exact per-block citation keys, `N of M` quantities, figure labels/references, predicted-result markers/AREQ refs/placeholders, and authoring-intent hits for later conservation checks, without placing raw TeX in generated global context。
+- Produces a shared context-aware privacy predicate/redacted finding boundary for contract/profile, terminology, ledger, citation/figure inventories, and later Task 5 projections; public DOI/HTTPS/citation/software and project-relative identities remain allowed。
 - Does not invoke `mirror-freshness-check --update` or mutate ledger。
 
 - [ ] **Step 1: Write RED tests**
@@ -203,7 +205,7 @@ Commit message: `全体文脈と変更範囲を分けるためcontractとTeX sna
 - Modify: `template/_paperops/defaults/schemas/section-plan.schema.json`
 - Modify: `template/_paperops/defaults/schemas/writer-packet.schema.json`
 - Create: `src/paperops/compiler/materialize.py`
-- Create: `src/paperops/compiler/privacy.py`
+- Modify: `src/paperops/compiler/privacy.py`
 - Create: `tests/test_p3_compile_materialize.py`
 - Create: `tests/fixtures/p3/compiler/approved/**`
 
