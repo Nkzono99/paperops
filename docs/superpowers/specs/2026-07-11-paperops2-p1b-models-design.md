@@ -94,6 +94,8 @@ metadata:
 
 `kind` は `scientific_scope / editorial_choice / submission / authorship / license / external_share / reviewer_response / scope_expansion`、`decision` は `approved / rejected / superseded` とする。actor の credential、email、署名値は保存しない。`object_hash` は必須、`object_revision` は対象が独立 revision を持つ場合に必須とする。現在 revision/hash に一致する `approved` record が必要な場所では、古い approval を `approval.stale`、存在しない場合を `approval.missing` とする。
 
+独立 revision を持つ record の canonical subject hash は `hash_excluded_paths` で `/approvals` と `/metadata/updated_at` を除外する。approval history はその subject hash/revision への attestation として別に検査し、approval の追加・decision 変更だけでは承認対象 object の hash/revision を進めない。ただし approval の有効性と workflow gate は `approval.*` finding により変化する。これにより approval 自身の `object_hash` を含む自己参照 hash を作らない。
+
 ## Index contract
 
 各 index は `model_name`、`schema_version`、`index_revision`、`records`、`extensions`、`metadata` を持つ。record row は次だけを保持する。

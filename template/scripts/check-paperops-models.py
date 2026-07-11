@@ -8,7 +8,12 @@ from pathlib import Path
 from pathlib import PurePosixPath, PureWindowsPath
 
 from paperops_editorial import validate_editorial_references, validate_editorial_semantics
-from paperops_models import ModelDocument, build_object_catalog, load_model_document
+from paperops_models import (
+    ModelDocument,
+    build_object_catalog,
+    load_model_document,
+    validate_research_semantics,
+)
 from paperops_schema import (
     KNOWN_MODEL_VERSIONS,
     ModelFinding,
@@ -421,6 +426,14 @@ def main() -> int:
         findings.extend(
             validate_editorial_semantics(editorial.document, strict=args.strict)
         )
+    research = loaded.get("research")
+    if (
+        phase in ("all", "semantics")
+        and "research" in selected_names
+        and research is not None
+        and research.schema_clean
+    ):
+        findings.extend(validate_research_semantics(catalog))
 
     computed_hashes: dict[str, str] = {}
     if phase in ("all", "hash"):

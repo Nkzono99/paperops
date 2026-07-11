@@ -311,7 +311,7 @@ class PaperOpsModelCheckTest(unittest.TestCase):
 
     def test_unregistered_known_model_is_a_stable_registry_finding(self) -> None:
         result = run_python_script(
-            SCRIPT, "--root", ROOT / "template", "--model", "research"
+            SCRIPT, "--root", ROOT / "template", "--model", "manuscript"
         )
 
         self.assertEqual(result.returncode, 1)
@@ -434,18 +434,18 @@ class PaperOpsModelCheckTest(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            registry["models"]["research"] = {
+            registry["models"]["manuscript"] = {
                 "document_kind": "index",
                 "schema": "model-index.schema.json",
                 "schema_version": 1,
                 "authority": "project-owned",
-                "default_path": "_paperops/model/research/index.yml",
+                "default_path": "_paperops/model/manuscript/index.yml",
                 "hash_profile": "semantic-v1",
                 "hash_excluded_paths": [],
                 "record_sets": {
                     "claim": {
                         "schema": "claim.schema.json",
-                        "path_prefix": "_paperops/model/research/claims/",
+                        "path_prefix": "_paperops/model/manuscript/claims/",
                         "id_pattern": "^CLM-[0-9]{4,}$",
                         "hash_excluded_paths": [],
                     }
@@ -459,22 +459,22 @@ class PaperOpsModelCheckTest(unittest.TestCase):
                 "revision": 1,
                 "unexpected": True,
             }
-            record_path = project / "_paperops/model/research/claims/CLM-0001.yml"
+            record_path = project / "_paperops/model/manuscript/claims/CLM-0001.yml"
             record_path.parent.mkdir(parents=True)
             record_path.write_text(json.dumps(record), encoding="utf-8")
             digest = semantic_hash(record)
-            index_path = project / "_paperops/model/research/index.yml"
+            index_path = project / "_paperops/model/manuscript/index.yml"
             index_path.write_text(
                 json.dumps(
                     {
-                        "model_name": "research",
+                        "model_name": "manuscript",
                         "schema_version": 1,
                         "index_revision": 1,
                         "records": [
                             {
                                 "id": "CLM-0001",
                                 "record_type": "claim",
-                                "document": "_paperops/model/research/claims/CLM-0001.yml",
+                                "document": "_paperops/model/manuscript/claims/CLM-0001.yml",
                                 "expected_revision": 1,
                                 "expected_hash": digest,
                             }
@@ -491,7 +491,7 @@ class PaperOpsModelCheckTest(unittest.TestCase):
                 "--root",
                 project,
                 "--model",
-                "research",
+                "manuscript",
                 "--phase",
                 "references",
             )
@@ -500,7 +500,7 @@ class PaperOpsModelCheckTest(unittest.TestCase):
                 "--root",
                 project,
                 "--model",
-                "research",
+                "manuscript",
                 "--phase",
                 "schema",
             )
@@ -552,18 +552,18 @@ class PaperOpsModelCheckTest(unittest.TestCase):
             (schema_dir / "claim.schema.json").write_text(
                 json.dumps(record_schema), encoding="utf-8"
             )
-            registry["models"]["research"] = {
+            registry["models"]["manuscript"] = {
                 "document_kind": "index",
                 "schema": "model-index.schema.json",
                 "schema_version": 1,
                 "authority": "project-owned",
-                "default_path": "_paperops/model/research/index.yml",
+                "default_path": "_paperops/model/manuscript/index.yml",
                 "hash_profile": "semantic-v1",
                 "hash_excluded_paths": ["/metadata/updated_at"],
                 "record_sets": {
                     "claim": {
                         "schema": "claim.schema.json",
-                        "path_prefix": "_paperops/model/research/claims/",
+                        "path_prefix": "_paperops/model/manuscript/claims/",
                         "id_pattern": "^CLM-[0-9]{4,}$",
                         "hash_excluded_paths": ["/metadata/updated_at"],
                     }
@@ -578,21 +578,21 @@ class PaperOpsModelCheckTest(unittest.TestCase):
                 "metadata": {"updated_at": "2026-07-11"},
             }
             digest = semantic_hash(record, excluded_paths=("/metadata/updated_at",))
-            record_path = project / "_paperops/model/research/claims/CLM-0001.yml"
+            record_path = project / "_paperops/model/manuscript/claims/CLM-0001.yml"
             record_path.parent.mkdir(parents=True)
             record_path.write_text(json.dumps(record), encoding="utf-8")
-            index_path = project / "_paperops/model/research/index.yml"
+            index_path = project / "_paperops/model/manuscript/index.yml"
             index_path.write_text(
                 json.dumps(
                     {
-                        "model_name": "research",
+                        "model_name": "manuscript",
                         "schema_version": 1,
                         "index_revision": 1,
                         "records": [
                             {
                                 "id": "CLM-0001",
                                 "record_type": "claim",
-                                "document": "_paperops/model/research/claims/CLM-0001.yml",
+                                "document": "_paperops/model/manuscript/claims/CLM-0001.yml",
                                 "expected_revision": 1,
                                 "expected_hash": digest,
                             }
@@ -609,7 +609,7 @@ class PaperOpsModelCheckTest(unittest.TestCase):
                 "--root",
                 project,
                 "--model",
-                "research",
+                "manuscript",
                 "--print-hash",
                 "--object-id",
                 "CLM-0001",

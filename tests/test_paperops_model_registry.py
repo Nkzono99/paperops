@@ -35,11 +35,14 @@ MODEL_NAMES = {
 
 
 class PaperOpsModelRegistryTest(unittest.TestCase):
-    def test_checked_in_two_entry_registry_remains_backward_compatible(self) -> None:
+    def test_checked_in_registry_adds_research_without_changing_core_aggregates(self) -> None:
         registry = load_registry(TEMPLATE)
 
-        self.assertEqual(set(registry.entries), {"editorial", "results_hierarchy"})
-        for entry in registry.entries.values():
+        self.assertEqual(
+            set(registry.entries), {"editorial", "results_hierarchy", "research"}
+        )
+        for name in ("editorial", "results_hierarchy"):
+            entry = registry.entries[name]
             with self.subTest(model=entry.name):
                 self.assertEqual(entry.document_kind, "aggregate")
                 self.assertEqual(entry.record_sets, {})
@@ -51,6 +54,7 @@ class PaperOpsModelRegistryTest(unittest.TestCase):
             destination.parent.mkdir(parents=True)
             shutil.copytree(SCHEMA_DIR, destination)
             document = self.read_registry(root)
+            document["models"].pop("research")
             for entry in document["models"].values():
                 entry.pop("document_kind")
             self.write_registry(root, document)

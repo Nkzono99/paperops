@@ -18,3 +18,49 @@ models:
     default_path: _paperops/model/editorial/results-hierarchy.yml
     hash_profile: semantic-v1
     hash_excluded_paths: []
+  research:
+    document_kind: index
+    schema: research-index.schema.json
+    schema_version: 1
+    authority: project-owned
+    default_path: _paperops/model/research/index.yml
+    hash_profile: semantic-v1
+    hash_excluded_paths:
+      - /metadata/updated_at
+    record_sets:
+      claim:
+        schema: research-claim.schema.json
+        path_prefix: _paperops/model/research/claims/
+        id_pattern: ^CLM-[0-9]{4,}$
+        hash_excluded_paths:
+          - /approvals
+          - /metadata/updated_at
+      result:
+        schema: research-result.schema.json
+        path_prefix: _paperops/model/research/results/
+        id_pattern: ^RES-[0-9]{4,}$
+        hash_excluded_paths:
+          - /approvals
+          - /metadata/updated_at
+      figure:
+        schema: research-figure.schema.json
+        path_prefix: _paperops/model/research/figures/
+        id_pattern: ^FIG-[0-9]{4,}$
+        hash_excluded_paths:
+          - /approvals
+          - /metadata/updated_at
+      source:
+        schema: research-source.schema.json
+        path_prefix: _paperops/model/research/sources/
+        id_pattern: ^SRC-[0-9]{4,}$
+        hash_excluded_paths:
+          - /approvals
+          - /metadata/updated_at
+      scientific_gate:
+        schema: research-gate.schema.json
+        path_prefix: _paperops/model/research/gates/
+        id_pattern: ^GATE-[0-9]{4,}$
+        hash_excluded_paths:
+          - /approvals
+          - /metadata/updated_at
+    dependency_profile: dependency-v1

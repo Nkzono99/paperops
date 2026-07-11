@@ -72,6 +72,149 @@ class ObjectCatalog:
     findings: tuple[ModelFinding, ...]
 
 
+def _research_finding(code: str, obj: CatalogObject, suffix: str, message: str) -> ModelFinding:
+    return ModelFinding(code, f"{obj.pointer}{suffix}", message)
+
+
+def validate_research_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
+    """Validate Research gate readiness, approvals, quantities, and provenance."""
+    findings: list[ModelFinding] = []
+    research = {
+        object_id: obj
+        for object_id, obj in catalog.objects.items()
+        if obj.model_name == "research"
+    }
+    quantity_ids: dict[str, tuple[CatalogObject, int]] = {}
+    for obj in research.values():
+        document = obj.document
+        if obj.object_type == "result":
+            quantities = document.get("quantity_contracts", [])
+            if isinstance(quantities, list):
+                for index, quantity in enumerate(quantities):
+                    quantity_id = quantity.get("id") if isinstance(quantity, dict) else None
+                    if not isinstance(quantity_id, str):
+                        continue
+                    previous = quantity_ids.get(quantity_id)
+                    if previous is not None:
+                        findings.append(
+                            _research_finding(
+                                "reference.duplicate",
+                                obj,
+                                f"/quantity_contracts/{index}/id",
+                                f"duplicate ID `{quantity_id}`",
+                            )
+                        )
+                    else:
+                        quantity_ids[quantity_id] = (obj, index)
+            provenance = document.get("artifact_provenance_ids", [])
+            _validate_public_provenance(obj, provenance, "/artifact_provenance_ids", findings)
+        elif obj.object_type == "source":
+            provenance = document.get("public_provenance_refs", [])
+            _validate_public_provenance(obj, provenance, "/public_provenance_refs", findings)
+
+    for claim in (obj for obj in research.values() if obj.object_type == "claim"):
+        gate_id = claim.document.get("gate_id")
+        paired_gate = research.get(gate_id) if isinstance(gate_id, str) else None
+        if paired_gate is None or paired_gate.object_type != "scientific_gate":
+            findings.append(
+                _research_finding(
+                    "semantic.gate_pair",
+                    claim,
+                    "/gate_id",
+                    f"claim gate `{gate_id}` is not a Research scientific gate",
+                )
+            )
+
+    for gate in (obj for obj in research.values() if obj.object_type == "scientific_gate"):
+        claim_id = gate.document.get("claim_id")
+        claim = research.get(claim_id) if isinstance(claim_id, str) else None
+        if claim is None or claim.object_type != "claim":
+            findings.append(
+                _research_finding(
+                    "semantic.gate_pair",
+                    gate,
+                    "/claim_id",
+                    f"gate claim `{claim_id}` is not a Research claim",
+                )
+            )
+            continue
+        if (
+            claim.document.get("gate_id") != gate.object_id
+            or claim.document.get("gate_status") != gate.document.get("gate_decision")
+        ):
+            findings.append(
+                _research_finding(
+                    "semantic.gate_pair",
+                    gate,
+                    "/claim_id",
+                    f"gate `{gate.object_id}` and claim `{claim.object_id}` do not agree",
+                )
+            )
+        if gate.document.get("gate_decision") != "ready_to_write":
+            continue
+        if claim.document.get("status") != "approved":
+            findings.append(
+                _research_finding(
+                    "semantic.claim_not_writable",
+                    gate,
+                    "/gate_decision",
+                    f"claim `{claim.object_id}` is not approved",
+                )
+            )
+        approvals = claim.document.get("approvals", [])
+        scientific = [
+            approval
+            for approval in approvals
+            if isinstance(approval, dict)
+            and approval.get("kind") == "scientific_scope"
+            and approval.get("decision") == "approved"
+        ] if isinstance(approvals, list) else []
+        if not scientific:
+            findings.append(
+                _research_finding(
+                    "approval.missing",
+                    claim,
+                    "/approvals",
+                    "current scientific_scope approval is required",
+                )
+            )
+        elif not any(
+            approval.get("object_revision") == claim.revision
+            and approval.get("object_hash") == claim.object_hash
+            for approval in scientific
+        ):
+            findings.append(
+                _research_finding(
+                    "approval.stale",
+                    claim,
+                    "/approvals",
+                    "scientific_scope approval does not match current revision/hash",
+                )
+            )
+    return findings
+
+
+def _validate_public_provenance(
+    obj: CatalogObject,
+    values: Any,
+    suffix: str,
+    findings: list[ModelFinding],
+) -> None:
+    allowed = ("doi:", "url:https://", "artifact:", "commit:")
+    if not isinstance(values, list):
+        return
+    for index, value in enumerate(values):
+        if not isinstance(value, str) or not value.startswith(allowed):
+            findings.append(
+                _research_finding(
+                    "semantic.public_provenance",
+                    obj,
+                    f"{suffix}/{index}",
+                    "provenance must use a public or opaque identifier, not a local/raw path",
+                )
+            )
+
+
 def _exception_finding(error: Exception, pointer: str) -> ModelFinding:
     message = str(error)
     prefix, separator, detail = message.partition(":")
