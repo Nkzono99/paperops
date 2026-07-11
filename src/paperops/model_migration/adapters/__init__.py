@@ -19,7 +19,7 @@ _ADAPTER_CLASSES = {
     "editorial": ("editorial", "EditorialAdapter"),
     "results_hierarchy": ("editorial", "EditorialAdapter"),
     "manuscript": ("manuscript", "ManuscriptAdapter"),
-    "issues": ("issues", "IssueAdapter"),
+    "issue": ("issue", "IssueAdapter"),
     "publication": ("publication", "PublicationAdapter"),
 }
 

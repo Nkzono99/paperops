@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- PaperOps 2 P2 migration のIssue / Publication adapterを追加した。Issueはfeedback、analysis / writing request、response、review roundのprediction→execution→reconciliation、closure、delegation / integration、human decisionをtyped recordへ写す一方、raw reviewer text、absolute/local path、credentialをcandidateから除外してlocal-only dispositionにする。Publicationはauthoring / candidate / round軸、source commit、gate report、artifact hash参照、snapshot manifest、response refsをledgerから写すがartifact本体をコピー・変更しない。submitted roundのimmutable marker / provenance欠落と未reconcile analysis requestはadopt blockerになる。
+
 - PaperOps 2 P2 migration のManuscript adapterとして、明示structural manifestからsection / block identity、全section kind、block順序、JA/EN marker、operation、compile manifest / input hash、dependency snapshotだけを変換する。TeX本文や`prose` / `content` fieldはcandidateへ入れず、手編集したTeXを変更しない。marker欠落、order不整合、compile lineage欠落、存在せずstrict承認も確認できないResearch参照はadopt blockerにする。
 
 - PaperOps 2 P2 migration のEditorial adapterとして、Editorial ModelとResults hierarchyを常にpaired candidateとして扱い、既存typed Resultsはschema-cleanな場合だけsemantic valueを再利用する。present-but-malformed typed stateはlegacyへfallbackせず停止し、legacy storylineが残る場合は`migration_editorial` / `migration_results_hierarchy`の明示structured payloadなしにeditorial choiceを推測しない。result ID順序の不一致、source変化、hash非決定性をfixtureで検査し、既存typed pairだけのprojectもstrict validationを経て採用候補にできる。
