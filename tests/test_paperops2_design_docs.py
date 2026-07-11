@@ -48,3 +48,29 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             for required in required_values:
                 with self.subTest(path=path, required=required):
                     self.assertIn(required, text)
+
+    def test_writer_and_macro_state_have_single_authority_boundaries(self) -> None:
+        expected = {
+            "docs/rfcs/0001-paperops-2.md": [
+                "Writer は patch を生成するだけ",
+                "deterministic applicator",
+            ],
+            "docs/adr/0001-authority-ownership-layout.md": [
+                "Writer は patch を生成するだけ",
+                "authority へ直接書き込まない",
+            ],
+            "docs/adr/0002-cli-agent-compiler-boundary.md": [
+                "承認済み patch は human または将来の deterministic applicator が適用する",
+                "authority へ直接書き込まない",
+            ],
+            "docs/adr/0003-revision-state-hash.md": [
+                "read-only deterministic projection",
+                "writable authority ではない",
+                "下位の authority fact/revision",
+            ],
+        }
+        for path, required_values in expected.items():
+            text = self.read(path)
+            for required in required_values:
+                with self.subTest(path=path, required=required):
+                    self.assertIn(required, text)

@@ -12,15 +12,15 @@
 
 macro state、object revision、section state、review round、submission axis を直交状態として定義する。一つの axis の遷移は、規則で明示されない限り他 axis を暗黙変更しない。
 
-| Axis | 意味 | 例 | 更新主体 |
+| Axis | 意味 | 例 | 導出 / 更新主体 |
 |---|---|---|---|
-| macro state | workflow 全体を要約する UI / orchestration 状態 | setup、researching、drafting、reviewing | deterministic projection または明示 workflow command |
+| macro state | workflow 全体を要約する UI / orchestration 状態 | setup、researching、drafting、reviewing | authority record から算出する read-only deterministic projection |
 | object revision | stable ID を持つ typed object の semantic version | story `S-01` revision 3 | authority record の単一 writer |
 | section state | manuscript section/block の editorial lifecycle | planned、drafted、verified、stale | section transition command / checker |
 | review round | reviewer feedback と response の反復単位 | internal-1、reviewer-2 | review workflow |
 | submission axis | living manuscript から immutable submission への履歴 | target、submitted、revised、accepted | publication workflow |
 
-macro state は他の axis を要約表示できるが、それらの authority にはならない。object revision の増加だけで review round や submission axis を進めない。submission snapshot は参照した object revision と section state を固定する。
+macro state は各 authority record から算出する read-only deterministic projection で、それ自体は writable authority ではない。明示 workflow command は macro state を直接書き換えず、下位の authority fact/revision を更新し、その結果として projection が変わる。object revision の増加だけで review round や submission axis を進めない。submission snapshot は参照した object revision と section state を固定する。
 
 ## Canonical hash boundary
 

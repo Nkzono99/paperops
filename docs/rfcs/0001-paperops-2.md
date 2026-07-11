@@ -32,6 +32,8 @@ PaperOps 2 の基本フローは次のとおりとする。
 Research Model
   -> Editorial Model
   -> compiled Writer packet
+  -> reviewable manuscript patch
+  -> human approval / deterministic application
   -> Manuscript Model / TeX authoring source
   -> Issue Model feedback loop
   -> Publication Model snapshot
@@ -41,7 +43,7 @@ Research Model は観測、根拠、quantity、figure、citation を扱う。Edi
 
 ## Authority と writer
 
-schema、prompt default、managed contract は paperops-managed default とし、論文固有の typed model state は project-owned typed state とする。TeX と対応する human-edited manuscript source は人間または明示的に起動された Writer が編集する。compiled Writer packet、judge output、materialized view は再生成可能な cache とし、tracked authority にしない。
+schema、prompt default、managed contract は paperops-managed default とし、論文固有の typed model state は project-owned typed state とする。TeX と対応する human-edited manuscript source は human が編集する。Writer は patch を生成するだけで、human が採否を承認し、承認済み patch は human または将来の deterministic applicator が適用する。Writer が tracked authority へ直接書き込むことは禁止する。compiled Writer packet、judge output、materialized view は再生成可能な cache とし、tracked authority にしない。
 
 同一判断の writable な正本は常に一つとする。各 rollout phase で active writer を一つに限定し、非 authoritative pipeline は比較用の読み取りまたは隔離された shadow output の生成だけを行う。責務境界は [ADR 0002](../adr/0002-cli-agent-compiler-boundary.md)、revision と stale 判定の入力境界は [ADR 0003](../adr/0003-revision-state-hash.md) に従う。
 

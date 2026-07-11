@@ -18,13 +18,15 @@ PaperOps 2 は複数の論理モデルを導入するが、それらを五つの
 
 managed pattern は project-owned path を包含してはならない。migration は authority の切替を明示し、検証完了前に旧正本を削除しない。
 
+human-edited manuscript source について、Writer は patch を生成するだけとする。human が patch の採否を承認し、承認済み patch は human または将来の deterministic applicator が適用する。Writer は manuscript authority へ直接書き込まない。
+
 ## Ownership table
 
 | Authority class | 内容 | 所有者 / writer | tracked | 更新規則 |
 |---|---|---|---|---|
 | paperops-managed default | schema、prompt default、contract、starter | PaperOps release / managed update | yes | versioned update。project-owned typed state を上書きしない |
 | project-owned typed state | story、claim、evidence、issue、publication metadata の論文固有 record | project workflow ごとに指定された単一 writer | yes | explicit command または approved migration のみ |
-| human-edited manuscript source | TeX、対応する人間編集 source | human、または明示起動された Writer | yes | packet の許可範囲内で編集し、暗黙生成で置換しない |
+| human-edited manuscript source | TeX、対応する人間編集 source | human、または将来の deterministic applicator | yes | human が採否を承認した patch だけを適用し、Writer の直接書込みを許可しない |
 | generated cache | compiled packet、judge output、materialized view | deterministic compiler / checker | no | authority から再生成し、正本として読まない |
 | local/confidential state | credential、絶対 path、raw reviewer text、未公開 raw data | local user / external system | no | tracked model へコピーしない |
 | immutable publication snapshot | submission 時点の原稿、manifest、参照 revision | publication snapshot command | yes | 作成後は変更せず、新 submission は新 snapshot とする |

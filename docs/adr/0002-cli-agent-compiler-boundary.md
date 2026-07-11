@@ -12,7 +12,7 @@ compiler と Writer の境界も必要である。compiler が自由文を生成
 
 ## Decision
 
-CLI と checker は deterministic な機械処理を担当する。Agent/skill は代替案比較と editorial choice を担当する。compiler は承認済み typed input だけから限定された Writer packet を作る。Writer はその packet が許可した対象と操作だけを実行する。
+CLI と checker は deterministic な機械処理を担当する。Agent/skill は代替案比較と editorial choice を担当する。compiler は承認済み typed input だけから限定された Writer packet を作る。Writer はその packet が許可した範囲の reviewable patch を生成するだけで、manuscript authority へ直接書き込まない。
 
 CLI は Agent の判断を内部で暗黙実行しない。通常 command は network、model、API key を暗黙利用せず、外部サービスが必要な別 workflow は明示起動、入力・出力境界、失敗時の非更新を備える。
 
@@ -23,14 +23,15 @@ CLI は Agent の判断を内部で暗黙実行しない。通常 command は ne
 | `pops` CLI | deterministic な validate、migrate、materialize、status 表示、atomic write の調停 | network/model/API key の暗黙利用、editorial choice の代行、Agent の暗黙実行 | 検証結果、明示 migration、状態表示、再生成可能 view |
 | Agent / skill | story candidate の比較、選択・棄却理由、claim role、argument move、文章上の代替案を提案する | 承認なしに authority や manuscript を変更する、deterministic check を裁量で無効化する | human-reviewable proposal / approval request |
 | compiler | 承認済み typed input と対象 revision を検証し、限定された Writer packet を deterministic に構成する | 新しい story/claim を創作する、未承認 input や local confidential data を packet に混ぜる | scoped Writer packet |
-| Writer | Writer packet の対象 section、block ID、許可操作、claim scope に従って manuscript patch を作る | packet 外の story/claim scope を変更する、対象外 section を編集する、packet を authority として永続化する | reviewable manuscript patch |
+| Writer | Writer packet の対象 section、block ID、許可操作、claim scope に従って manuscript patch を作る | packet 外の story/claim scope を変更する、対象外 section を編集する、authority へ直接書き込む | reviewable manuscript patch |
+| human / deterministic applicator | human が patch の採否を承認し、承認済み patch を manuscript authority へ適用する。deterministic applicator は将来実装し、承認済み patch の機械的適用だけを担う | 未承認 patch の適用、patch 内容の裁量変更 | tracked manuscript update |
 | checker | schema、参照、mirror、quantity、figure、citation、authoring intent、hash/revision 整合性を deterministic に検査する | editorial quality を合否へ偽装する、失敗を legacy fallback で隠す | strict / advisory / diagnostic result |
 
 ## Writer packet contract
 
 Writer packet は少なくとも入力 record ID と revision、dependency hash、対象 manuscript/section/block ID、許可操作、承認済み story/claim/move、引用可能な evidence reference、禁止範囲を持つ。packet は generated cache であり authority ではない。
 
-compiler は input の承認状態、revision、dependency を検査し、不整合時には packet を部分生成しない。Writer は packet 外の story/claim scope を変更しない。追加判断が必要なら patch を拡張せず Agent/human へ差し戻す。
+compiler は input の承認状態、revision、dependency を検査し、不整合時には packet を部分生成しない。Writer は packet 外の story/claim scope を変更せず、authority へ直接書き込まない。追加判断が必要なら patch を拡張せず Agent/human へ差し戻す。承認済み patch は human または将来の deterministic applicator が適用する。
 
 ## Execution rules
 
@@ -39,7 +40,9 @@ compiler は input の承認状態、revision、dependency を検査し、不整
 3. CLI/checker が承認済み state と dependency を検証する。
 4. compiler が限定 Writer packet を生成する。
 5. 明示起動された Writer が reviewable patch を作る。
-6. checker が patch と invariant を検証し、human が採否を決める。
+6. checker が patch と invariant を検証する。
+7. human が patch の採否を承認する。
+8. 承認済み patch を human または将来の deterministic applicator が適用する。
 
 いずれの段階も次段階を暗黙実行しない。特に validation command は Agent、compiler、Writer を連鎖起動しない。
 
@@ -48,7 +51,7 @@ compiler は input の承認状態、revision、dependency を検査し、不整
 - offline 環境でも CLI と checker の再現性を維持できる。
 - editorial proposal、承認済み state、compiled packet、manuscript patch の provenance を分離できる。
 - Agent の提案から原稿反映までに明示 checkpoint が増える。
-- packet contract と scope checker の実装が必要になる。
+- packet contract、scope checker、将来の deterministic applicator には承認確認と内容を変えない適用処理が必要になる。
 
 ## Revisit conditions
 
