@@ -130,4 +130,3 @@ typed Results hierarchy はこの原則の先行実装として扱う。managed 
 - 成功指標、撤退条件、shadow/cutover時のwriterがRFCまたはADRに明記されている。
 - 三つの合成fixtureの目的と必須要素が固定されている。
 - `make smoke` が成功する。
-
