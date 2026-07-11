@@ -21,6 +21,12 @@ from paperops.model_migration.staging import (
     transaction_paths,
     write_report,
 )
+from paperops.model_migration.transaction import (
+    TransactionError,
+    execute_adoption,
+    plan_adoption,
+    recover_incomplete_transactions,
+)
 from paperops.model_migration.types import (
     MigrationCandidate,
     MigrationFinding,
@@ -80,7 +86,7 @@ def add_model_parser(
     adopt.add_argument("--json", action="store_true", dest="json_output")
     adopt.add_argument("--yes", action="store_true")
     adopt.add_argument("--dry-run", action="store_true")
-    adopt.set_defaults(func=cmd_model_pending)
+    adopt.set_defaults(func=cmd_model_adopt)
 
     rollback = actions.add_parser("rollback", help="Restore a model snapshot.")
     rollback.add_argument("model", choices=MODEL_NAMES)
@@ -123,10 +129,20 @@ def _emit(args: argparse.Namespace, result: ModelCommandResult) -> int:
     return result.exit_code
 
 
+def _recovery_block(root: Path, action: str, model: str) -> ModelCommandResult | None:
+    findings = recover_incomplete_transactions(root)
+    if not findings:
+        return None
+    return ModelCommandResult(action, model, False, 1, findings)
+
+
 def cmd_model_status(args: argparse.Namespace) -> int:
     root = _root(args)
     if root is None:
         return _emit(args, _project_missing("status", args.model))
+    recovery = _recovery_block(root, "status", args.model)
+    if recovery is not None:
+        return _emit(args, recovery)
     try:
         states = read_model_states(root)
     except ModelStateError as error:
@@ -148,6 +164,9 @@ def cmd_model_validate(args: argparse.Namespace) -> int:
     root = _root(args)
     if root is None:
         return _emit(args, _project_missing("validate", args.model))
+    recovery = _recovery_block(root, "validate", args.model)
+    if recovery is not None:
+        return _emit(args, recovery)
     selected = MODEL_NAMES if args.model == "all" else (args.model,)
     findings: list[MigrationFinding] = []
     for name in selected:
@@ -206,6 +225,9 @@ def cmd_model_diff(args: argparse.Namespace) -> int:
     root = _root(args)
     if root is None:
         return _emit(args, _project_missing("diff", args.model))
+    recovery = _recovery_block(root, "diff", args.model)
+    if recovery is not None:
+        return _emit(args, recovery)
     try:
         states = read_model_states(root)
     except ModelStateError as error:
@@ -240,6 +262,55 @@ def cmd_model_diff(args: argparse.Namespace) -> int:
 
 def cmd_model_pending(args: argparse.Namespace) -> int:
     return _emit(args, ModelCommandResult(args.model_action, args.model, False, 2, (MigrationFinding("state.not_implemented", "/", "this action is not available until transaction support is installed"),)))
+
+
+def cmd_model_adopt(args: argparse.Namespace) -> int:
+    root = _root(args)
+    if root is None:
+        return _emit(args, _project_missing("adopt", args.model))
+    recovery = _recovery_block(root, "adopt", args.model)
+    if recovery is not None:
+        return _emit(args, recovery)
+    if not args.dry_run and not args.yes:
+        return _emit(
+            args,
+            ModelCommandResult(
+                "adopt",
+                args.model,
+                False,
+                2,
+                (MigrationFinding("transaction.confirmation", "/", "pass --yes to adopt a validated shadow"),),
+            ),
+        )
+    try:
+        plan = plan_adoption(root, args.model)
+        if not args.dry_run:
+            execute_adoption(plan)
+    except TransactionError as error:
+        return _emit(args, ModelCommandResult("adopt", args.model, False, 1, (error.finding,)))
+    except Exception as error:
+        return _emit(
+            args,
+            ModelCommandResult(
+                "adopt",
+                args.model,
+                False,
+                1,
+                (MigrationFinding("transaction.interrupted", "/", _public_message(str(error), root)),),
+                transaction_id=getattr(locals().get("plan"), "transaction_id", ""),
+            ),
+        )
+    return _emit(
+        args,
+        ModelCommandResult(
+            "adopt",
+            args.model,
+            True,
+            0,
+            transaction_id=plan.transaction_id,
+            reused=plan.no_op,
+        ),
+    )
 
 
 def render_model_result(result: ModelCommandResult, json_output: bool) -> str:

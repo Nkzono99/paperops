@@ -124,6 +124,8 @@ def _report_payload(report: MigrationReport) -> dict[str, Any]:
                 "relative_path": candidate.relative_path,
                 "object_id": candidate.object_id,
                 "semantic_hash": candidate.semantic_hash,
+                "content_hash": "sha256:"
+                + hashlib.sha256(candidate.content).hexdigest(),
             }
         )
     findings: list[dict[str, Any]] = []

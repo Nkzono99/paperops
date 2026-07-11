@@ -66,6 +66,10 @@ class ModelMigrationStagingTest(unittest.TestCase):
             payload = json.loads(left_json)
             self.assertEqual(payload["schema_version"], 1)
             self.assertEqual(payload["inventory"][0]["disposition"], "mapped")
+            self.assertRegex(
+                payload["candidates"][0]["content_hash"],
+                r"^sha256:[0-9a-f]{64}$",
+            )
             self.assertIn("# Model migration report", left.report_markdown_path.read_text())
             self.assertNotEqual(
                 left.report_markdown_path.read_text(),
