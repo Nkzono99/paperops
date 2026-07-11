@@ -6,8 +6,9 @@ import hashlib
 import json
 import math
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
+from pathlib import PurePosixPath, PureWindowsPath
 from typing import Any
 
 
@@ -28,6 +29,15 @@ class SchemaDefinitionError(ValueError):
 
 
 @dataclass(frozen=True)
+class RecordSetEntry:
+    name: str
+    schema_path: Path
+    path_prefix: Path
+    id_pattern: str
+    hash_excluded_paths: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class RegistryEntry:
     name: str
     schema_path: Path
@@ -36,6 +46,9 @@ class RegistryEntry:
     default_path: Path
     hash_profile: str
     hash_excluded_paths: tuple[str, ...]
+    document_kind: str = "aggregate"
+    record_sets: dict[str, RecordSetEntry] = field(default_factory=dict)
+    dependency_profile: str | None = None
 
 
 @dataclass(frozen=True)
@@ -45,10 +58,35 @@ class SchemaRegistry:
     entries: dict[str, RegistryEntry]
 
 
-SUPPORTED_MODEL_VERSIONS = {
+KNOWN_MODEL_VERSIONS = {
+    "research": 1,
     "editorial": 1,
     "results_hierarchy": 1,
+    "manuscript": 1,
+    "issue": 1,
+    "publication": 1,
 }
+
+REQUIRED_MODEL_NAMES = frozenset({"editorial", "results_hierarchy"})
+INDEX_MODEL_NAMES = frozenset({"research", "manuscript", "issue"})
+
+REGISTRY_KEYS = frozenset({"registry_version", "validator_profile", "models"})
+ENTRY_KEYS = frozenset(
+    {
+        "document_kind",
+        "schema",
+        "schema_version",
+        "authority",
+        "default_path",
+        "hash_profile",
+        "hash_excluded_paths",
+        "record_sets",
+        "dependency_profile",
+    }
+)
+RECORD_SET_KEYS = frozenset(
+    {"schema", "path_prefix", "id_pattern", "hash_excluded_paths"}
+)
 
 
 SUPPORTED_KEYWORDS = frozenset(
@@ -185,6 +223,38 @@ def _registry_string(entry: dict[str, Any], field: str, model: str) -> str:
     return value
 
 
+def _reject_unknown_registry_keys(
+    value: dict[str, Any],
+    allowed: frozenset[str],
+    field: str,
+) -> None:
+    unknown = set(value) - allowed
+    if unknown:
+        raise _registry_error(
+            "invalid",
+            f"{field} contains unknown field {sorted(unknown)[0]!r}",
+        )
+
+
+def _registry_hash_exclusions(value: Any, field: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or not all(
+        isinstance(pointer, str) for pointer in value
+    ):
+        raise _registry_error(
+            "hash_pointer",
+            f"{field} must be JSON Pointer strings",
+        )
+    invalid = [pointer for pointer in value if not _valid_json_pointer(pointer)]
+    if invalid:
+        raise _registry_error(
+            "hash_pointer",
+            f"{field} has invalid JSON Pointer: {invalid[0]!r}",
+        )
+    if len(set(value)) != len(value):
+        raise _registry_error("hash_duplicate", f"{field} contains duplicates")
+    return tuple(value)
+
+
 def _valid_json_pointer(pointer: str) -> bool:
     if pointer == "":
         return True
@@ -223,6 +293,87 @@ def _resolve_registry_default(root: Path, raw_path: str, model: str) -> Path:
     return resolved
 
 
+def _resolve_record_prefix(
+    root: Path,
+    raw_path: str,
+    model: str,
+    record_type: str,
+) -> Path:
+    posix = PurePosixPath(raw_path)
+    windows = PureWindowsPath(raw_path)
+    relative = Path(raw_path)
+    if (
+        not raw_path
+        or posix.is_absolute()
+        or windows.is_absolute()
+        or bool(windows.drive)
+        or bool(windows.root)
+        or ".." in posix.parts
+        or ".." in windows.parts
+    ):
+        raise _registry_error(
+            "path",
+            f"models.{model}.record_sets.{record_type}.path_prefix must stay within root",
+        )
+    resolved = (root / relative).resolve()
+    if not resolved.is_relative_to(root):
+        raise _registry_error(
+            "path",
+            f"models.{model}.record_sets.{record_type}.path_prefix escapes root",
+        )
+    return resolved
+
+
+def _load_record_sets(
+    raw_value: Any,
+    *,
+    root: Path,
+    registry_dir: Path,
+    model: str,
+) -> dict[str, RecordSetEntry]:
+    raw_sets = _registry_mapping(raw_value, f"models.{model}.record_sets")
+    if not raw_sets:
+        raise _registry_error("invalid", f"models.{model}.record_sets must not be empty")
+    record_sets: dict[str, RecordSetEntry] = {}
+    for record_type, raw_record_set in raw_sets.items():
+        if not record_type:
+            raise _registry_error("invalid", f"models.{model}.record_sets has an empty name")
+        field = f"models.{model}.record_sets.{record_type}"
+        record_set = _registry_mapping(raw_record_set, field)
+        _reject_unknown_registry_keys(record_set, RECORD_SET_KEYS, field)
+        for required in ("schema", "path_prefix", "id_pattern"):
+            if required not in record_set:
+                raise _registry_error("invalid", f"{field}.{required} is required")
+        schema_name = record_set["schema"]
+        path_prefix = record_set["path_prefix"]
+        id_pattern = record_set["id_pattern"]
+        if not isinstance(schema_name, str) or not schema_name:
+            raise _registry_error("invalid", f"{field}.schema must be a string")
+        if not isinstance(path_prefix, str) or not path_prefix:
+            raise _registry_error("invalid", f"{field}.path_prefix must be a string")
+        if not isinstance(id_pattern, str) or not id_pattern:
+            raise _registry_error("invalid", f"{field}.id_pattern must be a string")
+        try:
+            re.compile(id_pattern)
+        except re.error as error:
+            raise _registry_error(
+                "id_pattern", f"{field}.id_pattern is invalid: {error}"
+            ) from error
+        record_sets[record_type] = RecordSetEntry(
+            name=record_type,
+            schema_path=_resolve_registry_schema(
+                registry_dir, schema_name, f"{model}.{record_type}"
+            ),
+            path_prefix=_resolve_record_prefix(root, path_prefix, model, record_type),
+            id_pattern=id_pattern,
+            hash_excluded_paths=_registry_hash_exclusions(
+                record_set.get("hash_excluded_paths", []),
+                f"{field}.hash_excluded_paths",
+            ),
+        )
+    return record_sets
+
+
 def load_registry(root: Path) -> SchemaRegistry:
     """Load and validate the managed schema registry below a project root."""
     resolved_root = root.resolve()
@@ -235,6 +386,7 @@ def load_registry(root: Path) -> SchemaRegistry:
     except Exception as error:
         raise _registry_error("invalid", f"cannot load {registry_path}: {error}") from error
     registry = _registry_mapping(document, "registry")
+    _reject_unknown_registry_keys(registry, REGISTRY_KEYS, "registry")
 
     version = registry.get("registry_version")
     if version != 1 or isinstance(version, bool):
@@ -247,14 +399,14 @@ def load_registry(root: Path) -> SchemaRegistry:
         )
 
     models = _registry_mapping(registry.get("models"), "models")
-    supported_names = set(SUPPORTED_MODEL_VERSIONS)
+    supported_names = set(KNOWN_MODEL_VERSIONS)
     unknown_names = set(models) - supported_names
     if unknown_names:
         raise _registry_error(
             "model_unknown",
             f"unsupported models: {', '.join(sorted(unknown_names))}",
         )
-    missing_names = supported_names - set(models)
+    missing_names = set(REQUIRED_MODEL_NAMES) - set(models)
     if missing_names:
         raise _registry_error(
             "model_missing",
@@ -263,8 +415,9 @@ def load_registry(root: Path) -> SchemaRegistry:
     entries: dict[str, RegistryEntry] = {}
     for name, raw_entry in models.items():
         entry = _registry_mapping(raw_entry, f"models.{name}")
+        _reject_unknown_registry_keys(entry, ENTRY_KEYS, f"models.{name}")
         schema_version = entry.get("schema_version")
-        expected_version = SUPPORTED_MODEL_VERSIONS[name]
+        expected_version = KNOWN_MODEL_VERSIONS[name]
         if schema_version != expected_version or isinstance(schema_version, bool):
             raise _registry_error(
                 "model_version",
@@ -276,26 +429,42 @@ def load_registry(root: Path) -> SchemaRegistry:
         hash_profile = _registry_string(entry, "hash_profile", name)
         if hash_profile != "semantic-v1":
             raise _registry_error("invalid", f"unsupported hash_profile: {hash_profile!r}")
-        raw_exclusions = entry.get("hash_excluded_paths", [])
-        if not isinstance(raw_exclusions, list) or not all(
-            isinstance(pointer, str) for pointer in raw_exclusions
-        ):
+        raw_exclusions = _registry_hash_exclusions(
+            entry.get("hash_excluded_paths", []),
+            f"models.{name}.hash_excluded_paths",
+        )
+        document_kind = entry.get("document_kind", "aggregate")
+        expected_kind = "index" if name in INDEX_MODEL_NAMES else "aggregate"
+        if document_kind != expected_kind:
             raise _registry_error(
-                "hash_pointer",
-                f"models.{name}.hash_excluded_paths must be JSON Pointer strings",
+                "invalid",
+                f"models.{name}.document_kind must be {expected_kind!r}",
             )
-        invalid_pointers = [
-            pointer for pointer in raw_exclusions if not _valid_json_pointer(pointer)
-        ]
-        if invalid_pointers:
-            raise _registry_error(
-                "hash_pointer",
-                f"models.{name} has invalid JSON Pointer: {invalid_pointers[0]!r}",
+        record_sets: dict[str, RecordSetEntry] = {}
+        dependency_profile: str | None = None
+        if document_kind == "index":
+            if "document_kind" not in entry:
+                raise _registry_error(
+                    "invalid", f"models.{name}.document_kind is required"
+                )
+            if "record_sets" not in entry:
+                raise _registry_error("invalid", f"models.{name}.record_sets is required")
+            record_sets = _load_record_sets(
+                entry["record_sets"],
+                root=resolved_root,
+                registry_dir=registry_dir,
+                model=name,
             )
-        if len(set(raw_exclusions)) != len(raw_exclusions):
+            dependency_profile = entry.get("dependency_profile")
+            if dependency_profile != "dependency-v1":
+                raise _registry_error(
+                    "invalid",
+                    f"models.{name}.dependency_profile must be 'dependency-v1'",
+                )
+        elif "record_sets" in entry or "dependency_profile" in entry:
             raise _registry_error(
-                "hash_duplicate",
-                f"models.{name}.hash_excluded_paths contains duplicates",
+                "invalid",
+                f"models.{name} aggregate entry cannot define record_sets or dependency_profile",
             )
         entries[name] = RegistryEntry(
             name=name,
@@ -312,7 +481,10 @@ def load_registry(root: Path) -> SchemaRegistry:
                 name,
             ),
             hash_profile=hash_profile,
-            hash_excluded_paths=tuple(raw_exclusions),
+            hash_excluded_paths=raw_exclusions,
+            document_kind=document_kind,
+            record_sets=record_sets,
+            dependency_profile=dependency_profile,
         )
     return SchemaRegistry(
         version=version,

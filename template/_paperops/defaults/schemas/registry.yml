@@ -2,6 +2,7 @@ registry_version: 1
 validator_profile: paperops-schema-v1
 models:
   editorial:
+    document_kind: aggregate
     schema: editorial-model.schema.json
     schema_version: 1
     authority: project-owned
@@ -10,6 +11,7 @@ models:
     hash_excluded_paths:
       - /metadata/updated_at
   results_hierarchy:
+    document_kind: aggregate
     schema: results-hierarchy.schema.json
     schema_version: 1
     authority: project-owned

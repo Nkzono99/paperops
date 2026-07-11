@@ -47,6 +47,9 @@ class EditorialModelSchemaTest(unittest.TestCase):
         self.assertEqual(editorial.authority, "project-owned")
         self.assertEqual(editorial.hash_profile, "semantic-v1")
         self.assertEqual(editorial.hash_excluded_paths, ("/metadata/updated_at",))
+        self.assertEqual(editorial.document_kind, "aggregate")
+        self.assertEqual(editorial.record_sets, {})
+        self.assertIsNone(editorial.dependency_profile)
         self.assertEqual(
             registry.entries["results_hierarchy"].hash_excluded_paths,
             (),
@@ -111,7 +114,7 @@ class EditorialModelSchemaTest(unittest.TestCase):
                 with self.assertRaisesRegex(SchemaDefinitionError, "registry.path"):
                     load_registry(root)
 
-    def test_registry_requires_exact_supported_model_set(self) -> None:
+    def test_registry_requires_p1a_core_models_and_rejects_unknown_models(self) -> None:
         cases = [
             ("editorial", None, "registry.model_missing"),
             ("results_hierarchy", None, "registry.model_missing"),
