@@ -75,7 +75,7 @@ metadata:
 
 - `target_id` と `relation` は semantic field である。
 - `expected_revision` と `expected_hash` は参照を確定した時点の dependency snapshot である。
-- 両方を必須とし、現在値のどちらかが違えば `dependency.stale` とする。
+- `expected_hash` は常に必須とする。target が独立した `revision` を持つ場合は `expected_revision` も必須とし、現在値のどちらかが違えば `dependency.stale` とする。Editorial の move や Results item のように独立 revision を持たない subrecord は object-level hash だけで固定し、所有 document の revision を捏造しない。
 - dependency の配列順は意味を持たない。hash 計算では `(target_id, relation)` で整列する。
 - 同じ `(target_id, relation)` の重複は `reference.duplicate` とする。
 - 自己参照は、schema が明示的に許可する relation 以外は拒否する。P1-B では自己参照を許可する relation はない。
@@ -92,7 +92,7 @@ metadata:
   note: ""
 ```
 
-`kind` は `scientific_scope / editorial_choice / submission / authorship / license / external_share / reviewer_response / scope_expansion`、`decision` は `approved / rejected / superseded` とする。actor の credential、email、署名値は保存しない。現在 revision/hash に一致する `approved` record が必要な場所では、古い approval を `approval.stale`、存在しない場合を `approval.missing` とする。
+`kind` は `scientific_scope / editorial_choice / submission / authorship / license / external_share / reviewer_response / scope_expansion`、`decision` は `approved / rejected / superseded` とする。actor の credential、email、署名値は保存しない。`object_hash` は必須、`object_revision` は対象が独立 revision を持つ場合に必須とする。現在 revision/hash に一致する `approved` record が必要な場所では、古い approval を `approval.stale`、存在しない場合を `approval.missing` とする。
 
 ## Index contract
 
@@ -240,7 +240,7 @@ schema だけでは過去 file との差分を判断できないため、P1-B ch
 
 ## 全モデル横断 reference graph
 
-checker は schema phase が成功した document だけから ID catalog を作る。ID prefix だけで実在を推測しない。参照 field ごとに許可 target type と cardinality を schema companion metadata で固定する。
+checker は schema phase が成功した document だけから ID catalog を作る。per-ID record に加え、Editorial の story/move/visual obligation と Results hierarchy item を virtual object として登録し、subrecord JSON Pointer から object-level canonical hash を計算する。これらは独立 revision を持たず、hashだけで dependency snapshot を固定する。ID prefix だけで実在を推測しない。参照 field ごとに許可 target type と cardinality を schema companion metadata で固定する。
 
 主要 edge:
 
@@ -319,6 +319,8 @@ research:
       schema: research-claim.schema.json
       path_prefix: _paperops/model/research/claims/
       id_pattern: ^CLM-[0-9]{4,}$
+      hash_excluded_paths:
+        - /metadata/updated_at
   dependency_profile: dependency-v1
 ```
 
