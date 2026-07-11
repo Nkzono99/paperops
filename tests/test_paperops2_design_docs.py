@@ -74,3 +74,45 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             for required in required_values:
                 with self.subTest(path=path, required=required):
                     self.assertIn(required, text)
+
+    def test_disposition_matrix_covers_layers_and_all_decisions(self) -> None:
+        text = self.read("docs/paperops2-disposition.md")
+        for required in [
+            "## Root governance layer",
+            "## Downstream template layer",
+            "retain",
+            "adapt",
+            "redirect",
+            "deprecate",
+            "remove",
+            "investigate",
+            "writer before",
+            "writer after",
+            "removal condition",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, text)
+
+    def test_disposition_matrix_names_every_current_skill_checker_and_make_target(self) -> None:
+        text = self.read("docs/paperops2-disposition.md")
+        skill_files = sorted((ROOT / ".agents" / "skills").glob("*/SKILL.md"))
+        skill_files += sorted((ROOT / "template" / ".agents" / "skills").glob("*/SKILL.md"))
+        checker_files = sorted((ROOT / "template" / "scripts").glob("check-*.py"))
+        for path in [*skill_files, *checker_files]:
+            rel = path.relative_to(ROOT).as_posix()
+            with self.subTest(path=rel):
+                self.assertIn(f"`{rel}`", text)
+
+        for rel in ["Makefile", "template/Makefile"]:
+            makefile = self.read(rel)
+            targets = []
+            for line in makefile.splitlines():
+                if not line or line[0].isspace() or ":" not in line:
+                    continue
+                target = line.split(":", 1)[0]
+                if all(char.isalnum() or char in "._-" for char in target):
+                    targets.append(target)
+            for target in targets:
+                key = f"`{rel}::{target}`"
+                with self.subTest(target=key):
+                    self.assertIn(key, text)
