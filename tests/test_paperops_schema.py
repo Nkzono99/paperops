@@ -124,6 +124,75 @@ class SchemaProfileTest(unittest.TestCase):
             [("schema.type", "/extra")],
         )
 
+    def test_enum_distinguishes_nested_booleans_from_numbers(self) -> None:
+        schema = {"enum": [{"x": True}, [True]]}
+
+        for document in ({"x": 1}, [1]):
+            with self.subTest(document=document):
+                findings = validate_schema(document, schema)
+                self.assertEqual([finding.code for finding in findings], ["schema.enum"])
+
+    def test_const_distinguishes_nested_booleans_from_numbers(self) -> None:
+        cases = (({"x": 1}, {"x": True}), ([1], [True]))
+
+        for document, constant in cases:
+            with self.subTest(document=document):
+                findings = validate_schema(document, {"const": constant})
+                self.assertEqual([finding.code for finding in findings], ["schema.const"])
+
+    def test_unique_items_distinguishes_nested_booleans_from_numbers(self) -> None:
+        document = [{"x": True}, {"x": 1}, [True], [1]]
+
+        self.assertEqual(validate_schema(document, {"uniqueItems": True}), [])
+
+    def test_all_of_accepts_all_branches_and_reports_failed_branch(self) -> None:
+        schema = {"allOf": [{"type": "integer"}, {"const": 1}]}
+
+        self.assertEqual(validate_schema(1, schema), [])
+        findings = validate_schema(2, schema)
+        self.assertEqual([finding.code for finding in findings], ["schema.const"])
+
+    def test_any_of_accepts_one_branch_and_reports_when_none_match(self) -> None:
+        schema = {"anyOf": [{"type": "integer"}, {"type": "string"}]}
+
+        self.assertEqual(validate_schema("one", schema), [])
+        findings = validate_schema([], schema)
+        self.assertEqual([finding.code for finding in findings], ["schema.any_of"])
+
+    def test_invalid_keyword_value_types_are_schema_definition_errors(self) -> None:
+        invalid_schemas = (
+            {"type": 1},
+            {"required": True},
+            {"properties": []},
+            {"additionalProperties": "no"},
+            {"items": []},
+            {"minItems": "1"},
+            {"maxItems": False},
+            {"uniqueItems": "yes"},
+            {"enum": {}},
+            {"pattern": 1},
+            {"minLength": "1"},
+            {"$defs": []},
+            {"allOf": {}},
+            {"anyOf": {}},
+            {"oneOf": {}},
+        )
+
+        for schema in invalid_schemas:
+            with self.subTest(schema=schema):
+                with self.assertRaisesRegex(
+                    SchemaDefinitionError,
+                    "schema.invalid_definition",
+                ):
+                    validate_schema({}, schema)
+
+    def test_invalid_pattern_is_schema_definition_error(self) -> None:
+        with self.assertRaisesRegex(
+            SchemaDefinitionError,
+            "schema.invalid_definition",
+        ):
+            validate_schema("value", {"pattern": "["})
+
 
 class CanonicalHashTest(unittest.TestCase):
     def test_mapping_order_does_not_change_hash(self) -> None:

@@ -124,6 +124,16 @@ def _decode_pointer_token(token: str) -> str:
     return token.replace("~1", "/").replace("~0", "~")
 
 
+def _invalid_definition(keyword: str, expectation: str) -> SchemaDefinitionError:
+    return SchemaDefinitionError(
+        f"schema.invalid_definition: {keyword} {expectation}"
+    )
+
+
+def _is_non_negative_integer(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
 def _walk_schema_definition(schema: Any) -> None:
     if not isinstance(schema, dict):
         raise SchemaDefinitionError("schema.invalid_definition: schema must be an object")
@@ -132,10 +142,68 @@ def _walk_schema_definition(schema: Any) -> None:
             raise SchemaDefinitionError(
                 f"schema.unsupported_keyword: unsupported keyword {keyword!r}"
             )
-    reference = schema.get("$ref")
-    if reference is not None and (
-        not isinstance(reference, str) or not reference.startswith("#/$defs/")
+
+    for keyword in ("$schema", "$id", "title", "description"):
+        if keyword in schema and not isinstance(schema[keyword], str):
+            raise _invalid_definition(keyword, "must be a string")
+
+    if "type" in schema:
+        expected_type = schema["type"]
+        if isinstance(expected_type, str):
+            expected_types = [expected_type]
+        elif isinstance(expected_type, list) and all(
+            isinstance(item, str) for item in expected_type
+        ):
+            expected_types = expected_type
+        else:
+            raise _invalid_definition("type", "must be a string or array of strings")
+        known_types = {"object", "array", "string", "integer", "number", "boolean", "null"}
+        if not expected_types or any(item not in known_types for item in expected_types):
+            raise _invalid_definition("type", "contains an unsupported type")
+
+    if "required" in schema and (
+        not isinstance(schema["required"], list)
+        or not all(isinstance(item, str) for item in schema["required"])
     ):
+        raise _invalid_definition("required", "must be an array of strings")
+
+    for keyword in ("properties", "$defs"):
+        if keyword in schema and (
+            not isinstance(schema[keyword], dict)
+            or not all(isinstance(name, str) for name in schema[keyword])
+        ):
+            raise _invalid_definition(keyword, "must be an object with string keys")
+
+    if "additionalProperties" in schema and not isinstance(
+        schema["additionalProperties"],
+        (bool, dict),
+    ):
+        raise _invalid_definition(
+            "additionalProperties",
+            "must be a boolean or schema object",
+        )
+    if "items" in schema and not isinstance(schema["items"], dict):
+        raise _invalid_definition("items", "must be a schema object")
+    for keyword in ("minItems", "maxItems", "minLength"):
+        if keyword in schema and not _is_non_negative_integer(schema[keyword]):
+            raise _invalid_definition(keyword, "must be a non-negative integer")
+    if "uniqueItems" in schema and not isinstance(schema["uniqueItems"], bool):
+        raise _invalid_definition("uniqueItems", "must be a boolean")
+    if "enum" in schema and not isinstance(schema["enum"], list):
+        raise _invalid_definition("enum", "must be an array")
+    if "pattern" in schema:
+        pattern = schema["pattern"]
+        if not isinstance(pattern, str):
+            raise _invalid_definition("pattern", "must be a string")
+        try:
+            re.compile(pattern)
+        except re.error as error:
+            raise _invalid_definition("pattern", f"is not a valid regex: {error}") from error
+
+    reference = schema.get("$ref")
+    if reference is not None and not isinstance(reference, str):
+        raise _invalid_definition("$ref", "must be a string")
+    if isinstance(reference, str) and not reference.startswith("#/$defs/"):
         raise SchemaDefinitionError(
             f"schema.remote_ref: only local #/$defs references are supported: {reference!r}"
         )
@@ -200,6 +268,15 @@ def _json_equal(left: Any, right: Any) -> bool:
         return type(left) is type(right) and left == right
     if isinstance(left, (int, float)) and isinstance(right, (int, float)):
         return left == right
+    if isinstance(left, dict) and isinstance(right, dict):
+        return left.keys() == right.keys() and all(
+            _json_equal(left[key], right[key]) for key in left
+        )
+    if isinstance(left, list) and isinstance(right, list):
+        return len(left) == len(right) and all(
+            _json_equal(left_item, right_item)
+            for left_item, right_item in zip(left, right)
+        )
     return type(left) is type(right) and left == right
 
 
