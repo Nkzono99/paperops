@@ -95,13 +95,20 @@ def _issue_sensitive_text(value: str) -> bool:
         posix.is_absolute()
         or windows.is_absolute()
         or bool(windows.drive)
-        or stripped.casefold().startswith(("file://", "ssh://", "sftp://"))
+        or re.search(r"(?i)(?:file|ssh|sftp)://\S+", stripped) is not None
     ):
         return True
-    return re.search(
-        r"(?i)(?:password|passwd|secret|credential|api[_-]?key|access[_-]?token|auth[_-]?token|token)\s*[:=]",
-        stripped,
-    ) is not None
+    sensitive_patterns = (
+        r"(?:^|[\s(\"'])/(?!/)[A-Za-z0-9._~-]+(?:/[A-Za-z0-9._~-]+)+",
+        r"(?i)(?:^|[\s(\"'])/(?:home|users|tmp|var|etc|opt|srv|root|mnt|data|private|work|scratch|large[0-9]+)(?:/[A-Za-z0-9._~-]+)*",
+        r"(?i)(?:^|[\s(\"'])[A-Z]:[\\/](?:[^\\/\s]+[\\/])*[^\\/\s]+",
+        r"(?i)authorization\s*:\s*(?:bearer|basic)\s+\S+",
+        r"(?i)api[\s_-]*key\s*(?:is|:|=)\s*\S+",
+        r"(?i)(?:access[\s_-]*token|auth[\s_-]*token|token)\s*(?:is|:|=)\s*\S+",
+        r"(?i)-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
+        r"(?i)(?:password|passwd|secret|credential)\s*[:=]\s*\S+",
+    )
+    return any(re.search(pattern, stripped) is not None for pattern in sensitive_patterns)
 
 
 def _walk_issue_strings(value: Any, pointer: str = "") -> Iterable[tuple[str, str]]:
@@ -215,6 +222,26 @@ def validate_issue_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
     for obj in issues.values():
         if obj.object_type != "response" or obj.document.get("status") != "closed":
             continue
+        closure_criteria = obj.document.get("closure_criteria", [])
+        if not isinstance(closure_criteria, list) or not closure_criteria:
+            findings.append(
+                _issue_finding(
+                    "semantic.response_closure",
+                    obj,
+                    "/closure_criteria",
+                    "closed response requires non-empty closure criteria",
+                )
+            )
+        blockers = obj.document.get("blocking_dependency_refs", [])
+        if not isinstance(blockers, list) or blockers:
+            findings.append(
+                _issue_finding(
+                    "semantic.response_closure",
+                    obj,
+                    "/blocking_dependency_refs",
+                    "closed response cannot retain blocking dependency refs",
+                )
+            )
         audit = obj.document.get("closure_audit")
         if not isinstance(audit, dict):
             continue
@@ -241,6 +268,24 @@ def validate_issue_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                             "semantic.response_open_request",
                             obj,
                             f"/closure_audit/related_analysis_request_refs/{index}",
+                            f"analysis request `{request_id}` is still open",
+                        )
+                    )
+        dependencies = obj.document.get("dependencies", [])
+        if isinstance(dependencies, list):
+            for index, dependency in enumerate(dependencies):
+                request_id = dependency.get("target_id") if isinstance(dependency, dict) else None
+                request = issues.get(request_id) if isinstance(request_id, str) else None
+                if (
+                    request is not None
+                    and request.object_type == "analysis_request"
+                    and request.document.get("status") not in {"reconciled", "abandoned"}
+                ):
+                    findings.append(
+                        _issue_finding(
+                            "semantic.response_open_request",
+                            obj,
+                            f"/dependencies/{index}/target_id",
                             f"analysis request `{request_id}` is still open",
                         )
                     )

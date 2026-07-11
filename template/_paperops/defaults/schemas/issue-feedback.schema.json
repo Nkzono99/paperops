@@ -99,7 +99,8 @@
             "minLength": 1
         },
         "targets": {
-            "$ref": "#/$defs/strings"
+            "type": "array",
+            "items": {"$ref": "#/$defs/target"}
         },
         "review_round_ref": {
             "type": "string",
@@ -169,6 +170,7 @@
     },
     "additionalProperties": false,
     "$defs": {
+        "target": {"type": "object", "required": ["kind", "id"], "properties": {"kind": {"type": "string", "minLength": 1}, "id": {"type": "string", "minLength": 1}}, "additionalProperties": false},
         "strings": {
             "type": "array",
             "items": {

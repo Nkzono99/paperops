@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import copy
+import json
 import sys
+import tempfile
 import unittest
 
-from tests.helpers import ROOT, run_python_script
+from tests.helpers import ROOT, copy_template, run_python_script
 
 
 SCRIPTS = ROOT / "template/scripts"
@@ -25,7 +27,7 @@ def envelope(record_type: str, object_id: str, status: str) -> dict[str, object]
         "revision": 1, "status": status, "dependencies": [], "approvals": [],
         "extensions": {}, "metadata": {"created_at": "2026-07-11", "updated_at": "2026-07-11"},
         "source": "human", "source_mode": "prompt", "severity": "major",
-        "route": "evidence_loop", "targets": ["BLK-0001"],
+        "route": "evidence_loop", "targets": [{"kind": "manuscript_block", "id": "BLK-0001"}],
         "review_round_ref": "RVW-0001", "confidentiality": "internal_summary",
         "public_summary": "A bounded public summary.", "local_reference_id": "LOC-0001",
         "closure_criteria": ["Evidence and human decision are recorded."],
@@ -50,6 +52,7 @@ def analysis_request(status: str = "reconciled") -> dict[str, object]:
         "related_result_refs": ["RES-0001"], "manuscript_refs": ["BLK-0001"],
         "figure_panels": ["FIG-0001:A"], "target_project_link_id": "LINK-0001",
         "requested_outputs": ["RES-0001"], "verification_axes": ["denominator"],
+        "acceptance_criteria": {"artifact_refs": ["artifact:result-1"], "metric": "median", "estimand": "bounded effect", "denominator": "independent runs", "unit_of_analysis": "run", "independence_caveat": "Runs are the independent units.", "validated_scope": "registered cases", "not_covered": "unregistered regimes", "provenance_refs": ["commit:abcdef1"], "result_card_update_refs": ["legacy:RES-0001"]},
         "analysis_plan_frozen_commit": "commit:abcdef1", "data_not_seen_before_freeze": "confirmed",
         "planned_analysis": {"estimand": "bounded effect", "metric": "median", "denominator": "independent runs", "unit_of_analysis": "run", "comparison": "A versus B", "inclusion_exclusion": "registered cases", "decision_criteria": "report sign and interval", "stopping_condition": "registered sample complete", "outcome_neutral_qc": "conservation check"},
         "prediction": {"state": "predicted", "expected_sign": "positive", "expected_rank_or_range": "A > B", "uncertainty": "moderate", "basis_source_refs": ["SRC-0001"], "falsification_branch": "narrow the claim", "negative_null_route": "record negative result"},
@@ -121,6 +124,17 @@ class IssueModelTest(unittest.TestCase):
             objects[object_id] = CatalogObject(object_id, str(document["record_type"]), "issue", document, int(document["revision"]), semantic_hash(document, excluded_paths=HASH_EXCLUSIONS), f"/{object_id}")
         return ObjectCatalog(objects, ())
 
+    def write_issue_record(self, project, document: dict[str, object]) -> None:
+        record_type = str(document["record_type"])
+        directory = {"feedback": "feedback", "analysis_request": "analysis", "writing_request": "writing", "response": "responses", "review_round": "rounds"}[record_type]
+        relative = f"_paperops/model/issues/{directory}/{document['id']}.yml"
+        record_path = project / relative
+        record_path.parent.mkdir(parents=True, exist_ok=True)
+        record_path.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        digest = semantic_hash(document, excluded_paths=HASH_EXCLUSIONS)
+        index = {"model_name": "issue", "schema_version": 1, "index_revision": 1, "records": [{"id": document["id"], "record_type": record_type, "document": relative, "expected_revision": document["revision"], "expected_hash": digest}], "extensions": {}, "metadata": {"updated_at": "2026-07-11"}}
+        (project / "_paperops/model/issues/index.yml").write_text(json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
     def test_registry_stages_issue_as_fifth_entry_with_all_record_families(self) -> None:
         registry = load_registry(ROOT / "template")
         self.assertEqual(set(registry.entries), {"editorial", "results_hierarchy", "research", "manuscript", "issue"})
@@ -143,6 +157,22 @@ class IssueModelTest(unittest.TestCase):
                 self.assertEqual(self.schema_findings(record_type, document), [])
                 schema = load_document(SCHEMAS / f"issue-{record_type.replace('_', '-')}.schema.json")
                 self.assertTrue(shared.issubset(schema["required"]))
+
+    def test_targets_preserve_legacy_kind_and_id_for_every_family(self) -> None:
+        for record_type, factory in DOCUMENTS.items():
+            with self.subTest(record_type=record_type):
+                document = factory()
+                self.assertEqual(document["targets"], [{"kind": "manuscript_block", "id": "BLK-0001"}])
+                self.assertEqual(self.schema_findings(record_type, document), [])
+                legacy_string = copy.deepcopy(document); legacy_string["targets"] = ["BLK-0001"]
+                self.assertIn("schema.type", {f.code for f in self.schema_findings(record_type, legacy_string)})
+
+    def test_analysis_acceptance_criteria_preserves_every_legacy_field_family(self) -> None:
+        criteria = analysis_request()["acceptance_criteria"]
+        self.assertEqual(set(criteria), {"artifact_refs", "metric", "estimand", "denominator", "unit_of_analysis", "independence_caveat", "validated_scope", "not_covered", "provenance_refs", "result_card_update_refs"})
+        self.assertEqual(self.schema_findings("analysis_request", analysis_request()), [])
+        missing = analysis_request(); del missing["acceptance_criteria"]["independence_caveat"]
+        self.assertIn(("schema.required", "/acceptance_criteria/independence_caveat"), [(f.code, f.pointer) for f in self.schema_findings("analysis_request", missing)])
 
     def test_status_common_envelope_extension_and_dependency_contracts_are_exact(self) -> None:
         envelope_fields = {"schema_version", "record_type", "id", "revision", "status", "dependencies", "approvals", "extensions", "metadata"}
@@ -172,6 +202,32 @@ class IssueModelTest(unittest.TestCase):
                 candidate = feedback(); candidate["public_summary"] = value
                 self.assertIn("semantic.confidentiality", {f.code for f in validate_issue_semantics(self.catalog([candidate]))})
 
+    def test_embedded_private_text_is_rejected_at_stable_public_summary_pointer(self) -> None:
+        private_values = (
+            "Reviewer file is /srv/private/reviewer/comment.txt and must stay local.",
+            "Reviewer scratch is /tmp and must stay local.",
+            "Reviewer file is C:\\Users\\reviewer\\comment.txt and must stay local.",
+            "Reviewer file is C:/Users/reviewer/comment.txt and must stay local.",
+            "Local source file:///tmp/comment.txt must stay local.",
+            "Remote source ssh://private.example/path must stay local.",
+            "Remote source sftp://private.example/path must stay local.",
+            "Authorization: Bearer abc.def.ghi",
+            "Authorization: Basic YWxhZGRpbjpvcGVuc2VzYW1l",
+            "The api key is abc123.", "API_KEY: abc123", "api-key=abc123",
+            "The token is abc123.", "token: abc123", "token=abc123",
+            "-----BEGIN PRIVATE KEY----- secret material -----END PRIVATE KEY-----",
+        )
+        for value in private_values:
+            with self.subTest(value=value):
+                candidate = feedback(); candidate["public_summary"] = value
+                findings = validate_issue_semantics(self.catalog([candidate]))
+                self.assertIn(("semantic.confidentiality", "/FB-0001/public_summary"), [(f.code, f.pointer) for f in findings])
+
+    def test_public_identifiers_and_ordinary_summary_have_no_privacy_false_positive(self) -> None:
+        candidate = feedback()
+        candidate["public_summary"] = "Public evidence is at https://example.org/results and doi:10.1234/example; the bounded token count is reported."
+        self.assertNotIn("semantic.confidentiality", {f.code for f in validate_issue_semantics(self.catalog([candidate]))})
+
     def test_executed_requires_output_references(self) -> None:
         candidate = analysis_request("executed")
         candidate["execution_provenance"]["artifact_refs"] = []
@@ -192,6 +248,20 @@ class IssueModelTest(unittest.TestCase):
         self.assertIn("semantic.response_open_request", codes)
         human = response(); human["closure_audit"]["open_human_decision_refs"] = ["DEC-0001"]
         self.assertIn("semantic.response_human_decision", {f.code for f in validate_issue_semantics(self.catalog([human]))})
+
+    def test_closed_response_cannot_bypass_open_request_through_dependencies(self) -> None:
+        open_request = analysis_request("running")
+        closed = response()
+        closed["closure_audit"]["related_analysis_request_refs"] = []
+        closed["dependencies"] = [{"target_id": "AREQ-0001", "relation": "blocked_by", "expected_revision": 1, "expected_hash": semantic_hash(open_request, excluded_paths=HASH_EXCLUSIONS)}]
+        findings = validate_issue_semantics(self.catalog([open_request, closed]))
+        self.assertIn(("semantic.response_open_request", "/RSP-0001/dependencies/0/target_id"), [(f.code, f.pointer) for f in findings])
+
+    def test_closed_response_requires_nonempty_criteria_and_no_blockers(self) -> None:
+        empty = response(); empty["closure_criteria"] = []
+        blocked = response(); blocked["blocking_dependency_refs"] = ["AREQ-0001"]
+        self.assertIn(("semantic.response_closure", "/RSP-0001/closure_criteria"), [(f.code, f.pointer) for f in validate_issue_semantics(self.catalog([empty]))])
+        self.assertIn(("semantic.response_closure", "/RSP-0001/blocking_dependency_refs"), [(f.code, f.pointer) for f in validate_issue_semantics(self.catalog([blocked]))])
 
     def test_closed_response_requires_closure_criteria_and_scope_approval(self) -> None:
         candidate = response(); candidate["closure_audit"]["criteria_met"] = False; candidate["closure_audit"]["scope_change_approval_refs"] = []
@@ -219,6 +289,34 @@ class IssueModelTest(unittest.TestCase):
     def test_checker_dispatches_issue_semantics(self) -> None:
         result = run_python_script(CHECKER, "--root", ROOT / "template", "--model", "issue", "--phase", "all")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_checker_runs_issue_semantics_for_real_indexed_record_in_semantics_and_all(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = copy_template(tmp)
+            candidate = analysis_request("running")
+            candidate["public_summary"] = "Reviewer artifact lives at /srv/private/reviewer.txt."
+            self.write_issue_record(project, candidate)
+            for phase in ("semantics", "all"):
+                with self.subTest(phase=phase):
+                    result = run_python_script(CHECKER, "--root", project, "--model", "issue", "--phase", phase)
+                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    self.assertIn("[semantic.confidentiality] /records/0/public_summary", result.stdout)
+
+    def test_schema_invalid_issue_record_blocks_semantics_without_secondary_findings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = copy_template(tmp)
+            candidate = feedback(); candidate["raw_reviewer_text"] = "/srv/private/reviewer.txt"
+            self.write_issue_record(project, candidate)
+            semantics = run_python_script(CHECKER, "--root", project, "--model", "issue", "--phase", "semantics")
+            self.assertEqual(semantics.returncode, 1, semantics.stdout + semantics.stderr)
+            self.assertIn("[phase.prerequisite] /", semantics.stdout)
+            self.assertNotIn("semantic.confidentiality", semantics.stdout)
+            self.assertNotIn("schema.additional", semantics.stdout)
+            all_phases = run_python_script(CHECKER, "--root", project, "--model", "issue", "--phase", "all")
+            self.assertEqual(all_phases.returncode, 1, all_phases.stdout + all_phases.stderr)
+            self.assertIn("[schema.additional] /records/0/document/raw_reviewer_text", all_phases.stdout)
+            self.assertNotIn("semantic.confidentiality", all_phases.stdout)
+            self.assertNotIn("phase.prerequisite", all_phases.stdout)
 
     def test_complete_issue_catalog_has_no_semantic_findings(self) -> None:
         self.assertEqual(validate_issue_semantics(self.catalog([factory() for factory in DOCUMENTS.values()])), [])
