@@ -6,10 +6,10 @@
     "status": {"enum": ["unplanned", "planned", "compiled", "drafted", "verified", "stale", "removed"]},
     "dependencies": {"type": "array", "items": {"$ref": "#/$defs/dependency"}}, "approvals": {"type": "array", "items": {"$ref": "#/$defs/approval"}}, "extensions": {"type": "object", "additionalProperties": true}, "metadata": {"$ref": "#/$defs/metadata"},
     "section_id": {"type": "string", "pattern": "^SEC-[0-9]{4,}$"}, "position": {"type": "integer"}, "block_kind": {"enum": ["claim", "evidence", "method", "transition", "synthesis", "limitation", "conclusion"]}, "reader_task": {"type": "string", "minLength": 1},
-    "operation": {"enum": ["keep", "compress", "move", "merge", "split", "cut", "rewrite"]}, "ja_tex_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"}, "en_tex_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"},
+    "operation": {"enum": ["keep", "compress", "move", "merge", "split", "cut", "rewrite", "add"]}, "ja_tex_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"}, "en_tex_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"},
     "claim_refs": {"$ref": "#/$defs/strings"}, "result_refs": {"$ref": "#/$defs/strings"}, "source_refs": {"$ref": "#/$defs/strings"}, "figure_refs": {"$ref": "#/$defs/strings"}, "citation_keys": {"$ref": "#/$defs/strings"},
     "compiled_from": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/compiledFrom"}]}, "dependency_hash": {"$ref": "#/$defs/hashOrEmpty"}, "last_verified_dependency_hash": {"$ref": "#/$defs/hashOrEmpty"},
-    "allowed_operations": {"type": "array", "items": {"enum": ["keep", "compress", "move", "merge", "split", "cut", "rewrite"]}}, "forbidden_scope_expansion": {"$ref": "#/$defs/strings"}
+    "allowed_operations": {"type": "array", "items": {"enum": ["keep", "compress", "move", "merge", "split", "cut", "rewrite", "add"]}}, "forbidden_scope_expansion": {"$ref": "#/$defs/strings"}
   }, "additionalProperties": false,
   "$defs": {
     "strings": {"type": "array", "items": {"type": "string", "minLength": 1}}, "hashOrEmpty": {"anyOf": [{"const": ""}, {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}]},

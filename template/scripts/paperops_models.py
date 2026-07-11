@@ -96,7 +96,7 @@ REFERENCE_CONTRACTS: dict[str, dict[str, frozenset[str]]] = {
     "figure": {"claim_refs": frozenset({"claim"}), "result_refs": frozenset({"result"}), "manuscript_block_refs": frozenset({"block"}), "visual_obligation_refs": frozenset({"visual"}), "claim_or_decision": frozenset({"claim"})},
     "source": {"claim_refs": frozenset({"claim"}), "manuscript_block_refs": frozenset({"block"})},
     "scientific_gate": {"claim_id": frozenset({"claim"}), "analysis_request_refs": frozenset({"analysis_request"}), "blocking_feedback_refs": frozenset({"feedback"}), "central_assumptions/*/guarded_claim_refs": frozenset({"claim"}), "central_assumptions/*/manuscript_block_refs": frozenset({"block"}), "external_validation_gates/*/blocking_claim_ref": frozenset({"claim"}), "external_validation_gates/*/route_ref": frozenset({"analysis_request"})},
-    "section": {"editorial_move_refs": frozenset({"move"}), "research_refs": frozenset({"claim", "result", "figure", "source", "scientific_gate"})},
+    "section": {"editorial_move_refs": frozenset({"move"}), "move_bindings/*/move_id": frozenset({"move"}), "research_refs": frozenset({"claim", "result", "figure", "source", "scientific_gate"})},
     "block": {"section_id": frozenset({"section"}), "claim_refs": frozenset({"claim"}), "result_refs": frozenset({"result"}), "figure_refs": frozenset({"figure"}), "source_refs": frozenset({"source"})},
 }
 ISSUE_OBJECT_TYPES = frozenset(
@@ -863,6 +863,97 @@ def _scientific_approval_state(claim: CatalogObject) -> str:
     return "approved"
 
 
+def _editorial_plan_approval_state(section: CatalogObject) -> str:
+    approvals = section.document.get("approvals", [])
+    history = [
+        approval
+        for approval in approvals
+        if isinstance(approval, dict)
+        and approval.get("kind") == "editorial_choice"
+    ] if isinstance(approvals, list) else []
+    current = [
+        approval
+        for approval in history
+        if approval.get("object_revision") == section.revision
+        and approval.get("object_hash") == section.object_hash
+    ]
+    if not history:
+        return "missing"
+    if not current:
+        return "stale"
+    if current[-1].get("decision") != "approved":
+        return "rejected"
+    return "approved"
+
+
+def _section_move_bindings(
+    section: CatalogObject,
+) -> list[tuple[int, dict[str, Any]]]:
+    bindings = section.document.get("move_bindings")
+    if not isinstance(bindings, list):
+        return []
+    return [
+        (index, binding)
+        for index, binding in enumerate(bindings)
+        if isinstance(binding, dict)
+    ]
+
+
+def _move_primary_placements(
+    sections: Iterable[CatalogObject],
+) -> dict[str, list[tuple[CatalogObject, int]]]:
+    placements: dict[str, list[tuple[CatalogObject, int]]] = {}
+    for section in sections:
+        for index, binding in _section_move_bindings(section):
+            move_id = binding.get("move_id")
+            if (
+                isinstance(move_id, str)
+                and binding.get("role") == "primary"
+            ):
+                placements.setdefault(move_id, []).append((section, index))
+    return placements
+
+
+def _validate_move_binding_projection(
+    sections: Iterable[CatalogObject],
+) -> list[ModelFinding]:
+    section_list = list(sections)
+    findings: list[ModelFinding] = []
+    for section in section_list:
+        bindings = section.document.get("move_bindings")
+        if not isinstance(bindings, list):
+            continue
+        binding_ids = [
+            binding.get("move_id")
+            for binding in bindings
+            if isinstance(binding, dict)
+        ]
+        editorial_refs = section.document.get("editorial_move_refs", [])
+        if not isinstance(editorial_refs, list) or binding_ids != editorial_refs:
+            findings.append(
+                _manuscript_finding(
+                    "compile.move_binding_mismatch",
+                    section,
+                    "/move_bindings",
+                    "move binding IDs must exactly project editorial_move_refs order",
+                )
+            )
+
+    for move_id, placements in _move_primary_placements(section_list).items():
+        if len(placements) <= 1:
+            continue
+        for section, index in placements:
+            findings.append(
+                _manuscript_finding(
+                    "compile.move_primary",
+                    section,
+                    f"/move_bindings/{index}/role",
+                    f"move `{move_id}` has more than one primary section placement",
+                )
+            )
+    return findings
+
+
 def validate_manuscript_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
     """Validate Manuscript structure and its Research write-readiness boundary."""
     findings: list[ModelFinding] = []
@@ -886,6 +977,7 @@ def validate_manuscript_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
         for object_id, obj in catalog.objects.items()
         if obj.model_name == "research"
     }
+    findings.extend(_validate_move_binding_projection(sections.values()))
 
     for obj in manuscript.values():
         extensions = obj.document.get("extensions")
@@ -1099,6 +1191,123 @@ def validate_manuscript_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                             f"Research {expected_type} `{object_id}` is not present",
                         )
                     )
+    return findings
+
+
+def validate_manuscript_compile_readiness(
+    catalog: ObjectCatalog,
+    section_ids: Iterable[str] | None = None,
+) -> list[ModelFinding]:
+    """Validate the additive Manuscript requirements used only by P3 compile."""
+    sections = {
+        object_id: obj
+        for object_id, obj in catalog.objects.items()
+        if obj.model_name == "manuscript" and obj.object_type == "section"
+    }
+    blocks = {
+        object_id: obj
+        for object_id, obj in catalog.objects.items()
+        if obj.model_name == "manuscript" and obj.object_type == "block"
+    }
+    if section_ids is None:
+        selected = [
+            section
+            for section in sections.values()
+            if section.document.get("status") != "unplanned"
+        ]
+    else:
+        requested = {section_ids} if isinstance(section_ids, str) else set(section_ids)
+        selected = [
+            section
+            for object_id, section in sections.items()
+            if object_id in requested
+        ]
+
+    if not selected:
+        return []
+
+    findings = _validate_move_binding_projection(sections.values())
+    primary_placements = _move_primary_placements(sections.values())
+
+    for section in selected:
+        editorial_refs = section.document.get("editorial_move_refs", [])
+        if not isinstance(editorial_refs, list):
+            editorial_refs = []
+        for index, move_id in enumerate(editorial_refs):
+            placements = primary_placements.get(move_id, []) if isinstance(move_id, str) else []
+            if len(placements) != 1:
+                findings.append(
+                    _manuscript_finding(
+                        "compile.move_primary",
+                        section,
+                        f"/editorial_move_refs/{index}",
+                        f"move `{move_id}` requires exactly one primary section placement",
+                    )
+                )
+
+        approval_state = _editorial_plan_approval_state(section)
+        if approval_state != "approved":
+            findings.append(
+                _manuscript_finding(
+                    "compile.plan_approval",
+                    section,
+                    "/approvals",
+                    "section plan requires a current approved editorial_choice decision",
+                )
+            )
+
+        dependency_targets = {
+            dependency.get("target_id")
+            for dependency in section.document.get("dependencies", [])
+            if isinstance(dependency, dict)
+            and isinstance(dependency.get("target_id"), str)
+        }
+        research_refs = section.document.get("research_refs", [])
+        required_section_targets = [
+            *editorial_refs,
+            *(research_refs if isinstance(research_refs, list) else []),
+        ]
+        for target_id in required_section_targets:
+            if isinstance(target_id, str) and target_id not in dependency_targets:
+                findings.append(
+                    _manuscript_finding(
+                        "compile.dependency_coverage",
+                        section,
+                        "/dependencies",
+                        f"section dependency snapshot does not cover `{target_id}`",
+                    )
+                )
+
+        ordered_ids = section.document.get("ordered_block_ids", [])
+        if not isinstance(ordered_ids, list):
+            continue
+        for block_id in ordered_ids:
+            block = blocks.get(block_id) if isinstance(block_id, str) else None
+            if block is None:
+                continue
+            block_dependency_targets = {
+                dependency.get("target_id")
+                for dependency in block.document.get("dependencies", [])
+                if isinstance(dependency, dict)
+                and isinstance(dependency.get("target_id"), str)
+            }
+            for field in ("claim_refs", "result_refs", "source_refs", "figure_refs"):
+                references = block.document.get(field, [])
+                if not isinstance(references, list):
+                    continue
+                for target_id in references:
+                    if (
+                        isinstance(target_id, str)
+                        and target_id not in block_dependency_targets
+                    ):
+                        findings.append(
+                            _manuscript_finding(
+                                "compile.dependency_coverage",
+                                block,
+                                "/dependencies",
+                                f"block dependency snapshot does not cover `{target_id}`",
+                            )
+                        )
     return findings
 
 

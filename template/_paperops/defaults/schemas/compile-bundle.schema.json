@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paperops.local/schemas/compile-bundle.schema.json",
+  "title": "PaperOps generated compile bundle",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "compile_id",
+    "source_mode",
+    "status",
+    "request",
+    "authority",
+    "inputs",
+    "section_plans",
+    "writer_packets",
+    "findings"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "compile_id": {"$ref": "#/$defs/safeId"},
+    "source_mode": {"enum": ["authoritative", "shadow"]},
+    "status": {"$ref": "#/$defs/safeId"},
+    "request": {"$ref": "#/$defs/request"},
+    "authority": {"type": "array", "items": {"$ref": "#/$defs/authority"}},
+    "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
+    "section_plans": {"type": "array", "items": {"$ref": "#/$defs/sectionPlan"}},
+    "writer_packets": {"type": "array", "items": {"$ref": "#/$defs/writerPacket"}},
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "safeId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "relativePath": {
+      "type": "string",
+      "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*//).+$"
+    },
+    "strings": {"type": "array", "items": {"$ref": "#/$defs/safeId"}},
+    "finding": {
+      "type": "object",
+      "required": ["code", "pointer", "message", "severity", "identity"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "pointer": {"type": "string", "pattern": "^(?:$|/)"},
+        "message": {"type": "string"},
+        "severity": {"enum": ["error", "warning", "info"]},
+        "identity": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/relativePath"}]}
+      },
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "required": ["kind", "identity", "type", "hash", "relation"],
+      "properties": {
+        "kind": {"enum": ["catalog", "content"]},
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "type": {"$ref": "#/$defs/safeId"},
+        "hash": {"$ref": "#/$defs/hash"},
+        "relation": {"$ref": "#/$defs/safeId"},
+        "model": {"$ref": "#/$defs/safeId"},
+        "revision": {"type": "integer"}
+      },
+      "additionalProperties": false
+    },
+    "authority": {
+      "type": "object",
+      "required": ["model", "mode", "hash", "transaction_id"],
+      "properties": {
+        "model": {"$ref": "#/$defs/safeId"},
+        "mode": {"$ref": "#/$defs/safeId"},
+        "hash": {"$ref": "#/$defs/hash"},
+        "transaction_id": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/safeId"}]}
+      },
+      "additionalProperties": false
+    },
+    "writeScope": {
+      "type": "object",
+      "required": ["level", "languages", "files", "section_ids", "block_ids", "allowed_operations"],
+      "properties": {
+        "level": {"enum": ["block", "section", "manuscript"]},
+        "languages": {"$ref": "#/$defs/strings"},
+        "files": {"type": "array", "items": {"$ref": "#/$defs/relativePath"}},
+        "section_ids": {"$ref": "#/$defs/strings"},
+        "block_ids": {"$ref": "#/$defs/strings"},
+        "allowed_operations": {
+          "type": "array",
+          "items": {"enum": ["keep", "compress", "move", "merge", "split", "cut", "rewrite", "add"]}
+        }
+      },
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "required": ["targets", "write_scope", "source_mode", "shadow_transaction_id"],
+      "properties": {
+        "targets": {"$ref": "#/$defs/strings"},
+        "write_scope": {"$ref": "#/$defs/writeScope"},
+        "source_mode": {"enum": ["authoritative", "shadow"]},
+        "shadow_transaction_id": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/safeId"}]}
+      },
+      "additionalProperties": false
+    },
+    "sectionPlan": {
+      "type": "object",
+      "required": [
+        "schema_version", "section_id", "revision", "semantic_hash", "section_kind",
+        "ordered_block_ids", "inputs", "projection", "findings"
+      ],
+      "properties": {
+        "schema_version": {"const": 1},
+        "section_id": {"$ref": "#/$defs/safeId"},
+        "revision": {"type": "integer"},
+        "semantic_hash": {"$ref": "#/$defs/hash"},
+        "section_kind": {"$ref": "#/$defs/safeId"},
+        "ordered_block_ids": {"$ref": "#/$defs/strings"},
+        "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
+        "projection": {"type": "object", "additionalProperties": true},
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
+      },
+      "additionalProperties": false
+    },
+    "writerPacket": {
+      "type": "object",
+      "required": [
+        "schema_version", "packet_id", "compile_id", "authority", "write_scope",
+        "inputs", "read_context", "payload"
+      ],
+      "properties": {
+        "schema_version": {"const": 1},
+        "packet_id": {"$ref": "#/$defs/safeId"},
+        "compile_id": {"$ref": "#/$defs/safeId"},
+        "authority": {"type": "array", "items": {"$ref": "#/$defs/authority"}},
+        "write_scope": {"$ref": "#/$defs/writeScope"},
+        "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
+        "read_context": {"type": "object", "additionalProperties": true},
+        "payload": {"type": "object", "additionalProperties": true}
+      },
+      "additionalProperties": false
+    }
+  }
+}

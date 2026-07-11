@@ -181,7 +181,9 @@ class ManuscriptModelTest(unittest.TestCase):
         self.assertTrue(self.schema_findings("block", prose))
 
         block_schema = load_document(SCHEMAS / "manuscript-block.schema.json")
-        operations = {"keep", "compress", "move", "merge", "split", "cut", "rewrite"}
+        operations = {
+            "keep", "compress", "move", "merge", "split", "cut", "rewrite", "add",
+        }
         self.assertEqual(set(block_schema["properties"]["operation"]["enum"]), operations)
         self.assertEqual(
             set(block_schema["properties"]["allowed_operations"]["items"]["enum"]),
