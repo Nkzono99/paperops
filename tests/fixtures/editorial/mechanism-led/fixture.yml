@@ -1,0 +1,7 @@
+fixture_version: 1
+category: mechanism-led
+editorial_document: editorial-model.yml
+results_document: results-hierarchy.yml
+expected_hash: sha256:35ebae6eef00b4d4b646c07997a92c99883322ef4baeba0ec33cdff24c3fdc58
+expected_diagnostics: [reference.deferred]
+synthetic: true

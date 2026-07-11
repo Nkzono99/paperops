@@ -1,0 +1,26 @@
+schema_version: 1
+items:
+  - id: RHI-synthetic-control-negative-1
+    reader_question: Is the synthetic-control-negative test sensitive?
+    answer: synthetic-control-negative positive control is detected
+    quantitative_evidence_and_unit_of_analysis: synthetic-control-negative positive contrast per synthetic unit
+    figure_table_role: synthetic-control-negative sensitivity panel
+    baseline_comparator_rationale: synthetic-control-negative positive control tests detection
+    consequence: synthetic-control-negative absence can be interpreted
+    next_item_id: RHI-synthetic-control-negative-2
+  - id: RHI-synthetic-control-negative-2
+    reader_question: Is the synthetic-control-negative predicted response detected?
+    answer: synthetic-control-negative predicted response is not detected
+    quantitative_evidence_and_unit_of_analysis: synthetic-control-negative interval per synthetic unit
+    figure_table_role: synthetic-control-negative null panel
+    baseline_comparator_rationale: synthetic-control-negative matched comparator estimates background
+    consequence: synthetic-control-negative prediction lacks support
+    next_item_id: RHI-synthetic-control-negative-3
+  - id: RHI-synthetic-control-negative-3
+    reader_question: What does the synthetic-control-negative null result exclude?
+    answer: synthetic-control-negative null excludes the predicted explanation
+    quantitative_evidence_and_unit_of_analysis: synthetic-control-negative exclusion margin per synthetic unit
+    figure_table_role: synthetic-control-negative interpretation panel
+    baseline_comparator_rationale: synthetic-control-negative detection limit bounds the missing response
+    consequence: synthetic-control-negative viable explanations are narrowed
+    next_item_id: ""

@@ -1,0 +1,71 @@
+schema_version: 1
+model_id: EDT-synthetic-control-boundary
+revision: 1
+reader_transformation:
+  reader_before: synthetic-control-boundary effect is treated as universal
+  reader_after: synthetic-control-boundary effect is limited to a defined regime
+  why_it_matters: synthetic-control-boundary prevents unsupported generalization
+story_candidates:
+  - id: STY-synthetic-control-boundary-selected
+    label: synthetic-control-boundary selected story
+    thesis: synthetic-control-boundary identifies the regime where the effect holds
+    result_order: [RHI-synthetic-control-boundary-1, RHI-synthetic-control-boundary-2, RHI-synthetic-control-boundary-3]
+    argument_move_ids: [MOV-synthetic-control-boundary-1, MOV-synthetic-control-boundary-2, MOV-synthetic-control-boundary-3]
+    status: selected
+    selection_reason: synthetic-control-boundary evidence directly maps the validity limit
+    rejection_reason: ""
+  - id: STY-synthetic-control-boundary-rejected
+    label: synthetic-control-boundary universal story
+    thesis: synthetic-control-boundary effect holds in every regime
+    result_order: [RHI-synthetic-control-boundary-1, RHI-synthetic-control-boundary-2, RHI-synthetic-control-boundary-3]
+    argument_move_ids: [MOV-synthetic-control-boundary-1, MOV-synthetic-control-boundary-2, MOV-synthetic-control-boundary-3]
+    status: rejected
+    selection_reason: ""
+    rejection_reason: synthetic-control-boundary transition contradicts universality
+selected_story_id: STY-synthetic-control-boundary-selected
+single_candidate_reason: ""
+claim_roles:
+  foreground: {claim_ids: [CLM-synthetic-control-boundary-foreground], none_reason: ""}
+  supporting: {claim_ids: [CLM-synthetic-control-boundary-supporting], none_reason: ""}
+  supplement: {claim_ids: [CLM-synthetic-control-boundary-supplement], none_reason: ""}
+  cut: {claim_ids: [CLM-synthetic-control-boundary-cut], none_reason: ""}
+argument_moves:
+  - id: MOV-synthetic-control-boundary-1
+    position: 1
+    stance: assert
+    reader_question: Where does the synthetic-control-boundary effect appear?
+    assertion: synthetic-control-boundary effect appears within the tested regime
+    claim_ids: [CLM-synthetic-control-boundary-supporting]
+    result_item_ids: [RHI-synthetic-control-boundary-1]
+    next_move_id: MOV-synthetic-control-boundary-2
+  - id: MOV-synthetic-control-boundary-2
+    position: 2
+    stance: boundary
+    reader_question: Where does the synthetic-control-boundary effect stop?
+    assertion: synthetic-control-boundary transition marks the validity limit
+    claim_ids: [CLM-synthetic-control-boundary-foreground]
+    result_item_ids: [RHI-synthetic-control-boundary-2]
+    next_move_id: MOV-synthetic-control-boundary-3
+  - id: MOV-synthetic-control-boundary-3
+    position: 3
+    stance: hold
+    reader_question: What remains unresolved beyond the synthetic-control-boundary?
+    assertion: synthetic-control-boundary extrapolation is held pending evidence
+    claim_ids: [CLM-synthetic-control-boundary-supplement]
+    result_item_ids: [RHI-synthetic-control-boundary-3]
+    next_move_id: ""
+visual_obligations:
+  - id: VIS-synthetic-control-boundary-1
+    reader_task: locate the synthetic-control-boundary transition
+    takeaway: synthetic-control-boundary separates supported and unsupported regimes
+    claim_ids: [CLM-synthetic-control-boundary-foreground]
+    preferred_form: synthetic-control-boundary regime map
+    status: planned
+    waiver_reason: ""
+    figure_ids: [FIG-synthetic-control-boundary-1]
+results_hierarchy:
+  document: synthetic-control-boundary/results-hierarchy.yml
+  item_ids: [RHI-synthetic-control-boundary-1, RHI-synthetic-control-boundary-2, RHI-synthetic-control-boundary-3]
+extensions: {}
+metadata:
+  updated_at: synthetic-control-boundary-revision-1

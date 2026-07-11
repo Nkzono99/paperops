@@ -1,0 +1,71 @@
+schema_version: 1
+model_id: EDT-synthetic-control-negative
+revision: 1
+reader_transformation:
+  reader_before: synthetic-control-negative absence is treated as uninformative
+  reader_after: synthetic-control-negative controls exclude a predicted response
+  why_it_matters: synthetic-control-negative result narrows viable explanations
+story_candidates:
+  - id: STY-synthetic-control-negative-selected
+    label: synthetic-control-negative selected story
+    thesis: synthetic-control-negative null response rejects the predicted explanation
+    result_order: [RHI-synthetic-control-negative-1, RHI-synthetic-control-negative-2, RHI-synthetic-control-negative-3]
+    argument_move_ids: [MOV-synthetic-control-negative-1, MOV-synthetic-control-negative-2, MOV-synthetic-control-negative-3]
+    status: selected
+    selection_reason: synthetic-control-negative controls make the absence discriminating
+    rejection_reason: ""
+  - id: STY-synthetic-control-negative-rejected
+    label: synthetic-control-negative inconclusive story
+    thesis: synthetic-control-negative absence cannot constrain interpretation
+    result_order: [RHI-synthetic-control-negative-1, RHI-synthetic-control-negative-2, RHI-synthetic-control-negative-3]
+    argument_move_ids: [MOV-synthetic-control-negative-1, MOV-synthetic-control-negative-2, MOV-synthetic-control-negative-3]
+    status: rejected
+    selection_reason: ""
+    rejection_reason: synthetic-control-negative sensitivity and controls support exclusion
+selected_story_id: STY-synthetic-control-negative-selected
+single_candidate_reason: ""
+claim_roles:
+  foreground: {claim_ids: [CLM-synthetic-control-negative-foreground], none_reason: ""}
+  supporting: {claim_ids: [CLM-synthetic-control-negative-supporting], none_reason: ""}
+  supplement: {claim_ids: [CLM-synthetic-control-negative-supplement], none_reason: ""}
+  cut: {claim_ids: [CLM-synthetic-control-negative-cut], none_reason: ""}
+argument_moves:
+  - id: MOV-synthetic-control-negative-1
+    position: 1
+    stance: assert
+    reader_question: Was the synthetic-control-negative test sensitive enough?
+    assertion: synthetic-control-negative positive control establishes sensitivity
+    claim_ids: [CLM-synthetic-control-negative-supporting]
+    result_item_ids: [RHI-synthetic-control-negative-1]
+    next_move_id: MOV-synthetic-control-negative-2
+  - id: MOV-synthetic-control-negative-2
+    position: 2
+    stance: reject
+    reader_question: Is the synthetic-control-negative predicted response present?
+    assertion: synthetic-control-negative predicted response is absent
+    claim_ids: [CLM-synthetic-control-negative-cut]
+    result_item_ids: [RHI-synthetic-control-negative-2]
+    next_move_id: MOV-synthetic-control-negative-3
+  - id: MOV-synthetic-control-negative-3
+    position: 3
+    stance: assert
+    reader_question: What does the synthetic-control-negative absence constrain?
+    assertion: synthetic-control-negative absence rejects the predicted explanation
+    claim_ids: [CLM-synthetic-control-negative-foreground]
+    result_item_ids: [RHI-synthetic-control-negative-3]
+    next_move_id: ""
+visual_obligations:
+  - id: VIS-synthetic-control-negative-1
+    reader_task: compare synthetic-control-negative detection limit and observed response
+    takeaway: synthetic-control-negative absence lies below the supported prediction
+    claim_ids: [CLM-synthetic-control-negative-foreground]
+    preferred_form: synthetic-control-negative interval and threshold plot
+    status: planned
+    waiver_reason: ""
+    figure_ids: [FIG-synthetic-control-negative-1]
+results_hierarchy:
+  document: synthetic-control-negative/results-hierarchy.yml
+  item_ids: [RHI-synthetic-control-negative-1, RHI-synthetic-control-negative-2, RHI-synthetic-control-negative-3]
+extensions: {}
+metadata:
+  updated_at: synthetic-control-negative-revision-1

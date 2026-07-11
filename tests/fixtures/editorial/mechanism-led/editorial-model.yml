@@ -1,0 +1,71 @@
+schema_version: 1
+model_id: EDT-synthetic-control-mechanism
+revision: 1
+reader_transformation:
+  reader_before: synthetic-control-mechanism cause is unresolved
+  reader_after: synthetic-control-mechanism intervention identifies the cause
+  why_it_matters: synthetic-control-mechanism alternatives are separated
+story_candidates:
+  - id: STY-synthetic-control-mechanism-selected
+    label: synthetic-control-mechanism selected story
+    thesis: synthetic-control-mechanism intervention explains the response
+    result_order: [RHI-synthetic-control-mechanism-1, RHI-synthetic-control-mechanism-2, RHI-synthetic-control-mechanism-3]
+    argument_move_ids: [MOV-synthetic-control-mechanism-1, MOV-synthetic-control-mechanism-2, MOV-synthetic-control-mechanism-3]
+    status: selected
+    selection_reason: synthetic-control-mechanism evidence directly tests the explanation
+    rejection_reason: ""
+  - id: STY-synthetic-control-mechanism-rejected
+    label: synthetic-control-mechanism descriptive story
+    thesis: synthetic-control-mechanism response is described without a cause
+    result_order: [RHI-synthetic-control-mechanism-1, RHI-synthetic-control-mechanism-2, RHI-synthetic-control-mechanism-3]
+    argument_move_ids: [MOV-synthetic-control-mechanism-1, MOV-synthetic-control-mechanism-2, MOV-synthetic-control-mechanism-3]
+    status: rejected
+    selection_reason: ""
+    rejection_reason: synthetic-control-mechanism description does not distinguish alternatives
+selected_story_id: STY-synthetic-control-mechanism-selected
+single_candidate_reason: ""
+claim_roles:
+  foreground: {claim_ids: [CLM-synthetic-control-mechanism-foreground], none_reason: ""}
+  supporting: {claim_ids: [CLM-synthetic-control-mechanism-supporting], none_reason: ""}
+  supplement: {claim_ids: [CLM-synthetic-control-mechanism-supplement], none_reason: ""}
+  cut: {claim_ids: [CLM-synthetic-control-mechanism-cut], none_reason: ""}
+argument_moves:
+  - id: MOV-synthetic-control-mechanism-1
+    position: 1
+    stance: assert
+    reader_question: Which synthetic-control-mechanism response needs explanation?
+    assertion: synthetic-control-mechanism response differs from its comparator
+    claim_ids: [CLM-synthetic-control-mechanism-supporting]
+    result_item_ids: [RHI-synthetic-control-mechanism-1]
+    next_move_id: MOV-synthetic-control-mechanism-2
+  - id: MOV-synthetic-control-mechanism-2
+    position: 2
+    stance: reject
+    reader_question: Does the synthetic-control-mechanism alternative explain the contrast?
+    assertion: synthetic-control-mechanism alternative fails its discriminating control
+    claim_ids: [CLM-synthetic-control-mechanism-cut]
+    result_item_ids: [RHI-synthetic-control-mechanism-2]
+    next_move_id: MOV-synthetic-control-mechanism-3
+  - id: MOV-synthetic-control-mechanism-3
+    position: 3
+    stance: assert
+    reader_question: What synthetic-control-mechanism explanation remains?
+    assertion: synthetic-control-mechanism intervention supports the selected explanation
+    claim_ids: [CLM-synthetic-control-mechanism-foreground]
+    result_item_ids: [RHI-synthetic-control-mechanism-3]
+    next_move_id: ""
+visual_obligations:
+  - id: VIS-synthetic-control-mechanism-1
+    reader_task: compare synthetic-control-mechanism response and intervention
+    takeaway: synthetic-control-mechanism intervention isolates the response
+    claim_ids: [CLM-synthetic-control-mechanism-foreground]
+    preferred_form: synthetic-control-mechanism paired comparison
+    status: planned
+    waiver_reason: ""
+    figure_ids: [FIG-synthetic-control-mechanism-1]
+results_hierarchy:
+  document: synthetic-control-mechanism/results-hierarchy.yml
+  item_ids: [RHI-synthetic-control-mechanism-1, RHI-synthetic-control-mechanism-2, RHI-synthetic-control-mechanism-3]
+extensions: {}
+metadata:
+  updated_at: synthetic-control-mechanism-revision-1

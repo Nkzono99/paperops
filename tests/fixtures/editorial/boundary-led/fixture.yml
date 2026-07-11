@@ -1,0 +1,7 @@
+fixture_version: 1
+category: boundary-led
+editorial_document: editorial-model.yml
+results_document: results-hierarchy.yml
+expected_hash: sha256:e769e03e95780622965bada8ebc70475be53755f28b5ae72958eca285967a0d2
+expected_diagnostics: [reference.deferred]
+synthetic: true

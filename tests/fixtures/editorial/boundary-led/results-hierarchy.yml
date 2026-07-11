@@ -1,0 +1,26 @@
+schema_version: 1
+items:
+  - id: RHI-synthetic-control-boundary-1
+    reader_question: Does the synthetic-control-boundary effect occur in the reference regime?
+    answer: synthetic-control-boundary effect occurs in the reference regime
+    quantitative_evidence_and_unit_of_analysis: synthetic-control-boundary effect per synthetic regime unit
+    figure_table_role: synthetic-control-boundary supported-regime panel
+    baseline_comparator_rationale: synthetic-control-boundary reference defines the supported regime
+    consequence: synthetic-control-boundary effect is established locally
+    next_item_id: RHI-synthetic-control-boundary-2
+  - id: RHI-synthetic-control-boundary-2
+    reader_question: Where is the synthetic-control-boundary transition?
+    answer: synthetic-control-boundary transition occurs at the synthetic threshold
+    quantitative_evidence_and_unit_of_analysis: synthetic-control-boundary transition per synthetic regime unit
+    figure_table_role: synthetic-control-boundary transition panel
+    baseline_comparator_rationale: synthetic-control-boundary adjacent regimes locate the transition
+    consequence: synthetic-control-boundary validity limit is located
+    next_item_id: RHI-synthetic-control-boundary-3
+  - id: RHI-synthetic-control-boundary-3
+    reader_question: What happens beyond the synthetic-control-boundary?
+    answer: synthetic-control-boundary effect is not supported beyond the threshold
+    quantitative_evidence_and_unit_of_analysis: synthetic-control-boundary null contrast per synthetic regime unit
+    figure_table_role: synthetic-control-boundary unsupported-regime panel
+    baseline_comparator_rationale: synthetic-control-boundary outer regime tests extrapolation
+    consequence: synthetic-control-boundary blocks a universal claim
+    next_item_id: ""

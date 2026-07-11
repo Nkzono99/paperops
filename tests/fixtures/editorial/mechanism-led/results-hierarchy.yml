@@ -1,0 +1,26 @@
+schema_version: 1
+items:
+  - id: RHI-synthetic-control-mechanism-1
+    reader_question: What is the synthetic-control-mechanism response?
+    answer: synthetic-control-mechanism response differs from the comparator
+    quantitative_evidence_and_unit_of_analysis: synthetic-control-mechanism normalized contrast per synthetic unit
+    figure_table_role: synthetic-control-mechanism baseline panel
+    baseline_comparator_rationale: synthetic-control-mechanism comparator defines the reference
+    consequence: synthetic-control-mechanism response requires an explanation
+    next_item_id: RHI-synthetic-control-mechanism-2
+  - id: RHI-synthetic-control-mechanism-2
+    reader_question: Does the synthetic-control-mechanism alternative survive?
+    answer: synthetic-control-mechanism alternative does not survive the control
+    quantitative_evidence_and_unit_of_analysis: synthetic-control-mechanism controlled contrast per synthetic unit
+    figure_table_role: synthetic-control-mechanism exclusion panel
+    baseline_comparator_rationale: synthetic-control-mechanism matched comparator isolates the alternative
+    consequence: synthetic-control-mechanism alternative is rejected
+    next_item_id: RHI-synthetic-control-mechanism-3
+  - id: RHI-synthetic-control-mechanism-3
+    reader_question: Which synthetic-control-mechanism explanation remains?
+    answer: synthetic-control-mechanism intervention supports the selected explanation
+    quantitative_evidence_and_unit_of_analysis: synthetic-control-mechanism intervention contrast per synthetic unit
+    figure_table_role: synthetic-control-mechanism resolution panel
+    baseline_comparator_rationale: synthetic-control-mechanism sham intervention isolates the cause
+    consequence: synthetic-control-mechanism cause is identified
+    next_item_id: ""
