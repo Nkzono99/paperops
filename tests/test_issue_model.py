@@ -205,6 +205,8 @@ class IssueModelTest(unittest.TestCase):
     def test_embedded_private_text_is_rejected_at_stable_public_summary_pointer(self) -> None:
         private_values = (
             "Reviewer file is /srv/private/reviewer/comment.txt and must stay local.",
+            "Reviewer file is /reviewer.txt and must stay local.",
+            "Reviewer file is ../private/file and must stay local.",
             "Reviewer scratch is /tmp and must stay local.",
             "Reviewer file is C:\\Users\\reviewer\\comment.txt and must stay local.",
             "Reviewer file is C:/Users/reviewer/comment.txt and must stay local.",
@@ -214,7 +216,12 @@ class IssueModelTest(unittest.TestCase):
             "Authorization: Bearer abc.def.ghi",
             "Authorization: Basic YWxhZGRpbjpvcGVuc2VzYW1l",
             "The api key is abc123.", "API_KEY: abc123", "api-key=abc123",
+            "The password is hunter2.", "The secret is 's3cr3t'.",
+            'The credential is "abc123XYZ".', "The api key is `opaque-value`.",
             "The token is abc123.", "token: abc123", "token=abc123",
+            "The access token is split.", "The auth token is split.",
+            "The bearer token is split.", "The refresh token is split.",
+            "The session token is split.", "The id token is split.",
             "-----BEGIN PRIVATE KEY----- secret material -----END PRIVATE KEY-----",
         )
         for value in private_values:
@@ -224,9 +231,18 @@ class IssueModelTest(unittest.TestCase):
                 self.assertIn(("semantic.confidentiality", "/FB-0001/public_summary"), [(f.code, f.pointer) for f in findings])
 
     def test_public_identifiers_and_ordinary_summary_have_no_privacy_false_positive(self) -> None:
-        candidate = feedback()
-        candidate["public_summary"] = "Public evidence is at https://example.org/results and doi:10.1234/example; the bounded token count is reported."
-        self.assertNotIn("semantic.confidentiality", {f.code for f in validate_issue_semantics(self.catalog([candidate]))})
+        public_values = (
+            "Public evidence is at https://example.org/results and doi:10.1234/example; the bounded token count is reported.",
+            "The token is split by the tokenizer before the count is reported.",
+            "The token is conserved across the analysis.",
+            "The secret is not inferred from public data.",
+            "The credential is described without storing a value.",
+            "The API key is discussed but not recorded.",
+        )
+        for value in public_values:
+            with self.subTest(value=value):
+                candidate = feedback(); candidate["public_summary"] = value
+                self.assertNotIn("semantic.confidentiality", {f.code for f in validate_issue_semantics(self.catalog([candidate]))})
 
     def test_executed_requires_output_references(self) -> None:
         candidate = analysis_request("executed")

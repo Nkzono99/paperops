@@ -84,6 +84,26 @@ def _issue_finding(
     return ModelFinding(code, f"{obj.pointer}{suffix}", message)
 
 
+def _issue_secret_like_value(raw_value: str) -> bool:
+    """Recognize compact secret values without treating ordinary prose as one."""
+    value = raw_value.rstrip(".,;:!?")
+    wrappers = {"'": "'", '"': '"', "`": "`"}
+    quoted = len(value) >= 2 and value[0] in wrappers and value[-1] == wrappers[value[0]]
+    compact = value[1:-1] if quoted else value
+    if not compact or any(character.isspace() for character in compact):
+        return False
+    if quoted:
+        return len(compact) >= 4
+    has_alpha = any(character.isalpha() for character in compact)
+    has_digit = any(character.isdigit() for character in compact)
+    has_symbol = any(not character.isalnum() for character in compact)
+    return (
+        len(compact) >= 6
+        and has_alpha
+        and (has_digit or has_symbol)
+    )
+
+
 def _issue_sensitive_text(value: str) -> bool:
     """Reject tracked secrets and machine-local paths, not ordinary prose."""
     stripped = value.strip()
@@ -100,15 +120,28 @@ def _issue_sensitive_text(value: str) -> bool:
         return True
     sensitive_patterns = (
         r"(?:^|[\s(\"'])/(?!/)[A-Za-z0-9._~-]+(?:/[A-Za-z0-9._~-]+)+",
+        r"(?:^|[\s(\"'])/(?!/)[A-Za-z0-9._~-]+\.[A-Za-z0-9._~-]+",
         r"(?i)(?:^|[\s(\"'])/(?:home|users|tmp|var|etc|opt|srv|root|mnt|data|private|work|scratch|large[0-9]+)(?:/[A-Za-z0-9._~-]+)*",
+        r"(?:^|[\s(\"'])(?:\.\./)+(?:[A-Za-z0-9._~-]+/)*[A-Za-z0-9._~-]+",
         r"(?i)(?:^|[\s(\"'])[A-Z]:[\\/](?:[^\\/\s]+[\\/])*[^\\/\s]+",
         r"(?i)authorization\s*:\s*(?:bearer|basic)\s+\S+",
-        r"(?i)api[\s_-]*key\s*(?:is|:|=)\s*\S+",
-        r"(?i)(?:access[\s_-]*token|auth[\s_-]*token|token)\s*(?:is|:|=)\s*\S+",
+        r"(?i)api[\s_-]*key\s*[:=]\s*\S+",
+        r"(?i)(?:access|auth|bearer|refresh|session|id)[\s_-]*token\s*(?:is|:|=)\s*\S+",
+        r"(?i)token\s*[:=]\s*\S+",
         r"(?i)-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
         r"(?i)(?:password|passwd|secret|credential)\s*[:=]\s*\S+",
     )
-    return any(re.search(pattern, stripped) is not None for pattern in sensitive_patterns)
+    if any(re.search(pattern, stripped) is not None for pattern in sensitive_patterns):
+        return True
+    assigned_value_patterns = (
+        r"(?i)(?:password|passwd|secret|credential|api[\s_-]*key)\s+is\s+(\S+)",
+        r"(?i)token\s+is\s+(\S+)",
+    )
+    return any(
+        match is not None and _issue_secret_like_value(match.group(1))
+        for pattern in assigned_value_patterns
+        for match in (re.search(pattern, stripped),)
+    )
 
 
 def _walk_issue_strings(value: Any, pointer: str = "") -> Iterable[tuple[str, str]]:
