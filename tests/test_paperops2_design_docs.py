@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+import re
 import unittest
 
 from tests.helpers import ROOT
@@ -36,6 +37,25 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
                 continue
             rows.append(cells)
         return rows
+
+    def markdown_section(self, text: str, heading: str) -> str:
+        lines = text.splitlines()
+        start = lines.index(heading)
+        end = next(
+            (index for index in range(start + 1, len(lines)) if lines[index].startswith("## ")),
+            len(lines),
+        )
+        return "\n".join(lines[start:end])
+
+    def makefile_python_gates(self) -> set[str]:
+        gates = set()
+        for makefile, prefix in [("Makefile", ""), ("template/Makefile", "template/")]:
+            for script in re.findall(r"\$\(PYTHON\)\s+([^\s]+\.py)\b", self.read(makefile)):
+                rel = f"{prefix}{script}" if prefix and not script.startswith("template/") else script
+                if rel.endswith("cli-smoke.py") or rel.endswith("collect-note-context.py"):
+                    continue
+                gates.add(rel)
+        return gates
 
     def test_rfc_defines_success_retreat_and_rollout(self) -> None:
         text = self.read("docs/rfcs/0001-paperops-2.md")
@@ -76,6 +96,29 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             for required in required_values:
                 with self.subTest(path=path, required=required):
                     self.assertIn(required, text)
+
+    def test_authority_layout_matches_current_paths_and_defers_future_layout(self) -> None:
+        text = self.read("docs/adr/0001-authority-ownership-layout.md")
+        current_layout = self.markdown_section(text, "## Current physical layout")
+        for required in [
+            "`_paperops/defaults/contracts/` | paperops-managed default",
+            "`_paperops/contracts/` | project-owned contract overlay",
+            "`_paperops/model/editorial/` | project-owned typed state",
+            "`_paperops/notes/views/` | project-owned card/view state",
+            "`.paperops/cache/` | generated cache",
+            "repo 外 | local/confidential state",
+            "`manuscript/` | living human-edited manuscript source",
+            "`submission/` | immutable submission snapshot",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, current_layout)
+
+        future_layout = self.markdown_section(text, "## Future layout candidates")
+        for required in ["project-state/", ".paperops-cache/", "local-state/", "snapshots/"]:
+            with self.subTest(required=required):
+                self.assertIn(required, future_layout)
+        self.assertIn("非規範的", future_layout)
+        self.assertIn("後続の migration ADR", future_layout)
 
     def test_writer_and_macro_state_have_single_authority_boundaries(self) -> None:
         expected = {
@@ -141,7 +184,8 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             "template/_paperops/evidence/figures/",
             "template/_paperops/evidence/results/",
             "template/_paperops/evidence/sources/",
-            "template/_paperops/notes/views/",
+            "template/_paperops/notes/views/ (pure overview views)",
+            "template/_paperops/notes/views/ (controlled authoring views)",
             "template/_paperops/review/",
             "template/_paperops/requests/",
             "template/_paperops/workflow/",
@@ -163,8 +207,21 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             path.relative_to(ROOT).as_posix()
             for path in (ROOT / "template" / "scripts").glob("check-*.py")
         }
+        checker_files |= {
+            "template/scripts/lint-bib.py",
+            "template/scripts/mirror-check.py",
+            "template/scripts/mirror-freshness-check.py",
+            "template/scripts/readiness-check.py",
+        }
+        root_checkers = {
+            "scripts/check-release-version-truth.py",
+            "scripts/check-scaffold-package-boundary.py",
+        }
         expected = {
-            "## Root governance layer": root_families | root_skills | self.make_targets("Makefile"),
+            "## Root governance layer": root_families
+            | root_skills
+            | root_checkers
+            | self.make_targets("Makefile"),
             "## Downstream template layer": downstream_families
             | template_skills
             | checker_files
@@ -208,6 +265,90 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
         model_row = downstream_rows["template/_paperops/model/"]
         self.assertEqual(model_row[3], "investigate")
         self.assertIn("modelごとに単一writerをP1で決定する必要がある", model_row[6])
+
+    def test_disposition_splits_overview_and_controlled_authoring_views(self) -> None:
+        text = self.read("docs/paperops2-disposition.md")
+        rows = {
+            cells[0].removeprefix("`").removesuffix("`"): cells
+            for cells in self.disposition_rows(text, "## Downstream template layer")
+            if len(cells) == 8
+        }
+        overview = rows["template/_paperops/notes/views/ (pure overview views)"]
+        controlled = rows["template/_paperops/notes/views/ (controlled authoring views)"]
+        self.assertEqual(overview[3], "redirect")
+        self.assertIn("generated read-only projection", overview[2])
+        self.assertEqual(controlled[3], "adapt")
+        self.assertIn("project-owned", controlled[2])
+        self.assertIn("human-written", controlled[4])
+        self.assertIn("P1", controlled[5])
+        self.assertIn("compatibility readers", controlled[6])
+        self.assertIn("strict validation", controlled[7])
+
+    def test_checker_inventory_covers_every_deterministic_make_gate(self) -> None:
+        text = self.read("docs/paperops2-disposition.md")
+        self.assertIn(
+            "deterministic gate として Makefile から起動される Python entrypoint",
+            text,
+        )
+        documented = {
+            cells[0].removeprefix("`").removesuffix("`")
+            for heading in ["## Root governance layer", "## Downstream template layer"]
+            for cells in self.disposition_rows(text, heading)
+            if len(cells) == 8
+        }
+        expected = self.makefile_python_gates() | {"scripts/check-release-version-truth.py"}
+        self.assertEqual(expected - documented, set())
+
+    def test_rfc_and_matrix_have_exact_cross_links(self) -> None:
+        rfc = self.read("docs/rfcs/0001-paperops-2.md")
+        matrix = self.read("docs/paperops2-disposition.md")
+        self.assertIn("[Disposition matrix](../paperops2-disposition.md)", rfc)
+        for link in [
+            "[RFC 0001](rfcs/0001-paperops-2.md)",
+            "[ADR 0001](adr/0001-authority-ownership-layout.md)",
+            "[ADR 0002](adr/0002-cli-agent-compiler-boundary.md)",
+            "[ADR 0003](adr/0003-revision-state-hash.md)",
+        ]:
+            with self.subTest(link=link):
+                self.assertIn(link, matrix)
+
+    def test_rfc_compatibility_invariant_is_complete_in_its_own_section(self) -> None:
+        invariant = self.markdown_section(
+            self.read("docs/rfcs/0001-paperops-2.md"), "## 互換 invariant"
+        )
+        for required in [
+            "JA/EN mirror",
+            "block ID",
+            "quantity",
+            "figure",
+            "citation",
+            "authoring intent",
+            "predicted result",
+            "analysis request",
+            "claim",
+            "move",
+            "block",
+            "selective stale",
+            "living manuscript",
+            "immutable submission snapshot",
+            "paperops-managed default",
+            "project-owned state",
+            "migration validation",
+            "legacy deletion",
+            "conflict stop",
+            "strict",
+            "advisory",
+            "diagnostic",
+            "starter",
+            "raw reviewer text",
+            "credential",
+            "absolute path",
+            "unpublished raw data",
+            "generated cache",
+            "tracked state に含めない",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, invariant)
 
     def test_fixture_policy_uses_synthetic_cases_and_reserves_paths(self) -> None:
         text = self.read("docs/paperops2-evaluation-fixtures.md")

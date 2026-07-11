@@ -31,27 +31,35 @@ human-edited manuscript source について、Writer は patch を生成する�
 | local/confidential state | credential、絶対 path、raw reviewer text、未公開 raw data | local user / external system | no | tracked model へコピーしない |
 | immutable publication snapshot | submission 時点の原稿、manifest、参照 revision | publication snapshot command | yes | 作成後は変更せず、新 submission は新 snapshot とする |
 
-## Physical layout
+## Current physical layout
 
-次を規範的な形とし、具体的な basename と schema version は各モデルの実装 ADR で固定する。
+現在の下流 scaffold では次の配置を規範とする。managed update は managed の行だけを対象とし、project-owned の行を包含しない。
+
+| Current path | Authority class | Notes |
+|---|---|---|
+| `_paperops/defaults/contracts/` | paperops-managed default | section / figure の標準 contract。PaperOps release だけが更新する |
+| `_paperops/defaults/schemas/`、`_paperops/defaults/workflow/` | paperops-managed default | typed schema、workflow default、focus policy、subagent roster |
+| `_paperops/contracts/` | project-owned contract overlay | 標準 contract から外れる論文固有差分。managed contract ではない |
+| `_paperops/model/editorial/` | project-owned typed state | 現行の typed Results hierarchy を含む |
+| `_paperops/claims/`、`_paperops/evidence/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/workflow/` | project-owned card/model/workflow state | 論文固有の card、review、request、workflow fact |
+| `_paperops/notes/views/` | project-owned card/view state | pure overview と controlled authoring view を含む。個別 disposition は matrix で分ける |
+| `.paperops/cache/` | generated cache | compile packet、judge output、materialized view。未追跡で正本にしない |
+| repo 外 | local/confidential state | credential、絶対 path、raw reviewer text、未公開 raw data を追跡しない |
+| `manuscript/` | living human-edited manuscript source | 投稿後や査読後も更新できる authoring source |
+| `submission/` | immutable submission snapshot | submission candidate は可変な派生成果物、submitted round snapshot は作成後に変更しない証跡として、両方を living source から分離する |
+
+## Future layout candidates
+
+次は PaperOps 2 の比較検討用に示す**非規範的**な候補であり、現行 path の別名でも移行指示でもない。
 
 ```text
-_paperops/
-  defaults/                 # paperops-managed default
-  contracts/                # paperops-managed default
-project-state/
-  <model>/
-    index.yaml              # ID、順序、参照の索引
-    records/
-      <stable-id>.yaml      # per-ID record
-.paperops-cache/            # generated cache、未追跡
-local-state/                # local/confidential state、未追跡
-snapshots/
-  <submission-id>/          # immutable publication snapshot
-manuscript/                 # human-edited manuscript source
+project-state/<model>/records/   # per-ID record + index candidate
+.paperops-cache/                 # generated cache candidate
+local-state/                     # local/confidential state candidate
+snapshots/<submission-id>/       # immutable publication snapshot candidate
 ```
 
-小規模モデルでは `project-state/<model>.yaml` のような集約 file を選べる。ただし、各判断の ID、revision、writer が識別可能で、同じ内容を records と集約 file の双方から更新できないことを条件とする。実際の下流 path は disposition と migration 設計を経て決め、この例だけで既存 path を移動しない。
+小規模モデルでは `project-state/<model>.yaml` のような集約 file も比較できる。ただし、これらの path へ変更するには、managed / project-owned pattern、preflight、atomic write、post-validation、rollback、compatibility reader を定める後続の migration ADR が必要である。その ADR と検証済み migration が採択されるまで、上の Current physical layout を変更しない。
 
 ## Consequences
 

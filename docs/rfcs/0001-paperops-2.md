@@ -96,9 +96,10 @@ legacy writer を唯一の authority としたまま、v2 adapter/compiler が�
 - predicted result と analysis request の lifecycle を維持する。
 - claim、move、block 単位の selective stale を失わない。
 - living manuscript と immutable submission snapshot を分離する。
-- project-owned state を managed update で上書きしない。
-- migration は明示的に実行し、検証成功前に旧正本を削除しない。
+- paperops-managed default と project-owned state の境界を維持し、managed update で project-owned state を上書きしない。
+- migration validation が成功する前に legacy deletion を行わず、競合時は部分更新せず conflict stop とする。
 - strict、advisory、diagnostic、starter の意味を混同しない。
+- raw reviewer text、credential、absolute path、unpublished raw data、generated cache は tracked state に含めない。
 - malformed typed state が存在する場合、legacy state へ暗黙 fallback してエラーを隠さない。
 
 ## 評価
@@ -112,4 +113,4 @@ legacy writer を唯一の authority としたまま、v2 adapter/compiler が�
 - [ADR 0001: Authority・ownership・物理配置](../adr/0001-authority-ownership-layout.md)
 - [ADR 0002: CLI・Agent・compiler 境界](../adr/0002-cli-agent-compiler-boundary.md)
 - [ADR 0003: Revision・state・hash](../adr/0003-revision-state-hash.md)
-- 現行 artifact の retain / adapt / redirect / deprecate / remove / investigate は、P0-A の disposition matrix で別途管理する。
+- 現行 artifact の retain / adapt / redirect / deprecate / remove / investigate は [Disposition matrix](../paperops2-disposition.md) で管理する。

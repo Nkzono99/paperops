@@ -1,10 +1,12 @@
 # PaperOps 2 現行資産 disposition matrix
 
-この文書は ADR 0001–0003 の authority class、単一 writer、CLI / Agent / compiler 境界、revision / hash 境界を現行資産へ適用する。各行は P1–P7 の実装計画で再確認する移行判断であり、この表だけで authority を切り替えない。
+この文書は [RFC 0001](rfcs/0001-paperops-2.md)、[ADR 0001](adr/0001-authority-ownership-layout.md)、[ADR 0002](adr/0002-cli-agent-compiler-boundary.md)、[ADR 0003](adr/0003-revision-state-hash.md) の authority class、単一 writer、CLI / Agent / compiler 境界、revision / hash 境界を現行資産へ適用する。各行は P1–P7 の実装計画で再確認する移行判断であり、この表だけで authority を切り替えない。
 
 disposition の語彙は次のとおりである。`retain` は責務と入口を維持、`adapt` は入口を保って新 contract へ適合、`redirect` は互換入口を新正本へ転送、`deprecate` は利用観測と移行期間を設けて新規利用を止める、`remove` は検証済みの削除条件を満たした別変更だけで実行、`investigate` は責務または移行先が未確定で理由付き調査を要求する。本サイクルに `remove` の実行対象はない。
 
 P1 は schema・canonical hash・migration 基盤、P2–P3 は story / claim / evidence の typed authority、P4–P5 は compiler / Writer packet と manuscript patch、P6 は review / submission snapshot、P7 は既定化と legacy removal 判定を指す。段階導入中は legacy-authoritative → shadow → opt-in v2-authoritative → default v2-authoritative の gate を順守する。
+
+checker inventory は、名前が `check-` で始まるかにかかわらず、deterministic gate として Makefile から起動される Python entrypoint を個別 asset として含める。release/package gate も含める一方、test runner、collector、migration utility、build helper は、それ自体が deterministic gate でない限り checker に分類しない。
 
 ## Root governance layer
 
@@ -21,6 +23,13 @@ P1 は schema・canonical hash・migration 基盤、P2–P3 は story / claim / 
 | `.agents/skills/release/SKILL.md` | root release 手順 | P7 default / publish gate | adapt | maintainer via skill | maintainer; CI publish | v2-authoritative を実装済みと誤認しない release check を追加 | 後継 release automation の監査完了後のみ |
 | `.agents/skills/review-template-regression/SKILL.md` | template 互換性 review | P1–P7 compatibility gate | adapt | reviewer via skill | Agent diagnostic; reviewer decision | authority 二重化、fallback、snapshot 分離を review 観点へ追加 | 後継 gate が同じ観点を保証後のみ |
 | `.agents/skills/triage-template-feedback/SKILL.md` | feedback の scope / label / 実装先判断 | P1–P7 governance intake gate | retain | triager via skill | Agent proposal; human decision | root と downstream の分類を維持 | intake workflow の完全な代替後のみ |
+
+### Root deterministic checkers
+
+| asset | current responsibility | target model/gate | disposition | writer before | writer after | compatibility/migration | removal condition |
+|---|---|---|---|---|---|---|---|
+| `scripts/check-release-version-truth.py` | tag、package、CHANGELOG の release version truth 検査 | P7 release gate | retain | checker is read-only | checker is read-only | P1+ 未提供を release 済みと誤認しない | 置換 release gate の同等性確認後のみ |
+| `scripts/check-scaffold-package-boundary.py` | scaffold と package の所有境界検査 | P1 managed/project ownership gate | adapt | checker is read-only | checker is read-only | managed path が project-owned state を包含しないことを検査 | 同等 CLI checker へ全 caller 移行後のみ |
 
 ### Root Make targets
 
@@ -78,7 +87,8 @@ P1 は schema・canonical hash・migration 基盤、P2–P3 は story / claim / 
 | `template/_paperops/evidence/figures/` | figure evidence records | P3 figure evidence authority | adapt | human / figure skills | evidence workflow の単一 writer | figure ID と参照を migration | legacy reader 利用ゼロ後のみ |
 | `template/_paperops/evidence/results/` | result evidence records | P3 result evidence authority | adapt | human / analysis import | evidence workflow の単一 writer | predicted と observed を混同しない | legacy reader 利用ゼロ後のみ |
 | `template/_paperops/evidence/sources/` | source evidence records | P3 source provenance authority | adapt | human / research skill | evidence workflow の単一 writer | raw/private source は local state に残す | legacy reader 利用ゼロ後のみ |
-| `template/_paperops/notes/views/` | materialized human-readable views | P2–P6 generated read-only views | redirect | skills / humans が混在 | deterministic materializer only | legacy-authoritative 中は旧正本、切替後は generated と表示 | 全 reader が typed authority を参照後のみ |
+| `template/_paperops/notes/views/ (pure overview views)` | card / typed authority の俯瞰 | P2–P6 generated read-only projection | redirect | skill または human による集約 | deterministic materializer only | compatibility readers は migration と strict validation 完了まで維持 | 全 reader が typed authority を参照し strict validation 済みになった後のみ |
+| `template/_paperops/notes/views/ (controlled authoring views)` | story spine、概念語、条件名など本文判断の統制 | P2–P5 project-owned editorial decision | adapt | project-owned / human-written | P1 で各判断の typed authority と単一 writer を決定 | compatibility readers は migration と strict validation 完了まで維持し、それ以前は redirect しない | P1 の authority 決定、migration、strict validation 後に個別 view ごとに判断 |
 | `template/_paperops/review/` | review rounds、feedback、responses | P6 review-round authority | adapt | human / review skills | review workflow の単一 writer | raw reviewer text を local/confidential state と分離 | migrated rounds と復元確認後のみ |
 | `template/_paperops/requests/` | analysis / writing request lifecycle | P3–P5 request typed authority | adapt | human / skills | request workflow の単一 writer | predicted result と request の linkage を維持 | migrated requests と利用ゼロ確認後のみ |
 | `template/_paperops/workflow/` | writable workflow state | P1–P6 axis facts + read-only macro projection | adapt | setup / workflow tools | axis ごとの単一 CLI writer | macro state 直接更新を停止し atomic migration | legacy writable macro state 利用ゼロ後のみ |
@@ -171,6 +181,10 @@ P1 は schema・canonical hash・migration 基盤、P2–P3 は story / claim / 
 | `template/scripts/check-submission-drift.py` | submission drift | P6 snapshot gate | adapt | checker is read-only | checker is read-only | referenced revision/hash で比較 | v2 snapshot checker 同等性確認後のみ |
 | `template/scripts/check-tex-structure.py` | TeX structure | P4/P5 manuscript gate | retain | checker is read-only | checker is read-only | block/mirror structureを維持 | 置換 checker 同等性確認後のみ |
 | `template/scripts/check-workflow-state.py` | workflow state | P1–P6 orthogonal-state gate | adapt | checker is read-only | checker is read-only | macro state を projection として検査 | legacy writable macro state 利用ゼロ後のみ |
+| `template/scripts/lint-bib.py` | bibliography 構造と submission mode の lint | P3/P6 citation gate | retain | checker is read-only | checker is read-only | 通常 / pre-submit の exit semantics を維持 | 置換 checker 同等性確認後のみ |
+| `template/scripts/mirror-check.py` | JA/EN block 対応検査 | P4/P6 mirror gate | retain | checker is read-only | checker is read-only | block ID と mirror invariant を維持 | 置換 checker 同等性確認後のみ |
+| `template/scripts/mirror-freshness-check.py` | JA/EN mirror freshness 検査 | P4/P6 mirror stale gate | retain | checker is read-only | checker is read-only | advisory / strict と selective stale を維持 | 置換 checker 同等性確認後のみ |
+| `template/scripts/readiness-check.py` | starter / project / submission readiness 検査 | P1–P7 readiness gate | adapt | checker is read-only | checker is read-only | starter と strict submission profile を区別 | v2 readiness checker 同等性確認後のみ |
 
 ### Downstream Make targets
 
