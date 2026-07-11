@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import copy
 import importlib.util
+import json
 import sys
+import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from unittest.mock import patch
 
-from tests.helpers import ROOT, run_python_script
+from tests.helpers import ROOT, copy_template, run_python_script
+from tests.test_research_model import claim as complete_research_claim
 
 
 SCRIPTS = ROOT / "template/scripts"
@@ -183,23 +186,29 @@ class ManuscriptModelTest(unittest.TestCase):
         )
 
     def test_unplanned_records_need_not_fabricate_compile_state(self) -> None:
-        unplanned_section = section()
-        unplanned_section["status"] = "unplanned"
-        unplanned_section["compiled_manifest_ref"] = ""
-        unplanned_section["dependency_hash"] = ""
-        unplanned_section["last_verified_dependency_hash"] = ""
-        self.assertEqual(self.schema_findings("section", unplanned_section), [])
+        for status in ("unplanned", "planned"):
+            with self.subTest(status=status):
+                unplanned_section = section()
+                unplanned_section["status"] = status
+                unplanned_section["compiled_manifest_ref"] = ""
+                unplanned_section["dependency_hash"] = ""
+                unplanned_section["last_verified_dependency_hash"] = ""
+                self.assertEqual(self.schema_findings("section", unplanned_section), [])
 
-        unplanned_block = block()
-        unplanned_block["status"] = "unplanned"
-        unplanned_block["compiled_from"] = None
-        unplanned_block["dependency_hash"] = ""
-        unplanned_block["last_verified_dependency_hash"] = ""
-        unplanned_block["claim_refs"] = []
-        unplanned_block["result_refs"] = []
-        unplanned_block["source_refs"] = []
-        unplanned_block["figure_refs"] = []
-        self.assertEqual(self.schema_findings("block", unplanned_block), [])
+                unplanned_block = block()
+                unplanned_block["status"] = status
+                unplanned_block["compiled_from"] = None
+                unplanned_block["dependency_hash"] = ""
+                unplanned_block["last_verified_dependency_hash"] = ""
+                unplanned_block["claim_refs"] = []
+                unplanned_block["result_refs"] = []
+                unplanned_block["source_refs"] = []
+                unplanned_block["figure_refs"] = []
+                self.assertEqual(self.schema_findings("block", unplanned_block), [])
+                self.assertEqual(validate_manuscript_semantics(self.catalog([
+                    ("manuscript", "section", unplanned_section),
+                    ("manuscript", "block", unplanned_block),
+                ])), [])
 
         planned_with_provenance = copy.deepcopy(unplanned_block)
         planned_with_provenance["status"] = "planned"
@@ -210,6 +219,63 @@ class ManuscriptModelTest(unittest.TestCase):
             ("manuscript", "block", planned_with_provenance),
         ]))
         self.assertIn("reference.dangling", [finding.code for finding in findings])
+
+    def test_compiled_section_requires_manifest_and_both_dependency_hashes(self) -> None:
+        for status in ("compiled", "drafted", "verified", "stale"):
+            with self.subTest(status=status):
+                candidate = section()
+                candidate["status"] = status
+                candidate["compiled_manifest_ref"] = ""
+                candidate["dependency_hash"] = ""
+                candidate["last_verified_dependency_hash"] = ""
+                findings = validate_manuscript_semantics(
+                    self.catalog([("manuscript", "section", candidate)])
+                )
+                self.assertIn(
+                    ("semantic.compiled_from", "/SEC-0001/compiled_manifest_ref"),
+                    [(finding.code, finding.pointer) for finding in findings],
+                )
+                self.assertIn(
+                    ("dependency.missing", "/SEC-0001/dependency_hash"),
+                    [(finding.code, finding.pointer) for finding in findings],
+                )
+                self.assertIn(
+                    ("dependency.missing", "/SEC-0001/last_verified_dependency_hash"),
+                    [(finding.code, finding.pointer) for finding in findings],
+                )
+
+    def test_compiled_block_states_require_provenance_and_both_hashes(self) -> None:
+        for status in ("compiled", "drafted", "verified", "stale", "removed"):
+            with self.subTest(status=status):
+                candidate = block()
+                candidate["status"] = status
+                candidate["compiled_from"] = None
+                candidate["dependency_hash"] = ""
+                candidate["last_verified_dependency_hash"] = ""
+                findings = validate_manuscript_semantics(self.catalog([
+                    ("manuscript", "section", section()),
+                    ("manuscript", "block", candidate),
+                ]))
+                pairs = {(finding.code, finding.pointer) for finding in findings}
+                self.assertIn(("semantic.compiled_from", "/BLK-0001/compiled_from"), pairs)
+                self.assertIn(("dependency.missing", "/BLK-0001/dependency_hash"), pairs)
+                self.assertIn(
+                    ("dependency.missing", "/BLK-0001/last_verified_dependency_hash"),
+                    pairs,
+                )
+
+    def test_block_operation_must_be_allowed_for_that_block(self) -> None:
+        candidate = block()
+        candidate["operation"] = "cut"
+        candidate["allowed_operations"] = ["keep", "rewrite"]
+        findings = validate_manuscript_semantics(self.catalog([
+            ("manuscript", "section", section()),
+            ("manuscript", "block", candidate),
+        ]))
+        self.assertIn(
+            ("semantic.operation", "/BLK-0001/operation"),
+            [(finding.code, finding.pointer) for finding in findings],
+        )
 
     def test_status_enums_extensions_and_common_envelope_are_exact(self) -> None:
         for record_type, document in (("section", section()), ("block", block())):
@@ -340,6 +406,94 @@ class ManuscriptModelTest(unittest.TestCase):
             sys.modules.pop(spec.name, None)
         self.assertEqual(code, 1)
         self.assertIn("semantic.manuscript_probe", stdout.getvalue())
+
+    def test_checker_requires_registered_research_for_manuscript_dependent_phases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = copy_template(tmp)
+            registry_path = project / "_paperops/defaults/schemas/registry.yml"
+            registry = load_document(registry_path)
+            registry["models"].pop("research")
+            registry_path.write_text(json.dumps(registry), encoding="utf-8")
+            for phase in ("all", "semantics"):
+                with self.subTest(phase=phase):
+                    result = run_python_script(
+                        project / "scripts/check-paperops-models.py",
+                        "--root", project, "--model", "manuscript", "--phase", phase,
+                    )
+                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    self.assertIn("[phase.prerequisite] /", result.stdout)
+                    self.assertIn("research", result.stdout)
+
+    def _project_with_research_index_hash_and_orphan(self, tmp: str):
+        project = copy_template(tmp)
+        record = complete_research_claim()
+        record_path = project / "_paperops/model/research/claims/CLM-0002.json"
+        record_path.parent.mkdir(parents=True)
+        record_path.write_text(json.dumps(record), encoding="utf-8")
+        wrong_type = complete_research_claim()
+        wrong_type["id"] = "RES-0002"
+        wrong_type_path = project / "_paperops/model/research/results/RES-0002.json"
+        wrong_type_path.parent.mkdir(parents=True)
+        wrong_type_path.write_text(json.dumps(wrong_type), encoding="utf-8")
+        index_path = project / "_paperops/model/research/index.yml"
+        index = load_document(index_path)
+        index["records"] = [
+            {
+                "id": "CLM-0002",
+                "record_type": "claim",
+                "document": "_paperops/model/research/claims/CLM-0002.json",
+                "expected_revision": 2,
+                "expected_hash": "sha256:" + "0" * 64,
+            },
+            {
+                "id": "RES-0002",
+                "record_type": "result",
+                "document": "_paperops/model/research/results/RES-0002.json",
+                "expected_revision": 1,
+                "expected_hash": semantic_hash(
+                    wrong_type, excluded_paths=HASH_EXCLUSIONS
+                ),
+            },
+        ]
+        index_path.write_text(json.dumps(index), encoding="utf-8")
+        orphan = project / "_paperops/model/research/claims/CLM-9999.json"
+        orphan.write_text("{}", encoding="utf-8")
+        return project
+
+    def test_manuscript_phases_propagate_research_catalog_findings_once(self) -> None:
+        for phase in ("all", "semantics"):
+            with self.subTest(phase=phase), tempfile.TemporaryDirectory() as tmp:
+                project = self._project_with_research_index_hash_and_orphan(tmp)
+                result = run_python_script(
+                    project / "scripts/check-paperops-models.py",
+                    "--root", project, "--model", "manuscript", "--phase", phase,
+                )
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                for code in (
+                    "index.hash", "index.id", "index.type", "index.revision",
+                    "reference.orphan",
+                ):
+                    self.assertEqual(result.stdout.count(f"[{code}]"), 1)
+
+    def test_supporting_research_orphan_keeps_advisory_and_strict_exit_rules(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = copy_template(tmp)
+            orphan = project / "_paperops/model/research/claims/CLM-9999.json"
+            orphan.parent.mkdir(parents=True)
+            orphan.write_text("{}", encoding="utf-8")
+            advisory = run_python_script(
+                project / "scripts/check-paperops-models.py",
+                "--root", project, "--model", "manuscript", "--phase", "semantics",
+            )
+            strict = run_python_script(
+                project / "scripts/check-paperops-models.py",
+                "--root", project, "--model", "manuscript", "--phase", "semantics",
+                "--strict",
+            )
+        self.assertEqual(advisory.returncode, 0, advisory.stdout + advisory.stderr)
+        self.assertEqual(advisory.stdout.count("[reference.orphan]"), 1)
+        self.assertEqual(strict.returncode, 1, strict.stdout + strict.stderr)
+        self.assertEqual(strict.stdout.count("[reference.orphan]"), 1)
 
 
 if __name__ == "__main__":

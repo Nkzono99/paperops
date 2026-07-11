@@ -253,6 +253,11 @@ def main() -> int:
     selected_names = (
         list(registry.entries) if args.model == "all" else [args.model]
     )
+    manuscript_requires_missing_research = (
+        "manuscript" in selected_names
+        and phase in ("all", "semantics")
+        and "research" not in registry.entries
+    )
     names_to_load = list(selected_names)
     if (
         "editorial" in selected_names
@@ -371,14 +376,8 @@ def main() -> int:
             and not loaded["results_hierarchy"].schema_clean
         ):
             findings.extend(loaded["results_hierarchy"].schema_findings)
-        if (
-            phase == "all"
-            and "manuscript" in selected_names
-            and "research" not in selected_names
-            and "research" in loaded
-            and not loaded["research"].schema_clean
-        ):
-            findings.extend(loaded["research"].findings)
+        if manuscript_requires_missing_research:
+            findings.append(_prerequisite(["research"]))
     elif phase == "hash":
         for name in selected_names:
             model = loaded.get(name)
@@ -408,6 +407,18 @@ def main() -> int:
         ]
         if failed:
             findings.append(_prerequisite(failed))
+
+    supporting_research = (
+        "manuscript" in selected_names
+        and "research" not in selected_names
+        and "research" in loaded
+        and phase in ("all", "semantics")
+    )
+    if supporting_research:
+        research_support = loaded["research"]
+        if phase == "all":
+            findings.extend(research_support.schema_findings)
+        findings.extend(research_support.catalog_findings)
 
     if phase in ("all", "references"):
         findings.extend(binding_findings)

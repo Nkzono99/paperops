@@ -284,8 +284,42 @@ def validate_manuscript_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                         finding.message,
                     )
                 )
+        requires_compiled_state = obj.document.get("status") in {
+            "compiled", "drafted", "verified", "stale", "removed",
+        }
+        if (
+            requires_compiled_state
+            and obj.object_type == "section"
+            and not obj.document.get("compiled_manifest_ref")
+        ):
+            findings.append(
+                _manuscript_finding(
+                    "semantic.compiled_from",
+                    obj,
+                    "/compiled_manifest_ref",
+                    "compiled section state requires a compiled manifest reference",
+                )
+            )
         dependency_hash = obj.document.get("dependency_hash")
         verified_hash = obj.document.get("last_verified_dependency_hash")
+        if requires_compiled_state and not dependency_hash:
+            findings.append(
+                _manuscript_finding(
+                    "dependency.missing",
+                    obj,
+                    "/dependency_hash",
+                    "compiled state requires a current dependency hash",
+                )
+            )
+        if requires_compiled_state and not verified_hash:
+            findings.append(
+                _manuscript_finding(
+                    "dependency.missing",
+                    obj,
+                    "/last_verified_dependency_hash",
+                    "compiled state requires a last verified dependency hash",
+                )
+            )
         if dependency_hash and verified_hash and dependency_hash != verified_hash:
             findings.append(
                 _manuscript_finding(
@@ -345,9 +379,20 @@ def validate_manuscript_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                 )
             )
 
+        allowed_operations = block.document.get("allowed_operations", [])
+        if block.document.get("operation") not in allowed_operations:
+            findings.append(
+                _manuscript_finding(
+                    "semantic.operation",
+                    block,
+                    "/operation",
+                    "block operation must be included in allowed_operations",
+                )
+            )
+
         compiled_from = block.document.get("compiled_from")
         requires_compilation = block.document.get("status") in {
-            "compiled", "drafted", "verified",
+            "compiled", "drafted", "verified", "stale", "removed",
         }
         if compiled_from is None and not requires_compilation:
             continue
