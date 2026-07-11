@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- PaperOps 2 P2 migration の transaction 基盤として、immutable な inventory / candidate / report DTO、project-relative pathだけを扱うdeterministic report、秘密情報とabsolute pathを保存しないMarkdown projection、mode / size / SHA-256を検証するbyte-exact snapshotを追加した。path traversal、Windows absolute path、symlink component、special file、snapshot改変はauthority切替前に停止する。これはCLI内部基盤の追加であり、既存下流のtracked stateやauthorityは変更しない。
+
 - PaperOps 2 P2 migration の検証境界として、project-managed `check-paperops-models.py` に versioned `--json` 出力を追加し、package 側から shell を介さず安全に起動して finding / hash / exit status を型付き結果へ変換する runner を追加した。既存の人間向け出力と exit code は維持する。既存下流は managed checker を更新すればよく、project-owned model state の移行や authority 切替はまだ発生しない。
 
 - PaperOps 2 P1-B の六モデル kernel を完成し、Research / Editorial / Results hierarchy / Manuscript / Issue / Publication をschema-clean global catalogへ接続した。checkerに`approvals` / `dependencies` phase、cross-model type/cardinality検査、`dependency-v1`と`--print-dependency-hash`、candidateとsubmitted roundを分離するPublication semanticsを追加した。新規`pops init`は空indexと未提出Publication starterを含むが、既存projectの`_paperops/model/`はmanaged updateやM0-0005から生成・上書き・削除しない。P2 migration、P3 compiler、P4 workflow cutoverまではlegacy authorityを維持する。
