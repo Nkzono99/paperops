@@ -273,6 +273,84 @@ class EditorialReferenceValidationTest(unittest.TestCase):
 
         self.assertEqual(findings, [])
 
+    def test_non_mapping_story_item_skips_story_dependent_references(self) -> None:
+        editorial, results = valid_documents()
+        editorial["story_candidates"] = [None]
+        editorial["claim_roles"]["foreground"] = {
+            "claim_ids": [],
+            "none_reason": "No foreground claim is assigned in this reference test.",
+        }
+
+        findings = validate_editorial_references(editorial, results)
+
+        self.assertFalse(findings_with_code(findings, "reference.dangling"))
+
+    def test_non_mapping_move_item_skips_the_entire_move_graph(self) -> None:
+        editorial, results = valid_documents()
+        editorial["argument_moves"] = [
+            move("MOV-0001", 1, "MOV-0002"),
+            None,
+            move("MOV-0002", 2, ""),
+        ]
+        editorial["claim_roles"]["foreground"] = {
+            "claim_ids": [],
+            "none_reason": "No foreground claim is assigned in this reference test.",
+        }
+
+        findings = validate_editorial_references(editorial, results)
+
+        self.assertFalse(
+            {"reference.order", "reference.cycle", "reference.dangling"}
+            & {finding.code for finding in findings}
+        )
+
+    def test_non_mapping_results_item_skips_rhi_cross_references(self) -> None:
+        editorial, results = valid_documents()
+        results["items"] = [{"id": "RHI-other"}, None]
+        editorial["claim_roles"]["foreground"] = {
+            "claim_ids": [],
+            "none_reason": "No foreground claim is assigned in this reference test.",
+        }
+
+        findings = validate_editorial_references(editorial, results)
+
+        self.assertFalse(findings_with_code(findings, "reference.dangling"))
+
+    def test_non_mapping_visual_item_skips_visual_external_references(self) -> None:
+        editorial, results = valid_documents()
+        visual = copy.deepcopy(editorial["visual_obligations"][0])
+        visual["claim_ids"] = ["CLM-visual"]
+        visual["figure_ids"] = ["FIG-visual"]
+        editorial["visual_obligations"] = [visual, None]
+        editorial["claim_roles"]["foreground"] = {
+            "claim_ids": [],
+            "none_reason": "No foreground claim is assigned in this reference test.",
+        }
+
+        findings = validate_editorial_references(editorial, results)
+
+        self.assertFalse(
+            [
+                finding
+                for finding in findings_with_code(findings, "reference.deferred")
+                if finding.pointer.startswith("/visual_obligations")
+            ]
+        )
+
+    def test_non_mapping_claim_role_skips_all_role_external_references(self) -> None:
+        editorial, results = valid_documents()
+        editorial["claim_roles"]["supporting"] = None
+
+        findings = validate_editorial_references(editorial, results)
+
+        self.assertFalse(
+            [
+                finding
+                for finding in findings_with_code(findings, "reference.deferred")
+                if finding.pointer.startswith("/claim_roles")
+            ]
+        )
+
 
 class EditorialSemanticValidationTest(unittest.TestCase):
     def test_story_selection_requires_exactly_one_matching_selected_candidate(self) -> None:
@@ -468,6 +546,37 @@ class EditorialSemanticValidationTest(unittest.TestCase):
         findings = validate_editorial_semantics(editorial, strict=True)
 
         self.assertEqual(findings, [])
+
+    def test_non_mapping_story_item_skips_story_selection_and_count(self) -> None:
+        editorial, _ = valid_documents()
+        editorial["story_candidates"] = [None]
+
+        findings = validate_editorial_semantics(editorial, strict=True)
+
+        self.assertFalse(
+            {"semantic.story_selection", "semantic.story_count"}
+            & {finding.code for finding in findings}
+        )
+
+    def test_non_mapping_visual_item_skips_the_entire_visual_collection(self) -> None:
+        editorial, _ = valid_documents()
+        waived = copy.deepcopy(editorial["visual_obligations"][0])
+        waived["status"] = "waived"
+        waived["waiver_reason"] = ""
+        editorial["visual_obligations"] = [waived, None]
+
+        findings = validate_editorial_semantics(editorial, strict=True)
+
+        self.assertFalse(findings_with_code(findings, "semantic.visual"))
+
+    def test_non_mapping_claim_role_skips_all_role_semantics(self) -> None:
+        editorial, _ = valid_documents()
+        editorial["claim_roles"]["supporting"] = None
+        editorial["claim_roles"]["supplement"] = {"claim_ids": [], "none_reason": ""}
+
+        findings = validate_editorial_semantics(editorial, strict=True)
+
+        self.assertFalse(findings_with_code(findings, "semantic.claim_role"))
 
 
 if __name__ == "__main__":

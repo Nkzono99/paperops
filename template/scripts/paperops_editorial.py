@@ -48,6 +48,20 @@ def _mapping(value: Any) -> dict[str, Any] | None:
     return value
 
 
+def _mapping_array(value: Any) -> list[Any] | None:
+    items = _array(value)
+    if items is None or any(_mapping(item) is None for item in items):
+        return None
+    return items
+
+
+def _mapping_entries(value: Any) -> dict[str, Any] | None:
+    entries = _mapping(value)
+    if entries is None or any(_mapping(item) is None for item in entries.values()):
+        return None
+    return entries
+
+
 def _pointer_token(value: str) -> str:
     return value.replace("~", "~0").replace("/", "~1")
 
@@ -254,10 +268,10 @@ def validate_editorial_references(
     if not isinstance(editorial, dict) or not isinstance(results, dict):
         return findings
 
-    stories = _array(editorial.get("story_candidates"))
-    moves = _array(editorial.get("argument_moves"))
-    visuals = _array(editorial.get("visual_obligations"))
-    result_items = _array(results.get("items"))
+    stories = _mapping_array(editorial.get("story_candidates"))
+    moves = _mapping_array(editorial.get("argument_moves"))
+    visuals = _mapping_array(editorial.get("visual_obligations"))
+    result_items = _mapping_array(results.get("items"))
 
     story_index: dict[str, int] | None = None
     duplicate_stories: set[str] = set()
@@ -360,7 +374,7 @@ def validate_editorial_references(
                 findings,
             )
 
-    claim_roles = _mapping(editorial.get("claim_roles"))
+    claim_roles = _mapping_entries(editorial.get("claim_roles"))
     if claim_roles is not None:
         for role, raw_entry in claim_roles.items():
             entry = _mapping(raw_entry)
@@ -451,8 +465,8 @@ def _validate_story_semantics(
     strict: bool,
     findings: list[ModelFinding],
 ) -> None:
-    raw_stories = editorial.get("story_candidates")
-    if not isinstance(raw_stories, list):
+    raw_stories = _mapping_array(editorial.get("story_candidates"))
+    if raw_stories is None:
         return
     stories = [(index, item) for index, raw in enumerate(raw_stories) if (item := _mapping(raw))]
     selected = [(index, story) for index, story in stories if story.get("status") == "selected"]
@@ -536,7 +550,7 @@ def _validate_claim_roles(
     strict: bool,
     findings: list[ModelFinding],
 ) -> None:
-    claim_roles = _mapping(editorial.get("claim_roles"))
+    claim_roles = _mapping_entries(editorial.get("claim_roles"))
     if claim_roles is None:
         return
     assigned: dict[str, str] = {}
@@ -587,8 +601,8 @@ def _validate_moves(
     strict: bool,
     findings: list[ModelFinding],
 ) -> None:
-    moves = editorial.get("argument_moves")
-    if not isinstance(moves, list):
+    moves = _mapping_array(editorial.get("argument_moves"))
+    if moves is None:
         return
     _add_empty_collection_placeholder(moves, "/argument_moves", strict, findings)
     for index, raw_move in enumerate(moves):
@@ -623,8 +637,8 @@ def _validate_visuals(
     strict: bool,
     findings: list[ModelFinding],
 ) -> None:
-    visuals = editorial.get("visual_obligations")
-    if not isinstance(visuals, list):
+    visuals = _mapping_array(editorial.get("visual_obligations"))
+    if visuals is None:
         return
     _add_empty_collection_placeholder(visuals, "/visual_obligations", strict, findings)
     for index, raw_visual in enumerate(visuals):
