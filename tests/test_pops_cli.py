@@ -38,6 +38,17 @@ def create_legacy_internal_layout(root: Path) -> None:
 
 
 class PopsCliTest(unittest.TestCase):
+    def test_init_contains_editorial_starter(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+
+            code, _out, err = run_cli(["init", str(target)])
+
+            self.assertEqual(code, 0, err)
+            self.assertTrue(
+                (target / "_paperops" / "model" / "editorial" / "editorial-model.yml").is_file()
+            )
+
     def test_init_creates_project_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
@@ -511,6 +522,35 @@ class PopsCliTest(unittest.TestCase):
 
             self.assertEqual(code, 0, err)
             self.assertTrue(schema.is_file())
+
+    def test_update_manages_schema_registry_and_checker_but_not_editorial_state(self) -> None:
+        managed = [
+            "_paperops/defaults/schemas/registry.yml",
+            "_paperops/defaults/schemas/editorial-model.schema.json",
+            "scripts/paperops_schema.py",
+            "scripts/paperops_checks.py",
+        ]
+        project_owned = "_paperops/model/editorial/editorial-model.yml"
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+            for rel in [*managed, project_owned]:
+                (target / rel).unlink()
+
+            code, out, err = run_cli(["update-paperops", "--dry-run", str(target)])
+
+            self.assertEqual(code, 0, err)
+            for rel in managed:
+                self.assertIn(f"+ {rel}", out)
+            self.assertNotIn(project_owned, out)
+
+            code, _out, err = run_cli(["update-paperops", "--apply", str(target)])
+
+            self.assertEqual(code, 0, err)
+            for rel in managed:
+                self.assertTrue((target / rel).is_file(), rel)
+            self.assertFalse((target / project_owned).exists())
 
     def test_update_paperops_explains_changed_managed_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

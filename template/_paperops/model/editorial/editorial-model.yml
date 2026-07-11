@@ -1,0 +1,24 @@
+# Starter placeholder: replace these values with paper-specific editorial decisions.
+schema_version: 1
+model_id: EDT-0001
+revision: 1
+reader_transformation:
+  reader_before: 未記入
+  reader_after: 未記入
+  why_it_matters: 未記入
+story_candidates: []
+selected_story_id: ""
+single_candidate_reason: ""
+claim_roles:
+  foreground: {claim_ids: [], none_reason: 未記入}
+  supporting: {claim_ids: [], none_reason: 未記入}
+  supplement: {claim_ids: [], none_reason: 未記入}
+  cut: {claim_ids: [], none_reason: 未記入}
+argument_moves: []
+visual_obligations: []
+results_hierarchy:
+  document: _paperops/model/editorial/results-hierarchy.yml
+  item_ids: []
+extensions: {}
+metadata:
+  updated_at: ""

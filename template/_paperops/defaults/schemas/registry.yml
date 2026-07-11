@@ -1,0 +1,18 @@
+registry_version: 1
+validator_profile: paperops-schema-v1
+models:
+  editorial:
+    schema: editorial-model.schema.json
+    schema_version: 1
+    authority: project-owned
+    default_path: _paperops/model/editorial/editorial-model.yml
+    hash_profile: semantic-v1
+    hash_excluded_paths:
+      - /metadata/updated_at
+  results_hierarchy:
+    schema: results-hierarchy.schema.json
+    schema_version: 1
+    authority: project-owned
+    default_path: _paperops/model/editorial/results-hierarchy.yml
+    hash_profile: semantic-v1
+    hash_excluded_paths: []

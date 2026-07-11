@@ -27,6 +27,24 @@ class SchemaDefinitionError(ValueError):
     pass
 
 
+@dataclass(frozen=True)
+class RegistryEntry:
+    name: str
+    schema_path: Path
+    schema_version: int
+    authority: str
+    default_path: Path
+    hash_profile: str
+    hash_excluded_paths: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class SchemaRegistry:
+    version: int
+    validator_profile: str
+    entries: dict[str, RegistryEntry]
+
+
 SUPPORTED_KEYWORDS = frozenset(
     {
         "$schema",
@@ -110,6 +128,119 @@ def load_document(path: Path) -> Any:
 
     _reject_non_finite(document)
     return document
+
+
+def _registry_error(code: str, message: str) -> SchemaDefinitionError:
+    return SchemaDefinitionError(f"registry.{code}: {message}")
+
+
+def _registry_mapping(value: Any, field: str) -> dict[str, Any]:
+    if not isinstance(value, dict) or not all(isinstance(key, str) for key in value):
+        raise _registry_error("invalid", f"{field} must be an object with string keys")
+    return value
+
+
+def _registry_string(entry: dict[str, Any], field: str, model: str) -> str:
+    value = entry.get(field)
+    if not isinstance(value, str) or not value:
+        raise _registry_error("invalid", f"models.{model}.{field} must be a string")
+    return value
+
+
+def _resolve_registry_schema(registry_dir: Path, raw_path: str, model: str) -> Path:
+    relative = Path(raw_path)
+    if relative.is_absolute() or len(relative.parts) != 1 or relative.name != raw_path:
+        raise _registry_error("path", f"models.{model}.schema must be a filename")
+    resolved = (registry_dir / relative).resolve()
+    if resolved.parent != registry_dir or not resolved.is_file():
+        if resolved.parent != registry_dir:
+            raise _registry_error("path", f"models.{model}.schema escapes the registry")
+        raise _registry_error("schema_missing", f"schema file is missing: {raw_path}")
+    return resolved
+
+
+def _resolve_registry_default(root: Path, raw_path: str, model: str) -> Path:
+    relative = Path(raw_path)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise _registry_error("path", f"models.{model}.default_path must stay within root")
+    resolved = (root / relative).resolve()
+    if not resolved.is_relative_to(root):
+        raise _registry_error("path", f"models.{model}.default_path escapes root")
+    return resolved
+
+
+def load_registry(root: Path) -> SchemaRegistry:
+    """Load and validate the managed schema registry below a project root."""
+    resolved_root = root.resolve()
+    registry_dir = resolved_root / "_paperops" / "defaults" / "schemas"
+    registry_path = registry_dir / "registry.yml"
+    try:
+        document = load_document(registry_path)
+    except (OSError, DocumentLoadError) as error:
+        raise _registry_error("invalid", f"cannot load {registry_path}: {error}") from error
+    registry = _registry_mapping(document, "registry")
+
+    version = registry.get("registry_version")
+    if version != 1 or isinstance(version, bool):
+        raise _registry_error("version", f"unsupported registry_version: {version!r}")
+    validator_profile = registry.get("validator_profile")
+    if validator_profile != "paperops-schema-v1":
+        raise _registry_error(
+            "profile",
+            f"unsupported validator_profile: {validator_profile!r}",
+        )
+
+    models = _registry_mapping(registry.get("models"), "models")
+    entries: dict[str, RegistryEntry] = {}
+    for name, raw_entry in models.items():
+        entry = _registry_mapping(raw_entry, f"models.{name}")
+        schema_version = entry.get("schema_version")
+        if (
+            not isinstance(schema_version, int)
+            or isinstance(schema_version, bool)
+            or schema_version < 1
+        ):
+            raise _registry_error(
+                "invalid",
+                f"models.{name}.schema_version must be a positive integer",
+            )
+        authority = _registry_string(entry, "authority", name)
+        if authority != "project-owned":
+            raise _registry_error("invalid", f"unsupported authority: {authority!r}")
+        hash_profile = _registry_string(entry, "hash_profile", name)
+        if hash_profile != "semantic-v1":
+            raise _registry_error("invalid", f"unsupported hash_profile: {hash_profile!r}")
+        raw_exclusions = entry.get("hash_excluded_paths", [])
+        if not isinstance(raw_exclusions, list) or not all(
+            isinstance(pointer, str) and pointer.startswith("/")
+            for pointer in raw_exclusions
+        ):
+            raise _registry_error(
+                "invalid",
+                f"models.{name}.hash_excluded_paths must be JSON Pointer strings",
+            )
+        entries[name] = RegistryEntry(
+            name=name,
+            schema_path=_resolve_registry_schema(
+                registry_dir,
+                _registry_string(entry, "schema", name),
+                name,
+            ),
+            schema_version=schema_version,
+            authority=authority,
+            default_path=_resolve_registry_default(
+                resolved_root,
+                _registry_string(entry, "default_path", name),
+                name,
+            ),
+            hash_profile=hash_profile,
+            hash_excluded_paths=tuple(raw_exclusions),
+        )
+    return SchemaRegistry(
+        version=version,
+        validator_profile=validator_profile,
+        entries=entries,
+    )
 
 
 def _escape_pointer_token(token: Any) -> str:

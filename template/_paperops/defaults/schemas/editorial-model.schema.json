@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paperops.dev/schemas/editorial-model.schema.json",
+  "title": "PaperOps Editorial Model",
+  "description": "Version 1 project-owned Editorial decision model.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "model_id",
+    "revision",
+    "reader_transformation",
+    "story_candidates",
+    "selected_story_id",
+    "single_candidate_reason",
+    "claim_roles",
+    "argument_moves",
+    "visual_obligations",
+    "results_hierarchy",
+    "extensions",
+    "metadata"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "model_id": {"type": "string", "pattern": "^EDT-[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "revision": {"type": "integer"},
+    "reader_transformation": {"$ref": "#/$defs/reader_transformation"},
+    "story_candidates": {
+      "type": "array",
+      "minItems": 0,
+      "items": {"$ref": "#/$defs/story_candidate"}
+    },
+    "selected_story_id": {
+      "type": "string",
+      "pattern": "^(?:|STY-[A-Za-z0-9][A-Za-z0-9._-]*)$"
+    },
+    "single_candidate_reason": {"type": "string"},
+    "claim_roles": {"$ref": "#/$defs/claim_roles"},
+    "argument_moves": {
+      "type": "array",
+      "minItems": 0,
+      "items": {"$ref": "#/$defs/argument_move"}
+    },
+    "visual_obligations": {
+      "type": "array",
+      "minItems": 0,
+      "items": {"$ref": "#/$defs/visual_obligation"}
+    },
+    "results_hierarchy": {"$ref": "#/$defs/results_hierarchy"},
+    "extensions": {"type": "object", "additionalProperties": {}},
+    "metadata": {"$ref": "#/$defs/metadata"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "reader_transformation": {
+      "type": "object",
+      "required": ["reader_before", "reader_after", "why_it_matters"],
+      "properties": {
+        "reader_before": {"type": "string"},
+        "reader_after": {"type": "string"},
+        "why_it_matters": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "story_candidate": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "thesis",
+        "result_order",
+        "argument_move_ids",
+        "status",
+        "selection_reason",
+        "rejection_reason"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^STY-[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "label": {"type": "string"},
+        "thesis": {"type": "string"},
+        "result_order": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^RHI-[A-Za-z0-9][A-Za-z0-9._-]*$"}
+        },
+        "argument_move_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^MOV-[A-Za-z0-9][A-Za-z0-9._-]*$"}
+        },
+        "status": {"enum": ["candidate", "selected", "rejected"]},
+        "selection_reason": {"type": "string"},
+        "rejection_reason": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "claim_roles": {
+      "type": "object",
+      "required": ["foreground", "supporting", "supplement", "cut"],
+      "properties": {
+        "foreground": {"$ref": "#/$defs/claim_role"},
+        "supporting": {"$ref": "#/$defs/claim_role"},
+        "supplement": {"$ref": "#/$defs/claim_role"},
+        "cut": {"$ref": "#/$defs/claim_role"}
+      },
+      "additionalProperties": false
+    },
+    "claim_role": {
+      "type": "object",
+      "required": ["claim_ids", "none_reason"],
+      "properties": {
+        "claim_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^CLM-[A-Za-z0-9][A-Za-z0-9._-]*$"}
+        },
+        "none_reason": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "argument_move": {
+      "type": "object",
+      "required": [
+        "id",
+        "position",
+        "stance",
+        "reader_question",
+        "assertion",
+        "claim_ids",
+        "result_item_ids",
+        "next_move_id"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^MOV-[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "position": {"type": "integer"},
+        "stance": {"enum": ["assert", "reject", "boundary", "hold"]},
+        "reader_question": {"type": "string"},
+        "assertion": {"type": "string"},
+        "claim_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^CLM-[A-Za-z0-9][A-Za-z0-9._-]*$"}
+        },
+        "result_item_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^RHI-[A-Za-z0-9][A-Za-z0-9._-]*$"}
+        },
+        "next_move_id": {
+          "type": "string",
+          "pattern": "^(?:|MOV-[A-Za-z0-9][A-Za-z0-9._-]*)$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "visual_obligation": {
+      "type": "object",
+      "required": [
+        "id",
+        "reader_task",
+        "takeaway",
+        "claim_ids",
+        "preferred_form",
+        "status",
+        "waiver_reason",
+        "figure_ids"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^VIS-[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "reader_task": {"type": "string"},
+        "takeaway": {"type": "string"},
+        "claim_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^CLM-[A-Za-z0-9][A-Za-z0-9._-]*$"}
+        },
+        "preferred_form": {"type": "string"},
+        "status": {"enum": ["planned", "satisfied", "waived"]},
+        "waiver_reason": {"type": "string"},
+        "figure_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^FIG-[A-Za-z0-9][A-Za-z0-9._-]*$"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "results_hierarchy": {
+      "type": "object",
+      "required": ["document", "item_ids"],
+      "properties": {
+        "document": {"type": "string"},
+        "item_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^RHI-[A-Za-z0-9][A-Za-z0-9._-]*$"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["updated_at"],
+      "properties": {"updated_at": {"type": "string"}},
+      "additionalProperties": false
+    }
+  }
+}
