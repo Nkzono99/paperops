@@ -208,3 +208,31 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
         model_row = downstream_rows["template/_paperops/model/"]
         self.assertEqual(model_row[3], "investigate")
         self.assertIn("modelごとに単一writerをP1で決定する必要がある", model_row[6])
+
+    def test_fixture_policy_uses_synthetic_cases_and_reserves_paths(self) -> None:
+        text = self.read("docs/paperops2-evaluation-fixtures.md")
+        for required in [
+            "mechanism-led",
+            "boundary-led",
+            "negative-result-led",
+            "tests/fixtures/editorial/",
+            "story candidates",
+            "selection reason",
+            "rejection reason",
+            "Results hierarchy",
+            "argument move",
+            "合成データ",
+        ]:
+            with self.subTest(required=required):
+                self.assertIn(required, text)
+
+    def test_current_specification_indexes_paperops2_design_sources(self) -> None:
+        text = self.read("docs/current-specification.md")
+        for path in [
+            "docs/rfcs/0001-paperops-2.md",
+            "docs/adr/",
+            "docs/paperops2-disposition.md",
+            "docs/paperops2-evaluation-fixtures.md",
+        ]:
+            with self.subTest(path=path):
+                self.assertIn(path, text)

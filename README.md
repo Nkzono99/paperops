@@ -87,6 +87,7 @@ make smoke
 
 ## 詳細
 
+- PaperOps 2 設計 RFC: [docs/rfcs/0001-paperops-2.md](docs/rfcs/0001-paperops-2.md)
 - CLI: [docs/cli.md](docs/cli.md)
 - 配布とリリース: [docs/distribution.md](docs/distribution.md)
 - アーキテクチャ: [docs/architecture.md](docs/architecture.md)

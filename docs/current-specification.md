@@ -8,6 +8,7 @@
 
 | scope | source of truth | note |
 | --- | --- | --- |
+| PaperOps 2 design | `docs/rfcs/0001-paperops-2.md`, `docs/adr/`, `docs/paperops2-disposition.md`, `docs/paperops2-evaluation-fixtures.md` | 段階再設計の目標と導入、authority / ownership、CLI / Agent / compiler 境界、revision / hash、現行資産の判断、P1 fixture 方針 |
 | architecture / layer contract | `docs/architecture.md` | root 層、下流論文層、`_paperops/`、`paper_ir`、workflow state、submission axis |
 | typed Editorial state | `template/_paperops/defaults/schemas/results-hierarchy.schema.json`, `template/_paperops/model/editorial/results-hierarchy.yml`, `template/scripts/check-section-contracts.py`, `docs/migrations/v0.md` | schema、starter state、strict checker、M0-0003 compatibility |
 | CLI and checker behavior | `docs/cli.md`, `src/paperops/cli/`, `template/scripts/` | `pops init`、`pops update-paperops`、`pops scratch`、`pops workflow`、Makefile checks |
