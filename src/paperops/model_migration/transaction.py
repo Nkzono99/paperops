@@ -5,9 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import secrets
 import shutil
 import stat
 import tempfile
+from datetime import UTC, datetime
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -15,7 +17,7 @@ from typing import Any
 from paperops.model_state import ModelAuthorityState, read_model_states, write_model_states
 from paperops.model_validation import run_model_validation
 
-from .staging import snapshot_paths, transaction_paths, verify_snapshot
+from .staging import new_transaction_id, snapshot_paths, transaction_paths, verify_snapshot
 from .types import MigrationFinding
 
 
@@ -106,6 +108,21 @@ class TransactionJournal:
     manifest_existed: bool
     manifest_hash: str
     manifest_candidate_hash: str
+
+
+@dataclass(frozen=True)
+class RollbackPlan:
+    root: Path
+    model_name: str
+    transaction_id: str
+    models: tuple[str, ...]
+    targets: tuple[TransactionTarget, ...]
+    restore_transactions: dict[str, str]
+    result_states: dict[str, ModelAuthorityState]
+    manifest_existed: bool
+    manifest_hash: str
+    manifest_candidate_hash: str
+    no_op: bool = False
 
 
 def _file_hash(path: Path) -> str:
@@ -413,12 +430,18 @@ def execute_adoption(plan: AdoptionPlan, *, fail_at: str = "") -> TransactionJou
     for target in plan.targets:
         current = plan.root / target.relative_path
         candidate = paths.candidate_dir / target.relative_path
+        replacement = paths.migration_dir / "replacement" / target.relative_path
+        replacement.parent.mkdir(parents=True, exist_ok=True)
+        if candidate.is_dir():
+            shutil.copytree(candidate, replacement, copy_function=shutil.copy2)
+        else:
+            shutil.copy2(candidate, replacement)
         displaced = paths.migration_dir / "displaced" / target.relative_path
         displaced.parent.mkdir(parents=True, exist_ok=True)
         if current.exists() or current.is_symlink():
             os.replace(current, displaced)
         current.parent.mkdir(parents=True, exist_ok=True)
-        os.replace(candidate, current)
+        os.replace(replacement, current)
     if fail_at == "after:targets_replaced":
         raise InjectedTransactionFailure(fail_at)
     states = read_model_states(plan.root)
@@ -434,7 +457,210 @@ def execute_adoption(plan: AdoptionPlan, *, fail_at: str = "") -> TransactionJou
         raise InjectedTransactionFailure(fail_at)
     _transition(plan, "committed", fail_at)
     shutil.rmtree(paths.migration_dir / "displaced", ignore_errors=True)
+    shutil.rmtree(paths.migration_dir / "replacement", ignore_errors=True)
     return _journal_from_plan(plan, "committed")
+
+
+def _depends_transitively(model_name: str, dependency: str) -> bool:
+    direct = MODEL_DEPENDENCIES[model_name]
+    return dependency in direct or any(
+        _depends_transitively(item, dependency) for item in direct
+    )
+
+
+def dependent_models(
+    model_name: str,
+    states: dict[str, ModelAuthorityState] | None = None,
+) -> tuple[str, ...]:
+    target = "editorial" if model_name == "results_hierarchy" else model_name
+    order = ("publication", "issue", "manuscript", "editorial", "results_hierarchy", "research")
+    values = [
+        name
+        for name in order
+        if name != model_name
+        and _depends_transitively(name, target)
+        and (states is None or states[name].mode == "v2-authoritative")
+    ]
+    return tuple(values)
+
+
+def _committed_adoption(root: Path, transaction_id: str) -> TransactionJournal:
+    try:
+        journal = _read_journal(transaction_paths(root, transaction_id).journal_path)
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
+        raise TransactionError(
+            MigrationFinding("transaction.journal_missing", f"/{transaction_id}", f"adoption journal cannot be read: {error}")
+        ) from error
+    if journal.action != "adopt" or journal.state != "committed":
+        raise TransactionError(
+            MigrationFinding("transaction.journal_state", f"/{transaction_id}", "rollback source must be a committed adoption")
+        )
+    return journal
+
+
+def plan_rollback(
+    root: Path,
+    model_name: str,
+    *,
+    transaction_id: str = "",
+    cascade: bool = False,
+) -> RollbackPlan:
+    project = root.absolute()
+    states = read_model_states(project)
+    requested = _affected(model_name)
+    if all(states[name].mode != "v2-authoritative" for name in requested):
+        existed, digest = _manifest_identity(project)
+        return RollbackPlan(project, model_name, "", requested, (), {}, {}, existed, digest, digest, True)
+    blockers = tuple(name for name in dependent_models(model_name, states) if name not in requested)
+    if blockers and not cascade:
+        raise TransactionError(
+            MigrationFinding("transaction.dependent", f"/models/{model_name}", "v2 dependent models block rollback: " + ", ".join(blockers))
+        )
+    selected: set[str] = set(requested)
+    if cascade:
+        for name in blockers:
+            selected.update(_affected(name))
+    order = ("publication", "issue", "manuscript", "editorial", "results_hierarchy", "research")
+    models = tuple(name for name in order if name in selected and states[name].mode == "v2-authoritative")
+    targets: dict[str, TransactionTarget] = {}
+    restore_transactions: dict[str, str] = {}
+    result_states: dict[str, ModelAuthorityState] = {}
+    verified_snapshots: set[str] = set()
+    for name in models:
+        source_transaction = transaction_id if name in requested and transaction_id else states[name].last_adopt_transaction
+        if not source_transaction:
+            raise TransactionError(
+                MigrationFinding("transaction.snapshot_missing", f"/models/{name}", "model has no adoption transaction to roll back")
+            )
+        if transaction_id and name in requested and states[name].last_adopt_transaction != transaction_id:
+            raise TransactionError(
+                MigrationFinding("transaction.target_changed", f"/models/{name}", "specific transaction is not the model's current adoption")
+            )
+        journal = _committed_adoption(project, source_transaction)
+        if source_transaction not in verified_snapshots:
+            snapshot_findings = verify_snapshot(project, source_transaction)
+            if snapshot_findings:
+                raise TransactionError(snapshot_findings[0])
+            verified_snapshots.add(source_transaction)
+        snapshot_root = project / ".paperops/snapshots" / source_transaction
+        snapshot_states = read_model_states(snapshot_root)
+        result_states[name] = snapshot_states[name]
+        relative = _TARGETS[name]
+        if relative in targets:
+            continue
+        journal_target = next((item for item in journal.targets if item.relative_path == relative), None)
+        if journal_target is None:
+            raise TransactionError(
+                MigrationFinding("transaction.snapshot_manifest", f"/{relative}", "adoption journal does not cover the model target")
+            )
+        current = project / relative
+        if not current.exists() or _path_hash(current) != journal_target.candidate_hash:
+            raise TransactionError(
+                MigrationFinding("transaction.target_changed", f"/{relative}", "current model differs from the committed adoption")
+            )
+        source = snapshot_root / relative
+        if journal_target.old_exists and not source.exists():
+            raise TransactionError(
+                MigrationFinding("transaction.snapshot_missing", f"/{relative}", "rollback target is missing from the snapshot")
+            )
+        targets[relative] = TransactionTarget(
+            relative,
+            True,
+            _path_hash(current),
+            _path_hash(source) if journal_target.old_exists else "",
+        )
+        restore_transactions[relative] = source_transaction
+    rollback_id = new_transaction_id(datetime.now(UTC), secrets.token_bytes(24))
+    manifest_existed, manifest_hash = _manifest_identity(project)
+    future_states = dict(states)
+    future_states.update(result_states)
+    manifest_candidate_hash = _future_manifest_hash(project, future_states)
+    return RollbackPlan(
+        project,
+        model_name,
+        rollback_id,
+        models,
+        tuple(targets.values()),
+        restore_transactions,
+        result_states,
+        manifest_existed,
+        manifest_hash,
+        manifest_candidate_hash,
+    )
+
+
+def _rollback_journal(plan: RollbackPlan, state: str) -> TransactionJournal:
+    return TransactionJournal(
+        1,
+        plan.transaction_id,
+        "rollback",
+        plan.model_name,
+        plan.models,
+        state,
+        plan.targets,
+        {name: value.current_hash for name, value in plan.result_states.items()},
+        plan.manifest_existed,
+        plan.manifest_hash,
+        plan.manifest_candidate_hash,
+    )
+
+
+def _rollback_transition(plan: RollbackPlan, state: str, fail_at: str) -> None:
+    if fail_at == f"before:{state}":
+        raise InjectedTransactionFailure(fail_at)
+    _write_journal(plan.root, _rollback_journal(plan, state))
+    if fail_at == f"after:{state}":
+        raise InjectedTransactionFailure(fail_at)
+
+
+def execute_rollback(plan: RollbackPlan, *, fail_at: str = "") -> TransactionJournal:
+    if plan.no_op:
+        return _rollback_journal(plan, "committed")
+    _rollback_transition(plan, "planned", fail_at)
+    paths = transaction_paths(plan.root, plan.transaction_id)
+    for target in plan.targets:
+        source_transaction = plan.restore_transactions[target.relative_path]
+        source = plan.root / ".paperops/snapshots" / source_transaction / target.relative_path
+        destination = paths.candidate_dir / target.relative_path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        if target.candidate_hash:
+            if source.is_dir():
+                shutil.copytree(source, destination, copy_function=shutil.copy2)
+            else:
+                shutil.copy2(source, destination)
+    _rollback_transition(plan, "materialized", fail_at)
+    for target in plan.targets:
+        current = plan.root / target.relative_path
+        if not current.exists() or _path_hash(current) != target.old_hash:
+            raise TransactionError(
+                MigrationFinding("transaction.target_changed", f"/{target.relative_path}", "current target changed after rollback planning")
+            )
+    _rollback_transition(plan, "validated", fail_at)
+    snapshot_inputs = [Path(item.relative_path) for item in plan.targets]
+    if plan.manifest_existed:
+        snapshot_inputs.append(Path(".pops/manifest.toml"))
+    snapshot_paths(plan.root, plan.transaction_id, tuple(snapshot_inputs))
+    _rollback_transition(plan, "snapshotted", fail_at)
+    _rollback_transition(plan, "replacing", fail_at)
+    for target in plan.targets:
+        current = plan.root / target.relative_path
+        replacement = paths.candidate_dir / target.relative_path
+        displaced = paths.migration_dir / "displaced" / target.relative_path
+        displaced.parent.mkdir(parents=True, exist_ok=True)
+        os.replace(current, displaced)
+        if target.candidate_hash:
+            current.parent.mkdir(parents=True, exist_ok=True)
+            os.replace(replacement, current)
+    if fail_at == "after:targets_replaced":
+        raise InjectedTransactionFailure(fail_at)
+    states = read_model_states(plan.root)
+    states.update(plan.result_states)
+    write_model_states(plan.root, states)
+    if fail_at == "after:manifest_replaced":
+        raise InjectedTransactionFailure(fail_at)
+    _rollback_transition(plan, "committed", fail_at)
+    shutil.rmtree(paths.migration_dir / "displaced", ignore_errors=True)
+    return _rollback_journal(plan, "committed")
 
 
 def _read_journal(path: Path) -> TransactionJournal:

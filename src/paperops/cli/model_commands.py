@@ -24,7 +24,9 @@ from paperops.model_migration.staging import (
 from paperops.model_migration.transaction import (
     TransactionError,
     execute_adoption,
+    execute_rollback,
     plan_adoption,
+    plan_rollback,
     recover_incomplete_transactions,
 )
 from paperops.model_migration.types import (
@@ -95,7 +97,7 @@ def add_model_parser(
     rollback.add_argument("--cascade", action="store_true")
     rollback.add_argument("--dry-run", action="store_true")
     rollback.add_argument("--transaction", default="")
-    rollback.set_defaults(func=cmd_model_pending)
+    rollback.set_defaults(func=cmd_model_rollback)
     return parser
 
 
@@ -313,19 +315,62 @@ def cmd_model_adopt(args: argparse.Namespace) -> int:
     )
 
 
+def cmd_model_rollback(args: argparse.Namespace) -> int:
+    root = _root(args)
+    if root is None:
+        return _emit(args, _project_missing("rollback", args.model))
+    recovery = _recovery_block(root, "rollback", args.model)
+    if recovery is not None:
+        return _emit(args, recovery)
+    try:
+        plan = plan_rollback(
+            root,
+            args.model,
+            transaction_id=args.transaction,
+            cascade=args.cascade,
+        )
+        if not args.dry_run:
+            execute_rollback(plan)
+    except TransactionError as error:
+        return _emit(args, ModelCommandResult("rollback", args.model, False, 1, (error.finding,)))
+    except Exception as error:
+        return _emit(
+            args,
+            ModelCommandResult(
+                "rollback",
+                args.model,
+                False,
+                1,
+                (MigrationFinding("transaction.interrupted", "/", _public_message(str(error), root)),),
+                transaction_id=getattr(locals().get("plan"), "transaction_id", ""),
+            ),
+        )
+    return _emit(
+        args,
+        ModelCommandResult(
+            "rollback",
+            args.model,
+            True,
+            0,
+            transaction_id=plan.transaction_id,
+            reused=plan.no_op,
+        ),
+    )
+
+
 def render_model_result(result: ModelCommandResult, json_output: bool) -> str:
     payload: dict[str, Any] = {
         "schema_version": 1,
         "action": result.action,
         "model": result.model,
         "ok": result.ok,
+        "reused": result.reused,
         "findings": [asdict(item) for item in result.findings],
     }
     if result.models is not None:
         payload["models"] = result.models
     if result.transaction_id:
         payload["transaction_id"] = result.transaction_id
-        payload["reused"] = result.reused
     if json_output:
         return json.dumps(payload, ensure_ascii=False, sort_keys=True)
     lines = [f"model {result.action}: {'ok' if result.ok else 'blocked'}"]
