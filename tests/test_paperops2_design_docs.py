@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 import unittest
 
 from tests.helpers import ROOT
@@ -8,6 +9,33 @@ from tests.helpers import ROOT
 class PaperOps2DesignDocsTest(unittest.TestCase):
     def read(self, path: str) -> str:
         return (ROOT / path).read_text(encoding="utf-8")
+
+    def make_targets(self, rel: str) -> set[str]:
+        targets = set()
+        for line in self.read(rel).splitlines():
+            if not line or line[0].isspace() or ":" not in line:
+                continue
+            target = line.split(":", 1)[0]
+            if all(char.isalnum() or char in "._-" for char in target):
+                targets.add(f"{rel}::{target}")
+        return targets
+
+    def disposition_rows(self, text: str, heading: str) -> list[list[str]]:
+        lines = text.splitlines()
+        start = lines.index(heading) + 1
+        end = next(
+            (index for index in range(start, len(lines)) if lines[index].startswith("## ")),
+            len(lines),
+        )
+        rows = []
+        for line in lines[start:end]:
+            if not line.startswith("|"):
+                continue
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if cells[0] == "asset" or all(set(cell) <= {"-"} for cell in cells):
+                continue
+            rows.append(cells)
+        return rows
 
     def test_rfc_defines_success_retreat_and_rollout(self) -> None:
         text = self.read("docs/rfcs/0001-paperops-2.md")
@@ -93,26 +121,90 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, text)
 
-    def test_disposition_matrix_names_every_current_skill_checker_and_make_target(self) -> None:
+    def test_disposition_matrix_has_complete_structured_rows(self) -> None:
         text = self.read("docs/paperops2-disposition.md")
-        skill_files = sorted((ROOT / ".agents" / "skills").glob("*/SKILL.md"))
-        skill_files += sorted((ROOT / "template" / ".agents" / "skills").glob("*/SKILL.md"))
-        checker_files = sorted((ROOT / "template" / "scripts").glob("check-*.py"))
-        for path in [*skill_files, *checker_files]:
-            rel = path.relative_to(ROOT).as_posix()
-            with self.subTest(path=rel):
-                self.assertIn(f"`{rel}`", text)
+        root_families = {
+            "src/paperops/cli/",
+            ".agents/skills/",
+            ".claude/skills/",
+            "scripts/",
+            "Makefile",
+            ".github/workflows/",
+            "docs/",
+        }
+        downstream_families = {
+            "template/_paperops/defaults/schemas/",
+            "template/_paperops/defaults/contracts/",
+            "template/_paperops/model/",
+            "template/_paperops/claims/",
+            "template/_paperops/evidence/",
+            "template/_paperops/evidence/figures/",
+            "template/_paperops/evidence/results/",
+            "template/_paperops/evidence/sources/",
+            "template/_paperops/notes/views/",
+            "template/_paperops/review/",
+            "template/_paperops/requests/",
+            "template/_paperops/workflow/",
+            "template/manuscript/",
+            "template/.agents/skills/",
+            "template/.claude/skills/",
+            "template/scripts/check-*.py",
+            "template/Makefile",
+        }
+        root_skills = {
+            path.relative_to(ROOT).as_posix()
+            for path in (ROOT / ".agents" / "skills").glob("*/SKILL.md")
+        }
+        template_skills = {
+            path.relative_to(ROOT).as_posix()
+            for path in (ROOT / "template" / ".agents" / "skills").glob("*/SKILL.md")
+        }
+        checker_files = {
+            path.relative_to(ROOT).as_posix()
+            for path in (ROOT / "template" / "scripts").glob("check-*.py")
+        }
+        expected = {
+            "## Root governance layer": root_families | root_skills | self.make_targets("Makefile"),
+            "## Downstream template layer": downstream_families
+            | template_skills
+            | checker_files
+            | self.make_targets("template/Makefile"),
+        }
+        allowed_dispositions = {"retain", "adapt", "redirect", "deprecate", "investigate"}
 
-        for rel in ["Makefile", "template/Makefile"]:
-            makefile = self.read(rel)
-            targets = []
-            for line in makefile.splitlines():
-                if not line or line[0].isspace() or ":" not in line:
+        for heading, expected_assets in expected.items():
+            rows = self.disposition_rows(text, heading)
+            assets = []
+            for row_number, cells in enumerate(rows, start=1):
+                with self.subTest(heading=heading, row=row_number, check="column count"):
+                    self.assertEqual(len(cells), 8)
+                if len(cells) != 8:
                     continue
-                target = line.split(":", 1)[0]
-                if all(char.isalnum() or char in "._-" for char in target):
-                    targets.append(target)
-            for target in targets:
-                key = f"`{rel}::{target}`"
-                with self.subTest(target=key):
-                    self.assertIn(key, text)
+                asset = cells[0].removeprefix("`").removesuffix("`")
+                assets.append(asset)
+                with self.subTest(asset=asset, check="non-empty cells"):
+                    self.assertTrue(all(cells))
+                with self.subTest(asset=asset, check="disposition"):
+                    self.assertIn(cells[3], allowed_dispositions)
+                if cells[3] == "investigate":
+                    reason_fields = f"{cells[6]} {cells[7]}"
+                    with self.subTest(asset=asset, check="investigate reason"):
+                        self.assertIn("理由:", reason_fields)
+
+            counts = Counter(assets)
+            with self.subTest(heading=heading, check="asset set"):
+                self.assertEqual(set(assets), expected_assets)
+            with self.subTest(heading=heading, check="duplicates"):
+                self.assertEqual(
+                    {asset for asset, count in counts.items() if count > 1},
+                    set(),
+                )
+
+        downstream_rows = {
+            cells[0].removeprefix("`").removesuffix("`"): cells
+            for cells in self.disposition_rows(text, "## Downstream template layer")
+            if len(cells) == 8
+        }
+        model_row = downstream_rows["template/_paperops/model/"]
+        self.assertEqual(model_row[3], "investigate")
+        self.assertIn("modelごとに単一writerをP1で決定する必要がある", model_row[6])
