@@ -459,7 +459,9 @@ class ResearchModelTest(unittest.TestCase):
             for key in (
                 "invalid", "x-lab-credential", "x-lab-local_path",
                 "x-api-key-value", "x-access-token-value", "x-auth-token-value",
-                "x-private-key-value",
+                "x-private-key-value", "x-lab-apikey-value",
+                "x-bearer-token-value", "x-refresh-token-value",
+                "x-session-token-value", "x-id-token-value",
             ):
                 changed = copy.deepcopy(document)
                 changed["extensions"] = {key: "opaque:value"}

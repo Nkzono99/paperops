@@ -256,7 +256,7 @@ def _sensitive_extension_key(key: str) -> bool:
         if component
     }
     if components.intersection(
-        {"password", "passwd", "secret", "credential"}
+        {"password", "passwd", "secret", "credential", "apikey"}
     ):
         return True
     return any(
@@ -265,6 +265,10 @@ def _sensitive_extension_key(key: str) -> bool:
             {"api", "key"},
             {"access", "token"},
             {"auth", "token"},
+            {"bearer", "token"},
+            {"refresh", "token"},
+            {"session", "token"},
+            {"id", "token"},
             {"local", "path"},
             {"private", "key"},
         )
