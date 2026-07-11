@@ -48,6 +48,21 @@ class ModelValidationRunnerTest(unittest.TestCase):
             self.assertFalse(result.ok)
             self.assertEqual(result.findings[0].code, expected_code)
 
+    def test_oversized_checker_output_is_a_stable_finding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            checker = root / "scripts/check-paperops-models.py"
+            checker.parent.mkdir(parents=True)
+            checker.write_text(
+                "import sys\nsys.stdout.write('x' * (1024 * 1024 + 1))\n",
+                encoding="utf-8",
+            )
+            result = run_model_validation(root, "research")
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.findings[0].code, "validation.output")
+        self.assertEqual(result.findings[0].pointer, "/")
+
     def test_error_findings_preserve_code_pointer_message_and_severity(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             project = copy_template(tmp)

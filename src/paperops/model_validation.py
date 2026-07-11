@@ -5,9 +5,13 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+
+_MAX_CHECKER_OUTPUT_BYTES = 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -96,13 +100,16 @@ def run_model_validation(
     if strict:
         argv.append("--strict")
     try:
-        completed = subprocess.run(
-            argv,
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-        )
+        with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
+            completed = subprocess.run(
+                argv,
+                check=False,
+                stdout=stdout,
+                stderr=stderr,
+                timeout=timeout,
+            )
+            stdout.seek(0)
+            raw_output = stdout.read(_MAX_CHECKER_OUTPUT_BYTES + 1)
     except subprocess.TimeoutExpired:
         return _failure(
             model,
@@ -119,9 +126,18 @@ def run_model_validation(
             "/",
             f"model checker could not be executed: {error}",
         )
+    if len(raw_output) > _MAX_CHECKER_OUTPUT_BYTES:
+        return _failure(
+            model,
+            phase,
+            "validation.output",
+            "/",
+            "model checker output exceeded the validation limit",
+            returncode=completed.returncode or 1,
+        )
     try:
-        payload = json.loads(completed.stdout)
-    except json.JSONDecodeError:
+        payload = json.loads(raw_output.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
         return _failure(
             model,
             phase,

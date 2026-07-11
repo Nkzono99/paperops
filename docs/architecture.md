@@ -17,11 +17,15 @@
 
 この層の役割は、ハーネスを安全に進化させることである。
 
-## PaperOps 2 P1-A schema kernel
+## PaperOps 2 model kernel と P2 migration
 
 P1-B は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六モデルを同じ schema kernel へ接続する。`_paperops/defaults/schemas/registry.yml`、JSON Schema、validator / checker は paperops-managed、`_paperops/model/` の index、per-ID record、aggregate state は project-owned である。検証順は schema → references → semantics → approvals → dependencies → hash で、schema-clean catalog だけを後続 phase に渡す。canonical object hash と `dependency-v1` は timestamp と dependency 配列順を除外し、target の revision / semantic hash / relation の変化だけを stale 判定へ反映する。
 
-P1-B は shadow validation と手動 opt-in の境界までである。legacy card、human-edited TeX、review/request、submission ledger を削除せず、authority migration は P2、section compiler / Writer packet は P3、workflow writer cutover は P4 に defer する。Publication Model は living authoring candidate と immutable submitted round を分離するが、snapshot 作成や filesystem seal 自体は後続 cycle の責務である。
+P2 はこのkernelへdeterministic model migrationを接続する。`pops model status|validate|diff|adopt|rollback`がlegacy inventory、conservation、strict checker、shadow candidate、snapshot、durable journalを隠蔽する。authorityはmodelごとに`legacy-authoritative` → `shadow-compare` → `v2-authoritative`と進み、依存順はResearch → Editorial / Results hierarchy → Manuscript → Issue → Publicationである。Editorial / Results hierarchyは同一transactionのcompanionとして扱う。
+
+`.paperops/migrations/<transaction-id>/`はcandidate、report、journal、`.paperops/snapshots/<transaction-id>/`はbyte-exact rollback snapshotを置くignored stateである。source/candidate drift、unknown manual edit、snapshot corruptionは自動上書きせず停止する。CLIはnetworkやAI modelを呼ばず、AIはscientific / editorial judgmentと人間承認だけを担当する。
+
+P2はlegacy card、human-edited TeX、review/request、submission ledger、既存writerを削除しない。section compiler / Writer packetはP3、workflow writer cutoverはP4へdeferする。Publication Modelはliving candidateとimmutable submitted roundを分離し、artifact本体をmigration candidateへコピーしない。
 
 ## 下流論文層
 
@@ -78,6 +82,8 @@ P1-B は shadow validation と手動 opt-in の境界までである。legacy ca
 | `_paperops/defaults/workflow/` | 状態機械、content-first focus policy、subagent role roster の標準規約を管理する | managed default | `pops workflow`, `content-first-gate`, `route-manuscript-feedback`, `orchestrate-manuscript-subagents` |
 | `_paperops/workflow/` | 現在状態、section 状態、review loop、stale 伝播、人間判断、任意の workflow overlay を管理する | project state | `pops workflow`, review loop |
 | `.paperops/cache/` | section plan や一時 IR を置く | Git 管理しない生成物 | section compiler |
+| `.paperops/migrations/` | P2 shadow candidate、public-safe report、durable journal | Git 管理しないCLI state | `pops model diff/adopt/rollback` |
+| `.paperops/snapshots/` | adopt / rollback前のbyte-exact復元点 | Git 管理しないCLI state | `pops model adopt/rollback` |
 | `manuscript/` | living manuscript / authoring source。投稿後や査読後も編集してよい本文 source | 編集中の成果物 | Writer / editor pass / revision-authoring |
 | `submission/` | 投稿先に合わせた submission candidate と提出済み round snapshot | 派生成果物・証跡 | `submission-gate` と投稿前作業 |
 | `_handoff/` | 未整理入力の一時置き場 | Git 管理しない | 人間入力、raw file intake |

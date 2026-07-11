@@ -56,7 +56,9 @@
 
 既存下流 project は M0-0003 を採用するまで `storyline.md` の legacy Markdown Results hierarchy を fallback として利用できる。移行時は `uvx --from paper-harness-cli pops update-paperops --apply --only _paperops/defaults/schemas/` で managed schema を更新し、project-owned の typed file を opt-in で作成する。`python scripts/check-section-contracts.py --root . --strict` が成功する前に legacy Markdown を削除しない。
 
-新規 project は `pops init` で Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六モデル starter を受け取る。Research / Manuscript / Issue は架空 record のない空 index、Publication は未提出のaggregate starterである。既存 project は `pops update-paperops` や migration apply から project-owned model state を自動取得せず、managed registry / schema / checker の更新後に M0-0005 に従って手動採用する。`make schema-check` は references / semantics / approvals / dependencies / hash を advisory に検査する。P2まではlegacy card / review / request、P3まではhuman-edited TeX、P4までは既存workflow writerをauthorityとして維持する。
+新規 project は `pops init` で Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六モデル starter を受け取る。Research / Manuscript / Issue は架空 record のない空 index、Publication は未提出のaggregate starterである。既存projectはmanaged registry / schema / checkerを更新した後、`pops model status|validate|diff|adopt|rollback`でmodel単位に移行する。定型的なinventory、hash、snapshot、recoveryはdeterministic CLIが扱い、AIはscientific / editorial judgmentや人間承認を代替しない。
+
+最初は`pops model diff <model>`でshadowだけを作り、reportと`pops model validate <model> --strict`を確認する。authority切替は`pops model adopt <model> --yes`、復元は`pops model rollback <model>`を使う。P2後もlegacy card / review / requestを削除せず、P3まではhuman-edited TeX、P4までは既存workflow writerをauthorityとして維持する。
 
 `make schema-check` は schema / references / semantics / hash phaseをadvisoryに検査する。`editorial-model.yml`を含むproject-owned stateのauthority切替前は明示strict検査と人間承認を要求し、legacy controlled viewを維持する。
 

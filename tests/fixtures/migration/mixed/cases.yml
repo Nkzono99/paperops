@@ -1,0 +1,11 @@
+schema_version: 1
+cases:
+  - legacy-only
+  - typed-only
+  - mixed
+  - modified-managed-checker
+  - existing-project-owned-state
+  - partial-missing
+  - unknown-field
+  - private-raw-data
+  - submitted-round

@@ -14,8 +14,8 @@
 - `story/` は人間向けの構想層である。研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を書く。
 - `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` はカード正本である。
 - `_paperops/notes/views/` は pure overview view と controlled authoring view を含む。`view_type` と `source_of_truth` を確認し、`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
-- `_paperops/defaults/schemas/registry.yml`、JSON Schema、checkerはpaperops-managed、Research / Editorial / Results hierarchy / Manuscript / Issue / Publicationのmodel stateはproject-ownedであり混同しない。`schema` → `references` → `semantics` → `approvals` → `dependencies` → `hash` の順で検査し、`dependency-v1`は解決済みtargetだけから計算する。Issueには公開可能summaryとopaque local-reference IDだけを置き、Publicationはliving candidateとimmutable roundを分ける。P2まではlegacy card / review / request、P3まではhuman-edited TeX、P4までは既存workflow writerをauthorityとして維持する。
-- `make schema-check` は `editorial-model.yml` を含むproject-owned stateを schema / references / semantics / hash phasesでadvisory検査する。authority切替前は明示strict検査と人間承認を要求し、legacy controlled viewを維持する。
+- `_paperops/defaults/schemas/registry.yml`、JSON Schema、checkerはpaperops-managed、Research / Editorial / Results hierarchy / Manuscript / Issue / Publicationのmodel stateはproject-ownedであり混同しない。定型移行は`pops model status|validate|diff|adopt|rollback`へ渡し、AI Agentがindex、hash、snapshot、journalを手操作しない。AIはscientific / editorial judgmentと人間承認を支援するが、未解決fieldへ架空値を補わない。P2後もlegacy card / review / requestを削除せず、P3まではhuman-edited TeX、P4までは既存workflow writerをauthorityとして維持する。
+- `make schema-check` は `editorial-model.yml` を含むproject-owned stateを schema / references / semantics / approvals / dependencies / hash phasesでadvisory検査する。authority切替前は明示strict検査と人間承認を要求し、legacy controlled viewを維持する。
 - `_paperops/defaults/contracts/` は paperops-managed の標準 section / figure story 契約であり、文章テンプレートではない。論文固有の契約差分だけ `_paperops/contracts/` に同名 overlay として置く。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
 - `_paperops/workflow/` は現在状態、review loop、stale 伝播、人間判断の状態正本である。標準の状態機械、focus policy、subagent roster は `_paperops/defaults/workflow/` にあり、本文編集前に `pops workflow status` を確認する。
 - subagent を使う執筆では通常 `/develop-manuscript-content` または `/finish-manuscript` から必要時に `orchestrate-manuscript-subagents` へ委譲し、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
@@ -31,6 +31,11 @@
 uvx --from paper-harness-cli pops doctor
 uvx --from paper-harness-cli pops update-paperops --plan
 uvx --from paper-harness-cli pops links check
+uvx --from paper-harness-cli pops model status all
+uvx --from paper-harness-cli pops model validate research --strict
+uvx --from paper-harness-cli pops model diff research
+uvx --from paper-harness-cli pops model adopt research --yes
+uvx --from paper-harness-cli pops model rollback research
 
 make ci
 make audit

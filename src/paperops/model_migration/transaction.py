@@ -301,11 +301,17 @@ def plan_adoption(root: Path, model_name: str) -> AdoptionPlan:
                 raise TransactionError(
                     MigrationFinding("transaction.target_changed", f"/{target.relative_path}", "adopted target changed after commit")
                 )
+        for name in journal.models:
+            current_state = states[name]
+            if (
+                current_state.mode != "v2-authoritative"
+                or current_state.last_adopt_transaction != journal.transaction_id
+                or current_state.current_hash != journal.state_hashes.get(name, "")
+            ):
+                raise TransactionError(
+                    MigrationFinding("state.inconsistent", f"/models/{name}", "manifest model state differs from the committed adoption")
+                )
         existed, digest = _manifest_identity(project)
-        if not existed or digest != journal.manifest_candidate_hash:
-            raise TransactionError(
-                MigrationFinding("state.inconsistent", f"/models/{model_name}", "manifest changed after committed adoption")
-            )
         return AdoptionPlan(project, model_name, state.last_adopt_transaction, _affected(model_name), (), journal.state_hashes, existed, digest, digest, True)
     if state.mode != "shadow-compare" or not state.last_shadow_transaction:
         raise TransactionError(

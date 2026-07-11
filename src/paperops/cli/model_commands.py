@@ -22,6 +22,7 @@ from paperops.model_migration.staging import (
     write_report,
 )
 from paperops.model_migration.transaction import (
+    MODEL_DEPENDENCIES,
     TransactionError,
     execute_adoption,
     execute_rollback,
@@ -155,10 +156,21 @@ def cmd_model_status(args: argparse.Namespace) -> int:
     for name in selected:
         state = states[name]
         models[name] = asdict(state)
+        models[name]["blocking_dependencies"] = ",".join(
+            dependency
+            for dependency in MODEL_DEPENDENCIES[name]
+            if states[dependency].mode != "v2-authoritative"
+        )
         if state.mode == "shadow-compare":
             report = root / ".paperops/migrations" / state.last_shadow_transaction / "report.json"
-            if not state.last_shadow_transaction or not report.is_file():
+            candidate = root / ".paperops/migrations" / state.last_shadow_transaction / "candidate"
+            if not state.last_shadow_transaction or not report.is_file() or not candidate.is_dir():
                 findings.append(MigrationFinding("state.inconsistent", f"/models/{name}", "shadow state has no readable transaction report"))
+        elif state.mode == "v2-authoritative":
+            try:
+                plan_adoption(root, name)
+            except TransactionError as error:
+                findings.append(error.finding)
     return _emit(args, ModelCommandResult("status", args.model, not findings, 0 if not findings else 1, tuple(findings), models))
 
 

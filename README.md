@@ -56,7 +56,9 @@ uvx --from paper-harness-cli pops doctor
 
 新規 scaffold では typed Results hierarchy を使う。既存下流 project は M0-0003 採用まで legacy Markdown fallback を維持でき、移行時は managed schema default を更新したうえで project-owned typed state を opt-in で作成する。
 
-PaperOps 2 P1-B は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の正確な六モデルを提供する。managed registry / schema / checker と project-owned model state を分離し、全モデル参照、current approval、`dependency-v1`、投稿 round の不変条件を検査する。これは検証用 shadow state の完成であり、legacy card、human-edited TeX、review/request、submission ledger の authority は P2 の migration、P3 の compiler、P4 の workflow cutover が個別に承認されるまで維持する。
+PaperOps 2 P1-B は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の正確な六モデルを提供する。P2 は `pops model` の deterministic migrationとして、legacy inventory、shadow diff、strict validation、model単位のadopt、snapshot rollbackをAIなしで反復できるようにする。authorityは`legacy-authoritative`、`shadow-compare`、`v2-authoritative`をmodelごとに持ち、Editorial / Results hierarchyだけはcompanionとして同時に切り替える。
+
+AI Agentはscientific / editorial judgment、候補の選択理由、未解決fieldを埋めるための人間との対話を担当し、定型的なfile discovery、hash、conservation、transaction、recoveryを直接操作しない。P2はlegacy writerを削除せず、human-edited TeXを生成するP3 compiler / Writer packetと、既存workflow writerを切り替えるP4は引き続きdeferする。
 
 検証phaseは schema → references → semantics → canonical semantic-v1 hash の順で、mechanism-led、boundary-led、negative-result-led の三つの合成fixtureを回帰corpusとして維持する。
 
@@ -68,6 +70,10 @@ uvx --from paper-harness-cli pops doctor
 uvx --from paper-harness-cli pops update-paperops --plan
 uvx --from paper-harness-cli pops update-paperops --apply
 uvx --from paper-harness-cli pops links check
+uvx --from paper-harness-cli pops model status all
+uvx --from paper-harness-cli pops model diff research
+uvx --from paper-harness-cli pops model adopt research --yes
+uvx --from paper-harness-cli pops model rollback research
 uvx --from paper-harness-cli pops scratch archive --label before-rewrite
 uvx --from paper-harness-cli pops scratch reset --yes
 ```

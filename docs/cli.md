@@ -2,6 +2,32 @@
 
 `pops` は、`paperops` の scaffold を初期化・診断・更新する薄い CLI である。研究判断や原稿編集は Agent / skill が担当し、`pops` は決定的なファイル操作を担当する。
 
+## PaperOps 2 model migration
+
+既存projectの六モデル移行は、個別script、index、hash、snapshotを手で操作せず、次の五commandから行う。
+
+```sh
+uvx --from paper-harness-cli pops model status all
+uvx --from paper-harness-cli pops model validate research --strict
+uvx --from paper-harness-cli pops model diff research
+uvx --from paper-harness-cli pops model adopt research --yes
+uvx --from paper-harness-cli pops model rollback research
+```
+
+- `pops model status [model|all] [path]`: `legacy-authoritative`、`shadow-compare`、`v2-authoritative`、依存blocker、recoverable transactionを表示する。
+- `pops model validate <model|all> [path]`: project-managed checkerを安全なargvとversioned JSONで呼ぶ。
+- `pops model diff <model> [path] [--refresh]`: deterministic adapter、conservation、strict validationを実行し、tracked modelを変更せずshadow reportを作る。
+- `pops model adopt <model> [path] --yes`: source/candidate driftを再確認し、snapshotとdurable journalを作ってmodel authorityを切り替える。確認だけなら`--dry-run`を使う。
+- `pops model rollback <model> [path] [--transaction <id>]`: current hashとsnapshotを検証して戻す。v2 dependentがある場合は停止し、意図的にまとめて戻す場合だけ`--cascade`を指定する。`--dry-run`はbyte単位でprojectを変更しない。
+
+依存順はResearch → Editorial / Results hierarchy → Manuscript → Issue → Publicationで、rollback cascadeは逆順になる。EditorialとResults hierarchyは別stateを持つが、adopt / rollbackは同一transactionで行う。
+
+`diff`の正本reportは`.paperops/migrations/<transaction-id>/report.json`、人間向けprojectionは`report.md`、candidateとjournalも同じdirectoryに置く。復元点は`.paperops/snapshots/<transaction-id>/`に置く。どちらもGit管理しない。中断transactionは次の`pops model` commandがpreflightで回収し、既知hashなら旧stateへ戻す。unknown manual editやsnapshot破損は`recovery.conflict`で停止し、自動上書きしない。
+
+既存projectでは初回`diff`前に`.paperops/migrations/`と`.paperops/snapshots/`をprojectの`.gitignore`へ追加する。新規`pops init`には含まれている。
+
+adapter、checker、transactionはnetworkやAI modelを呼ばない。機械的に決められないfieldは`migration.unresolved`として残し、AIが架空のrevision、approval、scope、quantity、provenanceを埋める手順にはしない。AI / skillはscientific / editorial judgmentと人間承認を支援する。P2はlegacy writerを削除せず、P3 section compiler / Writer packetとP4 workflow writer cutoverは別の導入段階である。
+
 ## Editorial Model schema check
 
 `make schema-check` は paperops-managed registry / schema と project-owned model を schema → references → semantics → hash phases の順で advisory 検査する。個別実行は `python scripts/check-paperops-models.py --root . --model editorial --phase all`、hashability だけの独立確認は `--phase hash`、authority 切替前の gate は `python scripts/check-paperops-models.py --root . --model editorial --strict` である。`--phase hash` は通常レポート形状を維持し、model digest が必要な場合は `--print-hash`、schema-clean な record または Editorial / Results hierarchy の virtual object の digest が必要な場合は `--print-hash --object-id <ID>` を使う。virtual object は独立 revision を持たない。
@@ -57,6 +83,7 @@ uvx --from paper-harness-cli pops doctor
 - `pops migrate apply <id> [path] --dry-run`: migration の file operation を事前確認する。
 - `pops migrate apply <id> [path]`: migration を適用する。
 - `pops migrate [path] --apply`: 旧 scaffold に `.pops` 管理情報を追加する互換導線。
+- `pops model status|validate|diff|adopt|rollback`: 六モデルの検証、shadow、authority切替、復元を一つのdeterministic入口で扱う。
 - `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出す。
 - `pops links list [path]`: `_paperops/refs/links.toml` の外部 link を表示する。
 - `pops links check [path]`: link registry と local location の対応を検証する。

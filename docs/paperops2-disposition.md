@@ -2,6 +2,8 @@
 
 この文書は [RFC 0001](rfcs/0001-paperops-2.md)、[ADR 0001](adr/0001-authority-ownership-layout.md)、[ADR 0002](adr/0002-cli-agent-compiler-boundary.md)、[ADR 0003](adr/0003-revision-state-hash.md) の authority class、単一 writer、CLI / Agent / compiler 境界、revision / hash 境界を現行資産へ適用する。各行は P1–P7 の実装計画で再確認する移行判断であり、この表だけで authority を切り替えない。
 
+P2では`pops model status|validate|diff|adopt|rollback`がdeterministic migrationを実装した。これは各行のlegacy互換やremoval conditionを満たしたことを意味せず、legacy writerは保持する。P3 compiler / Writer packetとP4 workflow writer cutoverまではAgentがmodel authorityを直接更新せず、scientific / editorial judgmentと人間承認だけをproposalとして扱う。
+
 disposition の語彙は次のとおりである。`retain` は責務と入口を維持、`adapt` は入口を保って新 contract へ適合、`redirect` は互換入口を新正本へ転送、`deprecate` は利用観測と移行期間を設けて新規利用を止める、`remove` は検証済みの削除条件を満たした別変更だけで実行、`investigate` は責務または移行先が未確定で理由付き調査を要求する。本サイクルに `remove` の実行対象はない。
 
 P1 は schema・canonical hash・migration 基盤、P2–P3 は story / claim / evidence の typed authority、P4–P5 は compiler / Writer packet と manuscript patch、P6 は review / submission snapshot、P7 は既定化と legacy removal 判定を指す。段階導入中は legacy-authoritative → shadow → opt-in v2-authoritative → default v2-authoritative の gate を順守する。
