@@ -152,6 +152,18 @@ class EditorialReferenceValidationTest(unittest.TestCase):
             {finding.pointer for finding in findings_with_code(findings, "reference.dangling")},
         )
 
+    def test_duplicate_move_suppresses_ambiguous_graph_findings(self) -> None:
+        editorial, results = valid_documents()
+        editorial["claim_roles"]["foreground"] = {
+            "claim_ids": [],
+            "none_reason": "No foreground claim is assigned in this reference test.",
+        }
+        editorial["argument_moves"].append(copy.deepcopy(editorial["argument_moves"][0]))
+
+        findings = validate_editorial_references(editorial, results)
+
+        self.assertEqual({finding.code for finding in findings}, {"reference.duplicate"})
+
     def test_move_cycle_is_reported(self) -> None:
         editorial, results = valid_documents()
         editorial["argument_moves"][1]["next_move_id"] = "MOV-0001"
@@ -203,7 +215,14 @@ class EditorialReferenceValidationTest(unittest.TestCase):
         self.assertTrue(all(finding.severity == "info" for finding in deferred))
 
     def test_absolute_and_traversal_results_paths_are_rejected(self) -> None:
-        for document in ("/tmp/results.yml", "../results.yml", "model/../../results.yml"):
+        for document in (
+            "/tmp/results.yml",
+            "../results.yml",
+            "model/../../results.yml",
+            r"\outside\results.yml",
+            r"C:outside\results.yml",
+            r"\\server\share\results.yml",
+        ):
             with self.subTest(document=document):
                 editorial, results = valid_documents()
                 editorial["results_hierarchy"]["document"] = document
@@ -215,14 +234,44 @@ class EditorialReferenceValidationTest(unittest.TestCase):
                     ["/results_hierarchy/document"],
                 )
 
-    def test_malformed_structures_are_skipped(self) -> None:
-        editorial, results = valid_documents()
-        editorial["argument_moves"] = "not an array"
-        editorial["story_candidates"] = [None]
-        editorial["results_hierarchy"] = []
-        results["items"] = "not an array"
+    def test_invalid_top_level_arrays_skip_dependent_reference_checks(self) -> None:
+        cases = (
+            ("story_candidates", "not an array", None),
+            ("argument_moves", "not an array", None),
+            ("visual_obligations", "not an array", None),
+            ("claim_roles", "not an object", None),
+            (None, None, "not an array"),
+        )
+        for editorial_field, invalid_value, invalid_result_items in cases:
+            with self.subTest(editorial_field=editorial_field, results=invalid_result_items):
+                editorial, results = valid_documents()
+                editorial["claim_roles"]["foreground"] = {
+                    "claim_ids": [],
+                    "none_reason": "No foreground claim is assigned in this reference test.",
+                }
+                if editorial_field is not None:
+                    editorial[editorial_field] = invalid_value
+                if invalid_result_items is not None:
+                    results["items"] = invalid_result_items
 
-        validate_editorial_references(editorial, results)
+                findings = validate_editorial_references(editorial, results)
+
+                self.assertEqual(findings, [])
+
+    def test_invalid_nested_reference_arrays_are_skipped(self) -> None:
+        editorial, results = valid_documents()
+        editorial["story_candidates"][0]["argument_move_ids"] = "not an array"
+        editorial["story_candidates"][0]["result_order"] = "not an array"
+        editorial["argument_moves"][0]["claim_ids"] = "not an array"
+        editorial["argument_moves"][0]["result_item_ids"] = "not an array"
+        editorial["claim_roles"]["foreground"]["claim_ids"] = "not an array"
+        editorial["visual_obligations"][0]["claim_ids"] = "not an array"
+        editorial["visual_obligations"][0]["figure_ids"] = "not an array"
+        editorial["results_hierarchy"]["item_ids"] = "not an array"
+
+        findings = validate_editorial_references(editorial, results)
+
+        self.assertEqual(findings, [])
 
 
 class EditorialSemanticValidationTest(unittest.TestCase):
@@ -394,16 +443,31 @@ class EditorialSemanticValidationTest(unittest.TestCase):
             ["/extensions/invalid"],
         )
 
-    def test_malformed_structures_are_skipped(self) -> None:
-        editorial, _ = valid_documents()
-        editorial["reader_transformation"] = []
-        editorial["story_candidates"] = "not an array"
-        editorial["claim_roles"] = []
-        editorial["argument_moves"] = [None]
-        editorial["visual_obligations"] = "not an array"
-        editorial["extensions"] = []
+    def test_invalid_semantic_collections_skip_dependent_findings(self) -> None:
+        for field, invalid_value in (
+            ("story_candidates", "not an array"),
+            ("claim_roles", "not an object"),
+            ("argument_moves", "not an array"),
+            ("visual_obligations", "not an array"),
+        ):
+            with self.subTest(field=field):
+                editorial, _ = valid_documents()
+                editorial[field] = invalid_value
+                if field == "story_candidates":
+                    editorial["selected_story_id"] = ""
 
-        validate_editorial_semantics(editorial, strict=True)
+                findings = validate_editorial_semantics(editorial, strict=True)
+
+                self.assertEqual(findings, [])
+
+    def test_invalid_nested_semantic_arrays_are_skipped(self) -> None:
+        editorial, _ = valid_documents()
+        editorial["claim_roles"]["foreground"]["claim_ids"] = "not an array"
+        editorial["visual_obligations"][0]["figure_ids"] = "not an array"
+
+        findings = validate_editorial_semantics(editorial, strict=True)
+
+        self.assertEqual(findings, [])
 
 
 if __name__ == "__main__":

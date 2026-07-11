@@ -38,8 +38,8 @@ def _finding(
     return ModelFinding(code=code, pointer=pointer, message=message, severity=severity)
 
 
-def _items(value: Any) -> list[Any]:
-    return value if isinstance(value, list) else []
+def _array(value: Any) -> list[Any] | None:
+    return value if isinstance(value, list) else None
 
 
 def _mapping(value: Any) -> dict[str, Any] | None:
@@ -238,6 +238,8 @@ def _unsafe_document_path(value: str) -> bool:
     return (
         posix.is_absolute()
         or windows.is_absolute()
+        or bool(windows.drive)
+        or bool(windows.root)
         or ".." in posix.parts
         or ".." in windows.parts
     )
@@ -252,66 +254,84 @@ def validate_editorial_references(
     if not isinstance(editorial, dict) or not isinstance(results, dict):
         return findings
 
-    stories = _items(editorial.get("story_candidates"))
-    moves = _items(editorial.get("argument_moves"))
-    visuals = _items(editorial.get("visual_obligations"))
-    result_items = _items(results.get("items"))
+    stories = _array(editorial.get("story_candidates"))
+    moves = _array(editorial.get("argument_moves"))
+    visuals = _array(editorial.get("visual_obligations"))
+    result_items = _array(results.get("items"))
 
-    story_index, duplicate_stories = _id_index(stories, "/story_candidates", findings)
-    move_index, duplicate_moves = _id_index(moves, "/argument_moves", findings)
-    _id_index(visuals, "/visual_obligations", findings)
-    result_index, duplicate_results = _id_index(result_items, "/items", findings)
+    story_index: dict[str, int] | None = None
+    duplicate_stories: set[str] = set()
+    if stories is not None:
+        story_index, duplicate_stories = _id_index(stories, "/story_candidates", findings)
 
-    _check_reference(
-        editorial.get("selected_story_id"),
-        "/selected_story_id",
-        "story",
-        story_index,
-        duplicate_stories,
-        findings,
-    )
+    move_index: dict[str, int] | None = None
+    duplicate_moves: set[str] = set()
+    if moves is not None:
+        move_index, duplicate_moves = _id_index(moves, "/argument_moves", findings)
 
-    for story_number, raw_story in enumerate(stories):
+    if visuals is not None:
+        _id_index(visuals, "/visual_obligations", findings)
+
+    result_index: dict[str, int] | None = None
+    duplicate_results: set[str] = set()
+    if result_items is not None:
+        result_index, duplicate_results = _id_index(result_items, "/items", findings)
+
+    if story_index is not None:
+        _check_reference(
+            editorial.get("selected_story_id"),
+            "/selected_story_id",
+            "story",
+            story_index,
+            duplicate_stories,
+            findings,
+        )
+
+    for story_number, raw_story in enumerate(stories or []):
         story = _mapping(raw_story)
         if story is None:
             continue
-        _check_reference_array(
-            story.get("argument_move_ids"),
-            f"/story_candidates/{story_number}/argument_move_ids",
-            "argument move",
-            move_index,
-            duplicate_moves,
-            findings,
-        )
-        _check_reference_array(
-            story.get("result_order"),
-            f"/story_candidates/{story_number}/result_order",
-            "Results hierarchy item",
-            result_index,
-            duplicate_results,
-            findings,
-        )
+        if move_index is not None:
+            _check_reference_array(
+                story.get("argument_move_ids"),
+                f"/story_candidates/{story_number}/argument_move_ids",
+                "argument move",
+                move_index,
+                duplicate_moves,
+                findings,
+            )
+        if result_index is not None:
+            _check_reference_array(
+                story.get("result_order"),
+                f"/story_candidates/{story_number}/result_order",
+                "Results hierarchy item",
+                result_index,
+                duplicate_results,
+                findings,
+            )
 
-    for move_number, raw_move in enumerate(moves):
+    for move_number, raw_move in enumerate(moves or []):
         move = _mapping(raw_move)
         if move is None:
             continue
-        _check_reference(
-            move.get("next_move_id"),
-            f"/argument_moves/{move_number}/next_move_id",
-            "argument move",
-            move_index,
-            duplicate_moves,
-            findings,
-        )
-        _check_reference_array(
-            move.get("result_item_ids"),
-            f"/argument_moves/{move_number}/result_item_ids",
-            "Results hierarchy item",
-            result_index,
-            duplicate_results,
-            findings,
-        )
+        if move_index is not None and not duplicate_moves:
+            _check_reference(
+                move.get("next_move_id"),
+                f"/argument_moves/{move_number}/next_move_id",
+                "argument move",
+                move_index,
+                duplicate_moves,
+                findings,
+            )
+        if result_index is not None:
+            _check_reference_array(
+                move.get("result_item_ids"),
+                f"/argument_moves/{move_number}/result_item_ids",
+                "Results hierarchy item",
+                result_index,
+                duplicate_results,
+                findings,
+            )
         _defer_reference_array(
             move.get("claim_ids"),
             f"/argument_moves/{move_number}/claim_ids",
@@ -330,14 +350,15 @@ def validate_editorial_references(
                     "Results hierarchy document must be a project-relative path without traversal",
                 )
             )
-        _check_reference_array(
-            results_connection.get("item_ids"),
-            "/results_hierarchy/item_ids",
-            "Results hierarchy item",
-            result_index,
-            duplicate_results,
-            findings,
-        )
+        if result_index is not None:
+            _check_reference_array(
+                results_connection.get("item_ids"),
+                "/results_hierarchy/item_ids",
+                "Results hierarchy item",
+                result_index,
+                duplicate_results,
+                findings,
+            )
 
     claim_roles = _mapping(editorial.get("claim_roles"))
     if claim_roles is not None:
@@ -351,7 +372,7 @@ def validate_editorial_references(
                     findings,
                 )
 
-    for visual_number, raw_visual in enumerate(visuals):
+    for visual_number, raw_visual in enumerate(visuals or []):
         visual = _mapping(raw_visual)
         if visual is None:
             continue
@@ -368,8 +389,9 @@ def validate_editorial_references(
             findings,
         )
 
-    _check_move_order(moves, findings)
-    _check_move_cycles(moves, move_index, duplicate_moves, findings)
+    if moves is not None and move_index is not None and not duplicate_moves:
+        _check_move_order(moves, findings)
+        _check_move_cycles(moves, move_index, duplicate_moves, findings)
     return findings
 
 
@@ -455,6 +477,12 @@ def _validate_story_semantics(
                 )
 
     _add_empty_collection_placeholder(raw_stories, "/story_candidates", strict, findings)
+    _add_placeholder(
+        editorial.get("selected_story_id"),
+        "/selected_story_id",
+        strict,
+        findings,
+    )
     for index, story in stories:
         status = story.get("status")
         if status == "selected" and _blank(story.get("selection_reason")):
@@ -650,7 +678,6 @@ def validate_editorial_semantics(
             )
 
     _validate_story_semantics(editorial, strict, findings)
-    _add_placeholder(editorial.get("selected_story_id"), "/selected_story_id", strict, findings)
     _validate_claim_roles(editorial, strict, findings)
     _validate_moves(editorial, strict, findings)
     _validate_visuals(editorial, strict, findings)
