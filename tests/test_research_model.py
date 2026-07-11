@@ -463,6 +463,13 @@ class ResearchModelTest(unittest.TestCase):
                     self.catalog([(record_type, changed)])
                 )
                 self.assertIn("semantic.extension", [f.code for f in findings])
+        for key in ("x-nlp-tokenizer-version", "x-authors-authorship-note"):
+            changed = source()
+            changed["extensions"] = {key: "v1"}
+            findings = validate_research_semantics(
+                self.catalog([("source", changed)])
+            )
+            self.assertNotIn("semantic.extension", [f.code for f in findings])
 
     def test_ready_gate_requires_current_scientific_scope_approval(self) -> None:
         approved_claim = claim()
@@ -524,6 +531,11 @@ class ResearchModelTest(unittest.TestCase):
             "url:https://example.org/data?api_key=secret",
             "url:https://example.org/data?client_secret=secret",
             "url:https://example.org/data?access-key=secret",
+            "url:https://localhost/data", "url:https://api.localhost/data",
+            "url:https://service.local/data", "url:https://service.internal/data",
+            "url:https://service.lan/data", "url:https://intranet/data",
+            "url:https://127.0.0.1/data", "url:https://10.0.0.1/data",
+            "url:https://[::1]/data", "url:https://example.org/data#token=secret",
             "doi:not-a-doi", "doi:10.1234/bad doi", "doi:10.1234/bad\nvalue",
         ]
         for value in valid:

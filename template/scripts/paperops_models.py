@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import ipaddress
 import re
-from urllib.parse import parse_qsl, urlsplit
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Iterable
+from urllib.parse import parse_qsl, urlsplit
 
 from paperops_schema import (
     ModelFinding,
@@ -100,20 +101,8 @@ def validate_research_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                         extension_finding.message,
                     )
                 )
-            sensitive = (
-                "credential",
-                "password",
-                "secret",
-                "token",
-                "local_path",
-                "local-path",
-                "private_key",
-                "private-key",
-                "api_key",
-                "api-key",
-            )
             for key in extensions:
-                if isinstance(key, str) and any(term in key.casefold() for term in sensitive):
+                if isinstance(key, str) and _sensitive_extension_key(key):
                     findings.append(
                         _research_finding(
                             "semantic.extension",
@@ -260,6 +249,27 @@ def _validate_public_provenance(
             )
 
 
+def _sensitive_extension_key(key: str) -> bool:
+    components = {
+        component
+        for component in re.split(r"[-._]", key.casefold())
+        if component
+    }
+    if components.intersection(
+        {"token", "password", "passwd", "secret", "credential", "auth", "key"}
+    ):
+        return True
+    return any(
+        pair.issubset(components)
+        for pair in (
+            {"api", "key"},
+            {"access", "token"},
+            {"local", "path"},
+            {"private", "key"},
+        )
+    )
+
+
 def _valid_public_provenance(value: str) -> bool:
     if any(ord(character) < 32 or character.isspace() for character in value):
         return False
@@ -287,8 +297,24 @@ def _valid_public_provenance(value: str) -> bool:
             or not parsed.hostname
             or parsed.username is not None
             or parsed.password is not None
+            or bool(parsed.fragment)
         ):
             return False
+        hostname = parsed.hostname.casefold().rstrip(".")
+        try:
+            address = ipaddress.ip_address(hostname)
+        except ValueError:
+            if (
+                "." not in hostname
+                or hostname == "localhost"
+                or hostname.endswith(
+                    (".localhost", ".local", ".internal", ".lan")
+                )
+            ):
+                return False
+        else:
+            if not address.is_global:
+                return False
         sensitive_query_keys = {
             "token", "key", "password", "passwd", "secret", "credential",
             "api_key", "apikey", "access_token", "auth",
