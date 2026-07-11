@@ -246,6 +246,23 @@ class SectionContractCheckTest(unittest.TestCase):
         self.assertIn("RHI-0001", result.stdout)
         self.assertIn("answer", result.stdout)
 
+    def test_malformed_typed_results_hierarchy_does_not_fall_back_to_legacy_view(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_text(
+                root / "_paperops" / "notes" / "views" / "storyline.md",
+                "# Storyline\n\n" + COMPLETE_LEGACY_RESULTS + COMPLETE_DISCUSSION_AND_METHODS,
+            )
+            write_text(
+                root / "_paperops" / "model" / "editorial" / "results-hierarchy.yml",
+                "schema_version: [1\nitems:\n  - id: RHI-0001\n",
+            )
+            result = run_python_script(SCRIPT, "--root", root, "--strict")
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("`schema_version` は 1 である必要があります", result.stdout)
+        self.assertIn("`items` must be a non-empty list", result.stdout)
+
     def test_non_strict_warns_when_results_hierarchy_lacks_reader_completion(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
