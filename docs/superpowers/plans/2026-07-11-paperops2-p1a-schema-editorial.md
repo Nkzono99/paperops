@@ -567,9 +567,11 @@ git commit -m "Editorial設計を同じ合成入力で反復評価するため"
 - Modify: `docs/cli.md`
 - Modify: `docs/current-specification.md`
 - Modify: `docs/skill-catalog.md`
+- Modify: `docs/paperops2-disposition.md`
 - Modify: `CHANGELOG.md`
 - Modify: `_handoff/TODO.md`
 - Create: `tests/test_p1a_documentation.py`
+- Modify: `tests/test_paperops2_design_docs.py`
 
 **Interfaces:**
 - Produces migration: `M0-0004 Adopt the Editorial Model schema kernel`
@@ -623,6 +625,8 @@ updateでmanaged files取得→project-owned model手動作成→strict schema/r
 
 P1-Aの提供範囲とP1-B未提供を明記する。Results hierarchyをEditorial Model接続へ位置付けるが、旧checkerやcontrolled viewを削除しない。CHANGELOGはmanaged/project-owned境界と利用者のopt-in手順を含める。
 
+`docs/paperops2-disposition.md`には`template/scripts/check-paperops-models.py`とroot/templateの`schema-check` targetを八列の個別rowとして追加する。`tests/test_paperops2_design_docs.py`のdynamic checker/Make target inventoryが新surfaceを完全一致で検査し、存在しない別inventory文書を正本にしない。
+
 - [ ] **Step 8: TODOを実績同期する**
 
 P1全体を完了にせず、P1-A縦切りだけを完了として追記する。Research/Manuscript/Issue/Publication、全model cross-ref、dependency hashはP1-B残件とする。
@@ -666,7 +670,8 @@ Expected: whitespace errorなし、placeholder該当なし。
 git add src/paperops/cli/migrations.py tests/test_pops_cli.py docs/migrations/v0.md \
   template/AGENTS.md template/CLAUDE.md template/README.md README.md \
   docs/architecture.md docs/cli.md docs/current-specification.md docs/skill-catalog.md \
-  CHANGELOG.md tests/test_p1a_documentation.py
+  docs/paperops2-disposition.md CHANGELOG.md tests/test_p1a_documentation.py \
+  tests/test_paperops2_design_docs.py
 git commit -m "既存論文を保護しながらEditorial Modelへ移れるようにするため"
 ```
 
