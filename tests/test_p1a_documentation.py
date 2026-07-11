@@ -32,18 +32,21 @@ class P1ADocumentationTest(unittest.TestCase):
         for path in ["template/AGENTS.md", "template/CLAUDE.md", "template/README.md"]:
             self.assert_surface_contains(path, required)
 
-    def test_root_docs_state_p1a_scope_and_p1b_deferrals(self) -> None:
+    def test_root_docs_state_current_p1b_scope_and_later_deferrals(self) -> None:
         required = [
-            "P1-A",
             "P1-B",
             "Research",
+            "Editorial",
+            "Results hierarchy",
             "Manuscript",
             "Issue",
             "Publication",
-            "未提供",
             "schema",
             "references",
             "semantics",
+            "P2",
+            "P3",
+            "P4",
             "hash",
         ]
         for path in [

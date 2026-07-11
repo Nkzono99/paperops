@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | PaperOps 2 design | `docs/rfcs/0001-paperops-2.md`, `docs/adr/`, `docs/paperops2-disposition.md`, `docs/paperops2-evaluation-fixtures.md` | 段階再設計の目標と導入、authority / ownership、CLI / Agent / compiler 境界、revision / hash、現行資産の判断、P1 fixture 方針 |
 | architecture / layer contract | `docs/architecture.md` | root 層、下流論文層、`_paperops/`、`paper_ir`、workflow state、submission axis |
-| PaperOps 2 P1-A Editorial schema kernel | `template/_paperops/defaults/schemas/registry.yml`, `template/_paperops/defaults/schemas/*.schema.json`, `template/scripts/paperops_schema.py`, `template/scripts/paperops_editorial.py`, `template/scripts/check-paperops-models.py`, `docs/migrations/v0.md` | managed registry/schema/checker、project-owned Editorial Model、schema / references / semantics / canonical semantic-v1 hash、M0-0004 compatibility |
+| PaperOps 2 P1-B six-model kernel | `template/_paperops/defaults/schemas/registry.yml`, `template/_paperops/defaults/schemas/*.schema.json`, `template/scripts/paperops_schema.py`, `template/scripts/paperops_models.py`, `template/scripts/check-paperops-models.py`, `docs/migrations/v0.md` | Research / Editorial / Results hierarchy / Manuscript / Issue / Publication、schema / references / semantics / approvals / dependencies / hash、M0-0005 compatibility |
 | CLI and checker behavior | `docs/cli.md`, `src/paperops/cli/`, `template/scripts/` | `pops init`、`pops update-paperops`、`pops scratch`、`pops workflow`、Makefile checks |
 | migrations | `docs/migrations/` | 下流互換、legacy path、overlay migration |
 | release and distribution | `docs/distribution.md`, `CHANGELOG.md`, `.agents/skills/release/SKILL.md` | package / tag / PyPI / scaffold version |
@@ -26,7 +26,7 @@
 - 人間が普段触る入口は `story/`、`manuscript/`、`submission/`、review comments である。AI / harness が使う internal state は `_paperops/` に置く。
 - `_paperops/defaults/schemas/*` は managed default、`_paperops/model/editorial/editorial-model.yml` と `results-hierarchy.yml` は project-owned Editorial state である。既存下流は M0-0004 の strict opt-in と人間承認まで legacy controlled view を維持する。
 - P1-A の合成 fixture は mechanism-led、boundary-led、negative-result-led の三 category で、期待値に canonical semantic-v1 hash を持つ。
-- Research / Manuscript / Issue Model の schema、空 starter、個別 semantics は P1-B Task 3〜5 で提供済みである。Publication Model、全 model cross-reference、dependency target 解決は後続 P1-B の範囲であり未提供である。
+- P1-B の現行 model scope は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六つである。全 model cross-reference、approval、dependency target、Publication round を検証するが、legacy authority は維持し、P2 migration、P3 compiler、P4 workflow cutover を完了扱いしない。
 - 旧 top-level `notes/`、`refs/`、`claims/`、`evidence/`、`contracts/`、`workflow/` などは互換読み取り対象に留める。
 - `paper_ir` と section plan は生成一時物であり、必要な場合だけ `.paperops/cache/` に置く。
 - `manuscript/` は living manuscript / authoring source であり、投稿後や査読後も編集してよい。

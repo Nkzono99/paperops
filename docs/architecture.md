@@ -19,9 +19,9 @@
 
 ## PaperOps 2 P1-A schema kernel
 
-P1-A は Editorial Model を schema kernel の縦切りとして実装し、P1-B Task 3〜5 は同じ kernel に Research / Manuscript / Issue Model を追加する。`_paperops/defaults/schemas/registry.yml`、JSON Schema、validator / checker は paperops-managed であり、`_paperops/model/` の model state は project-owned である。検証は schema、references、semantics、canonical semantic-v1 hash の phase 順を固定し、既存 Results checker、TeX、legacy controlled view を削除しない。
+P1-B は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六モデルを同じ schema kernel へ接続する。`_paperops/defaults/schemas/registry.yml`、JSON Schema、validator / checker は paperops-managed、`_paperops/model/` の index、per-ID record、aggregate state は project-owned である。検証順は schema → references → semantics → approvals → dependencies → hash で、schema-clean catalog だけを後続 phase に渡す。canonical object hash と `dependency-v1` は timestamp と dependency 配列順を除外し、target の revision / semantic hash / relation の変化だけを stale 判定へ反映する。
 
-Research / Manuscript / Issue Model の schema、空 starter、個別 semantics は提供済みである。Publication Model、全 model cross-reference、dependency target 解決は後続 P1-B の範囲であり未提供である。したがって Task 5 の完了を shadow migration、Writer、workflow cutover、v2-authoritative の完了として扱わない。
+P1-B は shadow validation と手動 opt-in の境界までである。legacy card、human-edited TeX、review/request、submission ledger を削除せず、authority migration は P2、section compiler / Writer packet は P3、workflow writer cutover は P4 に defer する。Publication Model は living authoring candidate と immutable submitted round を分離するが、snapshot 作成や filesystem seal 自体は後続 cycle の責務である。
 
 ## 下流論文層
 

@@ -112,7 +112,7 @@ Writer には card 正本や gate 語彙を直接読み込ませすぎない。`
 
 ## 重要な境界
 
-PaperOps 2 P1-A の schema kernel と P1-B Task 3〜5 では managed registry / JSON Schema / checker と、project-owned の Editorial / Research / Manuscript / Issue Model state を分離する。Issue record は公開可能な summary と opaque local-reference ID だけを tracked state に置き、解析 lifecycle、予測の未解決 warning、response closure を検査する。legacy card、TeX、既存 checker は P2 まで authority として維持する。Publication Model、全 model cross-reference、dependency target 解決は未提供である。
+PaperOps 2 P1-Bではmanaged registry / JSON Schema / checkerと、project-ownedのResearch / Editorial / Results hierarchy / Manuscript / Issue / Publication stateを分離する。skillは六モデルを直接書くauthorityをまだ持たず、既存legacy artifactからのP2 shadow migration、P3 section compiler / Writer packet、P4 workflow writer cutoverが別々に承認されるまで現行routeを維持する。Issueは公開可能summaryとopaque local-reference IDだけをtracked stateに置き、Publicationはliving candidateとimmutable roundを混同しない。
 
 `make schema-check` は schema → references → semantics → canonical semantic-v1 hash の順で検査し、mechanism-led、boundary-led、negative-result-led の三つの合成fixtureを回帰corpusとする。
 

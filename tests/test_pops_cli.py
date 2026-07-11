@@ -78,6 +78,21 @@ class PopsCliTest(unittest.TestCase):
                     self.assertFalse(index.exists())
                     self.assertNotIn(relative, out)
 
+            publication = target / "_paperops/model/publication/publication-model.yml"
+            self.assertTrue(publication.is_file())
+            project_owned = publication.read_text(encoding="utf-8") + "\n# project-owned\n"
+            publication.write_text(project_owned, encoding="utf-8")
+            code, out, err = run_cli(["update-paperops", "--apply", str(target)])
+            self.assertEqual(code, 0, err)
+            self.assertEqual(publication.read_text(encoding="utf-8"), project_owned)
+            self.assertNotIn("_paperops/model/publication/publication-model.yml", out)
+
+            publication.unlink()
+            code, out, err = run_cli(["update-paperops", "--apply", str(target)])
+            self.assertEqual(code, 0, err)
+            self.assertFalse(publication.exists())
+            self.assertNotIn("_paperops/model/publication/publication-model.yml", out)
+
     def test_init_creates_project_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"

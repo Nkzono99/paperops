@@ -101,6 +101,24 @@ EDITORIAL_MODEL_SCHEMA_KERNEL_MIGRATION = Migration(
     ),
 )
 
+P1B_SIX_MODEL_MIGRATION = Migration(
+    migration_id="M0-0005",
+    title="Adopt the PaperOps 2 six-model validation kernel",
+    checkpoint="v0 checkpoint for the PaperOps 2 P1-B six-model kernel",
+    summary=(
+        "Guides existing projects through manual adoption of Research, Editorial, "
+        "Results hierarchy, Manuscript, Issue, and Publication state without "
+        "changing legacy authority."
+    ),
+    moves=(),
+    notes=(
+        "Run `pops update-paperops --apply` to receive managed schemas and checker scripts.",
+        "Create or migrate project-owned model state manually after reviewing the six-model contract.",
+        "Migration apply never deletes legacy cards, TeX, review state, requests, or submission ledgers.",
+        "Keep legacy authority until P2 migration, P3 compiler, and P4 workflow cutover are separately approved.",
+    ),
+)
+
 
 def registered_migrations() -> tuple[Migration, ...]:
     return (
@@ -108,6 +126,7 @@ def registered_migrations() -> tuple[Migration, ...]:
         DEFAULTS_SPLIT_MIGRATION,
         TYPED_RESULTS_HIERARCHY_MIGRATION,
         EDITORIAL_MODEL_SCHEMA_KERNEL_MIGRATION,
+        P1B_SIX_MODEL_MIGRATION,
     )
 
 

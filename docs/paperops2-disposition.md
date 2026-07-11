@@ -101,7 +101,7 @@ checker inventory は、名前が `check-` で始まるかにかかわらず、d
 | `template/_paperops/defaults/contracts/` | managed section / figure contracts | P1–P5 managed contract authority | adapt | PaperOps release | PaperOps release | schema version と compatibility reader を用意 | versioned replacement と利用ゼロ後のみ |
 | `template/_paperops/defaults/workflow/` | state machine、focus policy、subagent roster の managed default | paperops-managed workflow default | adapt | PaperOps release | PaperOps release | project-owned workflow fact や overlay を managed update で上書きしない | versioned replacement と migration 完了後のみ |
 | `template/_paperops/contracts/` | 論文固有の section / figure contract 差分 | project-owned contract overlay | adapt | human / Agent の明示更新 | project workflow ごとの承認済み単一 writer | defaults と同名でも managed update の対象にせず compatibility reader を維持 | typed overlay migration と利用ゼロ確認後のみ |
-| `template/_paperops/model/` | project-owned Editorial / Research / Manuscript / Issue typed state | P1 schema-checked opt-in state、P2以降のmodel別authority | investigate | legacy cards / human-edited TeX | P1-Bではwriterなし。P2/P4でmodel別単一writerを決定 | 理由: modelごとに単一writerをP1で決定する必要がある。managed updateはindex/recordを生成・上書きせず、Issueはpublic summaryとopaque local refのみ。legacy authorityからの切替は未提供 | writer決定、atomic migration、strict検証、全project復元確認後のみ |
+| `template/_paperops/model/` | project-owned Research / Editorial / Results hierarchy / Manuscript / Issue / Publication typed state | P1 schema-checked opt-in state、P2以降のmodel別authority | investigate | legacy cards / human-edited TeX | P1-Bではwriterなし。P2/P4でmodel別単一writerを決定 | 理由: modelごとに単一writerをP1で決定する必要がある。六モデルを検証するがmanaged updateはindex/recordを生成・上書きせず、legacy authorityからの切替は未提供 | writer決定、atomic migration、strict検証、全project復元確認後のみ |
 | `template/_paperops/claims/` | claim / argument / gate cards | P3 claim typed authority | adapt | human / skills | claim workflow の単一 writer | stable ID、revision、legacy read-only view を保持 | v2-authoritative と利用ゼロ確認後のみ |
 | `template/_paperops/evidence/` | result / figure / source evidence cards | P3 evidence typed authority | adapt | human / import skills | evidence workflow の単一 writer | provenance と confidential boundary を保持 | v2-authoritative と利用ゼロ確認後のみ |
 | `template/_paperops/evidence/figures/` | figure evidence records | P3 figure evidence authority | adapt | human / figure skills | evidence workflow の単一 writer | figure ID と参照を migration | legacy reader 利用ゼロ後のみ |
@@ -209,7 +209,7 @@ checker inventory は、名前が `check-` で始まるかにかかわらず、d
 | `template/scripts/mirror-check.py` | JA/EN block 対応検査 | P4/P6 mirror gate | retain | checker is read-only | checker is read-only | block ID と mirror invariant を維持 | 置換 checker 同等性確認後のみ |
 | `template/scripts/mirror-freshness-check.py` | JA/EN mirror freshness 検査 | P4/P6 mirror stale gate | retain | checker is read-only | checker is read-only | advisory / strict と selective stale を維持 | 置換 checker 同等性確認後のみ |
 | `template/scripts/readiness-check.py` | starter / project / submission readiness 検査 | P1–P7 readiness gate | adapt | checker is read-only | checker is read-only | starter と strict submission profile を区別 | v2 readiness checker 同等性確認後のみ |
-| `template/scripts/check-paperops-models.py` | schema registry に従う phase 別 model 検査 | P1-A schema / reference / semantics / hash gate | retain | checker is read-only | checker is read-only | managed schema と project-owned model の境界を維持 | 全 model checker の同等性確認後のみ |
+| `template/scripts/check-paperops-models.py` | schema registry に従う phase 別 model 検査 | P1-B schema / references / semantics / approvals / dependencies / hash gate | retain | checker is read-only | checker is read-only | managed schema と project-owned model の境界を維持 | 全 model checker の同等性確認後のみ |
 
 ### Downstream Make targets
 
@@ -231,7 +231,7 @@ checker inventory は、名前が `check-` で始まるかにかかわらず、d
 | `template/Makefile::argument-focus-check` | argument focus | P2–P5 diagnostic | adapt | Make / checker | Make / checker | editorial choice と分離 | fixture 同等性確認後のみ |
 | `template/Makefile::authoring-intent-check` | authoring intent | P4/P5 gate | retain | Make / checker | Make / checker | invariant 維持 | 置換 checker 同等性確認後のみ |
 | `template/Makefile::storyline-check` | storyline | P2 story gate | adapt | Make / checker | Make / typed checker | no-fallback を維持 | legacy reader 利用ゼロ後のみ |
-| `template/Makefile::schema-check` | project model の advisory schema 検査 | P1-A schema / reference / semantics / hash gate | retain | Make / checker | Make / checker | audit にだけ接続し finish / pre-submit へは未接続 | P1-B 後の統合 gate へ移行後のみ |
+| `template/Makefile::schema-check` | project model の advisory schema 検査 | P1-B six-model phase gate | retain | Make / checker | Make / checker | audit にだけ接続し finish / pre-submit へは未接続 | P2以降の統合 gate へ移行後のみ |
 | `template/Makefile::section-contract-check` | section contract | P2–P5 section gate | adapt | Make / checker | Make / typed checker | atomic migration 後に authority 切替 | legacy reader 利用ゼロ後のみ |
 | `template/Makefile::section-depth-check` | section depth | P4/P5 diagnostic | adapt | Make / checker | Make / checker | strict/advisory を区別 | fixture 同等性確認後のみ |
 | `template/Makefile::quantity-integrity-check` | quantity integrity | P3–P6 gate | retain | Make / checker | Make / checker | invariant 維持 | 置換 checker 同等性確認後のみ |
@@ -261,3 +261,25 @@ checker inventory は、名前が `check-` で始まるかにかかわらず、d
 | `template/Makefile::ci` | baseline CI aggregate | P1–P7 CI gate | adapt | Make | Make / deterministic checks | shadow check を段階追加 | 別 orchestrator 全移行後のみ |
 | `template/Makefile::audit` | advisory audit aggregate | P2–P6 diagnostic gate | adapt | Make | Make / deterministic diagnostics | strict check と混同しない | 別 orchestrator 全移行後のみ |
 | `template/Makefile::pre-submit` | full pre-submit aggregate | P6 publication gate | adapt | Make | Make / deterministic checks | snapshot 前 gate とする | v2 publication gate 全移行後のみ |
+
+## P1-B legacy field-family inventory
+
+P1-Bのtyped schemaがlegacy authorityを置換したと誤認しないため、移送先をfield family単位で固定する。
+
+| legacy family | typed destination | retained boundary |
+|---|---|---|
+| claim card | Research claim / scientific gate | statement、scope、limitation、warrant、assumption、approval、validation、claim/result/source/figure/block refs |
+| result card | Research result | observation、estimand、denominator、unit of analysis、quantity contract、provenance、claim/figure/block refs |
+| figure card | Research figure | reader task、takeaway、encoding、uncertainty、caption scope、visual obligation、design/audit checks |
+| source card | Research source | citation key、verification/promotion、claim boundary、parameter choice、reviewer objection、method precedent、public provenance |
+| scientific gate | Research scientific gate | claim pairing、required checks、assumption/stress/external gates、approved scope、history |
+| storyline | Editorial story / move / visual と Results hierarchy | candidate selection/rejection、reader transformation、claim role、move order、visual obligation、RHI chain |
+| section contract | Manuscript section / block | section kind/order、reader task、operation、JA/EN identity、compiled provenance、dependency snapshot |
+| analysis request | Issue analysis_request | plan、prediction、replacement、runops、execution provenance、reconciliation、human signoff |
+| writing request | Issue writing_request | target block、claim/evidence constraint、allowed wording、mirror/editing policy |
+| feedback | Issue feedback | source、severity、route、typed target、public summary、delegation、closure criteria |
+| response | Issue response | feedback refs、resolution route、scope approval、closure audit、changed object refs |
+| review round | Issue review_round | scope、artifact/feedback refs、architecture audit、delegation ledger、integration decision |
+| submission ledger | Publication candidate / round | venue requirement、source commit、gate report、artifact、snapshot dependency、response、immutable marker |
+
+このinventoryはmigration mappingであってwriter切替ではない。P2 / P3 / P4が完了するまでlegacy familyを削除・dual-writeしない。

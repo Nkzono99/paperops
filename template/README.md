@@ -56,7 +56,7 @@
 
 既存下流 project は M0-0003 を採用するまで `storyline.md` の legacy Markdown Results hierarchy を fallback として利用できる。移行時は `uvx --from paper-harness-cli pops update-paperops --apply --only _paperops/defaults/schemas/` で managed schema を更新し、project-owned の typed file を opt-in で作成する。`python scripts/check-section-contracts.py --root . --strict` が成功する前に legacy Markdown を削除しない。
 
-新規 project は `pops init` で Editorial Model starter と、架空 record を持たない Research / Manuscript / Issue の空 starter index を受け取る。既存 project は `pops update-paperops` や migration apply から project-owned model state を自動取得せず、managed registry / schema / checker の更新後に必要な空 index を手動で追加する。Issue Model は公開可能な summary と opaque local-reference ID だけを tracked state に置き、analysis lifecycle と response closure を検査する。P2 までは TeX、legacy `_paperops/review/` / `_paperops/requests/`、既存 checker を authority として維持する。Publication Model、全 model cross-reference、dependency target 解決は未提供である。
+新規 project は `pops init` で Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六モデル starter を受け取る。Research / Manuscript / Issue は架空 record のない空 index、Publication は未提出のaggregate starterである。既存 project は `pops update-paperops` や migration apply から project-owned model state を自動取得せず、managed registry / schema / checker の更新後に M0-0005 に従って手動採用する。`make schema-check` は references / semantics / approvals / dependencies / hash を advisory に検査する。P2まではlegacy card / review / request、P3まではhuman-edited TeX、P4までは既存workflow writerをauthorityとして維持する。
 
 `make schema-check` は schema / references / semantics / hash phaseをadvisoryに検査する。`editorial-model.yml`を含むproject-owned stateのauthority切替前は明示strict検査と人間承認を要求し、legacy controlled viewを維持する。
 
