@@ -456,14 +456,21 @@ class ResearchModelTest(unittest.TestCase):
             "source": source(), "scientific_gate": gate(),
         }
         for record_type, document in documents.items():
-            for key in ("invalid", "x-lab-credential", "x-lab-local_path"):
+            for key in (
+                "invalid", "x-lab-credential", "x-lab-local_path",
+                "x-api-key-value", "x-access-token-value", "x-auth-token-value",
+                "x-private-key-value",
+            ):
                 changed = copy.deepcopy(document)
                 changed["extensions"] = {key: "opaque:value"}
                 findings = validate_research_semantics(
                     self.catalog([(record_type, changed)])
                 )
                 self.assertIn("semantic.extension", [f.code for f in findings])
-        for key in ("x-nlp-tokenizer-version", "x-authors-authorship-note"):
+        for key in (
+            "x-nlp-tokenizer-version", "x-authors-authorship-note",
+            "x-figure-key-order", "x-nlp-token-count", "x-login-auth-method",
+        ):
             changed = source()
             changed["extensions"] = {key: "v1"}
             findings = validate_research_semantics(
@@ -521,7 +528,8 @@ class ResearchModelTest(unittest.TestCase):
     def test_provenance_schemes_reject_disguised_paths_and_credentials(self) -> None:
         valid = [
             "artifact:ART-0001", "commit:abcdef0",
-            "url:https://example.org/data?id=1", "doi:10.1234/example.1",
+            "url:https://example.org/data?id=1", "url:https://8.8.8.8/data",
+            "doi:10.1234/example.1",
         ]
         invalid = [
             "artifact:../private", r"artifact:C:\\private", "artifact:has space",
@@ -535,7 +543,12 @@ class ResearchModelTest(unittest.TestCase):
             "url:https://service.local/data", "url:https://service.internal/data",
             "url:https://service.lan/data", "url:https://intranet/data",
             "url:https://127.0.0.1/data", "url:https://10.0.0.1/data",
+            "url:https://127.1/data", "url:https://0177.0.0.1/data",
+            "url:https://0x7f.0.0.1/data",
             "url:https://[::1]/data", "url:https://example.org/data#token=secret",
+            "url:https://localhost.localdomain/data",
+            "url:https://service.localdomain/data", "url:https://home.arpa/data",
+            "url:https://router.home.arpa/data",
             "doi:not-a-doi", "doi:10.1234/bad doi", "doi:10.1234/bad\nvalue",
         ]
         for value in valid:

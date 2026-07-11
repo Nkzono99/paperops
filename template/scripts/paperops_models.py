@@ -256,7 +256,7 @@ def _sensitive_extension_key(key: str) -> bool:
         if component
     }
     if components.intersection(
-        {"token", "password", "passwd", "secret", "credential", "auth", "key"}
+        {"password", "passwd", "secret", "credential"}
     ):
         return True
     return any(
@@ -264,6 +264,7 @@ def _sensitive_extension_key(key: str) -> bool:
         for pair in (
             {"api", "key"},
             {"access", "token"},
+            {"auth", "token"},
             {"local", "path"},
             {"private", "key"},
         )
@@ -304,12 +305,25 @@ def _valid_public_provenance(value: str) -> bool:
         try:
             address = ipaddress.ip_address(hostname)
         except ValueError:
+            ipv4_like_labels = hostname.split(".")
             if (
-                "." not in hostname
+                (
+                    1 < len(ipv4_like_labels) <= 4
+                    and all(
+                        re.fullmatch(r"(?:0x[0-9a-f]+|[0-9]+)", label)
+                        is not None
+                        for label in ipv4_like_labels
+                    )
+                )
+                or "." not in hostname
                 or hostname == "localhost"
                 or hostname.endswith(
-                    (".localhost", ".local", ".internal", ".lan")
+                    (
+                        ".localhost", ".local", ".internal", ".lan",
+                        ".localdomain", ".home.arpa",
+                    )
                 )
+                or hostname in {"localdomain", "home.arpa"}
             ):
                 return False
         else:
