@@ -13,6 +13,7 @@ from paperops.workflow_v2.projection import project_workflow_status
 from paperops.workflow_v2.approvals import inspect_approvals, plan_approval_decision
 from paperops.workflow_v2.issues import inspect_issues, plan_issue_close, plan_issue_reopen, plan_issue_route
 from paperops.workflow_v2.transaction import execute_workflow_apply, execute_workflow_rollback
+from paperops.workflow_v2.migration import plan_workflow_adoption, prepare_workflow_shadow, workflow_migration_status
 
 
 def _canonical(value: object) -> str:
@@ -87,6 +88,20 @@ def workflow_v2_mutation(args, root: Path) -> int:
             print("error: workflow rollback requires --yes.", file=__import__("sys").stderr)
             return 2
         payload = {"transaction_id": execute_workflow_rollback(root, args.transaction_id, confirmed=True), "state": "ROLLED_BACK"}
+    elif action == "migrate":
+        if args.migrate_action == "status":
+            payload = workflow_migration_status(root)
+        elif args.migrate_action == "diff":
+            payload = prepare_workflow_shadow(root, refresh=args.refresh).to_dict()
+        elif args.migrate_action == "adopt":
+            payload = plan_workflow_adoption(root, args.migration_id).to_dict()
+        elif args.migrate_action == "rollback":
+            if not args.yes:
+                print("error: workflow migrate rollback requires --yes.", file=__import__("sys").stderr)
+                return 2
+            payload = {"transaction_id": execute_workflow_rollback(root, args.transaction_id, confirmed=True), "state": "ROLLED_BACK"}
+        else:
+            raise ValueError("unknown workflow migration action")
     else:
         raise ValueError("unknown typed workflow action")
     if getattr(args, "json", False):

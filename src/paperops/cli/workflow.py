@@ -97,6 +97,26 @@ def add_workflow_parser(
     rollback_parser.add_argument("--json", action="store_true")
     rollback_parser.set_defaults(func=cmd_workflow)
 
+    migrate_parser = workflow_subcommands.add_parser("migrate", help="Shadow, adopt, or roll back workflow authority.")
+    migrate_actions = migrate_parser.add_subparsers(dest="migrate_action", required=True)
+    migrate_status = migrate_actions.add_parser("status")
+    migrate_status.add_argument("--path", dest="workflow_path", type=Path)
+    migrate_status.add_argument("--json", action="store_true")
+    migrate_diff = migrate_actions.add_parser("diff")
+    migrate_diff.add_argument("--path", dest="workflow_path", type=Path)
+    migrate_diff.add_argument("--refresh", action="store_true")
+    migrate_diff.add_argument("--json", action="store_true")
+    migrate_adopt = migrate_actions.add_parser("adopt")
+    migrate_adopt.add_argument("migration_id")
+    migrate_adopt.add_argument("--path", dest="workflow_path", type=Path)
+    migrate_adopt.add_argument("--json", action="store_true")
+    migrate_rollback = migrate_actions.add_parser("rollback")
+    migrate_rollback.add_argument("transaction_id")
+    migrate_rollback.add_argument("--path", dest="workflow_path", type=Path)
+    migrate_rollback.add_argument("--yes", action="store_true")
+    migrate_rollback.add_argument("--json", action="store_true")
+    migrate_parser.set_defaults(func=cmd_workflow)
+
     next_parser = workflow_subcommands.add_parser("next", help="Show likely next transition.")
     next_parser.add_argument("path", nargs="?", type=Path, help="Project directory.")
     next_parser.set_defaults(func=cmd_workflow)
@@ -156,7 +176,7 @@ def cmd_workflow(args: argparse.Namespace) -> int:
         except (OSError, ValueError):
             print("error: workflow impact plan could not be prepared.", file=sys.stderr)
             return 1
-    if args.workflow_action in {"issue", "approval", "apply", "rollback"}:
+    if args.workflow_action in {"issue", "approval", "apply", "rollback", "migrate"}:
         try:
             return workflow_v2_mutation(args, root)
         except (OSError, ValueError, json.JSONDecodeError):
