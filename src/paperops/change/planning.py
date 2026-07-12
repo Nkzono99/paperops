@@ -80,6 +80,28 @@ def _write_json(path: Path, value: Any) -> None:
         os.close(descriptor)
 
 
+def _read_json(path: Path) -> Any:
+    descriptor = -1
+    try:
+        descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+        metadata = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(metadata.st_mode)
+            or metadata.st_nlink != 1
+            or metadata.st_uid != os.geteuid()
+            or stat.S_IMODE(metadata.st_mode) & 0o022
+        ):
+            raise ChangePlanningError("change plan cache leaf is unsafe")
+        with os.fdopen(descriptor, "r", encoding="utf-8") as stream:
+            descriptor = -1
+            return json.load(stream)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ChangePlanningError("change plan cache is missing, unsafe, or corrupt") from exc
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+
+
 def _read_yaml(path: Path) -> dict[str, Any]:
     try:
         value = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -235,7 +257,7 @@ def plan_change(root: Path, request_path: Path) -> ChangePlan:
     payload_path = directory / "payload.json"
     if directory.exists():
         cached = read_change_plan(root, change_id)
-        if canonical_json({key: value for key, value in summary.items()}) != canonical_json(json.loads(plan_path.read_text())):
+        if canonical_json({key: value for key, value in summary.items()}) != canonical_json(_read_json(plan_path)):
             raise ChangePlanningError("change plan cache is corrupt")
         return cached
     payload = {item.identity: base64.b64encode(item.content).decode() if item.content is not None else None for item in replacements.values()}
@@ -258,11 +280,8 @@ def plan_change(root: Path, request_path: Path) -> ChangePlan:
 
 def read_change_plan(root: Path, change_id: str) -> ChangePlan:
     directory = _change_directory(root.expanduser().resolve(), change_id, create_base=False)
-    try:
-        plan = json.loads((directory / "plan.json").read_text(encoding="utf-8"))
-        payload = json.loads((directory / "payload.json").read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise ChangePlanningError("change plan cache is missing or corrupt") from exc
+    plan = _read_json(directory / "plan.json")
+    payload = _read_json(directory / "payload.json")
     required = {"schema_version", "reason", "operations", "base_model_hashes", "candidate_model_hashes", "replacements", "change_id"}
     if not isinstance(plan, dict) or set(plan) != required or plan.get("schema_version") != 1 or plan.get("change_id") != change_id or not isinstance(plan.get("reason"), str) or not isinstance(payload, dict):
         raise ChangePlanningError("change plan cache identity is corrupt")

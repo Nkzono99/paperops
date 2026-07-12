@@ -98,6 +98,24 @@ class ChangePlanningTest(unittest.TestCase):
             with self.assertRaisesRegex(ChangePlanningError, "unsafe"):
                 read_change_plan(project, change_id)
 
+    def test_read_rejects_symlinked_plan_and_payload_leaves(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp); project = self.project(parent)
+            target = project / "_paperops/model/publication/publication-model.yml"
+            document = yaml.safe_load(target.read_text()); digest = semantic_hash(document)
+            document["revision"] = 1
+            operation = {"action": "upsert", "model": "publication", "record_type": "publication", "id": "PUB-main", "expected_revision": 0, "expected_hash": digest, "document": document}
+            plan = plan_change(project, self.request(parent, [operation]))
+            directory = project / ".paperops/changes" / plan.change_id
+            for leaf in ("plan.json", "payload.json"):
+                with self.subTest(leaf=leaf):
+                    original = directory / leaf
+                    outside = parent / f"outside-{leaf}"; outside.write_bytes(original.read_bytes())
+                    original.unlink(); original.symlink_to(outside)
+                    with self.assertRaises(ChangePlanningError):
+                        read_change_plan(project, plan.change_id)
+                    original.unlink(); original.write_bytes(outside.read_bytes()); original.chmod(0o600)
+
     def test_aggregate_id_is_registry_canonical(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp); project = self.project(parent)

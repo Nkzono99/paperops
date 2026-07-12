@@ -104,13 +104,34 @@ class ChangeTransactionTest(unittest.TestCase):
             receipt_id = "RBK-" + hashlib.sha256(transaction_id.encode()).hexdigest()[:20]
             receipt_dir = project / ".paperops/changes/transactions" / receipt_id; receipt_dir.mkdir()
             receipt = {"schema_version": 1, "transaction_id": receipt_id, "rollback_of": transaction_id, "state": "APPLYING", "entries": original["entries"]}
-            (receipt_dir / "journal.json").write_text(json.dumps(receipt))
+            receipt_path = receipt_dir / "journal.json"
+            receipt_path.write_text(json.dumps(receipt)); receipt_path.chmod(0o600)
             publication = next(row for row in original["entries"] if row["identity"].endswith("publication-model.yml"))
             target.write_bytes(base64.b64decode(publication["pre"]))
             self.assertIn(receipt_id, recover_incomplete_changes(project))
             self.assertEqual(target.read_bytes(), before)
             recovered = json.loads((receipt_dir / "journal.json").read_text())
             self.assertEqual(recovered["state"], "COMMITTED")
+
+    def test_apply_rejects_symlinked_lock_leaf(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp); project, target, plan = self.setup_plan(parent); before = target.read_bytes()
+            outside = parent / "outside-lock"; outside.write_bytes(b"")
+            lock = project / ".paperops/changes/lock"; lock.symlink_to(outside)
+            with self.assertRaisesRegex(ChangeTransactionError, "lock"):
+                apply_change(project, plan.change_id, confirmed=True)
+            self.assertEqual(target.read_bytes(), before)
+
+    def test_rollback_rejects_symlinked_journal_leaf(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp); project, target, plan = self.setup_plan(parent)
+            transaction_id = apply_change(project, plan.change_id, confirmed=True); committed = target.read_bytes()
+            journal = project / ".paperops/changes/transactions" / transaction_id / "journal.json"
+            outside = parent / "outside-journal"; outside.write_bytes(journal.read_bytes())
+            journal.unlink(); journal.symlink_to(outside)
+            with self.assertRaisesRegex(ChangeTransactionError, "journal"):
+                rollback_change(project, transaction_id, confirmed=True)
+            self.assertEqual(target.read_bytes(), committed)
 
     def test_apply_rejects_new_candidate_warning_at_commit_time(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -9,6 +9,7 @@ import json
 import os
 import re
 import stat
+import tomllib
 from contextlib import contextmanager
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -145,10 +146,25 @@ def _decoded(value: object, digest: object, label: str) -> bytes | None:
 
 
 def _read_journal(path: Path, expected_id: str) -> dict[str, Any]:
+    descriptor = -1
     try:
-        journal = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+        metadata = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(metadata.st_mode)
+            or metadata.st_nlink != 1
+            or metadata.st_uid != os.geteuid()
+            or stat.S_IMODE(metadata.st_mode) & 0o022
+        ):
+            raise ChangeTransactionError("change transaction journal leaf is unsafe")
+        with os.fdopen(descriptor, "r", encoding="utf-8") as stream:
+            descriptor = -1
+            journal = json.load(stream)
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise ChangeTransactionError("change transaction journal is missing or invalid") from exc
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
     is_rollback = ROLLBACK_ID_PATTERN.fullmatch(expected_id) is not None
     required = {"schema_version", "transaction_id", "state", "entries", "rollback_of" if is_rollback else "change_id"}
     if not isinstance(journal, dict) or set(journal) != required or journal.get("schema_version") != 1 or journal.get("transaction_id") != expected_id:
@@ -185,6 +201,44 @@ def _read_journal(path: Path, expected_id: str) -> dict[str, Any]:
         mode = entry.get("mode")
         if type(mode) is not int or mode < 0 or mode > 0o777:
             raise ChangeTransactionError("change transaction journal mode is invalid")
+    root = path.parents[4]
+    if is_rollback:
+        original_path = _transaction_dir(root, rollback_of, create=False) / "journal.json"
+        original = _read_journal(original_path, rollback_of)
+        if journal["entries"] != original["entries"]:
+            raise ChangeTransactionError("rollback journal entries disagree with the original transaction")
+    else:
+        try:
+            plan = read_change_plan(root, change_id)
+        except ChangePlanningError as exc:
+            raise ChangeTransactionError("change journal plan is missing or invalid") from exc
+        by_identity = {entry["identity"]: entry for entry in entries}
+        planned = {replacement.identity: replacement for replacement in plan.replacements}
+        if set(by_identity) != set(planned) | {".pops/manifest.toml"}:
+            raise ChangeTransactionError("change journal entries disagree with the plan")
+        for identity, replacement in planned.items():
+            entry = by_identity[identity]
+            expected_post = base64.b64encode(replacement.content).decode() if replacement.content is not None else None
+            if entry["pre_hash"] != replacement.before_hash or entry["post_hash"] != replacement.after_hash or entry["post"] != expected_post:
+                raise ChangeTransactionError("change journal entry disagrees with the plan")
+        manifest = by_identity[".pops/manifest.toml"]
+        pre_manifest = _decoded(manifest["pre"], manifest["pre_hash"], "manifest preimage")
+        post_manifest = _decoded(manifest["post"], manifest["post_hash"], "manifest postimage")
+        if pre_manifest is None or post_manifest is None:
+            raise ChangeTransactionError("change journal manifest transition is invalid")
+        try:
+            pre_models = tomllib.loads(pre_manifest.decode("utf-8"))["models"]
+            post_models = tomllib.loads(post_manifest.decode("utf-8"))["models"]
+        except (UnicodeError, tomllib.TOMLDecodeError, KeyError, TypeError) as exc:
+            raise ChangeTransactionError("change journal manifest transition is invalid") from exc
+        if any(
+            not isinstance(pre_models.get(name), dict)
+            or pre_models[name].get("current_hash") != plan.base_model_hashes[name]
+            or not isinstance(post_models.get(name), dict)
+            or post_models[name].get("current_hash") != plan.candidate_model_hashes[name]
+            for name in MODEL_NAMES
+        ):
+            raise ChangeTransactionError("change journal manifest hashes disagree with the plan")
     return journal
 
 
@@ -206,7 +260,25 @@ def _change_lock(root: Path):
         if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISDIR(metadata.st_mode):
             raise ChangeTransactionError("change lock directory is unsafe")
     lock_path = changes / "lock"
-    with lock_path.open("a+b") as lock:
+    descriptor = -1
+    try:
+        descriptor = os.open(lock_path, os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+        metadata = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(metadata.st_mode)
+            or metadata.st_nlink != 1
+            or metadata.st_uid != os.geteuid()
+            or stat.S_IMODE(metadata.st_mode) & 0o022
+        ):
+            raise ChangeTransactionError("change lock leaf is unsafe")
+        lock = os.fdopen(descriptor, "a+b")
+        descriptor = -1
+    except OSError as exc:
+        raise ChangeTransactionError("change lock leaf is unsafe") from exc
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+    with lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         yield
 
