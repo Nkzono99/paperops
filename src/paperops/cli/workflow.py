@@ -159,9 +159,15 @@ def cmd_workflow(args: argparse.Namespace) -> int:
         return 2
     args.project_root = root
 
-    if args.workflow_action == "status" and getattr(args, "json", False):
+    typed_mode = False
+    try:
+        from paperops.workflow_v2.migration import workflow_migration_status
+        typed_mode = workflow_migration_status(root)["mode"] == "v2-authoritative"
+    except (OSError, ValueError):
+        typed_mode = False
+    if args.workflow_action == "status" and (getattr(args, "json", False) or typed_mode):
         try:
-            return workflow_v2_status(root, json_output=True)
+            return workflow_v2_status(root, json_output=getattr(args, "json", False))
         except (OSError, ValueError) as exc:
             print("error: typed workflow projection is unavailable.", file=sys.stderr)
             return 1
@@ -182,6 +188,9 @@ def cmd_workflow(args: argparse.Namespace) -> int:
         except (OSError, ValueError, json.JSONDecodeError):
             print("error: typed workflow operation could not be completed.", file=sys.stderr)
             return 1
+    if typed_mode and args.workflow_action in {"advance", "invalidate", "route-review"}:
+        print("error: legacy workflow mutation is disabled in v2-authoritative mode; use workflow plan/issue/approval and apply.", file=sys.stderr)
+        return 2
 
     try:
         machine = load_mapping(

@@ -9,6 +9,7 @@ from io import StringIO
 from pathlib import Path
 
 from paperops.cli.main import build_parser, main
+from paperops.cli.manifest import write_manifest_data_atomic
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,6 +49,16 @@ class WorkflowReadonlyCliTest(unittest.TestCase):
         plan = self.project / ".paperops/workflow/plans" / payload["plan_id"] / "plan.json"
         self.assertTrue(plan.is_file())
         self.assertFalse(payload["ready"])
+
+    def test_v2_mode_uses_projection_and_disables_legacy_writers(self) -> None:
+        manifest = self.project / ".pops/manifest.toml"
+        manifest.parent.mkdir(parents=True, exist_ok=True)
+        write_manifest_data_atomic(manifest, {"workflow": {"mode": "v2-authoritative"}})
+        current = self.project / "_paperops/workflow/current-state.yml"
+        before = current.read_bytes()
+        self.assertEqual(main(["workflow", "status", str(self.project)]), 0)
+        self.assertEqual(main(["workflow", "invalidate", "CLM-0001", str(self.project)]), 2)
+        self.assertEqual(current.read_bytes(), before)
 
 
 if __name__ == "__main__":

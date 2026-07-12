@@ -23,7 +23,7 @@ class WorkflowMigrationTest(unittest.TestCase):
         shutil.copytree(ROOT / "template", self.project)
         write_manifest(self.project)
         current = json.loads((self.project / "_paperops/workflow/current-state.yml").read_text())
-        current["review"]["major_concerns"] = [{"summary": "Bound the claim.", "target_id": "SEC-0001", "target_type": "section", "target_revision": 1, "target_hash": H, "route": "editorial"}]
+        current["review"]["major_concerns"] = [{"summary": "Bound the claim.", "target_id": "ISS-0001", "target_type": "workflow_issue", "target_revision": 1, "target_hash": H, "route": "editorial"}]
         (self.project / "_paperops/workflow/current-state.yml").write_text(json.dumps(current) + "\n")
 
     def tearDown(self) -> None:

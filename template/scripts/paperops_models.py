@@ -295,6 +295,8 @@ def validate_cross_model_references(
             for target_id, relative_pointer, duplicate_pointer in (
                 _contract_reference_values(source.document, field)
             ):
+                if target_id == "":
+                    continue
                 if duplicate_pointer is not None and duplicate_pointer not in duplicate_pointers:
                     duplicate_pointers.add(duplicate_pointer)
                     findings.append(ModelFinding(

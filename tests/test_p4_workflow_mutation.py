@@ -9,6 +9,7 @@ from pathlib import Path
 from paperops.workflow_v2.approvals import inspect_approvals, plan_approval_decision
 from paperops.workflow_v2.issues import inspect_issues, plan_issue_close, plan_issue_reopen, plan_issue_route
 from paperops.workflow_v2.transaction import execute_workflow_apply, execute_workflow_rollback
+from paperops.workflow_v2.mutation import semantic_hash
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,15 +25,17 @@ class WorkflowMutationTest(unittest.TestCase):
             "schema_version": 1, "record_type": "workflow_issue", "id": "ISS-0001", "revision": 1,
             "status": "open", "dependencies": [], "approvals": [], "extensions": {},
             "metadata": {"created_at": "", "updated_at": ""}, "severity": "major", "route": "editorial",
-            "targets": [{"kind": "section", "id": "SEC-0001", "revision": 1, "hash": H}], "review_round_ref": "",
+            "targets": [{"kind": "workflow_issue", "id": "ISS-0001", "revision": 1, "hash": H}], "review_round_ref": "",
             "confidentiality": "public", "public_summary": "Reorder the argument.", "closure_criteria": ["verified"],
-            "blocking_dependency_refs": [], "impacts": [{"target_id": "SEC-0001", "target_type": "section", "expected_revision": 1, "expected_hash": H, "state": "resolved", "verification_refs": ["check:SEC-0001"]}],
+            "blocking_dependency_refs": [], "impacts": [{"target_id": "ISS-0001", "target_type": "workflow_issue", "expected_revision": 1, "expected_hash": H, "state": "resolved", "verification_refs": ["check:ISS-0001"]}],
             "route_history": [], "closure": {"decision": "pending", "reason": "", "verification_refs": []},
             "escalation": {"level": "none", "reason": ""}
         }
         path = self.project / "_paperops/model/issues/workflow/ISS-0001.yml"
         path.parent.mkdir(parents=True)
         path.write_text(json.dumps(issue) + "\n")
+        index = {"model_name": "issue", "schema_version": 1, "index_revision": 1, "records": [{"id": "ISS-0001", "record_type": "workflow_issue", "document": "_paperops/model/issues/workflow/ISS-0001.yml", "expected_revision": 1, "expected_hash": semantic_hash(issue)}], "extensions": {}, "metadata": {"updated_at": ""}}
+        (self.project / "_paperops/model/issues/index.yml").write_text(json.dumps(index) + "\n")
 
     def tearDown(self) -> None:
         self.temp.cleanup()
@@ -43,7 +46,7 @@ class WorkflowMutationTest(unittest.TestCase):
         self.assertEqual(inspect_issues(self.project, "ISS-0001").issues[0]["route"], "research")
         execute_workflow_rollback(self.project, tx, confirmed=True)
         self.assertEqual(inspect_issues(self.project, "ISS-0001").issues[0]["route"], "editorial")
-        close = plan_issue_close(self.project, "ISS-0001", "Verified", ("check:SEC-0001",))
+        close = plan_issue_close(self.project, "ISS-0001", "Verified", ("check:ISS-0001",))
         execute_workflow_apply(self.project, close.plan_id, confirmed=True)
         self.assertEqual(inspect_issues(self.project, "ISS-0001").issues[0]["status"], "closed")
         reopen = plan_issue_reopen(self.project, "ISS-0001", "New evidence")
@@ -51,12 +54,9 @@ class WorkflowMutationTest(unittest.TestCase):
         self.assertEqual(inspect_issues(self.project, "ISS-0001").issues[0]["status"], "open")
 
     def test_owner_local_approval_is_bound_to_subject_hash(self) -> None:
-        claim = self.project / "_paperops/model/research/claims/CLM-0001.yml"
-        claim.parent.mkdir(parents=True)
-        claim.write_text(json.dumps({"id": "CLM-0001", "record_type": "claim", "revision": 1, "approvals": [], "metadata": {"updated_at": ""}}) + "\n")
-        plan = plan_approval_decision(self.project, "CLM-0001", "scientific_scope", "approved", "Scope checked")
+        plan = plan_approval_decision(self.project, "ISS-0001", "scientific_scope", "approved", "Scope checked")
         execute_workflow_apply(self.project, plan.plan_id, confirmed=True)
-        status = inspect_approvals(self.project, "CLM-0001")
+        status = inspect_approvals(self.project, "ISS-0001")
         self.assertEqual(status.approvals[0]["decision"], "approved")
         self.assertEqual(status.approvals[0]["object_revision"], 1)
         self.assertTrue(status.approvals[0]["object_hash"].startswith("sha256:"))

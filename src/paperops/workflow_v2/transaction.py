@@ -21,8 +21,12 @@ def _read_plan(root: Path, plan_id: str) -> dict:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise ValueError("workflow plan is missing or invalid") from exc
-    if payload.get("plan_id") != plan_id or not isinstance(payload.get("replacements"), list):
+    if set(payload) != {"schema_version", "plan_id", "operation", "replacements"} or payload.get("schema_version") != 1 or payload.get("plan_id") != plan_id or not isinstance(payload.get("operation"), str) or not isinstance(payload.get("replacements"), list):
         raise ValueError("workflow plan identity is invalid")
+    digest_payload = {"operation": payload["operation"], "replacements": payload["replacements"]}
+    expected = "WPLAN-" + hashlib.sha256(canonical_json(digest_payload).encode()).hexdigest()[:16]
+    if expected != plan_id:
+        raise ValueError("workflow plan content hash is invalid")
     return payload
 
 
@@ -45,11 +49,12 @@ def _target(root: Path, identity: str) -> Path:
     return target
 
 
-def _replace(path: Path, content: bytes) -> None:
+def _replace(path: Path, content: bytes, mode: int = 0o600) -> None:
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
     try:
         os.write(descriptor, content)
+        os.fchmod(descriptor, mode)
         os.fsync(descriptor)
     finally:
         os.close(descriptor)
@@ -88,7 +93,8 @@ def execute_workflow_apply(root: Path, plan_id: str, *, confirmed: bool = False)
             before = path.read_bytes() if path.exists() else b""
             if (raw_hash(before) if path.exists() else "") != before_hash:
                 raise ValueError("workflow plan source drifted")
-            entries.append({"identity": identity, "pre": base64.b64encode(before).decode(), "pre_hash": before_hash, "post_hash": raw_hash(content.encode()), "created": not path.exists(), "content": content})
+            mode = stat.S_IMODE(path.stat().st_mode) if path.exists() else 0o600
+            entries.append({"identity": identity, "pre": base64.b64encode(before).decode(), "pre_hash": before_hash, "post_hash": raw_hash(content.encode()), "mode": mode, "created": not path.exists(), "content": content})
         journal = {"schema_version": 1, "transaction_id": tx_id, "plan_id": plan_id, "state": "PREPARED", "entries": entries}
         journal_path.write_text(canonical_json(journal, pretty=True), encoding="utf-8")
         journal["state"] = "APPLYING"
@@ -96,15 +102,34 @@ def execute_workflow_apply(root: Path, plan_id: str, *, confirmed: bool = False)
         written = []
         try:
             for entry in entries:
-                _replace(_target(root, entry["identity"]), entry["content"].encode())
+                _replace(_target(root, entry["identity"]), entry["content"].encode(), entry["mode"])
                 written.append(entry)
+            from paperops.model_validation import run_model_validation
+
+            affected = set()
+            for entry in entries:
+                identity = entry["identity"]
+                if identity.startswith("_paperops/model/issues/"):
+                    affected.add("issue")
+                elif identity.startswith("_paperops/model/research/"):
+                    affected.add("research")
+                elif identity.startswith("_paperops/model/manuscript/"):
+                    affected.add("manuscript")
+                elif identity.startswith("_paperops/model/publication/"):
+                    affected.add("publication")
+                elif identity.startswith("_paperops/model/editorial/"):
+                    affected.update({"editorial", "results_hierarchy"})
+            for model in sorted(affected):
+                validation = run_model_validation(root, model, strict=True)
+                if not validation.ok:
+                    raise ValueError(f"post-apply {model} validation failed")
         except BaseException:
             for entry in reversed(written):
                 path = _target(root, entry["identity"])
                 if entry.get("created"):
                     path.unlink(missing_ok=True)
                 else:
-                    _replace(path, base64.b64decode(entry["pre"]))
+                    _replace(path, base64.b64decode(entry["pre"]), entry["mode"])
             journal["state"] = "ROLLED_BACK"
             journal_path.write_text(canonical_json(journal, pretty=True), encoding="utf-8")
             raise
@@ -133,7 +158,7 @@ def execute_workflow_rollback(root: Path, transaction_id: str, *, confirmed: boo
         if entry.get("created"):
             path.unlink(missing_ok=True)
         else:
-            _replace(path, base64.b64decode(entry["pre"]))
+            _replace(path, base64.b64decode(entry["pre"]), entry["mode"])
     journal["state"] = "ROLLED_BACK"
     journal_path.write_text(canonical_json(journal, pretty=True), encoding="utf-8")
     return transaction_id
@@ -155,7 +180,7 @@ def recover_incomplete_workflow_transactions(root: Path) -> tuple[str, ...]:
                 if entry.get("created"):
                     path.unlink(missing_ok=True)
                 else:
-                    _replace(path, base64.b64decode(entry["pre"]))
+                    _replace(path, base64.b64decode(entry["pre"]), entry["mode"])
             elif current != entry["pre_hash"]:
                 raise ValueError("incomplete workflow transaction conflicts with an edit")
         journal["state"] = "ROLLED_BACK"

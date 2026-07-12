@@ -9,6 +9,7 @@ from io import StringIO
 from pathlib import Path
 
 from paperops.cli.main import build_parser, main
+from paperops.workflow_v2.mutation import semantic_hash
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,10 +21,12 @@ class WorkflowMutationCliTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.project = Path(self.temp.name) / "paper"
         shutil.copytree(ROOT / "template", self.project)
-        issue = {"schema_version": 1, "record_type": "workflow_issue", "id": "ISS-0001", "revision": 1, "status": "open", "dependencies": [], "approvals": [], "extensions": {}, "metadata": {"created_at": "", "updated_at": ""}, "severity": "major", "route": "editorial", "targets": [{"kind": "section", "id": "SEC-0001", "revision": 1, "hash": H}], "review_round_ref": "", "confidentiality": "public", "public_summary": "Reorder.", "closure_criteria": ["verified"], "blocking_dependency_refs": [], "impacts": [{"target_id": "SEC-0001", "target_type": "section", "expected_revision": 1, "expected_hash": H, "state": "resolved", "verification_refs": ["check:SEC-0001"]}], "route_history": [], "closure": {"decision": "pending", "reason": "", "verification_refs": []}, "escalation": {"level": "none", "reason": ""}}
+        issue = {"schema_version": 1, "record_type": "workflow_issue", "id": "ISS-0001", "revision": 1, "status": "open", "dependencies": [], "approvals": [], "extensions": {}, "metadata": {"created_at": "", "updated_at": ""}, "severity": "major", "route": "editorial", "targets": [{"kind": "workflow_issue", "id": "ISS-0001", "revision": 1, "hash": H}], "review_round_ref": "", "confidentiality": "public", "public_summary": "Reorder.", "closure_criteria": ["verified"], "blocking_dependency_refs": [], "impacts": [{"target_id": "ISS-0001", "target_type": "workflow_issue", "expected_revision": 1, "expected_hash": H, "state": "resolved", "verification_refs": ["check:ISS-0001"]}], "route_history": [], "closure": {"decision": "pending", "reason": "", "verification_refs": []}, "escalation": {"level": "none", "reason": ""}}
         path = self.project / "_paperops/model/issues/workflow/ISS-0001.yml"
         path.parent.mkdir(parents=True)
         path.write_text(json.dumps(issue) + "\n")
+        index = {"model_name": "issue", "schema_version": 1, "index_revision": 1, "records": [{"id": "ISS-0001", "record_type": "workflow_issue", "document": "_paperops/model/issues/workflow/ISS-0001.yml", "expected_revision": 1, "expected_hash": semantic_hash(issue)}], "extensions": {}, "metadata": {"updated_at": ""}}
+        (self.project / "_paperops/model/issues/index.yml").write_text(json.dumps(index) + "\n")
 
     def tearDown(self) -> None:
         self.temp.cleanup()
