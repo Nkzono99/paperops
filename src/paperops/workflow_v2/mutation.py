@@ -75,6 +75,11 @@ def replacement(ref: DocumentRef, document: dict[str, Any]) -> dict[str, Any]:
     return {"identity": ref.identity, "before_hash": ref.content_hash, "content": canonical_json(document, pretty=True)}
 
 
+def new_replacement(identity: str, document: dict[str, Any]) -> dict[str, Any]:
+    validate_identity(identity)
+    return {"identity": identity, "before_hash": "", "content": canonical_json(document, pretty=True)}
+
+
 def with_index_replacement(root: Path, ref: DocumentRef, document: dict[str, Any], rows: list[dict[str, Any]]) -> None:
     if document.get("record_type") != "workflow_issue":
         return
@@ -121,5 +126,6 @@ def safe_reason(reason: str) -> str:
 
 def validate_identity(identity: str) -> None:
     path = PurePosixPath(identity)
-    if path.is_absolute() or not identity.startswith("_paperops/model/") or any(part in {"", ".", ".."} for part in path.parts):
+    allowed = identity.startswith("_paperops/model/") or identity == ".pops/manifest.toml"
+    if path.is_absolute() or not allowed or any(part in {"", ".", ".."} for part in path.parts):
         raise ValueError("unsafe mutation identity")

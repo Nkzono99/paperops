@@ -32,9 +32,13 @@ def _target(root: Path, identity: str) -> Path:
     current = root
     for part in identity.split("/")[:-1]:
         current = current / part
+        if not current.exists() and identity.startswith("_paperops/model/"):
+            current.mkdir(mode=0o700)
         metadata = current.lstat()
         if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISDIR(metadata.st_mode):
             raise ValueError("workflow target path is unsafe")
+    if not target.exists():
+        return target
     metadata = target.lstat()
     if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISREG(metadata.st_mode):
         raise ValueError("workflow target is unsafe")
@@ -81,10 +85,10 @@ def execute_workflow_apply(root: Path, plan_id: str, *, confirmed: bool = False)
             if not all(isinstance(value, str) for value in (identity, before_hash, content)):
                 raise ValueError("workflow replacement is invalid")
             path = _target(root, identity)
-            before = path.read_bytes()
-            if raw_hash(before) != before_hash:
+            before = path.read_bytes() if path.exists() else b""
+            if (raw_hash(before) if path.exists() else "") != before_hash:
                 raise ValueError("workflow plan source drifted")
-            entries.append({"identity": identity, "pre": base64.b64encode(before).decode(), "pre_hash": before_hash, "post_hash": raw_hash(content.encode()), "content": content})
+            entries.append({"identity": identity, "pre": base64.b64encode(before).decode(), "pre_hash": before_hash, "post_hash": raw_hash(content.encode()), "created": not path.exists(), "content": content})
         journal = {"schema_version": 1, "transaction_id": tx_id, "plan_id": plan_id, "state": "PREPARED", "entries": entries}
         journal_path.write_text(canonical_json(journal, pretty=True), encoding="utf-8")
         journal["state"] = "APPLYING"
@@ -96,7 +100,11 @@ def execute_workflow_apply(root: Path, plan_id: str, *, confirmed: bool = False)
                 written.append(entry)
         except BaseException:
             for entry in reversed(written):
-                _replace(_target(root, entry["identity"]), base64.b64decode(entry["pre"]))
+                path = _target(root, entry["identity"])
+                if entry.get("created"):
+                    path.unlink(missing_ok=True)
+                else:
+                    _replace(path, base64.b64decode(entry["pre"]))
             journal["state"] = "ROLLED_BACK"
             journal_path.write_text(canonical_json(journal, pretty=True), encoding="utf-8")
             raise
@@ -121,7 +129,11 @@ def execute_workflow_rollback(root: Path, transaction_id: str, *, confirmed: boo
         if raw_hash(path.read_bytes()) != entry["post_hash"]:
             raise ValueError("workflow rollback conflicts with a newer edit")
     for entry in reversed(journal["entries"]):
-        _replace(_target(root, entry["identity"]), base64.b64decode(entry["pre"]))
+        path = _target(root, entry["identity"])
+        if entry.get("created"):
+            path.unlink(missing_ok=True)
+        else:
+            _replace(path, base64.b64decode(entry["pre"]))
     journal["state"] = "ROLLED_BACK"
     journal_path.write_text(canonical_json(journal, pretty=True), encoding="utf-8")
     return transaction_id
@@ -140,7 +152,10 @@ def recover_incomplete_workflow_transactions(root: Path) -> tuple[str, ...]:
             path = _target(root, entry["identity"])
             current = raw_hash(path.read_bytes())
             if current == entry["post_hash"]:
-                _replace(path, base64.b64decode(entry["pre"]))
+                if entry.get("created"):
+                    path.unlink(missing_ok=True)
+                else:
+                    _replace(path, base64.b64decode(entry["pre"]))
             elif current != entry["pre_hash"]:
                 raise ValueError("incomplete workflow transaction conflicts with an edit")
         journal["state"] = "ROLLED_BACK"
