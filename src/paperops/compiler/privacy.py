@@ -176,6 +176,28 @@ def contains_private_public_text(value: str) -> bool:
     return contains_private_material(value, allow_project_relative=True)
 
 
+def contains_private_tex_material(value: str) -> bool:
+    """Detect private material in TeX while allowing project-relative inputs.
+
+    Manuscripts routinely contain ``../shared/...`` imports.  Those paths are
+    private in Writer-facing DTO strings, but are legitimate source syntax in
+    the copied TeX workspace.  Remove only those complete relative tokens
+    before applying the stricter public-material predicate; credentials,
+    private URIs, home references, absolute paths, secrets, and raw-private
+    sentinels remain detectable.
+    """
+    if not isinstance(value, str):
+        raise TypeError("TeX value must be a string")
+    without_project_relative = _PARENT_TRAVERSAL.sub(
+        "[project-relative-input]",
+        value,
+    )
+    return contains_private_material(
+        without_project_relative,
+        allow_project_relative=True,
+    )
+
+
 def scan_private_material(
     value: object,
     *,
@@ -247,6 +269,7 @@ __all__ = [
     "PrivacyHit",
     "contains_private_material",
     "contains_private_public_text",
+    "contains_private_tex_material",
     "redact_private_material",
     "scan_private_material",
     "sensitive_document_key",

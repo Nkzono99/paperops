@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import secrets
 import shutil
 import stat
@@ -14,7 +15,9 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .bundles import BundleVerificationError, load_verified_bundle
+from .conservation import analyze_patch
 from .patches import WriterPatchResult
+from .privacy import contains_private_tex_material
 from .safe_fs import SafeCaptureError, SafeProjectReader
 from .storage import atomic_write_json, canonical_json_bytes, semantic_hash
 from .tex import parse_tex_bytes
@@ -22,6 +25,12 @@ from .types import CompileFinding, _freeze_json, _json_compatible, _validate_id
 
 
 _BUILD_PREFIX = "manuscript/shared/build/"
+_STANDARD_CITATIONS = {
+    "autocite", "cite", "citealp", "citeauthor", "citep", "citet", "cites",
+    "citeyear", "citeyearpar", "footcite", "nocite", "parencite", "parencites",
+    "smartcite", "supercite", "textcite", "textcites",
+}
+_CITE_LIKE = re.compile(r"\\(?P<command>[A-Za-z]*cite[A-Za-z]*)\*?")
 
 
 def _hash_bytes(value: bytes) -> str:
@@ -146,6 +155,11 @@ def _bindings(bundle: Mapping[str, Any]) -> list[dict[str, object]]:
                         "section_id": block.get("section_id", ""),
                         "operation": block.get("operation", ""),
                         "allowed_operations": list(block.get("allowed_operations", ())),
+                        "claim_refs": list(block.get("claim_refs", ())),
+                        "result_refs": list(block.get("result_refs", ())),
+                        "figure_refs": list(block.get("figure_refs", ())),
+                        "citation_keys": list(block.get("citation_keys", ())),
+                        "move_bindings": list(section.get("move_bindings", ())),
                         "model_revision": model_input.get("revision", 0),
                         "model_hash": model_input.get("hash", ""),
                         "authorization_reason": "current typed Manuscript block plan",
@@ -208,6 +222,9 @@ def start_writer_session(root: str | Path, compile_id: str) -> WriterSessionResu
             "files": files,
             "tex_files": _tex_inventory(workspace, files),
             "bindings": _bindings(bundle),
+            "section_topology": _json_compatible(
+                bundle.get("global_context", {}).get("section_block_map", ())
+            ),
             "extensions": {},
         }
         manifest_hash = semantic_hash(manifest)
@@ -345,6 +362,57 @@ def _tex_map(rows: object) -> dict[str, Mapping[str, Any]]:
 
 def _snapshot_hash(files: Mapping[str, Mapping[str, object]]) -> str:
     return semantic_hash([files[key] for key in sorted(files)])
+
+
+def _candidate_context(
+    candidate_root: Path,
+    candidate: Mapping[str, Mapping[str, object]],
+    bundle: Mapping[str, Any],
+) -> dict[str, object]:
+    tex_files: list[dict[str, object]] = []
+    custom_commands: set[str] = set()
+    privacy_violation = False
+    terminology_violation = False
+    prohibitions = bundle.get("global_context", {}).get("terminology", {}).get(
+        "prohibitions",
+        (),
+    )
+    forbidden_terms = {
+        term
+        for row in prohibitions
+        if isinstance(row, Mapping)
+        for term in (
+            row.get("ja"),
+            row.get("en_public"),
+            *row.get("avoid", ()),
+        )
+        if isinstance(term, str) and term.strip()
+    }
+    for identity in sorted(candidate):
+        if not identity.endswith(".tex"):
+            continue
+        content = (candidate_root / identity).read_bytes()
+        snapshot = parse_tex_bytes(identity, content)
+        tex_files.append(snapshot.to_dict())
+        try:
+            text = content.decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+        custom_commands.update(
+            match.group("command")
+            for match in _CITE_LIKE.finditer(text)
+            if match.group("command") not in _STANDARD_CITATIONS
+        )
+        privacy_violation = privacy_violation or contains_private_tex_material(text)
+        terminology_violation = terminology_violation or any(
+            term in text for term in forbidden_terms
+        )
+    return {
+        "tex_files": tex_files,
+        "custom_citation_commands": sorted(custom_commands),
+        "privacy_violation": privacy_violation,
+        "terminology_violation": terminology_violation,
+    }
 
 
 def _patch_from_candidate(
@@ -567,7 +635,7 @@ def build_patch(root: str | Path, session_id: str) -> WriterPatchResult:
         raise SafeCaptureError("Writer session is missing or unsafe")
     stale_patch = session_directory / "patch.json"
     stale_patch.unlink(missing_ok=True)
-    directory, session, manifest, _verified = _session_state(project, session_id)
+    directory, session, manifest, verified = _session_state(project, session_id)
     candidate_files: dict[str, dict[str, object]] = {}
     live_files: dict[str, dict[str, object]] = {}
     temporary = tempfile.TemporaryDirectory(prefix="pops-writer-patch-")
@@ -587,6 +655,26 @@ def build_patch(root: str | Path, session_id: str) -> WriterPatchResult:
             candidate_files,
             candidate_root,
         )
+        if result.status == "ready":
+            analysis = analyze_patch(
+                verified.bundle,
+                manifest,
+                _candidate_context(candidate_root, candidate_files, verified.bundle),
+                result,
+            )
+            combined = tuple((*result.findings, *analysis.findings))
+            blocked = any(item.severity == "error" for item in combined)
+            result = replace(
+                result,
+                status="blocked" if blocked else "ready",
+                findings=combined,
+                proposed_dispositions=analysis.dispositions,
+                introduced_references=analysis.introduced_references,
+                mirror_impacts=analysis.mirror_impacts,
+                conservation_result="blocked" if blocked else "passed",
+                patch_hash="",
+            )
+            result = replace(result, patch_hash=semantic_hash(result._payload()))
     except (SafeCaptureError, OSError, ValueError, BundleVerificationError):
         result = WriterPatchResult(
             session_id=session_id,

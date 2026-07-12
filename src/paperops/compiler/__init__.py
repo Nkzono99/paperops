@@ -17,6 +17,7 @@ from .bundles import (
     prepare_bundle,
 )
 from .compare import CompileComparison, compare_bundles
+from .conservation import ConservationAnalysis, analyze_patch, validate_patch
 from .materialize import (
     CompileBundleCandidate,
     CompileContractSnapshot,
@@ -82,6 +83,7 @@ __all__ = [
     "CompileBundleCandidate",
     "CompileContractSnapshot",
     "CompileComparison",
+    "ConservationAnalysis",
     "CompileFinding",
     "CompilePaths",
     "CompileRequest",
@@ -111,6 +113,7 @@ __all__ = [
     "compile_paths",
     "compute_compile_id",
     "compare_bundles",
+    "analyze_patch",
     "contains_private_material",
     "materialize_compile",
     "inspect_compile",
@@ -124,6 +127,7 @@ __all__ = [
     "prepare_bundle",
     "semantic_hash",
     "writer_paths",
+    "validate_patch",
     "build_patch",
     "inspect_writer_session",
     "start_writer_session",
