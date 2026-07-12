@@ -51,10 +51,26 @@ CANARY_RELS = (
 )
 REQUIRED_RELS = (
     "_paperops/defaults/workflow/machine.yml",
+    "_paperops/defaults/workflow/focus-policy.yml",
+    "_paperops/defaults/workflow/subagent-roster.yml",
+    "_paperops/defaults/schemas/registry.yml",
+    "_paperops/model/research/index.yml",
+    "_paperops/model/editorial/editorial-model.yml",
+    "_paperops/model/editorial/results-hierarchy.yml",
+    "_paperops/model/manuscript/index.yml",
+    "_paperops/model/issues/index.yml",
+    "_paperops/model/publication/publication-model.yml",
+    "scripts/check-workflow-state.py",
+)
+FORBIDDEN_RELS = (
+    "_paperops/claims/",
+    "_paperops/evidence/",
+    "_paperops/review/",
+    "_paperops/requests/",
     "_paperops/workflow/current-state.yml",
     "_paperops/workflow/decisions.yml",
     "_paperops/workflow/round-summary.yml",
-    "scripts/check-workflow-state.py",
+    "_paperops/workflow/submission-ledger.yml",
 )
 
 
@@ -152,6 +168,18 @@ def check_wheel_contents(wheel: Path) -> None:
         raise SystemExit(
             "required scaffold files were not bundled in the wheel:\n" + formatted
         )
+    forbidden = [
+        rel
+        for rel in FORBIDDEN_RELS
+        if any(
+            name == PACKAGE_SCAFFOLD_PREFIX + rel.rstrip("/")
+            or name.startswith(PACKAGE_SCAFFOLD_PREFIX + rel)
+            for name in names
+        )
+    ]
+    if forbidden:
+        formatted = "\n".join(f"  - {name}" for name in forbidden)
+        raise SystemExit("legacy authority artifacts were bundled in the wheel:\n" + formatted)
 
 
 def run_from_wheel(wheel: Path, init_dir: Path) -> None:
@@ -180,6 +208,10 @@ def check_init_contents(init_dir: Path) -> None:
         raise SystemExit(
             "required scaffold files were not copied by pops init:\n" + formatted
         )
+    forbidden = [rel for rel in FORBIDDEN_RELS if (init_dir / rel.rstrip("/")).exists()]
+    if forbidden:
+        formatted = "\n".join(f"  - {name}" for name in forbidden)
+        raise SystemExit("legacy authority artifacts were copied by pops init:\n" + formatted)
 
 
 def is_excluded_package_scaffold_path(name: str) -> bool:

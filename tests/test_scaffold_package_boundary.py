@@ -69,6 +69,19 @@ class ScaffoldPackageBoundaryTest(unittest.TestCase):
 
             module.check_init_contents(init_dir)
 
+    def test_release_boundary_requires_typed_models_and_forbids_legacy_authority(self) -> None:
+        module = load_boundary_module()
+
+        self.assertIn("_paperops/defaults/schemas/registry.yml", module.REQUIRED_RELS)
+        self.assertIn("_paperops/model/research/index.yml", module.REQUIRED_RELS)
+        self.assertIn("_paperops/model/editorial/editorial-model.yml", module.REQUIRED_RELS)
+        self.assertIn("_paperops/model/editorial/results-hierarchy.yml", module.REQUIRED_RELS)
+        self.assertIn("_paperops/model/manuscript/index.yml", module.REQUIRED_RELS)
+        self.assertIn("_paperops/model/issues/index.yml", module.REQUIRED_RELS)
+        self.assertIn("_paperops/model/publication/publication-model.yml", module.REQUIRED_RELS)
+        self.assertIn("_paperops/workflow/current-state.yml", module.FORBIDDEN_RELS)
+        self.assertIn("_paperops/claims/", module.FORBIDDEN_RELS)
+
 
 if __name__ == "__main__":
     unittest.main()
