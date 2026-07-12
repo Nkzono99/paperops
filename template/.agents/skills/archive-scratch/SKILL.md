@@ -11,7 +11,7 @@ description: 過去稿を封印して1から書き直す、scratch archive を�
 
 - `pops` は `uvx --from paper-harness-cli pops ...` で実行する。
 - 現在地が paper project root か不明なら `uvx --from paper-harness-cli pops doctor` を先に実行する。
-- archive は `story/`、`manuscript/`、`submission/`、`_paperops/notes/`、`_paperops/refs/`、`_paperops/model/research/`、`_paperops/model/research/`、`_paperops/model/issues/`、`_paperops/model/issues/`、`_paperops/contracts/`、`_paperops/workflow/` を sealed split bundle として `_archives/<id>/` に置く。旧互換の `notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`contracts/`、`workflow/` も対象にする。
+- archive は `story/`、`manuscript/`、`submission/`、`_paperops/notes/`、`_paperops/refs/`、六モデル全体の `_paperops/model/`、`_paperops/contracts/`、`_paperops/workflow/` を sealed split bundle として `_archives/<id>/` に置く。旧互換の `notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`contracts/`、`workflow/` も対象にする。
 - `_handoff/` は既定では含めない。人間が明示した場合だけ `--include-handoff` を使う。
 - `archive` は封印だけを行い、現行の作業層は残る。1から執筆へ戻す場合は `restart` を使う。
 - reset / restart / restore は破壊的操作である。ユーザーが対象 archive id または reset の実行意思を明示していない場合は、`--yes` を付けて実行しない。
@@ -59,7 +59,7 @@ uvx --from paper-harness-cli pops scratch list
 uvx --from paper-harness-cli pops scratch inspect <archive-id>
 ```
 
-復元は現在の `story/`、`manuscript/`、`submission/`、`_paperops/notes/`、`_paperops/refs/`、`_paperops/model/research/`、`_paperops/model/research/`、`_paperops/model/issues/`、`_paperops/model/issues/`、`_paperops/contracts/`、`_paperops/workflow/` と旧互換の scratch layer を置き換える。ユーザーが対象 ID と復元を明示した場合だけ実行する。
+復元は現在の `story/`、`manuscript/`、`submission/`、`_paperops/notes/`、`_paperops/refs/`、六モデル全体の `_paperops/model/`、`_paperops/contracts/`、`_paperops/workflow/` と旧互換の scratch layer を置き換える。ユーザーが対象 ID と復元を明示した場合だけ実行する。
 
 ```sh
 uvx --from paper-harness-cli pops scratch restore <archive-id> --yes

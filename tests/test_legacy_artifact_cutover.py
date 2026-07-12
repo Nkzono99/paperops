@@ -75,6 +75,19 @@ class LegacyArtifactCutoverTest(unittest.TestCase):
         self.assertNotIn("_paperops/requests/analysis", compiler)
         self.assertIn("_paperops/model/issues/analysis", compiler)
 
+    def test_current_reference_guidance_does_not_recreate_legacy_authority(self) -> None:
+        forbidden = ("_paperops/requests/", "_paperops/evidence/")
+        sources = list((ROOT / "template/_paperops/refs").glob("*.md"))
+        sources += list((ROOT / "template/_paperops/refs").glob("**/*.md"))
+        for path in set(sources):
+            text = path.read_text(encoding="utf-8")
+            for value in forbidden:
+                self.assertNotIn(value, text, path.relative_to(ROOT))
+
+    def test_change_runtime_state_is_ignored(self) -> None:
+        ignore = (ROOT / "template/.gitignore").read_text(encoding="utf-8")
+        self.assertIn(".paperops/changes/", ignore)
+
 
 if __name__ == "__main__":
     unittest.main()

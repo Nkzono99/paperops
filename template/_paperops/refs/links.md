@@ -13,7 +13,7 @@
 - `paper_roles`: `results`, `figures`, `background`, `discussion`, `reproducibility` など、この paper での役割。
 - `access`: `read` または `read_write`。
 
-`kind = "runops_project"` の場合は、利用できるなら `mcp_provider`, `mcp_server`, `mcp_tools`, `paper_request_queue` も記録する。追加解析・図表・実験要望は `_paperops/requests/analysis/` に paper 側の文脈を残し、`_paperops/notes/views/research-requests.md` で俯瞰し、`runops.paper.request.draft` で検証してから runops project の `research/paper_requests.toml` へ handoff する。
+`kind = "runops_project"` の場合は、利用できるなら `mcp_provider`, `mcp_server`, `mcp_tools`, `paper_request_queue` も記録する。追加解析・図表・実験要望は ignored change request と `pops change` で `_paperops/model/issues/analysis/` の typed analysis request にし、`_paperops/notes/views/research-requests.md` で俯瞰し、`runops.paper.request.draft` で検証してから runops project の `research/paper_requests.toml` へ handoff する。
 
 ローカル絶対パス、秘密情報、未公開データの詳細は `_paperops/refs/links.toml` に書かない。共有できる結論や文献知識は `_paperops/refs/summaries/` または `_paperops/notes/` に残す。
 

@@ -48,9 +48,9 @@ uvx --from paper-harness-cli pops model validate research --strict
 uvx --from paper-harness-cli pops model diff research
 uvx --from paper-harness-cli pops model adopt research --yes
 uvx --from paper-harness-cli pops model rollback research
-uvx --from paper-harness-cli pops change plan .paperops/change-request.yml
-uvx --from paper-harness-cli pops change diff CHG-0123456789abcdef
-uvx --from paper-harness-cli pops change apply CHG-0123456789abcdef --yes
+uvx --from paper-harness-cli pops change plan .paperops/changes/requests/change-request.yml
+uvx --from paper-harness-cli pops change diff CHG-0123456789abcdef0123
+uvx --from paper-harness-cli pops change apply CHG-0123456789abcdef0123 --yes
 uvx --from paper-harness-cli pops workflow status --json
 uvx --from paper-harness-cli pops workflow migrate diff --json
 uvx --from paper-harness-cli pops workflow issue route ISS-0001 editorial --reason "story architecture changed"

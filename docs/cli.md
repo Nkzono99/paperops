@@ -15,14 +15,14 @@ uvx --from paper-harness-cli pops init paper-my-topic
 ## Typed model change
 
 ```sh
-pops change plan .paperops/change-request.yml
+pops change plan .paperops/changes/requests/change-request.yml
 pops change status CHG-...
 pops change diff CHG-...
 pops change apply CHG-... --yes
 pops change rollback CTX-... --yes
 ```
 
-requestは`schema_version: 1`、公開可能な`reason`、一つ以上の`upsert` / `delete` operationを持つignored YAML/JSONである。tracked pathは指定せず、model / record type / IDとexpected revision/hash、candidate documentを指定する。CLIがregistryからpathとindex rowを解決し、六モデルをcandidate treeで一括検証する。applyは`--yes`必須で、manifest hashを含むjournal transactionとして適用する。delete cascadeは推測しないため、dependent update/deleteを同じrequestに明示する。plan/diffの公開出力にcandidate本文、raw review、credential、absolute pathは含めない。
+requestは`schema_version: 1`、公開可能な`reason`、一つ以上の`upsert` / `delete` operationを持つignored YAML/JSONである。request、plan payload、journal、preimageを含む`.paperops/changes/`全体はGit管理しない。tracked pathは指定せず、model / record type / IDとexpected revision/hash、candidate documentを指定する。CLIがregistryからpathとindex rowを解決し、六モデルをcandidate treeで一括検証する。applyは`--yes`必須で、manifest hashを含むjournal transactionとして適用する。delete cascadeは推測しないため、dependent update/deleteを同じrequestに明示する。plan/diffの公開出力にcandidate本文、raw review、credential、absolute pathは含めない。
 
 ## PaperOps 2 model migration
 

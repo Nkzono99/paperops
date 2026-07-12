@@ -36,7 +36,7 @@ method_precedent: ""
 
 ## Source card 昇格判断
 
-この summary は関連研究や背景説明で足りる場合に使う。次のいずれかに該当する場合は source card に昇格し、`_paperops/evidence/sources/` に確認状態、claim link、本文 block を持たせる。
+この summary は関連研究や背景説明で足りる場合に使う。次のいずれかに該当する場合は ignored change request と `pops change` で `_paperops/model/research/sources/` の typed source record に昇格し、確認状態、claim link、本文 block を持たせる。
 
 - promotion_decision: hold / source-card / reject
 - promotion_required_when: claim_boundary / parameter_choice / reviewer_objection / method_precedent

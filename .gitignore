@@ -3,6 +3,7 @@
 .paperops/cache/
 .paperops/compile/
 .paperops/compile-diagnostics/
+.paperops/changes/
 .paperops/migrations/
 .paperops/snapshots/
 .paperops/writer/
