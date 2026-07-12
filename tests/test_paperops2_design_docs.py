@@ -305,8 +305,8 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             if len(cells) == 8
         }
         model_row = downstream_rows["template/_paperops/model/"]
-        self.assertEqual(model_row[3], "investigate")
-        self.assertIn("modelごとに単一writerをP1で決定する必要がある", model_row[6])
+        self.assertEqual(model_row[3], "adapt")
+        self.assertIn("新規initは六モデルを検証", model_row[6])
 
         for asset in [
             "template/scripts/check-paperops-models.py",

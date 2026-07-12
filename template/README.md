@@ -70,7 +70,7 @@ P2で四つのcompile authorityを採用した後は、`pops compile prepare <se
 
 新規 project は `pops init` で Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六モデル starter を受け取る。Research / Manuscript / Issue は架空 record のない空 index、Publication は未提出のaggregate starterである。既存projectはmanaged registry / schema / checkerを更新した後、`pops model status|validate|diff|adopt|rollback`でmodel単位に移行する。定型的なinventory、hash、snapshot、recoveryはdeterministic CLIが扱い、AIはscientific / editorial judgmentや人間承認を代替しない。
 
-最初は`pops model diff <model>`でshadowだけを作り、reportと`pops model validate <model> --strict`を確認する。authority切替は`pops model adopt <model> --yes`、復元は`pops model rollback <model>`を使う。P2後もlegacy card / review / requestを削除せず、human-edited TeXを維持する。workflow authorityも`pops workflow migrate diff`から別途opt-inし、default cutoverまではlegacyをrollback可能なまま保持する。
+既存projectでは、最初に`pops model diff <model>`でshadowだけを作り、reportと`pops model validate <model> --strict`を確認する。authority切替は`pops model adopt <model> --yes`、復元は`pops model rollback <model>`を使う。P2後もlegacy card / review / requestを削除せず、human-edited TeXを維持する。既存workflow authorityも`pops workflow migrate diff`から別途opt-inし、採用まではlegacyをrollback可能なまま保持する。
 
 `make schema-check` は schema / references / semantics / hash phaseをadvisoryに検査する。`editorial-model.yml`を含むproject-owned stateのauthority切替前は明示strict検査と人間承認を要求し、legacy controlled viewを維持する。
 

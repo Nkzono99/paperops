@@ -78,7 +78,7 @@ class WorkflowKernelTest(unittest.TestCase):
     def test_workflow_loaders_accept_non_json_yaml_state(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
-            code, _out, err = run_cli(["init", str(target)])
+            code, _out, err = run_cli(["init", str(target), "--authority", "legacy"])
             self.assertEqual(code, 0, err)
 
             state_path = target / "_paperops" / "workflow" / "current-state.yml"
@@ -205,7 +205,7 @@ class WorkflowKernelTest(unittest.TestCase):
     def test_pops_workflow_status_next_and_advance_with_guards(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
-            code, _out, err = run_cli(["init", str(target)])
+            code, _out, err = run_cli(["init", str(target), "--authority", "legacy"])
             self.assertEqual(code, 0, err)
 
             code, out, err = run_cli(["workflow", "status", str(target)])
@@ -238,7 +238,7 @@ class WorkflowKernelTest(unittest.TestCase):
     def test_pops_workflow_invalidate_marks_dependent_sections_stale(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
-            code, _out, err = run_cli(["init", str(target)])
+            code, _out, err = run_cli(["init", str(target), "--authority", "legacy"])
             self.assertEqual(code, 0, err)
 
             state_path = target / "_paperops" / "workflow" / "current-state.yml"
@@ -263,7 +263,7 @@ class WorkflowKernelTest(unittest.TestCase):
     def test_pops_workflow_route_review_can_apply_issue_class_route(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
-            code, _out, err = run_cli(["init", str(target)])
+            code, _out, err = run_cli(["init", str(target), "--authority", "legacy"])
             self.assertEqual(code, 0, err)
 
             code, out, err = run_cli(
@@ -280,7 +280,7 @@ class WorkflowKernelTest(unittest.TestCase):
     def test_pops_workflow_route_review_blocks_submission_loop_before_structure_acceptance(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
-            code, _out, err = run_cli(["init", str(target)])
+            code, _out, err = run_cli(["init", str(target), "--authority", "legacy"])
             self.assertEqual(code, 0, err)
 
             code, out, err = run_cli(

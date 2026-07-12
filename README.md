@@ -2,7 +2,7 @@
 
 ## PaperOps 2 P7
 
-P3 typed compiler / Writer boundaryとP4 typed workflowを実装し、P7では新規`pops init`を六モデル・workflowの`v2-authoritative`既定へ切り替えた。既存projectのauthorityは`setup`やmanaged updateで変更しない。legacyで新規作成する必要がある場合だけ`pops init --authority legacy`を明示できるが、この入口は非推奨で削除時期は未定である。legacy artifact、互換reader、human-edited living TeXは削除しない。
+P3の`pops compile` / `pops write`とP4 typed workflowを実装し、P7では新規`pops init`を六モデル・workflowの`v2-authoritative`既定へ切り替えた。既存projectのauthorityは`setup`やmanaged updateで変更しない。legacyで新規作成する必要がある場合だけ`pops init --authority legacy`を明示できるが、この入口は非推奨で削除時期は未定である。legacy artifact、互換reader、human-edited living TeXは削除しない。
 
 `paperops` は、AI エージェントと論文を書くためのプロジェクトハーネスである。
 

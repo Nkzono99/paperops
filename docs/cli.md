@@ -9,7 +9,7 @@ uvx --from paper-harness-cli pops init paper-my-topic
 uvx --from paper-harness-cli pops init paper-legacy --authority legacy
 ```
 
-`pops init`の既定は`--authority v2`である。scaffoldをtargetと同じfilesystemの一時directoryへ展開し、project-managed checkerでResearch / Editorial / Results hierarchy / Manuscript / Issue / Publicationを一括検証する。errorがなく六つのsemantic hashが得られた場合だけ、六モデルとworkflowを`v2-authoritative`としてmanifestへ一度に書き、project directoryを切り替える。warningは未記入starterの状態として許容し、失敗時は部分projectを残さない。
+`pops init`の既定は`--authority v2`である。scaffoldをtargetと同じfilesystemの一時directoryへ展開し、project-managed checkerでResearch / Editorial / Results hierarchy / Manuscript / Issue / Publicationを一括検証する。errorがなく六つのsemantic hashが得られた場合だけ、六モデルを`origin = "init-v2"`、workflowを`v2-authoritative`としてmanifestへ一度に書き、project directoryを切り替える。`model status`とcompilerはこのoriginではmigration journalの代わりにexact six-model setとlive hashを再検証する。warningは未記入starterの状態として許容し、失敗時は部分projectを残さない。
 
 `--authority legacy`は六モデルを`legacy-authoritative`、workflowを`legacy`として作る非推奨の退避導線であり、削除時期は未定である。非空directoryへの`--force`は`--authority legacy`との組合せだけを許し、missing scaffold fileを追加するが、既存manifestのauthority tableは変更しない。`setup`と`update-paperops`も既存authorityを切り替えない。既存projectのv2移行には下記のmodel migrationとP4 workflow migrationを使う。
 
@@ -68,7 +68,7 @@ uvx --from paper-harness-cli pops write rollback <transaction-id>
 
 既存projectでは初回`diff`前に`.paperops/migrations/`と`.paperops/snapshots/`をprojectの`.gitignore`へ追加する。新規`pops init`には含まれている。
 
-adapter、checker、transactionはnetworkやAI modelを呼ばない。機械的に決められないfieldは`migration.unresolved`として残し、AIが架空のrevision、approval、scope、quantity、provenanceを埋める手順にはしない。AI / skillはscientific / editorial judgmentと人間承認を支援する。P3 section compiler / Writer boundaryの導入後もlegacy writerを保持し、P4 workflow writer cutoverは別の導入段階である。
+adapter、checker、transactionはnetworkやAI modelを呼ばない。機械的に決められないfieldは`migration.unresolved`として残し、AIが架空のrevision、approval、scope、quantity、provenanceを埋める手順にはしない。AI / skillはscientific / editorial judgmentと人間承認を支援する。P3 section compiler / WriterとP4 workflow writerの導入後もlegacy互換入口を保持し、既存projectは明示migrationまでauthorityを切り替えない。
 
 ## Editorial Model schema check
 

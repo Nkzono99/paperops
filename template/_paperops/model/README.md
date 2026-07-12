@@ -1,6 +1,6 @@
 # PaperOps project models
 
-このdirectoryはproject-owned stateであり、`pops update-paperops`のmanaged update対象ではない。新規projectは`pops init`時に六つのstarterを検証し、model hashと`v2-authoritative` stateをmanifestへ記録する。既存projectはauthorityを自動変更せず、M0-0005と`pops model diff|adopt`を使って手動採用する。
+このdirectoryはproject-owned stateであり、`pops update-paperops`のmanaged update対象ではない。新規projectは`pops init`時に六つのstarterを検証し、model hashと`v2-authoritative` stateをmanifestへ記録する。既存projectはauthorityを自動変更せず、M0-0005とP2の`pops model diff|adopt`を使って手動採用する。
 
 現行scopeはResearch、Editorial、Results hierarchy、Manuscript、Issue、Publicationの六モデルである。Research / Manuscript / Issueはindexとper-ID record、Editorial / Results hierarchy / Publicationはaggregate documentを使う。検査はschema、references、semantics、approvals、dependencies、hashの順で実行する。
 
