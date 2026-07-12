@@ -1,7 +1,7 @@
 profile_version: 1
 macro_stages: [INGESTED, MODELED, ARCHITECTED, DRAFTED, PUBLISHABLE]
 routes: [research, editorial, manuscript, publication]
-approval_kinds: [scientific, editorial, manuscript, publication, submission, waiver]
+approval_kinds: [scientific_scope, editorial_choice, submission, authorship, license, external_share, reviewer_response, scope_expansion, waiver]
 target_routes:
   claim: research
   result: research

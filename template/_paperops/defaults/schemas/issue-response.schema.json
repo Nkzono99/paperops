@@ -341,25 +341,8 @@
                     "type": "string",
                     "pattern": "^APR-[0-9]{4,}$"
                 },
-                "kind": {
-                    "enum": [
-                        "scientific_scope",
-                        "editorial_choice",
-                        "submission",
-                        "authorship",
-                        "license",
-                        "external_share",
-                        "reviewer_response",
-                        "scope_expansion"
-                    ]
-                },
-                "decision": {
-                    "enum": [
-                        "approved",
-                        "rejected",
-                        "superseded"
-                    ]
-                },
+                "kind": {"type": "string", "pattern": "^[a-z][a-z0-9._:-]*$"},
+                "decision": {"enum": ["approved", "rejected", "revoked", "superseded"]},
                 "object_revision": {
                     "type": "integer"
                 },

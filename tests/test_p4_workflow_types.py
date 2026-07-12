@@ -37,8 +37,8 @@ class WorkflowTypesTest(unittest.TestCase):
         )
         profile = load_workflow_profile(self.root)
         self.assertEqual(profile.routes, ("research", "editorial", "manuscript", "publication"))
-        self.assertIn("scientific", profile.approval_kinds)
-        self.assertIn("editorial", profile.approval_kinds)
+        self.assertIn("scientific_scope", profile.approval_kinds)
+        self.assertIn("editorial_choice", profile.approval_kinds)
         self.assertIn("submission", profile.approval_kinds)
 
     def test_dtos_are_immutable_and_canonical(self) -> None:
