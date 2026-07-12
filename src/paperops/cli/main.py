@@ -14,6 +14,7 @@ from pathlib import Path
 from paperops.authority_bootstrap import bootstrap_legacy_authority, bootstrap_v2_authority
 from paperops.cli.constants import PACKAGE_NAME, UPSTREAM_REPO
 from paperops.cli.compile_commands import add_compile_parser
+from paperops.cli.change_commands import add_change_parser
 from paperops.cli.write_commands import add_write_parser
 from paperops.cli.doctor import (
     check_executable,
@@ -178,6 +179,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     add_migrate_parser(subcommands)
     add_model_parser(subcommands)
+    add_change_parser(subcommands)
     add_compile_parser(subcommands)
     add_write_parser(subcommands)
 
