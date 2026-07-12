@@ -1903,12 +1903,17 @@ class PredictedMarkerHit:
     name: str
     body_hash: str
     line_number: int
+    analysis_request_ids: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        _detach_tuple_fields(self, "analysis_request_ids")
 
     def to_dict(self) -> dict[str, object]:
         return {
             "name": self.name,
             "body_hash": self.body_hash,
             "line_number": self.line_number,
+            "analysis_request_ids": list(self.analysis_request_ids),
         }
 
 
@@ -2339,11 +2344,18 @@ def _inventory(
     for offset, raw_line in enumerate(body.splitlines(), start=first_line):
         marker = _PREDICTED_RE.search(raw_line)
         if marker:
+            marker_request_ids: list[str] = []
+            for request_id in _AREQ_RE.findall(marker.group("body")):
+                if _private_public_text(request_id):
+                    private_categories.append("analysis_requests")
+                else:
+                    marker_request_ids.append(request_id)
             predicted.append(
                 PredictedMarkerHit(
                     name=marker.group("name"),
                     body_hash=_hash(marker.group("body").strip().encode("utf-8")),
                     line_number=offset,
+                    analysis_request_ids=_ordered_unique(marker_request_ids),
                 )
             )
         for request_id in _AREQ_RE.findall(raw_line):
@@ -2395,7 +2407,11 @@ def _protected_hashes(inventory: BlockInventory) -> dict[str, str]:
         for item in inventory.quantities
     ]
     predicted_markers = [
-        {"name": item.name, "body_hash": item.body_hash}
+        {
+            "name": item.name,
+            "body_hash": item.body_hash,
+            "analysis_request_ids": list(item.analysis_request_ids),
+        }
         for item in inventory.predicted_markers
     ]
     return {

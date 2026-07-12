@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- P3 typed compilerのpure materializerを追加し、承認済みResearch / Editorial・Results / Manuscript authority、resolved contract、全原稿snapshotから、全体storyとsection topologyを保持したglobal context、section plan、Writer packetを決定的に生成する。catalog semantic/content hashとcompile snapshotを全packetへ結び、承認履歴だけの変更でもcompile IDを更新する。失敗時は部分plan/packetを返さず、scope、approval、dependency、prediction/AREQ、privacyをstable findingにする。generated bundle/packet schemaは後方互換を保ってrich DTOを閉じた形で検証する。
+
 - P3 section compiler向けにcontract overlay、TeX block/mirror/terminology、analysis request、3系統のBibTeX registryを型付きsnapshotとして取得するread-only APIを追加した。Writer-facing snapshotはraw TeX・private path・credentialを含めず、YAML/TOML/tree depth、alias、重複、driftをstable findingにする。schema準拠のcolon付き`% block:` IDをmirror/submission/sync helperでも扱い、BibTeXの`{}`/`()` entryをtop-level delimiterで判定する。既存TeX、ledger、project-owned stateは変更しない。
 
 - GitHub公式ActionをNode.js 24 runtimeのmajorへ更新した。`checkout@v7`、`setup-python@v6`、`upload-artifact@v7`、`download-artifact@v8`を全workflowで統一し、trigger、permissions、Python 3.12、artifact contract、PyPI Trusted Publishing境界は維持する。

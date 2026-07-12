@@ -17,14 +17,19 @@
   ],
   "properties": {
     "schema_version": {"const": 1},
+    "compiler_contract_version": {"$ref": "#/$defs/safeId"},
     "compile_id": {"$ref": "#/$defs/safeId"},
     "source_mode": {"enum": ["authoritative", "shadow"]},
     "status": {"$ref": "#/$defs/safeId"},
+    "applicable": {"type": "boolean"},
+    "contract_snapshot_hash": {"$ref": "#/$defs/hashOrEmpty"},
+    "manuscript_snapshot_hash": {"$ref": "#/$defs/hashOrEmpty"},
     "request": {"$ref": "#/$defs/request"},
     "authority": {"type": "array", "items": {"$ref": "#/$defs/authority"}},
     "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
     "section_plans": {"type": "array", "items": {"$ref": "#/$defs/sectionPlan"}},
     "writer_packets": {"type": "array", "items": {"$ref": "#/$defs/writerPacket"}},
+    "global_context": {"$ref": "#/$defs/globalContext"},
     "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}}
   },
   "additionalProperties": false,
@@ -37,6 +42,9 @@
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
     },
+    "hashOrEmpty": {
+      "anyOf": [{"const": ""}, {"$ref": "#/$defs/hash"}]
+    },
     "relativePath": {
       "type": "string",
       "pattern": "^(?!.*\\x00)(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/$|//)).+$"
@@ -44,6 +52,21 @@
     "strings": {
       "type": "array",
       "items": {"$ref": "#/$defs/safeId"}
+    },
+    "texts": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "jsonValue": {
+      "anyOf": [
+        {"type": "string"},
+        {"type": "integer"},
+        {"type": "number"},
+        {"type": "boolean"},
+        {"type": "null"},
+        {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        {"type": "object", "additionalProperties": {"$ref": "#/$defs/jsonValue"}}
+      ]
     },
     "extensions": {
       "type": "object",
@@ -74,6 +97,7 @@
         "identity": {"$ref": "#/$defs/relativePath"},
         "type": {"$ref": "#/$defs/safeId"},
         "hash": {"$ref": "#/$defs/hash"},
+        "content_hash": {"$ref": "#/$defs/hash"},
         "relation": {"$ref": "#/$defs/safeId"},
         "model": {"$ref": "#/$defs/safeId"},
         "revision": {"type": "integer", "minimum": 1}
@@ -150,11 +174,111 @@
       "required": ["schema_version", "move_bindings", "extensions"],
       "properties": {
         "schema_version": {"const": 1},
+        "reader_question": {"type": "string"},
+        "section_purpose": {"type": "string"},
+        "connections": {"$ref": "#/$defs/sectionConnections"},
+        "editorial_move_refs": {"$ref": "#/$defs/strings"},
         "move_bindings": {
           "type": "array",
           "items": {"$ref": "#/$defs/projectionMoveBinding"}
         },
+        "blocks": {"type": "array", "items": {"$ref": "#/$defs/blockProjection"}},
+        "contract": {"$ref": "#/$defs/contractProjection"},
+        "section_fields": {"$ref": "#/$defs/sectionFields"},
         "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
+    },
+    "sectionConnections": {
+      "type": "object",
+      "required": ["previous_section_id", "next_section_id"],
+      "properties": {
+        "previous_section_id": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/safeId"}]},
+        "next_section_id": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/safeId"}]}
+      },
+      "additionalProperties": false
+    },
+    "blockBinding": {
+      "type": "object",
+      "required": ["typed_block_id", "language", "raw_block_id", "file_identity", "marker_index", "body_hash", "region_hash"],
+      "properties": {
+        "typed_block_id": {"$ref": "#/$defs/safeId"},
+        "language": {"$ref": "#/$defs/safeId"},
+        "raw_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"},
+        "file_identity": {"$ref": "#/$defs/relativePath"},
+        "marker_index": {"type": "integer", "minimum": 0},
+        "body_hash": {"$ref": "#/$defs/hash"},
+        "region_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "blockProjection": {
+      "type": "object",
+      "required": ["id", "section_id", "reader_task", "operation", "allowed_operations", "ja_tex_block_id", "en_tex_block_id", "claim_refs", "result_refs", "source_refs", "figure_refs", "citation_keys", "forbidden_scope_expansion", "bindings"],
+      "properties": {
+        "id": {"$ref": "#/$defs/safeId"},
+        "section_id": {"$ref": "#/$defs/safeId"},
+        "reader_task": {"type": "string"},
+        "operation": {"$ref": "#/$defs/safeId"},
+        "allowed_operations": {"$ref": "#/$defs/strings"},
+        "ja_tex_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"},
+        "en_tex_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"},
+        "claim_refs": {"$ref": "#/$defs/strings"},
+        "result_refs": {"$ref": "#/$defs/strings"},
+        "source_refs": {"$ref": "#/$defs/strings"},
+        "figure_refs": {"$ref": "#/$defs/strings"},
+        "citation_keys": {"$ref": "#/$defs/texts"},
+        "forbidden_scope_expansion": {"$ref": "#/$defs/texts"},
+        "bindings": {"type": "array", "items": {"$ref": "#/$defs/blockBinding"}}
+      },
+      "additionalProperties": false
+    },
+    "contractLayer": {
+      "type": "object",
+      "required": ["name", "identity", "present", "content_hash", "semantic_hash"],
+      "properties": {
+        "name": {"$ref": "#/$defs/safeId"},
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "present": {"type": "boolean"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "semantic_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "contractProjection": {
+      "type": "object",
+      "required": ["section_kind", "snapshot_hash", "effective", "trace", "layers"],
+      "properties": {
+        "section_kind": {"$ref": "#/$defs/safeId"},
+        "snapshot_hash": {"$ref": "#/$defs/hash"},
+        "effective": {"$ref": "#/$defs/jsonValue"},
+        "trace": {"$ref": "#/$defs/jsonValue"},
+        "layers": {"type": "array", "items": {"$ref": "#/$defs/contractLayer"}}
+      },
+      "additionalProperties": false
+    },
+    "sectionFields": {
+      "type": "object",
+      "properties": {
+        "results_hierarchy": {"$ref": "#/$defs/jsonValue"},
+        "results": {"$ref": "#/$defs/jsonValue"},
+        "figures": {"$ref": "#/$defs/jsonValue"},
+        "observation": {"$ref": "#/$defs/jsonValue"},
+        "inference": {"$ref": "#/$defs/jsonValue"},
+        "mechanism": {"$ref": "#/$defs/jsonValue"},
+        "alternative": {"$ref": "#/$defs/jsonValue"},
+        "implication": {"$ref": "#/$defs/jsonValue"},
+        "prediction": {"$ref": "#/$defs/jsonValue"},
+        "limitation": {"$ref": "#/$defs/jsonValue"},
+        "estimand": {"$ref": "#/$defs/jsonValue"},
+        "unit_of_analysis": {"$ref": "#/$defs/jsonValue"},
+        "baseline_or_comparator": {"$ref": "#/$defs/jsonValue"},
+        "decision_criteria": {"$ref": "#/$defs/jsonValue"},
+        "verification_or_convergence": {"$ref": "#/$defs/jsonValue"},
+        "main_text": {"$ref": "#/$defs/jsonValue"},
+        "supplement": {"$ref": "#/$defs/jsonValue"},
+        "citation": {"$ref": "#/$defs/jsonValue"},
+        "code_or_manifest": {"$ref": "#/$defs/jsonValue"}
       },
       "additionalProperties": false
     },
@@ -164,7 +288,19 @@
       "properties": {
         "schema_version": {"const": 1},
         "global": {"$ref": "#/$defs/relativePath"},
+        "global_context_hash": {"$ref": "#/$defs/hash"},
+        "manuscript_files": {"type": "array", "items": {"$ref": "#/$defs/readFile"}},
         "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
+    },
+    "readFile": {
+      "type": "object",
+      "required": ["identity", "content_hash", "size"],
+      "properties": {
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "size": {"type": "integer", "minimum": 0}
       },
       "additionalProperties": false
     },
@@ -173,8 +309,79 @@
       "required": ["schema_version", "section_plan", "extensions"],
       "properties": {
         "schema_version": {"const": 1},
-        "section_plan": {"$ref": "#/$defs/safeId"},
+        "section_plan": {
+          "anyOf": [
+            {"$ref": "#/$defs/safeId"},
+            {"$ref": "#/$defs/planDescriptor"}
+          ]
+        },
+        "target_section_id": {"$ref": "#/$defs/safeId"},
+        "target_blocks": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "selected_story_id": {"$ref": "#/$defs/safeId"},
+        "ordered_move_ids": {"$ref": "#/$defs/strings"},
+        "approved_claims": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "evidence": {"$ref": "#/$defs/evidenceProjection"},
+        "citation_registry": {"type": "array", "items": {"$ref": "#/$defs/bibliography"}},
+        "contract_snapshot_hash": {"$ref": "#/$defs/hash"},
+        "terminology_prohibitions": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "forbidden_assertions": {"$ref": "#/$defs/texts"},
+        "predicted_result": {"$ref": "#/$defs/predictedResult"},
         "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
+    },
+    "evidenceProjection": {
+      "type": "object",
+      "required": ["claims", "results", "sources", "figures", "gates", "results_hierarchy"],
+      "properties": {
+        "claims": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "results": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "sources": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "figures": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "gates": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "results_hierarchy": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}}
+      },
+      "additionalProperties": false
+    },
+    "bibliography": {
+      "type": "object",
+      "required": ["identity", "content_hash", "entry_keys"],
+      "properties": {
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "entry_keys": {"$ref": "#/$defs/texts"}
+      },
+      "additionalProperties": false
+    },
+    "analysisRequest": {
+      "type": "object",
+      "required": ["id", "status", "identity", "content_hash"],
+      "properties": {
+        "id": {"$ref": "#/$defs/safeId"},
+        "status": {"$ref": "#/$defs/safeId"},
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "content_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "predictedResult": {
+      "type": "object",
+      "required": ["enabled", "analysis_request_ids", "analysis_requests"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "analysis_request_ids": {"$ref": "#/$defs/strings"},
+        "analysis_requests": {"type": "array", "items": {"$ref": "#/$defs/analysisRequest"}}
+      },
+      "additionalProperties": false
+    },
+    "planDescriptor": {
+      "type": "object",
+      "required": ["id", "path", "content_hash", "semantic_hash"],
+      "properties": {
+        "id": {"$ref": "#/$defs/safeId"},
+        "path": {"$ref": "#/$defs/relativePath"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "semantic_hash": {"$ref": "#/$defs/hash"}
       },
       "additionalProperties": false
     },
@@ -224,7 +431,41 @@
         "write_scope": {"$ref": "#/$defs/writeScope"},
         "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
         "read_context": {"$ref": "#/$defs/readContext"},
-        "payload": {"$ref": "#/$defs/writerPayload"}
+        "payload": {"$ref": "#/$defs/writerPayload"},
+        "dependency_profile": {"$ref": "#/$defs/dependencyProfile"},
+        "dependency_hash": {"$ref": "#/$defs/hashOrEmpty"}
+      },
+      "additionalProperties": false
+    },
+    "dependencyProfile": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const": 1},
+        "input_count": {"type": "integer", "minimum": 0},
+        "relations": {"$ref": "#/$defs/strings"},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
+    },
+    "globalContext": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const": 1},
+        "reader_transformation": {"$ref": "#/$defs/jsonValue"},
+        "selected_story": {"$ref": "#/$defs/jsonValue"},
+        "rejected_stories": {"$ref": "#/$defs/jsonValue"},
+        "thesis": {"type": "string"},
+        "claim_roles": {"$ref": "#/$defs/jsonValue"},
+        "evidence_ladder": {"$ref": "#/$defs/strings"},
+        "ordered_moves": {"$ref": "#/$defs/jsonValue"},
+        "section_block_map": {"$ref": "#/$defs/jsonValue"},
+        "salience": {"$ref": "#/$defs/jsonValue"},
+        "visual_obligations": {"$ref": "#/$defs/jsonValue"},
+        "terminology": {"$ref": "#/$defs/jsonValue"},
+        "mirror_policy": {"$ref": "#/$defs/jsonValue"},
+        "manuscript_read_files": {"type": "array", "items": {"$ref": "#/$defs/readFile"}},
+        "citation_registry": {"$ref": "#/$defs/jsonValue"},
+        "extensions": {"$ref": "#/$defs/extensions"}
       },
       "additionalProperties": false
     }

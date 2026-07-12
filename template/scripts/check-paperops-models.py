@@ -605,12 +605,24 @@ def main() -> int:
     if phase in ("all", "references") and not any(
         not model.schema_clean for model in loaded.values()
     ):
-        findings.extend(
-            validate_cross_model_references(
-                catalog,
-                defer_empty_editorial_research=not research_objects_available,
-            )
+        cross_model_findings = validate_cross_model_references(
+            catalog,
+            defer_empty_editorial_research=not research_objects_available,
         )
+        if args.internal_compile_query:
+            # Issue state is intentionally outside the closed compiler-model
+            # catalog. Prediction authority is revalidated from safe AREQ
+            # snapshots by the compiler, so only this external bridge is
+            # deferred here; every other cross-model reference stays strict.
+            cross_model_findings = [
+                finding
+                for finding in cross_model_findings
+                if not (
+                    finding.code == "reference.dangling"
+                    and "/analysis_request_refs/" in finding.pointer
+                )
+            ]
+        findings.extend(cross_model_findings)
 
     editorial = loaded.get("editorial")
     results = loaded.get("results_hierarchy")

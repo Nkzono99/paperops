@@ -21,7 +21,9 @@
     "write_scope": {"$ref": "#/$defs/writeScope"},
     "inputs": {"type": "array", "items": {"$ref": "#/$defs/input"}},
     "read_context": {"$ref": "#/$defs/readContext"},
-    "payload": {"$ref": "#/$defs/writerPayload"}
+    "payload": {"$ref": "#/$defs/writerPayload"},
+    "dependency_profile": {"$ref": "#/$defs/dependencyProfile"},
+    "dependency_hash": {"$ref": "#/$defs/hashOrEmpty"}
   },
   "additionalProperties": false,
   "$defs": {
@@ -33,6 +35,9 @@
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
     },
+    "hashOrEmpty": {
+      "anyOf": [{"const": ""}, {"$ref": "#/$defs/hash"}]
+    },
     "relativePath": {
       "type": "string",
       "pattern": "^(?!.*\\x00)(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/$|//)).+$"
@@ -40,6 +45,21 @@
     "strings": {
       "type": "array",
       "items": {"$ref": "#/$defs/safeId"}
+    },
+    "texts": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "jsonValue": {
+      "anyOf": [
+        {"type": "string"},
+        {"type": "integer"},
+        {"type": "number"},
+        {"type": "boolean"},
+        {"type": "null"},
+        {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        {"type": "object", "additionalProperties": {"$ref": "#/$defs/jsonValue"}}
+      ]
     },
     "extensions": {
       "type": "object",
@@ -92,6 +112,7 @@
         "identity": {"$ref": "#/$defs/relativePath"},
         "type": {"$ref": "#/$defs/safeId"},
         "hash": {"$ref": "#/$defs/hash"},
+        "content_hash": {"$ref": "#/$defs/hash"},
         "relation": {"$ref": "#/$defs/safeId"},
         "model": {"$ref": "#/$defs/safeId"},
         "revision": {"type": "integer", "minimum": 1}
@@ -104,6 +125,31 @@
       "properties": {
         "schema_version": {"const": 1},
         "global": {"$ref": "#/$defs/relativePath"},
+        "global_context_hash": {"$ref": "#/$defs/hash"},
+        "manuscript_files": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/readFile"}
+        },
+        "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
+    },
+    "readFile": {
+      "type": "object",
+      "required": ["identity", "content_hash", "size"],
+      "properties": {
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "size": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "dependencyProfile": {
+      "type": "object",
+      "properties": {
+        "schema_version": {"const": 1},
+        "input_count": {"type": "integer", "minimum": 0},
+        "relations": {"$ref": "#/$defs/strings"},
         "extensions": {"$ref": "#/$defs/extensions"}
       },
       "additionalProperties": false
@@ -113,8 +159,79 @@
       "required": ["schema_version", "section_plan", "extensions"],
       "properties": {
         "schema_version": {"const": 1},
-        "section_plan": {"$ref": "#/$defs/safeId"},
+        "section_plan": {
+          "anyOf": [
+            {"$ref": "#/$defs/safeId"},
+            {"$ref": "#/$defs/planDescriptor"}
+          ]
+        },
+        "target_section_id": {"$ref": "#/$defs/safeId"},
+        "target_blocks": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "selected_story_id": {"$ref": "#/$defs/safeId"},
+        "ordered_move_ids": {"$ref": "#/$defs/strings"},
+        "approved_claims": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "evidence": {"$ref": "#/$defs/evidenceProjection"},
+        "citation_registry": {"type": "array", "items": {"$ref": "#/$defs/bibliography"}},
+        "contract_snapshot_hash": {"$ref": "#/$defs/hash"},
+        "terminology_prohibitions": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "forbidden_assertions": {"$ref": "#/$defs/texts"},
+        "predicted_result": {"$ref": "#/$defs/predictedResult"},
         "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
+    },
+    "planDescriptor": {
+      "type": "object",
+      "required": ["id", "path", "content_hash", "semantic_hash"],
+      "properties": {
+        "id": {"$ref": "#/$defs/safeId"},
+        "path": {"$ref": "#/$defs/relativePath"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "semantic_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "evidenceProjection": {
+      "type": "object",
+      "required": ["claims", "results", "sources", "figures", "gates", "results_hierarchy"],
+      "properties": {
+        "claims": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "results": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "sources": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "figures": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "gates": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        "results_hierarchy": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}}
+      },
+      "additionalProperties": false
+    },
+    "bibliography": {
+      "type": "object",
+      "required": ["identity", "content_hash", "entry_keys"],
+      "properties": {
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "entry_keys": {"$ref": "#/$defs/texts"}
+      },
+      "additionalProperties": false
+    },
+    "analysisRequest": {
+      "type": "object",
+      "required": ["id", "status", "identity", "content_hash"],
+      "properties": {
+        "id": {"$ref": "#/$defs/safeId"},
+        "status": {"$ref": "#/$defs/safeId"},
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "content_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "predictedResult": {
+      "type": "object",
+      "required": ["enabled", "analysis_request_ids", "analysis_requests"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "analysis_request_ids": {"$ref": "#/$defs/strings"},
+        "analysis_requests": {"type": "array", "items": {"$ref": "#/$defs/analysisRequest"}}
       },
       "additionalProperties": false
     }

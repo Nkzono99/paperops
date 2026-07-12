@@ -7,7 +7,18 @@ from .contracts import (
     ResolvedContract,
     resolve_section_contract,
 )
-from .privacy import contains_private_material
+from .materialize import (
+    CompileBundleCandidate,
+    CompileContractSnapshot,
+    compute_compile_id,
+    materialize_compile,
+)
+from .privacy import (
+    PrivacyHit,
+    contains_private_material,
+    redact_private_material,
+    scan_private_material,
+)
 from .storage import (
     atomic_write_json,
     canonical_json_bytes,
@@ -48,6 +59,8 @@ __all__ = [
     "AuthoritySnapshot",
     "BibliographyFileSnapshot",
     "CompileBundle",
+    "CompileBundleCandidate",
+    "CompileContractSnapshot",
     "CompileFinding",
     "CompilePaths",
     "CompileRequest",
@@ -56,6 +69,7 @@ __all__ = [
     "ManuscriptSnapshot",
     "MirrorFilePairSnapshot",
     "MirrorFreshnessFact",
+    "PrivacyHit",
     "ResolvedContract",
     "SectionPlan",
     "TerminologyRule",
@@ -69,10 +83,14 @@ __all__ = [
     "bind_typed_tex_blocks",
     "canonical_json_bytes",
     "compile_paths",
+    "compute_compile_id",
     "contains_private_material",
+    "materialize_compile",
     "parse_tex_bytes",
     "resolve_section_contract",
+    "redact_private_material",
     "scan_manuscript",
+    "scan_private_material",
     "semantic_hash",
     "writer_paths",
 ]

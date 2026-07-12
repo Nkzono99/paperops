@@ -43,6 +43,24 @@
       "type": "array",
       "items": {"$ref": "#/$defs/safeId"}
     },
+    "texts": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "jsonValue": {
+      "anyOf": [
+        {"type": "string"},
+        {"type": "integer"},
+        {"type": "number"},
+        {"type": "boolean"},
+        {"type": "null"},
+        {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/jsonValue"}
+        }
+      ]
+    },
     "extensions": {
       "type": "object",
       "additionalProperties": true
@@ -62,11 +80,114 @@
       "required": ["schema_version", "move_bindings", "extensions"],
       "properties": {
         "schema_version": {"const": 1},
+        "reader_question": {"type": "string"},
+        "section_purpose": {"type": "string"},
+        "connections": {"$ref": "#/$defs/sectionConnections"},
+        "editorial_move_refs": {"$ref": "#/$defs/strings"},
         "move_bindings": {
           "type": "array",
           "items": {"$ref": "#/$defs/projectionMoveBinding"}
         },
+        "blocks": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/blockProjection"}
+        },
+        "contract": {"$ref": "#/$defs/contractProjection"},
+        "section_fields": {"$ref": "#/$defs/sectionFields"},
         "extensions": {"$ref": "#/$defs/extensions"}
+      },
+      "additionalProperties": false
+    },
+    "sectionConnections": {
+      "type": "object",
+      "required": ["previous_section_id", "next_section_id"],
+      "properties": {
+        "previous_section_id": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/safeId"}]},
+        "next_section_id": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/safeId"}]}
+      },
+      "additionalProperties": false
+    },
+    "blockBinding": {
+      "type": "object",
+      "required": ["typed_block_id", "language", "raw_block_id", "file_identity", "marker_index", "body_hash", "region_hash"],
+      "properties": {
+        "typed_block_id": {"$ref": "#/$defs/safeId"},
+        "language": {"$ref": "#/$defs/safeId"},
+        "raw_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"},
+        "file_identity": {"$ref": "#/$defs/relativePath"},
+        "marker_index": {"type": "integer", "minimum": 0},
+        "body_hash": {"$ref": "#/$defs/hash"},
+        "region_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "blockProjection": {
+      "type": "object",
+      "required": ["id", "section_id", "reader_task", "operation", "allowed_operations", "ja_tex_block_id", "en_tex_block_id", "claim_refs", "result_refs", "source_refs", "figure_refs", "citation_keys", "forbidden_scope_expansion", "bindings"],
+      "properties": {
+        "id": {"$ref": "#/$defs/safeId"},
+        "section_id": {"$ref": "#/$defs/safeId"},
+        "reader_task": {"type": "string"},
+        "operation": {"$ref": "#/$defs/safeId"},
+        "allowed_operations": {"$ref": "#/$defs/strings"},
+        "ja_tex_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"},
+        "en_tex_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"},
+        "claim_refs": {"$ref": "#/$defs/strings"},
+        "result_refs": {"$ref": "#/$defs/strings"},
+        "source_refs": {"$ref": "#/$defs/strings"},
+        "figure_refs": {"$ref": "#/$defs/strings"},
+        "citation_keys": {"$ref": "#/$defs/texts"},
+        "forbidden_scope_expansion": {"$ref": "#/$defs/texts"},
+        "bindings": {"type": "array", "items": {"$ref": "#/$defs/blockBinding"}}
+      },
+      "additionalProperties": false
+    },
+    "contractLayer": {
+      "type": "object",
+      "required": ["name", "identity", "present", "content_hash", "semantic_hash"],
+      "properties": {
+        "name": {"$ref": "#/$defs/safeId"},
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "present": {"type": "boolean"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "semantic_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "contractProjection": {
+      "type": "object",
+      "required": ["section_kind", "snapshot_hash", "effective", "trace", "layers"],
+      "properties": {
+        "section_kind": {"$ref": "#/$defs/safeId"},
+        "snapshot_hash": {"$ref": "#/$defs/hash"},
+        "effective": {"$ref": "#/$defs/jsonValue"},
+        "trace": {"$ref": "#/$defs/jsonValue"},
+        "layers": {"type": "array", "items": {"$ref": "#/$defs/contractLayer"}}
+      },
+      "additionalProperties": false
+    },
+    "sectionFields": {
+      "type": "object",
+      "properties": {
+        "results_hierarchy": {"$ref": "#/$defs/jsonValue"},
+        "results": {"$ref": "#/$defs/jsonValue"},
+        "figures": {"$ref": "#/$defs/jsonValue"},
+        "observation": {"$ref": "#/$defs/jsonValue"},
+        "inference": {"$ref": "#/$defs/jsonValue"},
+        "mechanism": {"$ref": "#/$defs/jsonValue"},
+        "alternative": {"$ref": "#/$defs/jsonValue"},
+        "implication": {"$ref": "#/$defs/jsonValue"},
+        "prediction": {"$ref": "#/$defs/jsonValue"},
+        "limitation": {"$ref": "#/$defs/jsonValue"},
+        "estimand": {"$ref": "#/$defs/jsonValue"},
+        "unit_of_analysis": {"$ref": "#/$defs/jsonValue"},
+        "baseline_or_comparator": {"$ref": "#/$defs/jsonValue"},
+        "decision_criteria": {"$ref": "#/$defs/jsonValue"},
+        "verification_or_convergence": {"$ref": "#/$defs/jsonValue"},
+        "main_text": {"$ref": "#/$defs/jsonValue"},
+        "supplement": {"$ref": "#/$defs/jsonValue"},
+        "citation": {"$ref": "#/$defs/jsonValue"},
+        "code_or_manifest": {"$ref": "#/$defs/jsonValue"}
       },
       "additionalProperties": false
     },
@@ -78,6 +199,7 @@
         "identity": {"$ref": "#/$defs/relativePath"},
         "type": {"$ref": "#/$defs/safeId"},
         "hash": {"$ref": "#/$defs/hash"},
+        "content_hash": {"$ref": "#/$defs/hash"},
         "relation": {"$ref": "#/$defs/safeId"},
         "model": {"$ref": "#/$defs/safeId"},
         "revision": {"type": "integer", "minimum": 1}

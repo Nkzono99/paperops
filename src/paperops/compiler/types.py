@@ -155,6 +155,7 @@ class InputSnapshot:
     model_name: str = ""
     revision: int | None = None
     snapshot_kind: str = "catalog"
+    content_hash: str = ""
 
     def __post_init__(self) -> None:
         _validate_relative_identity(self.identity, "input identity")
@@ -171,6 +172,8 @@ class InputSnapshot:
             raise ValueError("input revision must be a positive integer")
         if self.snapshot_kind not in _SNAPSHOT_KINDS:
             raise ValueError("snapshot kind must be catalog or content")
+        if self.content_hash:
+            _validate_hash(self.content_hash, "input content hash")
 
     def to_dict(self) -> dict[str, Any]:
         result: dict[str, Any] = {
@@ -184,6 +187,8 @@ class InputSnapshot:
             result["model"] = self.model_name
         if self.revision is not None:
             result["revision"] = self.revision
+        if self.content_hash:
+            result["content_hash"] = self.content_hash
         return result
 
 
@@ -343,6 +348,8 @@ class WriterPacket:
     inputs: tuple[InputSnapshot, ...]
     read_context: Mapping[str, Any] = field(default_factory=dict)
     payload: Mapping[str, Any] = field(default_factory=dict)
+    dependency_profile: Mapping[str, Any] = field(default_factory=dict)
+    dependency_hash: str = ""
     schema_version: int = 1
 
     def __post_init__(self) -> None:
@@ -356,10 +363,17 @@ class WriterPacket:
             raise TypeError("Writer packet write_scope must be a WriteScope")
         if self.schema_version != 1:
             raise ValueError("unsupported Writer packet schema version")
+        if self.dependency_hash:
+            _validate_hash(self.dependency_hash, "Writer packet dependency hash")
         object.__setattr__(self, "authority", authority)
         object.__setattr__(self, "inputs", inputs)
         object.__setattr__(self, "read_context", _freeze_json(self.read_context))
         object.__setattr__(self, "payload", _freeze_json(self.payload))
+        object.__setattr__(
+            self,
+            "dependency_profile",
+            _freeze_json(self.dependency_profile),
+        )
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -371,6 +385,8 @@ class WriterPacket:
             "inputs": [item.to_dict() for item in self.inputs],
             "read_context": _json_compatible(self.read_context),
             "payload": _json_compatible(self.payload),
+            "dependency_profile": _json_compatible(self.dependency_profile),
+            "dependency_hash": self.dependency_hash,
         }
 
 
@@ -386,6 +402,11 @@ class CompileBundle:
     findings: tuple[CompileFinding, ...] = ()
     status: str = "ready"
     schema_version: int = 1
+    compiler_contract_version: str = "p3-typed-compile-v1"
+    applicable: bool = True
+    contract_snapshot_hash: str = ""
+    manuscript_snapshot_hash: str = ""
+    global_context: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         _validate_id(self.compile_id, "compile ID")
@@ -407,6 +428,22 @@ class CompileBundle:
             self.findings, CompileFinding, "compile bundle findings"
         )
         _validate_id(self.status, "compile bundle status")
+        _validate_id(
+            self.compiler_contract_version,
+            "compile bundle compiler contract version",
+        )
+        if type(self.applicable) is not bool:
+            raise TypeError("compile bundle applicable must be boolean")
+        if self.contract_snapshot_hash:
+            _validate_hash(
+                self.contract_snapshot_hash,
+                "compile bundle contract snapshot hash",
+            )
+        if self.manuscript_snapshot_hash:
+            _validate_hash(
+                self.manuscript_snapshot_hash,
+                "compile bundle manuscript snapshot hash",
+            )
         if self.schema_version != 1:
             raise ValueError("unsupported compile bundle schema version")
         object.__setattr__(self, "authority", authority)
@@ -414,18 +451,24 @@ class CompileBundle:
         object.__setattr__(self, "section_plans", plans)
         object.__setattr__(self, "writer_packets", packets)
         object.__setattr__(self, "findings", findings)
+        object.__setattr__(self, "global_context", _freeze_json(self.global_context))
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "schema_version": self.schema_version,
+            "compiler_contract_version": self.compiler_contract_version,
             "compile_id": self.compile_id,
             "source_mode": self.source_mode,
             "status": self.status,
+            "applicable": self.applicable,
+            "contract_snapshot_hash": self.contract_snapshot_hash,
+            "manuscript_snapshot_hash": self.manuscript_snapshot_hash,
             "request": self.request.to_dict(),
             "authority": [item.to_dict() for item in self.authority],
             "inputs": [item.to_dict() for item in self.inputs],
             "section_plans": [item.to_dict() for item in self.section_plans],
             "writer_packets": [item.to_dict() for item in self.writer_packets],
+            "global_context": _json_compatible(self.global_context),
             "findings": [item.to_dict() for item in self.findings],
         }
 
