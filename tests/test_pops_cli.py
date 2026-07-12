@@ -190,6 +190,8 @@ class PopsCliTest(unittest.TestCase):
 
             def create_contending_target(staging: Path) -> dict[str, str]:
                 hashes = bootstrap_v2_authority(staging)
+                target.chmod(0o700)
+                target.rmdir()
                 target.mkdir()
                 return hashes
 
@@ -200,8 +202,22 @@ class PopsCliTest(unittest.TestCase):
                 code, _out, err = run_cli(["init", str(target)])
 
             self.assertEqual(code, 1)
-            self.assertFalse(target.exists())
+            self.assertTrue(target.is_dir())
+            self.assertEqual(list(target.iterdir()), [])
             self.assertNotIn(".pops-init-", err)
+
+    def test_init_cleans_new_target_when_staging_creation_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            with mock.patch(
+                "paperops.cli.main.tempfile.mkdtemp",
+                side_effect=OSError("no space"),
+            ):
+                code, _out, err = run_cli(["init", str(target)])
+
+            self.assertEqual(code, 1)
+            self.assertFalse(target.exists())
+            self.assertNotIn("no space", err)
 
     def test_legacy_force_copy_preserves_existing_v2_authority(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

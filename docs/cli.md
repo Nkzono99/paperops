@@ -9,7 +9,7 @@ uvx --from paper-harness-cli pops init paper-my-topic
 uvx --from paper-harness-cli pops init paper-legacy --authority legacy
 ```
 
-`pops init`の既定は`--authority v2`である。scaffoldをtargetと同じfilesystemの一時directoryへ展開し、project-managed checkerでResearch / Editorial / Results hierarchy / Manuscript / Issue / Publicationを一括検証する。errorがなく六つのsemantic hashが得られた場合だけ、六モデルを`origin = "init-v2"`、workflowを`v2-authoritative`としてmanifestへ一度に書き、project directoryを切り替える。`model status`とcompilerはこのoriginではmigration journalの代わりにexact six-model setとlive hashを再検証する。warningは未記入starterの状態として許容し、失敗時は部分projectを残さない。
+`pops init`の既定は`--authority v2`である。scaffoldをtargetと同じfilesystemの一時directoryへ展開し、project-managed checkerでResearch / Editorial / Results hierarchy / Manuscript / Issue / Publicationを一括検証する。errorがなく六つのsemantic hashが得られた場合だけ、六モデルを`origin = "init-v2"`、workflowを`v2-authoritative`としてmanifestへ一度に書き、予約した空targetをproject directoryへ切り替える。`model status`とcompilerはこのoriginではmigration journalの代わりにexact six-model setとlive hashを再検証する。warningは未記入starterの状態として許容し、通常のvalidation / I/O例外では予約を回収して部分projectを残さない。
 
 `--authority legacy`は六モデルを`legacy-authoritative`、workflowを`legacy`として作る非推奨の退避導線であり、削除時期は未定である。非空directoryへの`--force`は`--authority legacy`との組合せだけを許し、missing scaffold fileを追加するが、既存manifestのauthority tableは変更しない。`setup`と`update-paperops`も既存authorityを切り替えない。既存projectのv2移行には下記のmodel migrationとP4 workflow migrationを使う。
 

@@ -414,20 +414,22 @@ def _initialize_staged_project(
                 tempfile.mkdtemp(prefix=f".{target.name}.pops-init-", dir=target.parent)
             )
             shutil.copystat(target, staging, follow_symlinks=False)
+            reserved = target.stat()
+            reservation_identity = (reserved.st_dev, reserved.st_ino)
             target.chmod(0o500)
             reservation_locked = True
         else:
             previous_umask = os.umask(0)
             os.umask(previous_umask)
             target.mkdir(mode=0o500)
-            target.chmod(0o500)
             reservation_created = True
+            reserved = target.stat()
+            reservation_identity = (reserved.st_dev, reserved.st_ino)
+            target.chmod(0o500)
             staging = Path(
                 tempfile.mkdtemp(prefix=f".{target.name}.pops-init-", dir=target.parent)
             )
             staging.chmod(0o777 & ~previous_umask)
-        reserved = target.stat()
-        reservation_identity = (reserved.st_dev, reserved.st_ino)
         if any(target.iterdir()):
             raise FileExistsError(f"target changed while initialization was starting: {target}")
         with scaffold_source() as source:
