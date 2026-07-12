@@ -24,6 +24,22 @@ uvx --from paper-harness-cli pops model rollback research
 
 `diff`の正本reportは`.paperops/migrations/<transaction-id>/report.json`、人間向けprojectionは`report.md`、candidateとjournalも同じdirectoryに置く。復元点は`.paperops/snapshots/<transaction-id>/`に置く。どちらもGit管理しない。中断transactionは次の`pops model` commandがpreflightで回収し、既知hashなら旧stateへ戻す。unknown manual editやsnapshot破損は`recovery.conflict`で停止し、自動上書きしない。
 
+## P3 typed compile
+
+```sh
+uvx --from paper-harness-cli pops compile status all
+uvx --from paper-harness-cli pops compile prepare all
+uvx --from paper-harness-cli pops compile prepare SEC-0002 --scope block --block BLK-0002
+uvx --from paper-harness-cli pops compile compare <compile-id-a> <compile-id-b>
+```
+
+- `status [target|all] [path]`はcurrent authorityを確認して、検証済みcompile cacheだけを表示する。
+- `prepare <target|all> [path]`はManuscript index順、typed block binding、JA/EN file、allowed operationからwrite scopeを決定し、`.paperops/compile/<compile-id>/`へbundleを保存する。`all`の既定scopeは`manuscript`、単一sectionの既定は`section`である。局所変更は`--scope block --block <BLK-ID>`を使う。
+- `--shadow <transaction-id>`は非適用の比較用bundleを要求し、living TeXやmodel authorityを変更しない。`--refresh`は同一入力でbyte-identicalなcacheだけを明示再検証・再生成する。
+- `compare`は二つの検証済みbundleのstory/move/claim role/result order/section placement/visual obligation/target/scope差分だけを出し、優劣を判断しない。
+
+三操作ともAIやnetworkを呼ばず、model adopt、TeX、workflow、mirror ledgerを変更しない。実行前にはP2の未完了transaction recoveryを行い、conflict時はcompileを開始しない。`--json`とhuman表示は同じversioned domain resultから描画される。
+
 既存projectでは初回`diff`前に`.paperops/migrations/`と`.paperops/snapshots/`をprojectの`.gitignore`へ追加する。新規`pops init`には含まれている。
 
 adapter、checker、transactionはnetworkやAI modelを呼ばない。機械的に決められないfieldは`migration.unresolved`として残し、AIが架空のrevision、approval、scope、quantity、provenanceを埋める手順にはしない。AI / skillはscientific / editorial judgmentと人間承認を支援する。P2はlegacy writerを削除せず、P3 section compiler / Writer packetとP4 workflow writer cutoverは別の導入段階である。
@@ -84,6 +100,7 @@ uvx --from paper-harness-cli pops doctor
 - `pops migrate apply <id> [path]`: migration を適用する。
 - `pops migrate [path] --apply`: 旧 scaffold に `.pops` 管理情報を追加する互換導線。
 - `pops model status|validate|diff|adopt|rollback`: 六モデルの検証、shadow、authority切替、復元を一つのdeterministic入口で扱う。
+- `pops compile status|prepare|compare`: typed authorityから全体文脈とWriter packetを決定的に生成・検証・比較する。
 - `pops feedback`: 上流 `paperops` へ戻す改善フィードバックの下書きを出す。
 - `pops links list [path]`: `_paperops/refs/links.toml` の外部 link を表示する。
 - `pops links check [path]`: link registry と local location の対応を検証する。

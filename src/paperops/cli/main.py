@@ -8,6 +8,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from paperops.cli.constants import PACKAGE_NAME, UPSTREAM_REPO
+from paperops.cli.compile_commands import add_compile_parser
 from paperops.cli.doctor import (
     check_executable,
     check_path,
@@ -68,7 +69,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.print_help()
         return 0
     code = args.func(args)
-    maybe_print_update_notice(args, code)
+    if getattr(args, "command", "") != "compile":
+        maybe_print_update_notice(args, code)
     return code
 
 
@@ -163,6 +165,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     add_migrate_parser(subcommands)
     add_model_parser(subcommands)
+    add_compile_parser(subcommands)
 
     feedback_parser = subcommands.add_parser(
         "feedback",

@@ -98,6 +98,17 @@ class CompileResult:
         }
 
 
+@dataclass(frozen=True)
+class CompileCacheStatus:
+    target: str
+    results: tuple[CompileResult, ...]
+    findings: tuple[CompileFinding, ...] = ()
+
+    @property
+    def ok(self) -> bool:
+        return not any(item.severity == "error" for item in self.findings)
+
+
 def _read_json_regular(path: Path) -> tuple[dict[str, Any], bytes]:
     try:
         descriptor = os.open(
@@ -648,7 +659,7 @@ def prepare_bundle(
             shutil.rmtree(stage)
 
 
-def inspect_compile(root: str | Path, compile_id: str) -> CompileResult:
+def _inspect_compile_entry(root: str | Path, compile_id: str) -> CompileResult:
     verified = load_verified_bundle(root, compile_id)
     bundle = verified.bundle
     findings = tuple(
@@ -664,8 +675,48 @@ def inspect_compile(root: str | Path, compile_id: str) -> CompileResult:
     )
 
 
+def inspect_compile(
+    root: str | Path,
+    target_or_all: str = "all",
+) -> CompileCacheStatus:
+    """Inspect verified cache entries matching a section target, without writes."""
+    project = Path(root).expanduser().absolute()
+    state_root = project / ".paperops/compile"
+    results: list[CompileResult] = []
+    findings: list[CompileFinding] = []
+    if state_root.is_symlink() or (state_root.exists() and not state_root.is_dir()):
+        findings.append(
+            CompileFinding(
+                "compile.cache_invalid",
+                "/cache",
+                "compile cache namespace is invalid",
+            )
+        )
+    elif state_root.is_dir():
+        for entry in sorted(state_root.iterdir(), key=lambda item: item.name):
+            if entry.name.startswith("."):
+                continue
+            try:
+                verified = load_verified_bundle(project, entry.name)
+                inspected = _inspect_compile_entry(project, entry.name)
+            except BundleVerificationError:
+                findings.append(
+                    CompileFinding(
+                        "compile.cache_invalid",
+                        f"/cache/{len(findings)}",
+                        "a compile cache entry is invalid",
+                    )
+                )
+                continue
+            targets = verified.bundle["request"]["targets"]
+            if target_or_all == "all" or target_or_all in targets:
+                results.append(inspected)
+    return CompileCacheStatus(target_or_all, tuple(results), tuple(findings))
+
+
 __all__ = [
     "BundleVerificationError",
+    "CompileCacheStatus",
     "CompileResult",
     "VerifiedBundle",
     "inspect_compile",

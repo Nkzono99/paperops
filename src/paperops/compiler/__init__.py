@@ -9,6 +9,7 @@ from .contracts import (
 )
 from .bundles import (
     BundleVerificationError,
+    CompileCacheStatus,
     CompileResult,
     VerifiedBundle,
     inspect_compile,
@@ -28,6 +29,7 @@ from .privacy import (
     redact_private_material,
     scan_private_material,
 )
+from .requests import CompileRequestError, resolve_compile_request
 from .storage import (
     atomic_write_json,
     canonical_json_bytes,
@@ -68,6 +70,7 @@ __all__ = [
     "AuthoritySnapshot",
     "BibliographyFileSnapshot",
     "BundleVerificationError",
+    "CompileCacheStatus",
     "CompileBundle",
     "CompileBundleCandidate",
     "CompileContractSnapshot",
@@ -75,6 +78,7 @@ __all__ = [
     "CompileFinding",
     "CompilePaths",
     "CompileRequest",
+    "CompileRequestError",
     "CompileResult",
     "ContractLayerSnapshot",
     "InputSnapshot",
@@ -104,6 +108,7 @@ __all__ = [
     "load_verified_bundle",
     "parse_tex_bytes",
     "resolve_section_contract",
+    "resolve_compile_request",
     "redact_private_material",
     "scan_manuscript",
     "scan_private_material",
