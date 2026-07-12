@@ -1,12 +1,16 @@
 # paper-my-topic
 
+## P7 new-project default
+
+通常の`pops init`で作成したprojectは、Research / Editorial / Results hierarchy / Manuscript / Issue / Publicationとtyped workflowを`v2-authoritative`で開始する。六モデルのstarter hashは`.pops/manifest.toml`に記録される。既存projectの`setup` / managed updateはauthorityを変えず、legacy artifact、互換reader、living TeXを削除しない。
+
 ## P4 typed workflow（opt-in）
 
 P4では`pops workflow status --json`が六モデルから`INGESTED / MODELED / ARCHITECTED / DRAFTED / PUBLISHABLE`を投影する。査読論点は独立した`ISS-*`として`pops workflow issue route|close|reopen`でplan化し、owner-local approvalは`pops workflow approval decide`で対象revision/hashへ固定する。tracked反映は`pops workflow apply <plan-id> --yes`だけが行う。既存projectは`pops workflow migrate diff`でshadowを確認してから採用し、legacy workflowを削除しない。
 
 ## P3 typed compile / Writer（opt-in）
 
-P2で四つのcompile authorityを採用した後は、`pops compile prepare <section|all>`で全体文脈と固定scopeを生成し、`pops write start <compile-id>`で原稿全体を読めるcandidateを作る。candidate TeXは直接編集し、`pops write check` / `diff`、人間確認後の`apply --yes`、必要時の`rollback`を使う。read contextとwrite scopeは別であり、局所scopeでは直せない場合はEditorial / Manuscript Modelを改訂して再compileする。P3はliving TeX直接編集やlegacy writerを削除せず、P4 workflow writer cutoverも行わない。
+P2で四つのcompile authorityを採用した後は、`pops compile prepare <section|all>`で全体文脈と固定scopeを生成し、`pops write start <compile-id>`で原稿全体を読めるcandidateを作る。candidate TeXは直接編集し、`pops write check` / `diff`、人間確認後の`apply --yes`、必要時の`rollback`を使う。read contextとwrite scopeは別であり、局所scopeでは直せない場合はEditorial / Manuscript Modelを改訂して再compileする。P3はliving TeX直接編集やlegacy writerを削除しない。
 
 `pops init` で作成される個別論文プロジェクトのスターター。
 

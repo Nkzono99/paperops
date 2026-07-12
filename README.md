@@ -1,8 +1,8 @@
 # paperops
 
-## PaperOps 2 P3
+## PaperOps 2 P7
 
-P3 typed compiler / Writer boundaryを実装済みである。`pops compile status|prepare|compare`が承認済み四モデルから全体文脈と固定write scopeを生成し、`pops write start|status|check|diff|apply|rollback`が全原稿candidate、意味保存検査、承認済みTeX transactionを扱う。candidate TeXの直接編集、全体の再読、typed modelを介したglobal replanを維持する。P4 workflow writerとP7 default cutoverは未実装である。
+P3 typed compiler / Writer boundaryとP4 typed workflowを実装し、P7では新規`pops init`を六モデル・workflowの`v2-authoritative`既定へ切り替えた。既存projectのauthorityは`setup`やmanaged updateで変更しない。legacyで新規作成する必要がある場合だけ`pops init --authority legacy`を明示できるが、この入口は非推奨で削除時期は未定である。legacy artifact、互換reader、human-edited living TeXは削除しない。
 
 `paperops` は、AI エージェントと論文を書くためのプロジェクトハーネスである。
 
@@ -17,6 +17,8 @@ uvx --from paper-harness-cli pops init paper-my-topic
 cd paper-my-topic
 uvx --from paper-harness-cli pops doctor
 ```
+
+この新規projectは六モデルのstarterを検証し、そのsemantic hashとtyped workflowを`.pops/manifest.toml`へ原子的に記録する。既存projectをv2へ移す場合は`pops init --force`で権威を上書きせず、`pops model diff|adopt`と`pops workflow migrate`を使う。
 
 既存プロジェクトを `pops` 管理に寄せる:
 
@@ -62,7 +64,7 @@ uvx --from paper-harness-cli pops doctor
 
 PaperOps 2 P1-B は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の正確な六モデルを提供する。P2 は `pops model` の deterministic migrationとして、legacy inventory、shadow diff、strict validation、model単位のadopt、snapshot rollbackをAIなしで反復できるようにする。authorityは`legacy-authoritative`、`shadow-compare`、`v2-authoritative`をmodelごとに持ち、Editorial / Results hierarchyだけはcompanionとして同時に切り替える。
 
-AI Agentはscientific / editorial judgment、候補の選択理由、未解決fieldを埋めるための人間との対話を担当し、定型的なfile discovery、hash、conservation、transaction、recoveryを直接操作しない。P3 compiler / Writer boundaryの導入後もlegacy writerとhuman-edited TeXを維持し、既存workflow writerを切り替えるP4はdeferする。
+AI Agentはscientific / editorial judgment、候補の選択理由、未解決fieldを埋めるための人間との対話を担当し、定型的なfile discovery、hash、conservation、transaction、recoveryを直接操作しない。P3 compiler / WriterとP4 workflow writerの導入後もlegacy互換artifactとhuman-edited TeXを維持し、物理削除は利用観測と別の削除判断が揃うまで行わない。
 
 検証phaseは schema → references → semantics → canonical semantic-v1 hash の順で、mechanism-led、boundary-led、negative-result-led の三つの合成fixtureを回帰corpusとして維持する。
 

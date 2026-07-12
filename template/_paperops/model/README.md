@@ -1,7 +1,7 @@
 # PaperOps project models
 
-このdirectoryはproject-owned stateであり、`pops update-paperops`のmanaged update対象ではない。新規projectだけが`pops init`からstarterを受け取り、既存projectはM0-0005を確認して手動採用する。
+このdirectoryはproject-owned stateであり、`pops update-paperops`のmanaged update対象ではない。新規projectは`pops init`時に六つのstarterを検証し、model hashと`v2-authoritative` stateをmanifestへ記録する。既存projectはauthorityを自動変更せず、M0-0005と`pops model diff|adopt`を使って手動採用する。
 
 現行scopeはResearch、Editorial、Results hierarchy、Manuscript、Issue、Publicationの六モデルである。Research / Manuscript / Issueはindexとper-ID record、Editorial / Results hierarchy / Publicationはaggregate documentを使う。検査はschema、references、semantics、approvals、dependencies、hashの順で実行する。
 
-P1-Bはshadow validation境界でありauthority cutoverではない。P2まではlegacy card / review / request、P3まではhuman-edited TeX、P4までは既存workflow writerを維持する。移行中にlegacy artifactを削除したり、modelとdual-writeしたりしない。
+v2-authoritativeではこの六モデルが意味論上の正本で、workflow macro stateは投影値になる。legacy card / review / request / workflowとhuman-edited TeXは互換参照として維持するがdual-writeしない。既存projectは明示migrationまで従来のauthorityを保ち、legacy artifactの物理削除は別判断とする。

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- PaperOps 2 P7として、新規`pops init`を六モデル・typed workflowの`v2-authoritative`既定へ切り替えた。scaffoldを同一filesystem上でstageし、project-managed checkerの一括検証と六つのsemantic hash確定後だけatomic renameするため、失敗時に部分projectを残さない。成功時はmodeとhashをCLIへ表示する。
+
+- 既存projectの`setup`、managed update、非空targetへの追加的copyはauthorityを変更しない。`pops init --authority legacy`は非推奨の明示退避として残し、削除時期は未定である。legacy artifact、互換reader、human-edited living TeXの削除・dual-write・reverse migrationは行わない。
+
 - PaperOps 2 P4 typed workflow projection / writerを追加した。六モデルから`INGESTED -> MODELED -> ARCHITECTED -> DRAFTED -> PUBLISHABLE`をread-only投影し、review / submission / section / effective stale / owner-local approvalを直交軸として返す。`workflow_issue`を一論点一recordとして独立route / close / reopenし、`pops workflow status|plan|issue|approval|apply|rollback|migrate`がimpact計算、承認plan、journal transaction、legacy shadow/adopt/rollbackをAIなしで扱う。v2-authoritative時だけP3 compileが選択sectionのopen impactを停止する。
 
 - P4はopt-inであり、legacy workflowを削除・dual-writeしない。既存下流はmanaged workflow profile、Issue schema/registry/checker、AGENTS / CLAUDE / READMEと関連skillを更新し、`.paperops/workflow/`をignoreしてから`pops workflow migrate diff`で保存的変換を確認する。`migrate adopt`はplan生成、tracked反映は`pops workflow apply <plan-id> --yes`、復元は明示transactionの`workflow rollback`を使う。default cutoverとlegacy removalはP7へ残す。

@@ -8,6 +8,10 @@ P2で四つのcompile authorityを採用したprojectでは、定型的なcompil
 
 `pops workflow status --json`は六モデルから五段階macro stateをread-only投影する。定型的なimpact、Issue route / close / reopen、owner-local approvalは`pops workflow plan|issue|approval`でplan化し、tracked変更は人間確認後の`pops workflow apply <plan-id> --yes`だけで行う。AIはroute理由、科学的・編集的判断、人間との対話を担当し、hash、snapshot、recoveryを再実装しない。legacy projectは`pops workflow migrate diff`で比較してからopt-inし、legacy stateを削除・dual-writeしない。
 
+## P7 new-project default
+
+このscaffoldを通常の`pops init`で作ったprojectは六モデルとworkflowが`v2-authoritative`である。`.pops/manifest.toml`のmodeとhashを確認し、model stateを正本、legacy card / workflow stateを互換参照として扱う。`setup`や`update-paperops`で既存projectが自動cutoverすることはない。legacy artifactを削除・逆生成・dual-writeしない。
+
 ユーザーとは日本語でコミュニケーションする。
 
 このリポジトリは `paperops` から作成された個別論文プロジェクトである。人間が主に触る面は prompt、`story/`、`manuscript/`、`submission/`、レビューコメントである。AI が執筆に使う evidence、claims、refs、requests、workflow、contracts、notes/views は `_paperops/` に置く。
