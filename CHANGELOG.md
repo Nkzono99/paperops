@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- P3 compile bundleを`.paperops/compile/<compile-id>/`へcontent-addressedかつ原子的に保存し、closed artifact manifest、canonical hash、DTO round-trip、compile ID、plan/packet参照を再検証するstrict loaderを追加した。同一入力はbyte-identicalに再利用し、破損は暗黙上書きせず、blocked compileは成功bundleと分離したdiagnostic namespaceだけへ保存する。二bundleのstory、move、claim role、result order、section placement、visual obligation、target/scopeだけを順位付けせず比較できる。
+
 - P3 typed compilerのpure materializerを追加し、承認済みResearch / Editorial・Results / Manuscript authority、resolved contract、全原稿snapshotから、全体storyとsection topologyを保持したglobal context、section plan、Writer packetを決定的に生成する。catalog semantic/content hashとcompile snapshotを全packetへ結び、承認履歴だけの変更でもcompile IDを更新する。失敗時は部分plan/packetを返さず、scope、approval、dependency、prediction/AREQ、privacyをstable findingにする。generated bundle/packet schemaは後方互換を保ってrich DTOを閉じた形で検証する。
 
 - P3 section compiler向けにcontract overlay、TeX block/mirror/terminology、analysis request、3系統のBibTeX registryを型付きsnapshotとして取得するread-only APIを追加した。Writer-facing snapshotはraw TeX・private path・credentialを含めず、YAML/TOML/tree depth、alias、重複、driftをstable findingにする。schema準拠のcolon付き`% block:` IDをmirror/submission/sync helperでも扱い、BibTeXの`{}`/`()` entryをtop-level delimiterで判定する。既存TeX、ledger、project-owned stateは変更しない。

@@ -2,6 +2,8 @@
 .venv/
 .tools/
 .paperops/cache/
+.paperops/compile/
+.paperops/compile-diagnostics/
 .paperops/migrations/
 .paperops/snapshots/
 .claude/settings.local.json
