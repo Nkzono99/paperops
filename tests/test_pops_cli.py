@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from tests.helpers import ROOT, run_cli
+from tests.helpers import ROOT, copy_template, run_cli
 
 from paperops import __version__  # noqa: E402
 from paperops.cli.main import write_manifest  # noqa: E402
@@ -131,6 +131,49 @@ class PopsCliTest(unittest.TestCase):
             self.assertEqual(after["models"], before["models"])
             self.assertEqual(after["workflow"], before["workflow"])
             self.assertEqual((target / "project-owned.txt").read_text(encoding="utf-8"), "keep\n")
+
+    def test_setup_of_existing_legacy_scaffold_does_not_invent_authority_tables(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = copy_template(tmp)
+
+            code, _out, err = run_cli(["setup", "--path", str(target)])
+
+            self.assertEqual(code, 0, err)
+            manifest = tomllib.loads(
+                (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
+            )
+            self.assertNotIn("models", manifest)
+            self.assertNotIn("workflow", manifest)
+
+    def test_managed_update_preserves_explicit_authority_tables(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            for authority in ("v2", "legacy"):
+                with self.subTest(authority=authority):
+                    target = Path(tmp) / f"paper-{authority}"
+                    args = ["init", str(target)]
+                    if authority == "legacy":
+                        args.extend(["--authority", "legacy"])
+                    code, _out, err = run_cli(args)
+                    self.assertEqual(code, 0, err)
+                    manifest_path = target / ".pops" / "manifest.toml"
+                    before = tomllib.loads(manifest_path.read_text(encoding="utf-8"))
+                    managed = target / "_paperops" / "defaults" / "contracts" / "results.yml"
+                    managed.unlink()
+
+                    code, _out, err = run_cli(
+                        [
+                            "update-paperops",
+                            "--apply",
+                            "--only",
+                            "_paperops/defaults/contracts/results.yml",
+                            str(target),
+                        ]
+                    )
+
+                    self.assertEqual(code, 0, err)
+                    after = tomllib.loads(manifest_path.read_text(encoding="utf-8"))
+                    self.assertEqual(after["models"], before["models"])
+                    self.assertEqual(after["workflow"], before["workflow"])
 
     def test_init_contains_editorial_starter(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
