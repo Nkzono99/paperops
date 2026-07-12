@@ -28,7 +28,7 @@ def inspect_approvals(root: Path, target_id: str = "") -> ApprovalStatusResult:
 
 def plan_approval_decision(root: Path, target_id: str, kind: str, decision: str, reason: str, profile: str = ""):
     managed = load_workflow_profile(root)
-    if kind not in managed.approval_kinds and not (profile and kind.startswith(profile + ":")):
+    if kind not in managed.approval_kinds:
         raise ValueError("approval kind is not registered")
     if decision not in {"approved", "rejected", "revoked"}:
         raise ValueError("approval decision is invalid")

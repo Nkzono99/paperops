@@ -6,6 +6,7 @@ import copy
 import hashlib
 import json
 import re
+import stat
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Any
@@ -37,6 +38,20 @@ def canonical_json(value: object, *, pretty: bool = False) -> str:
     if pretty:
         return json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2, allow_nan=False) + "\n"
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False) + "\n"
+
+
+def safe_generated_dir(root: Path, relative: str) -> Path:
+    if not relative.startswith(".paperops/workflow"):
+        raise ValueError("generated workflow identity is invalid")
+    current = root
+    for part in PurePosixPath(relative).parts:
+        current = current / part
+        if not current.exists():
+            current.mkdir(mode=0o700)
+        metadata = current.lstat()
+        if not stat.S_ISDIR(metadata.st_mode) or stat.S_ISLNK(metadata.st_mode):
+            raise ValueError("generated workflow directory is unsafe")
+    return current
 
 
 def raw_hash(content: bytes) -> str:
@@ -112,9 +127,10 @@ def persist_plan(root: Path, operation: str, replacements: list[dict[str, Any]])
         raise ValueError("mutation plan contains private material")
     digest = hashlib.sha256(canonical_json(payload).encode()).hexdigest()
     plan = WorkflowMutationPlan(f"WPLAN-{digest[:16]}", operation, tuple(payload["replacements"]))
-    directory = root / ".paperops/workflow/plans" / plan.plan_id
-    directory.mkdir(parents=True, exist_ok=True)
-    (directory / "plan.json").write_text(canonical_json(plan.to_dict(), pretty=True), encoding="utf-8")
+    directory = safe_generated_dir(root, f".paperops/workflow/plans/{plan.plan_id}")
+    temporary = directory / f".plan.{__import__('os').getpid()}.tmp"
+    temporary.write_text(canonical_json(plan.to_dict(), pretty=True), encoding="utf-8")
+    __import__("os").replace(temporary, directory / "plan.json")
     return plan
 
 

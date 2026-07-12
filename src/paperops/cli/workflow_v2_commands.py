@@ -14,6 +14,7 @@ from paperops.workflow_v2.approvals import inspect_approvals, plan_approval_deci
 from paperops.workflow_v2.issues import inspect_issues, plan_issue_close, plan_issue_reopen, plan_issue_route
 from paperops.workflow_v2.transaction import execute_workflow_apply, execute_workflow_rollback
 from paperops.workflow_v2.migration import plan_workflow_adoption, prepare_workflow_shadow, workflow_migration_status
+from paperops.workflow_v2.mutation import safe_generated_dir
 
 
 def _canonical(value: object) -> str:
@@ -40,8 +41,7 @@ def workflow_v2_plan(root: Path, *, changed: tuple[str, ...], issues: tuple[str,
     graph = build_dependency_graph(load_workflow_catalog(root))
     result = plan_workflow_impact(graph, changed_ids=changed, issue_ids=issues)
     payload = result.to_dict()
-    directory = root / ".paperops/workflow/plans" / result.plan_id
-    directory.mkdir(parents=True, exist_ok=True)
+    directory = safe_generated_dir(root, f".paperops/workflow/plans/{result.plan_id}")
     temporary = directory / f".plan.{os.getpid()}.tmp"
     temporary.write_text(_canonical(payload), encoding="utf-8")
     os.replace(temporary, directory / "plan.json")
@@ -58,6 +58,8 @@ def workflow_v2_plan(root: Path, *, changed: tuple[str, ...], issues: tuple[str,
 
 def workflow_v2_mutation(args, root: Path) -> int:
     action = args.workflow_action
+    if action in {"issue", "approval"} and workflow_migration_status(root)["mode"] != "v2-authoritative":
+        raise ValueError("typed workflow mutation requires v2-authoritative mode")
     if action == "issue":
         subaction = args.issue_action
         if subaction == "status":

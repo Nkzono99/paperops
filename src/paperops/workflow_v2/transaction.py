@@ -10,13 +10,13 @@ import os
 import stat
 from pathlib import Path
 
-from paperops.workflow_v2.mutation import canonical_json, raw_hash, validate_identity
+from paperops.workflow_v2.mutation import canonical_json, raw_hash, safe_generated_dir, validate_identity
 
 
 def _read_plan(root: Path, plan_id: str) -> dict:
     if not plan_id.startswith("WPLAN-"):
         raise ValueError("invalid plan id")
-    path = root / ".paperops/workflow/plans" / plan_id / "plan.json"
+    path = safe_generated_dir(root, f".paperops/workflow/plans/{plan_id}") / "plan.json"
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -71,10 +71,8 @@ def execute_workflow_apply(root: Path, plan_id: str, *, confirmed: bool = False)
         raise ValueError("workflow apply requires explicit confirmation")
     payload = _read_plan(root, plan_id)
     tx_id = "WTX-" + hashlib.sha256(canonical_json(payload).encode()).hexdigest()[:16]
-    state = root / ".paperops/workflow/transactions" / tx_id
-    state.mkdir(parents=True, exist_ok=True)
-    lock_path = root / ".paperops/workflow/lock"
-    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    state = safe_generated_dir(root, f".paperops/workflow/transactions/{tx_id}")
+    lock_path = safe_generated_dir(root, ".paperops/workflow") / "lock"
     with lock_path.open("a+b") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         journal_path = state / "journal.json"
@@ -143,7 +141,7 @@ def execute_workflow_apply(root: Path, plan_id: str, *, confirmed: bool = False)
 def execute_workflow_rollback(root: Path, transaction_id: str, *, confirmed: bool = False) -> str:
     if not confirmed:
         raise ValueError("workflow rollback requires explicit confirmation")
-    journal_path = root / ".paperops/workflow/transactions" / transaction_id / "journal.json"
+    journal_path = safe_generated_dir(root, f".paperops/workflow/transactions/{transaction_id}") / "journal.json"
     journal = json.loads(journal_path.read_text(encoding="utf-8"))
     if journal.get("transaction_id") != transaction_id or journal.get("state") not in {"APPLIED", "ROLLED_BACK"}:
         raise ValueError("workflow transaction cannot be rolled back")
@@ -169,6 +167,7 @@ def recover_incomplete_workflow_transactions(root: Path) -> tuple[str, ...]:
     directory = root / ".paperops/workflow/transactions"
     if not directory.exists():
         return ()
+    directory = safe_generated_dir(root, ".paperops/workflow/transactions")
     for journal_path in sorted(directory.glob("WTX-*/journal.json")):
         journal = json.loads(journal_path.read_text())
         if journal.get("state") not in {"PREPARED", "APPLYING"}:

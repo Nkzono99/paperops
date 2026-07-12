@@ -4,6 +4,7 @@ import json
 import shutil
 import tempfile
 import unittest
+import os
 from pathlib import Path
 
 from paperops.workflow_v2.approvals import inspect_approvals, plan_approval_decision
@@ -69,6 +70,17 @@ class WorkflowMutationTest(unittest.TestCase):
         issue.write_text(issue.read_text() + "\n")
         with self.assertRaises(ValueError):
             execute_workflow_apply(self.project, plan.plan_id, confirmed=True)
+
+    def test_generated_workflow_namespace_cannot_be_a_symlink(self) -> None:
+        namespace = self.project / ".paperops/workflow"
+        if namespace.exists():
+            shutil.rmtree(namespace)
+        outside = Path(self.temp.name) / "outside"
+        outside.mkdir()
+        namespace.parent.mkdir(parents=True, exist_ok=True)
+        os.symlink(outside, namespace)
+        with self.assertRaises(ValueError):
+            plan_issue_route(self.project, "ISS-0001", "research", "Evidence changed")
 
 
 if __name__ == "__main__":

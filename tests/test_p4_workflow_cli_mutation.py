@@ -9,6 +9,7 @@ from io import StringIO
 from pathlib import Path
 
 from paperops.cli.main import build_parser, main
+from paperops.cli.manifest import write_manifest_data_atomic
 from paperops.workflow_v2.mutation import semantic_hash
 
 
@@ -21,6 +22,9 @@ class WorkflowMutationCliTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.project = Path(self.temp.name) / "paper"
         shutil.copytree(ROOT / "template", self.project)
+        manifest = self.project / ".pops/manifest.toml"
+        manifest.parent.mkdir(parents=True)
+        write_manifest_data_atomic(manifest, {"workflow": {"mode": "v2-authoritative"}})
         issue = {"schema_version": 1, "record_type": "workflow_issue", "id": "ISS-0001", "revision": 1, "status": "open", "dependencies": [], "approvals": [], "extensions": {}, "metadata": {"created_at": "", "updated_at": ""}, "severity": "major", "route": "editorial", "targets": [{"kind": "workflow_issue", "id": "ISS-0001", "revision": 1, "hash": H}], "review_round_ref": "", "confidentiality": "public", "public_summary": "Reorder.", "closure_criteria": ["verified"], "blocking_dependency_refs": [], "impacts": [{"target_id": "ISS-0001", "target_type": "workflow_issue", "expected_revision": 1, "expected_hash": H, "state": "resolved", "verification_refs": ["check:ISS-0001"]}], "route_history": [], "closure": {"decision": "pending", "reason": "", "verification_refs": []}, "escalation": {"level": "none", "reason": ""}}
         path = self.project / "_paperops/model/issues/workflow/ISS-0001.yml"
         path.parent.mkdir(parents=True)

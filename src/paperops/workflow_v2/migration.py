@@ -14,7 +14,7 @@ from paperops.cli.manifest import as_table, dumps_manifest_toml, read_manifest
 from paperops.compiler.privacy import scan_private_material
 from paperops.compiler.safe_fs import SafeProjectReader
 from paperops.workflow_v2.migration_inventory import inventory_legacy_workflow
-from paperops.workflow_v2.mutation import DocumentRef, new_replacement, persist_plan, raw_hash, replacement, semantic_hash
+from paperops.workflow_v2.mutation import DocumentRef, new_replacement, persist_plan, raw_hash, replacement, safe_generated_dir, semantic_hash
 from paperops.workflow_v2.profile import load_workflow_profile
 
 
@@ -59,7 +59,7 @@ def prepare_workflow_shadow(root: Path, refresh: bool = False) -> WorkflowMigrat
     inventory = inventory_legacy_workflow(root)
     profile = load_workflow_profile(root)
     migration_id = "WMIG-" + inventory.source_hash.removeprefix("sha256:")[:16]
-    directory = root / ".paperops/workflow/migration" / migration_id
+    directory = safe_generated_dir(root, f".paperops/workflow/migration/{migration_id}")
     report_path = directory / "report.json"
     if report_path.exists() and not refresh:
         payload = json.loads(report_path.read_text())
@@ -72,9 +72,8 @@ def prepare_workflow_shadow(root: Path, refresh: bool = False) -> WorkflowMigrat
         if document is not None:
             candidates.append(document)
     result = WorkflowMigrationResult(migration_id, inventory.source_hash, tuple(candidates), tuple(dispositions))
-    directory.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(result.to_dict(), ensure_ascii=False, sort_keys=True, indent=2) + "\n")
-    latest = root / ".paperops/workflow/migration/latest.json"
+    latest = safe_generated_dir(root, ".paperops/workflow/migration") / "latest.json"
     latest.write_text(json.dumps({"migration_id": migration_id}, sort_keys=True) + "\n")
     return result
 
@@ -82,7 +81,7 @@ def prepare_workflow_shadow(root: Path, refresh: bool = False) -> WorkflowMigrat
 def _load_result(root: Path, migration_id: str) -> WorkflowMigrationResult:
     if re.fullmatch(r"WMIG-[0-9a-f]{16}", migration_id) is None:
         raise ValueError("invalid workflow migration id")
-    payload = json.loads((root / ".paperops/workflow/migration" / migration_id / "report.json").read_text())
+    payload = json.loads((safe_generated_dir(root, f".paperops/workflow/migration/{migration_id}") / "report.json").read_text())
     return WorkflowMigrationResult(payload["migration_id"], payload["source_hash"], tuple(payload["candidates"]), tuple(payload["dispositions"]))
 
 
