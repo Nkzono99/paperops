@@ -169,7 +169,7 @@ def check(root: Path, phase: str, intent: str, changed_files: list[str], strict:
             findings.append(
                 Finding(
                     "error" if strict else "warning",
-                    "subagent reports are not manuscript edits; convert the report into typed Issue/Research updates or Manuscript section plans before treating it as progress on a content blocker.",
+                    "subagent reports are not manuscript edits; convert the report into typed Issue/Research updates or Manuscript section plans before treating it as progress on a manuscript content blocker.",
                 )
             )
         if changed_kinds <= {"hygiene"}:

@@ -379,6 +379,7 @@ def _initialize_staged_project(
     reservation_created = False
     reservation_locked = False
     reservation_identity: tuple[int, int] | None = None
+    reservation_fd: int | None = None
     installed = False
     try:
         if restore_empty:
@@ -388,6 +389,7 @@ def _initialize_staged_project(
             shutil.copystat(target, staging, follow_symlinks=False)
             reserved = target.stat()
             reservation_identity = (reserved.st_dev, reserved.st_ino)
+            reservation_fd = os.open(target, os.O_RDONLY | os.O_DIRECTORY)
             target.chmod(0o500)
             reservation_locked = True
         else:
@@ -397,6 +399,7 @@ def _initialize_staged_project(
             reservation_created = True
             reserved = target.stat()
             reservation_identity = (reserved.st_dev, reserved.st_ino)
+            reservation_fd = os.open(target, os.O_RDONLY | os.O_DIRECTORY)
             target.chmod(0o500)
             staging = Path(
                 tempfile.mkdtemp(prefix=f".{target.name}.pops-init-", dir=target.parent)
@@ -408,7 +411,7 @@ def _initialize_staged_project(
             plan = copy_scaffold(source, staging, overwrite=False)
         write_manifest(staging, template_ref=template_ref)
         hashes = bootstrap_v2_authority(staging)
-        if not _is_empty_reservation(target, reservation_identity):
+        if not _is_empty_reservation(target, reservation_identity, reservation_fd):
             raise FileExistsError(f"target changed during initialization: {target}")
         os.replace(staging, target)
         installed = True
@@ -417,24 +420,29 @@ def _initialize_staged_project(
         if not installed:
             if staging is not None:
                 shutil.rmtree(staging, ignore_errors=True)
-            if _is_empty_reservation(target, reservation_identity):
+            if _is_empty_reservation(target, reservation_identity, reservation_fd):
                 if reservation_created:
                     target.rmdir()
                 elif reservation_locked:
                     target.chmod(restore_mode)
+        if reservation_fd is not None:
+            os.close(reservation_fd)
 
 
 def _is_empty_reservation(
     target: Path,
     identity: tuple[int, int] | None,
+    reservation_fd: int | None,
 ) -> bool:
-    if identity is None:
+    if identity is None or reservation_fd is None:
         return False
     try:
         metadata = target.stat()
+        reserved = os.fstat(reservation_fd)
         return (
             target.is_dir()
             and (metadata.st_dev, metadata.st_ino) == identity
+            and os.path.samestat(metadata, reserved)
             and not any(target.iterdir())
         )
     except OSError:
