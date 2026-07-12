@@ -7,6 +7,8 @@
 .paperops/snapshots/
 .paperops/writer/
 _handoff/
+# Agent session designs and implementation plans are local working state.
+docs/superpowers/
 .venv/
 .worktrees/
 __pycache__/
