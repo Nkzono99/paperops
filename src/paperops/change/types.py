@@ -25,6 +25,26 @@ class ChangeRequest:
     operations: tuple[Operation, ...]
 
 
+@dataclass(frozen=True)
+class Replacement:
+    identity: str
+    before_hash: str
+    after_hash: str
+    content: bytes | None
+
+
+@dataclass(frozen=True)
+class ChangePlan:
+    schema_version: int
+    change_id: str
+    reason: str
+    affected_models: tuple[str, ...]
+    operations: tuple[Operation, ...]
+    replacements: tuple[Replacement, ...]
+    base_model_hashes: Mapping[str, str]
+    candidate_model_hashes: Mapping[str, str]
+
+
 def frozen_mapping(value: dict[str, Any]) -> Mapping[str, Any]:
     """Detach the top-level document from the YAML parser's mutable mapping."""
     return MappingProxyType(dict(value))

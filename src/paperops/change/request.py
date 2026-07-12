@@ -91,8 +91,8 @@ def _operation(request_path: Path, value: object) -> Operation:
         raise ChangeRequestError("operation.id is unsafe")
     revision = row.get("expected_revision")
     digest = row.get("expected_hash", "")
-    if revision is not None and (type(revision) is not int or revision < 1):
-        raise ChangeRequestError("operation.expected_revision must be a positive integer or null")
+    if revision is not None and (type(revision) is not int or revision < 0):
+        raise ChangeRequestError("operation.expected_revision must be a non-negative integer or null")
     if not isinstance(digest, str) or (digest and HASH_PATTERN.fullmatch(digest) is None):
         raise ChangeRequestError("operation.expected_hash must be empty or sha256:<hex>")
     existing = revision is not None or bool(digest)
