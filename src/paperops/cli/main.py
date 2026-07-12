@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import argparse
+import os
+import shutil
 import sys
+import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 
+from paperops.authority_bootstrap import bootstrap_legacy_authority, bootstrap_v2_authority
 from paperops.cli.constants import PACKAGE_NAME, UPSTREAM_REPO
 from paperops.cli.compile_commands import add_compile_parser
 from paperops.cli.write_commands import add_write_parser
@@ -26,6 +30,7 @@ from paperops.cli.manifest import (
     write_manifest,
 )
 from paperops.cli.migration_commands import add_migrate_parser
+from paperops.cli.models import CopyPlan
 from paperops.cli.model_commands import add_model_parser
 from paperops.cli.notices import maybe_print_update_notice, warn_ignored_bootstrap_options
 from paperops.cli.output import print_copy_summary, print_next_steps, print_update_plan
@@ -93,6 +98,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--force",
         action="store_true",
         help="Copy into an existing directory without overwriting files.",
+    )
+    init_parser.add_argument(
+        "--authority",
+        choices=("v2", "legacy"),
+        default="v2",
+        help="Initial authority mode (default: v2; legacy is deprecated).",
     )
     init_parser.add_argument(
         "--template-ref",
@@ -296,27 +307,109 @@ def add_update_paperops_parser(
 
 
 def cmd_init(args: argparse.Namespace) -> int:
-    target = Path(args.path).expanduser().resolve()
-    if target.exists() and any(target.iterdir()) and not args.force:
+    target = Path(os.path.abspath(Path(args.path).expanduser()))
+    if target.is_symlink() or (target.exists() and not target.is_dir()):
+        print(
+            "error: target must be a directory path, not a symlink or "
+            f"special file: {target}",
+            file=sys.stderr,
+        )
+        return 2
+    nonempty = target.is_dir() and any(target.iterdir())
+    if nonempty and not args.force:
         print(f"error: target is not empty: {target}", file=sys.stderr)
         print(
             "hint: choose a new directory or pass --force to copy only missing files.",
             file=sys.stderr,
         )
         return 2
+    if nonempty and args.authority == "v2":
+        print(
+            "error: v2 authority cannot be claimed while force-copying into "
+            "a non-empty target.",
+            file=sys.stderr,
+        )
+        print(
+            "hint: use --authority legacy for additive copy, or migrate the existing project explicitly.",
+            file=sys.stderr,
+        )
+        return 2
 
-    target.mkdir(parents=True, exist_ok=True)
-    with scaffold_source() as source:
-        plan = copy_scaffold(source, target, overwrite=False)
+    try:
+        preserved_authority = False
+        if nonempty:
+            preserved_authority = (target / ".pops" / "manifest.toml").is_file()
+            with scaffold_source() as source:
+                plan = copy_scaffold(source, target, overwrite=False)
+            write_manifest(target, template_ref=args.template_ref)
+            if not preserved_authority:
+                bootstrap_legacy_authority(target)
+            hashes: dict[str, str] = {}
+        else:
+            plan, hashes = _initialize_staged_project(
+                target,
+                authority=args.authority,
+                template_ref=args.template_ref,
+            )
+    except (OSError, ValueError) as error:
+        print(f"error: initialization failed: {error}", file=sys.stderr)
+        return 1
 
-    write_manifest(target, template_ref=args.template_ref)
     args.project_root = target
     print(f"Initialized paper project: {target}")
     print_copy_summary(plan)
+    if args.authority == "v2":
+        print("Authority: v2-authoritative")
+        print("Workflow: v2-authoritative")
+        print("Model hashes:")
+        for name, digest in hashes.items():
+            print(f"  {name}: {digest}")
+    else:
+        if preserved_authority:
+            print("Authority: unchanged")
+            print("Workflow: unchanged")
+        else:
+            print("Authority: legacy-authoritative")
+            print("Workflow: legacy")
+        print(
+            "warning: --authority legacy is deprecated; removal is not scheduled.",
+            file=sys.stderr,
+        )
     warn_ignored_bootstrap_options(args)
 
     print_next_steps(target)
     return 0
+
+
+def _initialize_staged_project(
+    target: Path,
+    *,
+    authority: str,
+    template_ref: str,
+) -> tuple[CopyPlan, dict[str, str]]:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    restore_empty = target.is_dir()
+    staging = Path(tempfile.mkdtemp(prefix=f".{target.name}.pops-init-", dir=target.parent))
+    installed = False
+    try:
+        with scaffold_source() as source:
+            plan = copy_scaffold(source, staging, overwrite=False)
+        write_manifest(staging, template_ref=template_ref)
+        if authority == "v2":
+            hashes = bootstrap_v2_authority(staging)
+        else:
+            bootstrap_legacy_authority(staging)
+            hashes = {}
+        if restore_empty:
+            target.rmdir()
+        os.replace(staging, target)
+        installed = True
+        return plan, hashes
+    finally:
+        if not installed:
+            shutil.rmtree(staging, ignore_errors=True)
+            if restore_empty and not os.path.lexists(target):
+                target.mkdir()
 
 
 def cmd_setup(args: argparse.Namespace) -> int:

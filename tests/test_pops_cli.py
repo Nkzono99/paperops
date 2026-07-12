@@ -13,6 +13,7 @@ from paperops.cli.main import write_manifest  # noqa: E402
 from paperops.cli.manifest import applied_migrations  # noqa: E402
 from paperops.cli.migrations import get_migration  # noqa: E402
 from paperops.cli.scaffold import copy_scaffold, is_managed_update  # noqa: E402
+from paperops.model_state import MODEL_NAMES  # noqa: E402
 
 
 def set_scaffold_version(root: Path, version: str) -> None:
@@ -40,6 +41,97 @@ def create_legacy_internal_layout(root: Path) -> None:
 
 
 class PopsCliTest(unittest.TestCase):
+    def test_init_defaults_to_v2_authority_for_all_models_and_workflow(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+
+            code, out, err = run_cli(["init", str(target)])
+
+            self.assertEqual(code, 0, err)
+            manifest = tomllib.loads(
+                (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
+            )
+            self.assertEqual(manifest["workflow"]["mode"], "v2-authoritative")
+            self.assertEqual(tuple(manifest["models"]), MODEL_NAMES)
+            for name in MODEL_NAMES:
+                with self.subTest(model=name):
+                    state = manifest["models"][name]
+                    self.assertEqual(state["mode"], "v2-authoritative")
+                    self.assertRegex(state["current_hash"], r"^sha256:[0-9a-f]{64}$")
+                    self.assertEqual(state["last_shadow_transaction"], "")
+                    self.assertEqual(state["last_adopt_transaction"], "")
+                    self.assertIn(f"  {name}: {state['current_hash']}", out)
+            self.assertIn("Authority: v2-authoritative", out)
+            self.assertIn("Workflow: v2-authoritative", out)
+
+    def test_init_legacy_records_explicit_legacy_authority_and_warns(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+
+            code, out, err = run_cli(["init", str(target), "--authority", "legacy"])
+
+            self.assertEqual(code, 0, err)
+            manifest = tomllib.loads(
+                (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
+            )
+            self.assertEqual(manifest["workflow"]["mode"], "legacy")
+            self.assertTrue(
+                all(manifest["models"][name]["mode"] == "legacy-authoritative" for name in MODEL_NAMES)
+            )
+            self.assertIn("Authority: legacy-authoritative", out)
+            self.assertIn("deprecated", err)
+            self.assertIn("removal is not scheduled", err)
+
+    def test_init_rejects_v2_force_copy_into_nonempty_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            target.mkdir()
+            marker = target / "project-owned.txt"
+            marker.write_text("keep\n", encoding="utf-8")
+
+            code, _out, err = run_cli(["init", str(target), "--force"])
+
+            self.assertEqual(code, 2)
+            self.assertIn("--authority legacy", err)
+            self.assertEqual(marker.read_text(encoding="utf-8"), "keep\n")
+            self.assertFalse((target / ".pops").exists())
+
+    def test_init_bootstrap_failure_leaves_no_partial_target(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            with mock.patch(
+                "paperops.cli.main.bootstrap_v2_authority",
+                side_effect=ValueError("starter model validation failed: schema.invalid"),
+            ):
+                code, _out, err = run_cli(["init", str(target)])
+
+            self.assertEqual(code, 1)
+            self.assertIn("schema.invalid", err)
+            self.assertFalse(target.exists())
+            self.assertEqual(list(Path(tmp).glob(".paper-demo.pops-init-*")), [])
+
+    def test_legacy_force_copy_preserves_existing_v2_authority(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+            before = tomllib.loads(
+                (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
+            )
+            (target / "project-owned.txt").write_text("keep\n", encoding="utf-8")
+
+            code, _out, err = run_cli(
+                ["init", str(target), "--force", "--authority", "legacy"]
+            )
+
+            self.assertEqual(code, 0, err)
+            after = tomllib.loads(
+                (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
+            )
+            self.assertEqual(after["models"], before["models"])
+            self.assertEqual(after["workflow"], before["workflow"])
+            self.assertEqual((target / "project-owned.txt").read_text(encoding="utf-8"), "keep\n")
+
     def test_init_contains_editorial_starter(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
