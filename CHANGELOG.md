@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- P3 Writer apply/rollbackをdurable transaction化した。validated authoritative patchをcompile bundle / base manifest / authority / scope / target pre/post hash・modeへ固定し、明示確認後だけliving `.tex`をfile単位でatomic replaceする。journal、preimage snapshot、sequence/lineage、中断回復を持ち、通常例外は同じ呼出し内で補償し、hard crash後も既知pre/post hashだけを復元する。未知の手編集、欠損・symlink・special file・snapshot破損はconflictとして上書きせず、rollbackは新しいreceiptとして記録する。
+
 - P3 Writer patchにoccurrence単位の意味保存検査を追加した。claim / result / quantity / figure / citation / argument move / predicted marker / AREQ / placeholder / authoring intentをmultisetとして追跡し、current modelに結び付いたwhole-block cut以外の消失、未被覆の追加、未承認move、custom citation、private/raw materialを停止する。JA/ENの片側変更はledgerを更新せずfreshness driftとして報告し、通常のproject-relative TeX input、DOI/HTTPS、公開software名は許可する。
 
 - P3 Writer session APIを追加し、検証済みcompile bundleとliving `manuscript/`全体を`.paperops/writer/<session>/workspace/manuscript/`へ安全にsnapshotする。session/base manifestは全regular fileのbyte hash・mode、compile/bundle/authority/scope、TeX block inventory、typed/raw bindingへ固定し、symlink・special file・hardlinkを拒否する。candidate patchはliving driftとscopeを再検証し、生TeXを保存せずfile/block hash、endpoint、model authorizationだけを出す。scope外・preamble/shared/bib変更はblocked、未計画topologyは`replan_required`になる。

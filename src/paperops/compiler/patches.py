@@ -33,6 +33,7 @@ class WriterPatchResult:
     introduced_references: tuple[Mapping[str, Any], ...] = ()
     mirror_impacts: tuple[Mapping[str, Any], ...] = ()
     conservation_result: str = "pending"
+    compile_bundle_hash: str = ""
     patch_hash: str = ""
     schema_version: int = 1
 
@@ -49,6 +50,8 @@ class WriterPatchResult:
         _validate_hash(self.candidate_snapshot_hash, "Writer candidate snapshot hash")
         if self.patch_hash:
             _validate_hash(self.patch_hash, "Writer patch hash")
+        if self.compile_bundle_hash:
+            _validate_hash(self.compile_bundle_hash, "Writer compile bundle hash")
         if self.conservation_result not in {"pending", "blocked", "passed"}:
             raise ValueError("Writer patch conservation result is invalid")
         if self.schema_version != 1:
@@ -72,7 +75,7 @@ class WriterPatchResult:
         )
 
     def _payload(self) -> dict[str, object]:
-        return {
+        payload = {
             "schema_version": self.schema_version,
             "session_id": self.session_id,
             "compile_id": self.compile_id,
@@ -97,6 +100,9 @@ class WriterPatchResult:
             "conservation_result": self.conservation_result,
             "findings": [item.to_dict() for item in self.findings],
         }
+        if self.compile_bundle_hash:
+            payload["compile_bundle_hash"] = self.compile_bundle_hash
+        return payload
 
     def to_dict(self) -> dict[str, object]:
         payload = self._payload()

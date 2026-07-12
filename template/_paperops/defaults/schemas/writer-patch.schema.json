@@ -11,6 +11,7 @@
     "status": {"enum": ["ready", "blocked", "replan_required"]},
     "applicable": {"type": "boolean"},
     "source_mode": {"enum": ["authoritative", "shadow"]},
+    "compile_bundle_hash": {"$ref": "#/$defs/hash"},
     "base_manifest_hash": {"$ref": "#/$defs/hash"},
     "candidate_snapshot_hash": {"$ref": "#/$defs/hash"},
     "authority": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},

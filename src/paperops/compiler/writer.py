@@ -623,6 +623,7 @@ def _patch_from_candidate(
         changes=tuple(changes),
         findings=tuple(findings),
         conservation_result="pending" if status == "ready" else "blocked",
+        compile_bundle_hash=str(session.get("bundle_hash", "")),
     )
     return replace(result, patch_hash=semantic_hash(result._payload()))
 
@@ -692,6 +693,7 @@ def build_patch(root: str | Path, session_id: str) -> WriterPatchResult:
                 _finding("write.candidate_invalid", "/candidate", "Writer candidate is missing or unsafe"),
             ),
             conservation_result="blocked",
+            compile_bundle_hash=str(session.get("bundle_hash", "")),
         )
         result = replace(result, patch_hash=semantic_hash(result._payload()))
     finally:

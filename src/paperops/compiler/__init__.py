@@ -38,6 +38,19 @@ from .writer import (
     inspect_writer_session,
     start_writer_session,
 )
+from .write_transaction import (
+    HardCrashSimulation,
+    InjectedWriteFailure,
+    WriteApplyPlan,
+    WriteRollbackPlan,
+    WriteTransactionError,
+    WriteTransactionResult,
+    execute_write_apply,
+    execute_write_rollback,
+    plan_write_apply,
+    plan_write_rollback,
+    recover_incomplete_writes,
+)
 from .storage import (
     atomic_write_json,
     canonical_json_bytes,
@@ -107,6 +120,12 @@ __all__ = [
     "WriterPatchResult",
     "WriterPaths",
     "WriterSessionResult",
+    "WriteApplyPlan",
+    "WriteRollbackPlan",
+    "WriteTransactionError",
+    "WriteTransactionResult",
+    "HardCrashSimulation",
+    "InjectedWriteFailure",
     "atomic_write_json",
     "bind_typed_tex_blocks",
     "canonical_json_bytes",
@@ -131,4 +150,9 @@ __all__ = [
     "build_patch",
     "inspect_writer_session",
     "start_writer_session",
+    "execute_write_apply",
+    "execute_write_rollback",
+    "plan_write_apply",
+    "plan_write_rollback",
+    "recover_incomplete_writes",
 ]
