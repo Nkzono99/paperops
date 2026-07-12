@@ -45,7 +45,7 @@ hard_rules:
 
 soft_rules:
   - Main Results usually have three to five major subsections.
-  - `section_depth` in `manuscript/writing-profile.yml` is a soft floor, not a target; expand only by adding missing results, comparisons, scope, or consequence.
+  - "`section_depth` in `manuscript/writing-profile.yml` is a soft floor, not a target; expand only by adding missing results, comparisons, scope, or consequence."
   - Subsections are allowed but not required. Avoid one-paragraph subsections; merge them or expand the reader question, answer, evidence, and consequence.
   - Group repeated caveats in one place when they share the same scope.
   - Move secondary sensitivity or inventory material to supplement unless it changes a central answer.

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import List
 
 
-BLOCK_RE = re.compile(r"^\s*%\s*block:\s*(?P<block_id>[A-Za-z0-9_.-]+)\s*$")
+BLOCK_RE = re.compile(r"^\s*%\s*block:\s*(?P<block_id>[A-Za-z0-9:._-]+)\s*$")
 
 
 def extract_blocks(path):

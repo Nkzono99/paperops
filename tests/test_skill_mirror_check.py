@@ -130,6 +130,31 @@ class SkillMirrorCheckTest(unittest.TestCase):
             ).exists()
         )
 
+    def test_sync_helper_accepts_schema_colon_block_ids(self) -> None:
+        helper = (
+            ROOT
+            / "template"
+            / ".agents"
+            / "skills"
+            / "sync-ja-en"
+            / "scripts"
+            / "sync_blocks.py"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "source.tex"
+            target = Path(tmp) / "target.tex"
+            for path in (source, target):
+                path.write_text(
+                    "% block: results:primary.01\nSame body.\n",
+                    encoding="utf-8",
+                )
+
+            result = run_python_script(helper, source, target)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("source_blocks: 1", result.stdout)
+        self.assertIn("target_blocks: 1", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

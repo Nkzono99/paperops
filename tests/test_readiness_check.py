@@ -3,12 +3,14 @@ from __future__ import annotations
 import tempfile
 import textwrap
 import unittest
+from pathlib import Path
 
 
 from tests.helpers import ROOT, copy_template, run_python_script
 
 
 SCRIPT = ROOT / "template" / "scripts" / "readiness-check.py"
+MIRROR_SCRIPT = ROOT / "template" / "scripts" / "mirror-check.py"
 MIRROR_FRESHNESS_SCRIPT = ROOT / "template" / "scripts" / "mirror-freshness-check.py"
 
 
@@ -186,6 +188,50 @@ class ReadinessCheckTest(unittest.TestCase):
         self.assertEqual(non_strict.returncode, 0)
         self.assertEqual(strict.returncode, 1)
         self.assertIn("--update", strict.stdout)
+
+    def test_mirror_gates_accept_schema_colon_block_ids(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manuscript = root / "manuscript"
+            (manuscript / "ja/sections").mkdir(parents=True)
+            (manuscript / "en/sections").mkdir(parents=True)
+            (manuscript / "mirror").mkdir(parents=True)
+            for language in ("ja", "en"):
+                (manuscript / language / "sections/results.tex").write_text(
+                    "% block: results:primary.01\nSame body.\n",
+                    encoding="utf-8",
+                )
+            (manuscript / "mirror/map.toml").write_text(
+                """\
+[[file_pair]]
+ja = "ja/sections/results.tex"
+en = "en/sections/results.tex"
+""",
+                encoding="utf-8",
+            )
+
+            mirror = run_python_script(MIRROR_SCRIPT, "--root", root)
+            update = run_python_script(
+                MIRROR_FRESHNESS_SCRIPT,
+                "--root",
+                manuscript,
+                "--update",
+            )
+            strict = run_python_script(
+                MIRROR_FRESHNESS_SCRIPT,
+                "--root",
+                manuscript,
+                "--strict",
+            )
+            ledger_text = (manuscript / "mirror/block-ledger.yml").read_text(
+                encoding="utf-8"
+            )
+
+        self.assertEqual(mirror.returncode, 0, mirror.stdout + mirror.stderr)
+        self.assertIn("整合 (1 ブロック)", mirror.stdout)
+        self.assertEqual(update.returncode, 0, update.stdout + update.stderr)
+        self.assertEqual(strict.returncode, 0, strict.stdout + strict.stderr)
+        self.assertIn("results:primary.01", ledger_text)
 
 
 if __name__ == "__main__":

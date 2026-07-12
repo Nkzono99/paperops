@@ -7,7 +7,7 @@ from pathlib import Path
 import re
 
 
-BLOCK_RE = re.compile(r"^\s*%\s*block:\s*(?P<block_id>[A-Za-z0-9_.-]+)\s*$")
+BLOCK_RE = re.compile(r"^\s*%\s*block:\s*(?P<block_id>[A-Za-z0-9:._-]+)\s*$")
 PAIR_HEADER_RE = re.compile(r"^\s*\[\[file_pair\]\]\s*$")
 ASSIGN_RE = re.compile(r'^\s*(?P<key>ja|en)\s*=\s*"(?P<value>[^"]+)"\s*$')
 

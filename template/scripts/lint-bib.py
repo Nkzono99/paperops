@@ -7,10 +7,6 @@ from pathlib import Path
 from paperops_paths import internal_path
 
 
-ENTRY_RE = re.compile(
-    r"@(?P<entry_type>[A-Za-z]+)\s*\{\s*(?P<key>[^,\s]+)\s*,(?P<body>.*?)\n\}",
-    re.DOTALL,
-)
 FIELD_RE = re.compile(r"^\s*(?P<field>[A-Za-z]+)\s*=", re.MULTILINE)
 DEFAULT_CITE_COMMANDS = {
     "autocite",
@@ -31,6 +27,60 @@ DEFAULT_CITE_COMMANDS = {
     "textcite",
     "textcites",
 }
+
+
+def bib_entries(text: str):
+    active = "\n".join(strip_comments(text).splitlines())
+    index = 0
+    while index < len(active):
+        marker = active.find("@", index)
+        if marker < 0:
+            break
+        cursor = marker + 1
+        while cursor < len(active) and active[cursor].isalpha():
+            cursor += 1
+        entry_type = active[marker + 1 : cursor].lower()
+        while cursor < len(active) and active[cursor].isspace():
+            cursor += 1
+        if not entry_type or cursor >= len(active) or active[cursor] not in "{(":
+            index = marker + 1
+            continue
+        opener = active[cursor]
+        body_start = cursor + 1
+        cursor = body_start
+        stack = ["}" if opener == "{" else ")"]
+        quoted = False
+        escaped = False
+        while cursor < len(active) and stack:
+            character = active[cursor]
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif quoted:
+                if character == '"':
+                    quoted = False
+            elif character == '"':
+                quoted = True
+            elif character == "{":
+                stack.append("}")
+            elif character == "}" and stack[-1] == "}":
+                stack.pop()
+            elif character == "(" and stack[-1] == ")":
+                stack.append(")")
+            elif character == ")" and stack[-1] == ")":
+                stack.pop()
+            cursor += 1
+        if stack or quoted:
+            break
+        body = active[body_start : cursor - 1]
+        index = cursor
+        if entry_type in {"comment", "preamble", "string"} or "," not in body:
+            continue
+        key, fields = body.split(",", 1)
+        key = key.strip()
+        if key and not any(character.isspace() for character in key):
+            yield key, entry_type, fields
 
 
 def iter_bib_files(root):
@@ -172,9 +222,7 @@ def main() -> int:
 
     for bib_file in files:
         text = bib_file.read_text(encoding="utf-8")
-        for match in ENTRY_RE.finditer(text):
-            key = match.group("key").strip()
-            body = match.group("body")
+        for key, _entry_type, body in bib_entries(text):
             if key in keys:
                 errors.append(f"重複キー '{key}': {bib_file} と {keys[key]}")
             else:

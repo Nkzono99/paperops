@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 
-BLOCK_RE = re.compile(r"^\s*%\s*block:\s*(?P<block_id>[A-Za-z0-9_.-]+)\s*$", re.MULTILINE)
+BLOCK_RE = re.compile(r"^\s*%\s*block:\s*(?P<block_id>[A-Za-z0-9:._-]+)\s*$", re.MULTILINE)
 
 
 def extract_blocks(path: Path) -> set[str]:

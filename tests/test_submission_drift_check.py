@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from pathlib import Path
 
 from tests.helpers import ROOT, copy_template, run_python_script
 
@@ -71,6 +72,22 @@ class SubmissionDriftCheckTest(unittest.TestCase):
         makefile = (ROOT / "template" / "Makefile").read_text(encoding="utf-8")
 
         self.assertIn("check-submission-drift.py --root . --strict", makefile)
+
+    def test_schema_colon_block_id_is_compared_as_one_submission_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            manuscript = project / "manuscript/en/results.tex"
+            submission = project / "submission/demo/main.tex"
+            manuscript.parent.mkdir(parents=True)
+            submission.parent.mkdir(parents=True)
+            content = "% block: results:primary.01\nPublished body.\n"
+            manuscript.write_text(content, encoding="utf-8")
+            submission.write_text(content, encoding="utf-8")
+
+            result = run_python_script(SCRIPT, "--root", project, "--strict")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("block ID は対応しています", result.stdout)
 
 
 if __name__ == "__main__":
