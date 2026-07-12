@@ -1635,6 +1635,11 @@ def load_compile_inputs(root: Path, request: CompileRequest) -> LoadedCompileInp
     """Return a detached snapshot only after its model authority is validated."""
     _reject_source_mode(request)
     if request.source_mode == "authoritative":
+        from paperops.workflow_v2.readiness import workflow_compile_findings
+
+        workflow_findings = workflow_compile_findings(root, request.write_scope.section_ids)
+        if workflow_findings:
+            raise CompileInputError(workflow_findings[0])
         with tempfile.TemporaryDirectory(prefix="pops-compile-authority-") as tmp:
             target = Path(tmp) / "project"
             captured = _capture_authoritative_project(root, target)
