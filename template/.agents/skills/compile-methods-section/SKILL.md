@@ -38,3 +38,9 @@ method unit の plan には、`role_in_claim`、`nonstandard_choice`、`sensitiv
 `section-contract-check` が Methods definition registry の不足を返した場合は、Results の prose を先に直さない。Methods plan に criterion glossary と baseline/comparator の scientific role を追加し、必要な `% block:` ID を作ってから Results / captions へ戻る。
 
 生成した section plan は必要な場合だけ `.paperops/cache/section-plan-methods.yml` に置き、Git 管理しない。本文を生成・修正した後は `make authoring-intent-check` を使い、AI 執筆意図が公開 prose に漏れていないことを確認する。
+
+## P3 typed compile / Writer route
+
+P2 authority採用済みprojectでは、routineな入力snapshotとcontract解決を`pops compile prepare <SEC-ID>`へ渡し、`pops write start <compile-id>`のcandidate TeXを直接編集する。全原稿contextを再読してResultsのestimand、baseline、criterionとMethods定義の対応を見直し、`pops write check <session-id>`でscopeと参照保存を検査する。
+
+Methods definition registryやsection topology自体が不足する場合はcandidateだけで推測せず、Manuscript Modelを改訂・再承認して再compileする。確認済みcandidateだけ`pops write apply <session-id> --yes`で反映する。CLIはhashとtransactionを担い、再現可能性や方法選択の意味論は著者・reviewerが判断する。

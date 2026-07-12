@@ -1,5 +1,9 @@
 # アーキテクチャ
 
+## P3 typed compiler / Writer boundary
+
+`pops compile` / `pops write`によるP3は承認済みResearch / Editorial / Results hierarchy / Manuscriptをread-only authorityとして読み、`.paperops/compile/`へdeterministic bundle、`.paperops/writer/`へ全`manuscript/`のcandidate copyを置く。`manuscript/`はhuman-edited living authorityである。Writerは全原稿を読み直してcandidate TeXを直接編集できるが、patchはcompile時のblock / section / manuscript scopeとauthority revision/hashを越えられない。claim、result、quantity、figure、citation、argument move、predicted materialを保存検査し、局所patchで直せない全体構造は`replan_required`としてtyped model revisionへ戻す。apply/rollbackはjournalとsnapshotを持ち、未知の人間編集を上書きしない。P4 workflow writer cutoverは後続である。
+
 `paperops` は、テンプレート保守と個別論文執筆を分ける。目的は、AI に原稿を直接書かせることではなく、研究状態を検証可能な中間層へ整理し、承認済みの材料だけを論文本文へ変換することである。
 
 今回の基本方針は、人間が普段見る面と AI が執筆に使う内部状態を分けることである。人間側は `story/`、`manuscript/`、`submission/`、レビューコメントを主な接点にする。AI/ハーネス側の evidence、claims、refs、requests、workflow、contracts、notes/views は `_paperops/` に寄せ、必要な skill と CLI が読みに行く。
@@ -25,7 +29,7 @@ P2 はこのkernelへdeterministic model migrationを接続する。`pops model 
 
 `.paperops/migrations/<transaction-id>/`はcandidate、report、journal、`.paperops/snapshots/<transaction-id>/`はbyte-exact rollback snapshotを置くignored stateである。source/candidate drift、unknown manual edit、snapshot corruptionは自動上書きせず停止する。CLIはnetworkやAI modelを呼ばず、AIはscientific / editorial judgmentと人間承認だけを担当する。
 
-P2はlegacy card、human-edited TeX、review/request、submission ledger、既存writerを削除しない。section compiler / Writer packetはP3、workflow writer cutoverはP4へdeferする。Publication Modelはliving candidateとimmutable submitted roundを分離し、artifact本体をmigration candidateへコピーしない。
+P2/P3はlegacy card、human-edited TeX、review/request、submission ledger、既存writerを削除しない。typed section compiler / Writer boundaryはP3で追加済みだがopt-inであり、workflow writer cutoverはP4へdeferする。Publication Modelはliving candidateとimmutable submitted roundを分離し、artifact本体をmigration candidateへコピーしない。
 
 ## 下流論文層
 

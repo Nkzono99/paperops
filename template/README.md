@@ -1,5 +1,9 @@
 # paper-my-topic
 
+## P3 typed compile / Writer（opt-in）
+
+P2で四つのcompile authorityを採用した後は、`pops compile prepare <section|all>`で全体文脈と固定scopeを生成し、`pops write start <compile-id>`で原稿全体を読めるcandidateを作る。candidate TeXは直接編集し、`pops write check` / `diff`、人間確認後の`apply --yes`、必要時の`rollback`を使う。read contextとwrite scopeは別であり、局所scopeでは直せない場合はEditorial / Manuscript Modelを改訂して再compileする。P3はliving TeX直接編集やlegacy writerを削除せず、P4 workflow writer cutoverも行わない。
+
 `pops init` で作成される個別論文プロジェクトのスターター。
 
 この scaffold では、人間が普段見る面と AI が執筆に使う内部状態を分ける。人間側は prompt、`story/`、`manuscript/`、`submission/`、レビューコメントを主な接点にする。AI/ハーネス側の evidence、claims、refs、requests、workflow、contracts、notes/views は `_paperops/` に置く。

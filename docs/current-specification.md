@@ -27,7 +27,7 @@
 - 人間が普段触る入口は `story/`、`manuscript/`、`submission/`、review comments である。AI / harness が使う internal state は `_paperops/` に置く。
 - `_paperops/defaults/schemas/*` は managed default、`_paperops/model/editorial/editorial-model.yml` と `results-hierarchy.yml` は project-owned Editorial state である。既存下流は M0-0004 の strict opt-in と人間承認まで legacy controlled view を維持する。
 - P1-A の合成 fixture は mechanism-led、boundary-led、negative-result-led の三 category で、期待値に canonical semantic-v1 hash を持つ。
-- P1-B の現行 model scope は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六つである。P2 model migrationはdeterministic CLIでmodel単位にopt-inできるが、legacy artifactを保持し、P3 compiler / Writer packetとP4 workflow writer cutoverは完了扱いしない。
+- P1-B の現行 model scope は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六つである。P2 model migrationはdeterministic CLIでmodel単位にopt-inでき、P3の`pops compile` / `pops write`は全体文脈、固定scope、candidate TeX、保存検査、apply/rollbackを提供する。legacy artifactとliving TeX直接編集は保持し、P4 workflow writer cutoverとP7 default cutoverは完了扱いしない。
 - 定型移行は`pops model`が扱い、AI Agentはscientific / editorial judgmentや人間承認を代替しない。shadowとsnapshotはignored `.paperops/`に置き、tracked modelを`diff`で変更しない。
 - 旧 top-level `notes/`、`refs/`、`claims/`、`evidence/`、`contracts/`、`workflow/` などは互換読み取り対象に留める。
 - `paper_ir` と section plan は生成一時物であり、必要な場合だけ `.paperops/cache/` に置く。

@@ -1,5 +1,9 @@
 # paperops
 
+## PaperOps 2 P3
+
+P3 typed compiler / Writer boundaryを実装済みである。`pops compile status|prepare|compare`が承認済み四モデルから全体文脈と固定write scopeを生成し、`pops write start|status|check|diff|apply|rollback`が全原稿candidate、意味保存検査、承認済みTeX transactionを扱う。candidate TeXの直接編集、全体の再読、typed modelを介したglobal replanを維持する。P4 workflow writerとP7 default cutoverは未実装である。
+
 `paperops` は、AI エージェントと論文を書くためのプロジェクトハーネスである。
 
 人間が `template/` を手でコピーして使う道具ではなく、`pops` CLI で論文プロジェクトを初期化・診断・更新する。
@@ -58,7 +62,7 @@ uvx --from paper-harness-cli pops doctor
 
 PaperOps 2 P1-B は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の正確な六モデルを提供する。P2 は `pops model` の deterministic migrationとして、legacy inventory、shadow diff、strict validation、model単位のadopt、snapshot rollbackをAIなしで反復できるようにする。authorityは`legacy-authoritative`、`shadow-compare`、`v2-authoritative`をmodelごとに持ち、Editorial / Results hierarchyだけはcompanionとして同時に切り替える。
 
-AI Agentはscientific / editorial judgment、候補の選択理由、未解決fieldを埋めるための人間との対話を担当し、定型的なfile discovery、hash、conservation、transaction、recoveryを直接操作しない。P2はlegacy writerを削除せず、human-edited TeXを生成するP3 compiler / Writer packetと、既存workflow writerを切り替えるP4は引き続きdeferする。
+AI Agentはscientific / editorial judgment、候補の選択理由、未解決fieldを埋めるための人間との対話を担当し、定型的なfile discovery、hash、conservation、transaction、recoveryを直接操作しない。P3 compiler / Writer boundaryの導入後もlegacy writerとhuman-edited TeXを維持し、既存workflow writerを切り替えるP4はdeferする。
 
 検証phaseは schema → references → semantics → canonical semantic-v1 hash の順で、mechanism-led、boundary-led、negative-result-led の三つの合成fixtureを回帰corpusとして維持する。
 

@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+## P3 typed compiler / Writer
+
+P2で四つのcompile authorityを採用したprojectでは、定型的なcompileとTeX transactionに`pops compile` / `pops write`を使う。Writer sessionは原稿全体をread contextとしてcopyするが、write scopeは別に固定する。candidate TeXは直接編集してよい。scope外変更や意味保存違反はscopeを黙って広げず、typed modelを改訂・再承認・再compileする。`pops write apply <session-id> --yes`は人間確認後だけ実行する。model、workflow、mirror ledgerは逆生成しない。living TeX直接編集は引き続き正当で、P4 workflow writer cutoverは未実装である。
+
 ユーザーとは日本語でコミュニケーションする。
 
 このリポジトリは `paperops` から作成された個別論文プロジェクトである。人間が主に触る面は prompt、`story/`、`manuscript/`、`submission/`、レビューコメントである。AI が執筆に使う evidence、claims、refs、requests、workflow、contracts、notes/views は `_paperops/` に置く。

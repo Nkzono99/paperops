@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- P3 downstream interfaceを完成し、Results / Discussion / Methods compiler、storyline設計、block-flow review、AGENTS / CLAUDE / README、architecture / CLI / skill docsをtyped compile / Writer routeへ接続した。全原稿read contextと固定write scopeを分離し、candidate TeXの直接編集と全体再読を許しつつ、局所scopeを越える意味論・構成変更はtyped model revisionへ戻す。legacy writerとliving TeX直接編集を保持し、P4 workflow writerとP7 default cutoverは後続に残す。
+
 - AIを起動しない`pops write start|status|check|diff|apply|rollback`を追加した。compile IDから全原稿candidate workspaceを開始し、scope・保存則・mirror impactを検査して、`apply --yes`だけがjournal transactionを実行する。全操作はP2/P3 recoveryを先行し、human/JSONを同じ公開DTOから描画して生TeX・private path・例外詳細を出さない。同一apply/rollbackは検証済みno-opになり、wheel単体でもproject-managed checker/contractsを使うcompile→write→rollback lifecycleを実行できる。
 
 - P3 Writer apply/rollbackをdurable transaction化した。validated authoritative patchをcompile bundle / base manifest / authority / scope / target pre/post hash・modeへ固定し、明示確認後だけliving `.tex`をfile単位でatomic replaceする。journal、preimage snapshot、sequence/lineage、中断回復を持ち、通常例外は同じ呼出し内で補償し、hard crash後も既知pre/post hashだけを復元する。未知の手編集、欠損・symlink・special file・snapshot破損はconflictとして上書きせず、rollbackは新しいreceiptとして記録する。

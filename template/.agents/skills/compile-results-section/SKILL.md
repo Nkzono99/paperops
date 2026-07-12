@@ -50,3 +50,9 @@ AI Writer が「この claim を強めるために必要な追加作業」「後
 Draft 後は `review-block-flow` で block operation table を作る。各 block の reader_question、author_move、why_here、next_block_expectation を確認し、必要なら keep / move / split / merge / delete / add を行ってから AUDITED 扱いにする。
 
 生成した section plan は必要な場合だけ `.paperops/cache/section-plan-results.yml` に置き、Git 管理しない。本文を生成・修正した後は `make authoring-intent-check` を使い、AI 執筆意図が公開 prose に漏れていないことを確認する。
+
+## P3 typed compile / Writer route
+
+P2で四つのcompile authorityが採用済みなら、routineなcontext収集とscope検査を手作業で再実装せず、`pops compile prepare <SEC-ID>`、`pops write start <compile-id>`を使う。Writer workspaceは原稿全体を読み直せるので、candidate（候補）TeXを直接編集し、`pops write check <session-id>`で保存則、引用、数量、図、予測稿、JA/EN影響を確認する。局所修正ならcompile時に`--scope block --block <BLK-ID>`を明示する。
+
+候補を読み返してResults hierarchyや全体の証明順が不適切なら、scopeを黙って広げない。`design-paper-storyline`でManuscript / Editorial Modelを改訂し、再承認・再compileする。`pops write apply <session-id> --yes`は人間が候補を確認した後だけ使う。living TeXの直接編集も引き続き有効であり、P3は意味論的判断を機械検査へ置換しない。

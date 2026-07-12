@@ -79,6 +79,12 @@ Submission hygiene は最終提出面であり、manuscript content blocker を�
 - `Content blockers before Submission hygiene`
 - `Files to update`
 
+## P3 global replan
+
+P3 Writer candidateは原稿全体をread contextとして持つが、write scopeはcompile時に固定される。candidateを通読してstory spine、section順、argument move、claim roleを変える必要が判明したら、局所TeX patchへ押し込まずEditorial / Results hierarchy / Manuscript Modelを改訂し、人間承認後に`pops compile prepare all`または対象sectionを再実行（再compile）する。`pops compile compare <old> <new>`は候補storyを順位付けせず比較する。
+
+AIは一度作った流れをcandidate全体から何度でも見直してよい。ただし、全体再設計のauthorityはtyped model revisionであり、`pops write`がproseから逆推定して更新しない。routineなsnapshot、scope、conservation、apply、rollbackはCLIへ任せ、storyの意味論はこのskillで明示的に再判断する。
+
 ## Codex 実行メモ
 
 - `finish-manuscript` の before-drafting gate として使う。

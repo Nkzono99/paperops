@@ -40,9 +40,24 @@ uvx --from paper-harness-cli pops compile compare <compile-id-a> <compile-id-b>
 
 三操作ともAIやnetworkを呼ばず、model adopt、TeX、workflow、mirror ledgerを変更しない。実行前にはP2の未完了transaction recoveryを行い、conflict時はcompileを開始しない。`--json`とhuman表示は同じversioned domain resultから描画される。
 
+## P3 Writer
+
+```sh
+uvx --from paper-harness-cli pops write start <compile-id>
+uvx --from paper-harness-cli pops write status <session-id>
+uvx --from paper-harness-cli pops write check <session-id>
+uvx --from paper-harness-cli pops write diff <session-id>
+uvx --from paper-harness-cli pops write apply <session-id> --yes
+uvx --from paper-harness-cli pops write rollback <transaction-id>
+```
+
+`start`は全`manuscript/`をignored candidateへcopyする。TeXをcandidate内で直接編集し、`check` / `diff`でscope、drift、保存則、citation / quantity / figure / predicted material、JA/EN mirror impactを検査する。公開diffは生TeXではなくhashとblock operation summaryであり、意味論的レビューはcandidate全体を直接読む。
+
+`apply`だけがliving TeXを変更し、`--yes`を必須とする。shadow compileはapplyできない。transactionはfile単位atomic replace、journal、snapshot、中断回復を持つが、複数fileを一つのfilesystem operationで切り替えるとは主張しない。未知のmanual editはconflictとなる。全write操作はP2/P3 recoveryを先行し、AI/network/update noticeを呼ばない。
+
 既存projectでは初回`diff`前に`.paperops/migrations/`と`.paperops/snapshots/`をprojectの`.gitignore`へ追加する。新規`pops init`には含まれている。
 
-adapter、checker、transactionはnetworkやAI modelを呼ばない。機械的に決められないfieldは`migration.unresolved`として残し、AIが架空のrevision、approval、scope、quantity、provenanceを埋める手順にはしない。AI / skillはscientific / editorial judgmentと人間承認を支援する。P2はlegacy writerを削除せず、P3 section compiler / Writer packetとP4 workflow writer cutoverは別の導入段階である。
+adapter、checker、transactionはnetworkやAI modelを呼ばない。機械的に決められないfieldは`migration.unresolved`として残し、AIが架空のrevision、approval、scope、quantity、provenanceを埋める手順にはしない。AI / skillはscientific / editorial judgmentと人間承認を支援する。P3 section compiler / Writer boundaryの導入後もlegacy writerを保持し、P4 workflow writer cutoverは別の導入段階である。
 
 ## Editorial Model schema check
 

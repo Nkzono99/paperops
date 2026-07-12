@@ -43,3 +43,9 @@ AI Writer の作業計画を Discussion prose に混ぜない。`claim を強め
 Draft 後は `review-block-flow` で block operation table を作る。各 block の reader_question、author_move、why_here、next_block_expectation を確認し、author stance が assert / reject / boundary / hold のどれかを明示してから AUDITED 扱いにする。
 
 生成した section plan は必要な場合だけ `.paperops/cache/section-plan-discussion.yml` に置き、Git 管理しない。本文を生成・修正した後は `make authoring-intent-check` を使い、AI 執筆意図が公開 prose に漏れていないことを確認する。
+
+## P3 typed compile / Writer route
+
+P2 authority採用済みprojectでは、`pops compile prepare <SEC-ID>`から全体storyとsection planを固定し、`pops write start <compile-id>`で原稿全体を読めるcandidateを作る。TeXはcandidate内で直接再構成し、`pops write check <session-id>`と`pops write diff <session-id>`でscope・意味保存・mirror impactを確認する。定型snapshot、hash、recovery、rollbackをAgentのshell手順にしない。
+
+Discussionの解釈順、alternative、scope、decisive next testをcandidateの局所rewriteだけで直せない場合は、scopeを拡張せずEditorial / Manuscript revisionへ戻り、再compileする。承認済み反映だけ`pops write apply <session-id> --yes`を使い、必要なら`pops write rollback <transaction-id>`で既知hashへ戻す。P3はproseの科学的妥当性を自動承認しない。

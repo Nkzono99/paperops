@@ -112,7 +112,7 @@ Writer には card 正本や gate 語彙を直接読み込ませすぎない。`
 
 ## 重要な境界
 
-PaperOps 2 P1-Bではmanaged registry / JSON Schema / checkerと、project-ownedのResearch / Editorial / Results hierarchy / Manuscript / Issue / Publication stateを分離する。定型的なinventory、hash、conservation、shadow、adopt、recovery、rollbackは`pops model`へ渡し、skillやAI Agentにshell手順を再実装させない。AIはscientific / editorial judgment、候補の意味、棄却理由、人間承認を扱うが、六モデルへ架空値を補わない。P2後もlegacy writerを維持し、P3 section compiler / Writer packetとP4 workflow writer cutoverが個別承認されるまで現行執筆routeを使う。Issueは公開可能summaryとopaque local-reference IDだけをtracked stateに置き、Publicationはliving candidateとimmutable roundを混同しない。
+PaperOps 2 P1-Bではmanaged registry / JSON Schema / checkerとproject-ownedのResearch / Editorial / Results hierarchy / Manuscript / Issue / Publication stateを分離する。P2 migrationとP3 compiler / Writerでは、定型的なinventory、hash、shadow、adopt、compile、scope、conservation、apply、recovery、rollbackを`pops model` / `pops compile` / `pops write`へ渡し、skillやAI Agentにshell手順を再実装させない。AIは全原稿candidateを読み、scientific / editorial judgment、候補の意味、棄却理由、global replanを扱うが、六モデルへ架空値を補わずscopeを黙って広げない。P3後もlegacy writerとliving TeX直接編集を維持し、P4 workflow writer cutoverとP7 default cutoverは別に承認する。
 
 `make schema-check` は schema → references → semantics → canonical semantic-v1 hash の順で検査し、mechanism-led、boundary-led、negative-result-led の三つの合成fixtureを回帰corpusとする。
 

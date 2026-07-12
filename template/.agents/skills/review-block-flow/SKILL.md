@@ -67,3 +67,9 @@ description: Use when a manuscript section has a draft, weak author stance, thin
 - すべて `keep` にする場合も、各 block の `why_here` と `next_block_expectation` を書く。
 - block を変えないことは選択であり、デフォルトではない。
 - Results / Discussion が薄い場合、文量ではなく missing reader question、missing author_move、missing evidence、missing consequence のどれかへ戻す。
+
+## P3 candidate review
+
+P3 sessionでは`.paperops/writer/<session-id>/workspace/manuscript/`の全TeXを読み、candidate内でblockを直接move/split/merge/cut/add/rewriteできる。ただし実際に許されるoperationとwrite scopeはcurrent Manuscript revisionに固定される。`pops write check <session-id>`が`replan_required`を返した場合は、説明文で正当化せずblock operation tableとManuscript / Editorial Modelを更新し、再承認・再compileする。
+
+`pops write diff`はhash、block operation、mirror impactのsummaryであり、意味の良い流れを判定する代替ではない。candidate全体を再読してauthor stanceとsection間の流れを評価し、確認後だけ`pops write apply <session-id> --yes`を実行する。
