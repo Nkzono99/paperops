@@ -119,7 +119,8 @@ def plan_workflow_adoption(root: Path, migration_id: str):
         rows.append(replacement(DocumentRef(index_identity, index_meta.content_hash, index), index))
     manifest = read_manifest(root / ".pops/manifest.toml")
     workflow = as_table(manifest.get("workflow"))
-    workflow.update({"mode": "v2-authoritative", "last_shadow_migration": migration_id, "last_adopt_transaction": "pending"})
+    workflow.update({"mode": "v2-authoritative", "last_shadow_migration": migration_id})
+    workflow.pop("last_adopt_transaction", None)
     manifest["workflow"] = workflow
     rows.append({"identity": ".pops/manifest.toml", "before_hash": manifest_meta.content_hash, "content": dumps_manifest_toml(manifest)})
     return persist_plan(root, "migration.adopt", rows)

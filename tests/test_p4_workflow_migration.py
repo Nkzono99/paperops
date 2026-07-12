@@ -38,6 +38,7 @@ class WorkflowMigrationTest(unittest.TestCase):
         plan = plan_workflow_adoption(self.project, shadow.migration_id)
         tx = execute_workflow_apply(self.project, plan.plan_id, confirmed=True)
         self.assertEqual(workflow_migration_status(self.project)["mode"], "v2-authoritative")
+        self.assertNotEqual(workflow_migration_status(self.project)["last_adopt_transaction"], "pending")
         self.assertTrue((self.project / "_paperops/model/issues/workflow/ISS-0001.yml").is_file())
         self.assertEqual((self.project / "_paperops/workflow/current-state.yml").read_bytes(), legacy)
         execute_workflow_rollback(self.project, tx, confirmed=True)
