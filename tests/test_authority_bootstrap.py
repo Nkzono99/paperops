@@ -28,6 +28,7 @@ class AuthorityBootstrapTest(unittest.TestCase):
                     self.assertRegex(hashes[name], r"^sha256:[0-9a-f]{64}$")
                     self.assertEqual(states[name].last_shadow_transaction, "")
                     self.assertEqual(states[name].last_adopt_transaction, "")
+                    self.assertEqual(states[name].origin, "init-v2")
             manifest = read_manifest(project / ".pops" / "manifest.toml")
             self.assertEqual(manifest["workflow"]["mode"], "v2-authoritative")
 
@@ -40,7 +41,7 @@ class AuthorityBootstrapTest(unittest.TestCase):
                 "not: [valid\n", encoding="utf-8"
             )
 
-            with self.assertRaisesRegex(ValueError, "starter model"):
+            with self.assertRaisesRegex(ValueError, "starter six-model set"):
                 bootstrap_v2_authority(project)
 
             self.assertEqual((project / ".pops" / "manifest.toml").read_bytes(), before)

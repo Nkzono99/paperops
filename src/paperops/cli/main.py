@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 import os
 import shutil
+import stat
 import sys
 import tempfile
 from collections.abc import Sequence
@@ -351,8 +353,14 @@ def cmd_init(args: argparse.Namespace) -> int:
                 authority=args.authority,
                 template_ref=args.template_ref,
             )
-    except (OSError, ValueError) as error:
+    except ValueError as error:
         print(f"error: initialization failed: {error}", file=sys.stderr)
+        return 1
+    except OSError:
+        print(
+            f"error: initialization failed: target could not be installed safely: {target}",
+            file=sys.stderr,
+        )
         return 1
 
     args.project_root = target
@@ -389,7 +397,14 @@ def _initialize_staged_project(
 ) -> tuple[CopyPlan, dict[str, str]]:
     target.parent.mkdir(parents=True, exist_ok=True)
     restore_empty = target.is_dir()
+    restore_mode = stat.S_IMODE(target.stat().st_mode) if restore_empty else 0
     staging = Path(tempfile.mkdtemp(prefix=f".{target.name}.pops-init-", dir=target.parent))
+    if restore_empty:
+        shutil.copystat(target, staging, follow_symlinks=False)
+    else:
+        previous_umask = os.umask(0)
+        os.umask(previous_umask)
+        staging.chmod(0o777 & ~previous_umask)
     installed = False
     try:
         with scaffold_source() as source:
@@ -402,14 +417,40 @@ def _initialize_staged_project(
             hashes = {}
         if restore_empty:
             target.rmdir()
-        os.replace(staging, target)
+        _rename_no_replace(staging, target)
         installed = True
         return plan, hashes
     finally:
         if not installed:
             shutil.rmtree(staging, ignore_errors=True)
             if restore_empty and not os.path.lexists(target):
-                target.mkdir()
+                target.mkdir(mode=restore_mode)
+                target.chmod(restore_mode)
+
+
+def _rename_no_replace(source: Path, target: Path) -> None:
+    """Atomically install a directory without replacing a contending target."""
+    if os.name == "nt":
+        os.rename(source, target)
+        return
+    try:
+        renameat2 = ctypes.CDLL(None, use_errno=True).renameat2
+    except AttributeError:
+        if os.path.lexists(target):
+            raise FileExistsError(f"target already exists: {target}")
+        os.rename(source, target)
+        return
+    renameat2.argtypes = (
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_uint,
+    )
+    renameat2.restype = ctypes.c_int
+    if renameat2(-100, os.fsencode(source), -100, os.fsencode(target), 1) != 0:
+        error_number = ctypes.get_errno()
+        raise OSError(error_number, os.strerror(error_number), str(target))
 
 
 def cmd_setup(args: argparse.Namespace) -> int:

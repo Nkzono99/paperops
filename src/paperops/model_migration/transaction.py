@@ -283,6 +283,36 @@ def plan_adoption(root: Path, model_name: str) -> AdoptionPlan:
     project = root.absolute()
     states = read_model_states(project)
     state = states[model_name]
+    if state.mode == "v2-authoritative" and state.origin == "init-v2":
+        if any(
+            candidate.mode != "v2-authoritative"
+            or candidate.origin != "init-v2"
+            or not candidate.current_hash
+            or candidate.last_shadow_transaction
+            or candidate.last_adopt_transaction
+            for candidate in states.values()
+        ):
+            raise TransactionError(
+                MigrationFinding(
+                    "state.inconsistent",
+                    f"/models/{model_name}",
+                    "init-v2 authority must cover the exact six-model bootstrap set",
+                )
+            )
+        existed, digest = _manifest_identity(project)
+        models = _affected(model_name)
+        return AdoptionPlan(
+            project,
+            model_name,
+            "",
+            models,
+            (),
+            {name: states[name].current_hash for name in models},
+            existed,
+            digest,
+            digest,
+            True,
+        )
     if state.mode == "v2-authoritative" and state.last_adopt_transaction:
         journal_path = transaction_paths(project, state.last_adopt_transaction).journal_path
         try:

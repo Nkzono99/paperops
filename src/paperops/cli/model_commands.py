@@ -152,6 +152,29 @@ def cmd_model_status(args: argparse.Namespace) -> int:
         return _emit(args, ModelCommandResult("status", args.model, False, 1, (MigrationFinding("state.invalid", "/models", str(error)),)))
     selected = MODEL_NAMES if args.model == "all" else (args.model,)
     findings: list[MigrationFinding] = []
+    if any(state.origin == "init-v2" for state in states.values()):
+        validation = run_model_validation(root, "all", phase="all", strict=False)
+        if not validation.ok:
+            findings.extend(
+                MigrationFinding(
+                    finding.code,
+                    finding.pointer,
+                    finding.message,
+                    finding.severity,
+                )
+                for finding in validation.findings
+                if finding.severity == "error"
+            )
+        else:
+            for name in MODEL_NAMES:
+                if validation.hashes.get(name, "") != states[name].current_hash:
+                    findings.append(
+                        MigrationFinding(
+                            "state.hash_mismatch",
+                            f"/models/{name}/current_hash",
+                            "live model hash differs from init-v2 authority state",
+                        )
+                    )
     models: dict[str, dict[str, str]] = {}
     for name in selected:
         state = states[name]

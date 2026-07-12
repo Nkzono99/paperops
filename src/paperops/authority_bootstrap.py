@@ -25,6 +25,7 @@ def _write_authority_manifest(
             "current_hash": hashes.get(name, ""),
             "last_shadow_transaction": "",
             "last_adopt_transaction": "",
+            "origin": "init-v2" if model_mode == "v2-authoritative" else "",
         }
         for name in MODEL_NAMES
     }
@@ -41,7 +42,7 @@ def bootstrap_v2_authority(root: Path) -> dict[str, str]:
     result = run_model_validation(root, "all", phase="all", strict=False)
     if not result.ok:
         codes = ", ".join(finding.code for finding in result.findings)
-        raise ValueError(f"starter model validation failed: {codes}")
+        raise ValueError(f"starter six-model set failed validation: {codes}")
     hashes: dict[str, str] = {}
     for name in MODEL_NAMES:
         digest = result.hashes.get(name, "")

@@ -42,6 +42,7 @@ class ModelAuthorityState:
     current_hash: str = ""
     last_shadow_transaction: str = ""
     last_adopt_transaction: str = ""
+    origin: str = ""
 
 
 def _validate_state(name: str, state: ModelAuthorityState) -> None:
@@ -59,6 +60,17 @@ def _validate_state(name: str, state: ModelAuthorityState) -> None:
             raise ModelStateError(
                 f"state.transaction: {field_name} is not a safe transaction ID"
             )
+    if state.origin not in {"", "init-v2"}:
+        raise ModelStateError(f"state.origin: unsupported origin `{state.origin}`")
+    if state.origin == "init-v2" and (
+        state.mode != "v2-authoritative"
+        or not state.current_hash
+        or state.last_shadow_transaction
+        or state.last_adopt_transaction
+    ):
+        raise ModelStateError(
+            "state.origin: init-v2 requires v2 mode, a hash, and no migration transaction"
+        )
 
 
 def _state_from_table(name: str, value: object) -> ModelAuthorityState:
@@ -68,6 +80,7 @@ def _state_from_table(name: str, value: object) -> ModelAuthorityState:
         "current_hash",
         "last_shadow_transaction",
         "last_adopt_transaction",
+        "origin",
     }
     unknown = sorted(set(table) - known)
     if unknown:
@@ -80,6 +93,7 @@ def _state_from_table(name: str, value: object) -> ModelAuthorityState:
         current_hash=table.get("current_hash", ""),
         last_shadow_transaction=table.get("last_shadow_transaction", ""),
         last_adopt_transaction=table.get("last_adopt_transaction", ""),
+        origin=table.get("origin", ""),
     )
     if not all(
         isinstance(value, str)
@@ -88,6 +102,7 @@ def _state_from_table(name: str, value: object) -> ModelAuthorityState:
             state.current_hash,
             state.last_shadow_transaction,
             state.last_adopt_transaction,
+            state.origin,
         )
     ):
         raise ModelStateError(f"state.type: models.{name} values must be strings")
@@ -128,6 +143,7 @@ def write_model_states(
             "current_hash": state.current_hash,
             "last_shadow_transaction": state.last_shadow_transaction,
             "last_adopt_transaction": state.last_adopt_transaction,
+            "origin": state.origin,
         }
     path = root / ".pops" / "manifest.toml"
     manifest = read_manifest(path)

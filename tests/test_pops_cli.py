@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+import os
+import stat
 import tempfile
 import tomllib
 import unittest
@@ -9,6 +12,7 @@ from unittest import mock
 from tests.helpers import ROOT, copy_template, run_cli
 
 from paperops import __version__  # noqa: E402
+from paperops.authority_bootstrap import bootstrap_v2_authority  # noqa: E402
 from paperops.cli.main import write_manifest  # noqa: E402
 from paperops.cli.manifest import applied_migrations  # noqa: E402
 from paperops.cli.migrations import get_migration  # noqa: E402
@@ -64,6 +68,37 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("Authority: v2-authoritative", out)
             self.assertIn("Workflow: v2-authoritative", out)
 
+    def test_init_v2_is_immediately_valid_for_model_and_compile_status(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+
+            code, raw, err = run_cli(["model", "status", "all", str(target), "--json"])
+            self.assertEqual(code, 0, err or raw)
+            self.assertTrue(json.loads(raw)["ok"])
+
+            code, raw, err = run_cli(["compile", "status", "all", str(target), "--json"])
+            self.assertIn(code, {0, 1}, err or raw)
+            self.assertNotIn("compile.authority_journal", raw)
+            self.assertNotIn("compile.authority_state", raw)
+
+    def test_init_v2_model_status_detects_live_model_hash_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+            publication = target / "_paperops" / "model" / "publication" / "publication-model.yml"
+            publication.write_text(
+                publication.read_text(encoding="utf-8").replace('  name: ""', '  name: "Journal"'),
+                encoding="utf-8",
+            )
+
+            code, raw, err = run_cli(["model", "status", "all", str(target), "--json"])
+
+            self.assertEqual(code, 1, err or raw)
+            self.assertIn("state.hash_mismatch", raw)
+
     def test_init_legacy_records_explicit_legacy_authority_and_warns(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
@@ -109,6 +144,56 @@ class PopsCliTest(unittest.TestCase):
             self.assertIn("schema.invalid", err)
             self.assertFalse(target.exists())
             self.assertEqual(list(Path(tmp).glob(".paper-demo.pops-init-*")), [])
+
+    def test_init_preserves_empty_target_mode_and_restores_it_on_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            target.mkdir(mode=0o750)
+            target.chmod(0o750)
+
+            with mock.patch(
+                "paperops.cli.main.bootstrap_v2_authority",
+                side_effect=ValueError("starter model validation failed: schema.invalid"),
+            ):
+                code, _out, _err = run_cli(["init", str(target)])
+            self.assertEqual(code, 1)
+            self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o750)
+
+            code, _out, err = run_cli(["init", str(target)])
+            self.assertEqual(code, 0, err)
+            self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o750)
+
+    def test_init_new_target_uses_normal_directory_umask(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+            previous = os.umask(0o027)
+            try:
+                code, _out, err = run_cli(["init", str(target)])
+            finally:
+                os.umask(previous)
+
+            self.assertEqual(code, 0, err)
+            self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o750)
+
+    def test_init_does_not_replace_target_created_during_bootstrap(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "paper-demo"
+
+            def create_contending_target(staging: Path) -> dict[str, str]:
+                hashes = bootstrap_v2_authority(staging)
+                target.mkdir()
+                return hashes
+
+            with mock.patch(
+                "paperops.cli.main.bootstrap_v2_authority",
+                side_effect=create_contending_target,
+            ):
+                code, _out, err = run_cli(["init", str(target)])
+
+            self.assertEqual(code, 1)
+            self.assertTrue(target.is_dir())
+            self.assertEqual(list(target.iterdir()), [])
+            self.assertNotIn(".pops-init-", err)
 
     def test_legacy_force_copy_preserves_existing_v2_authority(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

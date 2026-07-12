@@ -788,7 +788,8 @@ def _authoritative_snapshot(
             f"/authority/{model}",
             "model is not v2-authoritative",
         )
-    _preflight_authority_journal(root, state.last_adopt_transaction)
+    if state.origin != "init-v2":
+        _preflight_authority_journal(root, state.last_adopt_transaction)
     try:
         plan = plan_adoption(root, model)
     except TransactionError as error:
@@ -831,12 +832,13 @@ def _authoritative_snapshot(
             f"/authority/{model}",
             "checker, manifest, and adoption journal hashes do not agree",
         )
-    _read_committed_journal(
-        root,
-        model,
-        plan.transaction_id,
-        plan.state_hashes,
-    )
+    if state.origin != "init-v2":
+        _read_committed_journal(
+            root,
+            model,
+            plan.transaction_id,
+            plan.state_hashes,
+        )
     return AuthoritySnapshot(
         model_name=model,
         mode="v2-authoritative",

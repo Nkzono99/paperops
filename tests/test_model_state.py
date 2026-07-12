@@ -35,6 +35,7 @@ class ModelStateTest(unittest.TestCase):
             {state.mode for state in states.values()}, {"legacy-authoritative"}
         )
         self.assertTrue(all(state.current_hash == "" for state in states.values()))
+        self.assertTrue(all(state.origin == "" for state in states.values()))
         self.assertEqual(
             AUTHORITY_MODES,
             ("legacy-authoritative", "shadow-compare", "v2-authoritative"),
@@ -73,6 +74,7 @@ class ModelStateTest(unittest.TestCase):
             {**{name: ModelAuthorityState(name) for name in MODEL_NAMES}, "research": ModelAuthorityState("research", mode="other")},
             {**{name: ModelAuthorityState(name) for name in MODEL_NAMES}, "research": ModelAuthorityState("research", current_hash="sha256:BAD")},
             {**{name: ModelAuthorityState(name) for name in MODEL_NAMES}, "research": ModelAuthorityState("research", last_shadow_transaction="../escape")},
+            {**{name: ModelAuthorityState(name) for name in MODEL_NAMES}, "research": ModelAuthorityState("research", origin="manual")},
         )
         with tempfile.TemporaryDirectory() as tmp:
             for states in mutations:
