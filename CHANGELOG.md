@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- PaperOps 2 P7として、新規`pops init`を六モデル・typed workflowの`v2-authoritative`既定へ切り替えた。scaffoldを同一filesystem上でstageし、project-managed checkerの一括検証と六つのsemantic hash確定後だけno-replace renameするため、失敗時に部分projectを残さず競合targetを上書きしない。`init-v2` originではmigration journalの代わりにexact six-model setとlive hashを再検証し、成功時はmodeとhashをCLIへ表示する。
+- PaperOps 2 P7として、新規`pops init`を六モデル・typed workflowの`v2-authoritative`既定へ切り替えた。scaffoldを同一filesystem上でstageし、予約した空targetの同一性とproject-managed checkerの六つのsemantic hashを確認してからatomic replaceするため、失敗時に部分projectを残さず競合targetを上書きしない。`init-v2` originではmigration journalの代わりにexact six-model setとlive hashを再検証し、成功時はmodeとhashをCLIへ表示する。
 
 - 既存projectの`setup`、managed update、非空targetへの追加的copyはauthorityを変更しない。`pops init --authority legacy`は非推奨の明示退避として残し、削除時期は未定である。legacy artifact、互換reader、human-edited living TeXの削除・dual-write・reverse migrationは行わない。
 

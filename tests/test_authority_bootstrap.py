@@ -41,7 +41,7 @@ class AuthorityBootstrapTest(unittest.TestCase):
                 "not: [valid\n", encoding="utf-8"
             )
 
-            with self.assertRaisesRegex(ValueError, "starter six-model set"):
+            with self.assertRaisesRegex(ValueError, "publication"):
                 bootstrap_v2_authority(project)
 
             self.assertEqual((project / ".pops" / "manifest.toml").read_bytes(), before)

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import ctypes
 import os
 import shutil
 import stat
@@ -396,17 +395,41 @@ def _initialize_staged_project(
     template_ref: str,
 ) -> tuple[CopyPlan, dict[str, str]]:
     target.parent.mkdir(parents=True, exist_ok=True)
-    restore_empty = target.is_dir()
-    restore_mode = stat.S_IMODE(target.stat().st_mode) if restore_empty else 0
-    staging = Path(tempfile.mkdtemp(prefix=f".{target.name}.pops-init-", dir=target.parent))
-    if restore_empty:
-        shutil.copystat(target, staging, follow_symlinks=False)
+    if os.path.lexists(target):
+        if target.is_symlink() or not target.is_dir() or any(target.iterdir()):
+            raise FileExistsError(f"target is no longer an empty directory: {target}")
+        restore_empty = True
+        restore_mode = stat.S_IMODE(target.stat().st_mode)
     else:
-        previous_umask = os.umask(0)
-        os.umask(previous_umask)
-        staging.chmod(0o777 & ~previous_umask)
+        restore_empty = False
+        restore_mode = 0
+    staging: Path | None = None
+    reservation_created = False
+    reservation_locked = False
+    reservation_identity: tuple[int, int] | None = None
     installed = False
     try:
+        if restore_empty:
+            staging = Path(
+                tempfile.mkdtemp(prefix=f".{target.name}.pops-init-", dir=target.parent)
+            )
+            shutil.copystat(target, staging, follow_symlinks=False)
+            target.chmod(0o500)
+            reservation_locked = True
+        else:
+            previous_umask = os.umask(0)
+            os.umask(previous_umask)
+            target.mkdir(mode=0o500)
+            target.chmod(0o500)
+            reservation_created = True
+            staging = Path(
+                tempfile.mkdtemp(prefix=f".{target.name}.pops-init-", dir=target.parent)
+            )
+            staging.chmod(0o777 & ~previous_umask)
+        reserved = target.stat()
+        reservation_identity = (reserved.st_dev, reserved.st_ino)
+        if any(target.iterdir()):
+            raise FileExistsError(f"target changed while initialization was starting: {target}")
         with scaffold_source() as source:
             plan = copy_scaffold(source, staging, overwrite=False)
         write_manifest(staging, template_ref=template_ref)
@@ -415,42 +438,37 @@ def _initialize_staged_project(
         else:
             bootstrap_legacy_authority(staging)
             hashes = {}
-        if restore_empty:
-            target.rmdir()
-        _rename_no_replace(staging, target)
+        if not _is_empty_reservation(target, reservation_identity):
+            raise FileExistsError(f"target changed during initialization: {target}")
+        os.replace(staging, target)
         installed = True
         return plan, hashes
     finally:
         if not installed:
-            shutil.rmtree(staging, ignore_errors=True)
-            if restore_empty and not os.path.lexists(target):
-                target.mkdir(mode=restore_mode)
-                target.chmod(restore_mode)
+            if staging is not None:
+                shutil.rmtree(staging, ignore_errors=True)
+            if _is_empty_reservation(target, reservation_identity):
+                if reservation_created:
+                    target.rmdir()
+                elif reservation_locked:
+                    target.chmod(restore_mode)
 
 
-def _rename_no_replace(source: Path, target: Path) -> None:
-    """Atomically install a directory without replacing a contending target."""
-    if os.name == "nt":
-        os.rename(source, target)
-        return
+def _is_empty_reservation(
+    target: Path,
+    identity: tuple[int, int] | None,
+) -> bool:
+    if identity is None:
+        return False
     try:
-        renameat2 = ctypes.CDLL(None, use_errno=True).renameat2
-    except AttributeError:
-        if os.path.lexists(target):
-            raise FileExistsError(f"target already exists: {target}")
-        os.rename(source, target)
-        return
-    renameat2.argtypes = (
-        ctypes.c_int,
-        ctypes.c_char_p,
-        ctypes.c_int,
-        ctypes.c_char_p,
-        ctypes.c_uint,
-    )
-    renameat2.restype = ctypes.c_int
-    if renameat2(-100, os.fsencode(source), -100, os.fsencode(target), 1) != 0:
-        error_number = ctypes.get_errno()
-        raise OSError(error_number, os.strerror(error_number), str(target))
+        metadata = target.stat()
+        return (
+            target.is_dir()
+            and (metadata.st_dev, metadata.st_ino) == identity
+            and not any(target.iterdir())
+        )
+    except OSError:
+        return False
 
 
 def cmd_setup(args: argparse.Namespace) -> int:

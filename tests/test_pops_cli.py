@@ -175,6 +175,15 @@ class PopsCliTest(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o750)
 
+    def test_init_installs_on_the_repository_shared_filesystem(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="p7-init-fs-", dir=ROOT) as tmp:
+            target = Path(tmp) / "paper-demo"
+
+            code, _out, err = run_cli(["init", str(target)])
+
+            self.assertEqual(code, 0, err)
+            self.assertTrue((target / ".pops" / "manifest.toml").is_file())
+
     def test_init_does_not_replace_target_created_during_bootstrap(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
@@ -191,8 +200,7 @@ class PopsCliTest(unittest.TestCase):
                 code, _out, err = run_cli(["init", str(target)])
 
             self.assertEqual(code, 1)
-            self.assertTrue(target.is_dir())
-            self.assertEqual(list(target.iterdir()), [])
+            self.assertFalse(target.exists())
             self.assertNotIn(".pops-init-", err)
 
     def test_legacy_force_copy_preserves_existing_v2_authority(self) -> None:

@@ -41,8 +41,10 @@ def bootstrap_v2_authority(root: Path) -> dict[str, str]:
     """Validate starter models and atomically make typed state authoritative."""
     result = run_model_validation(root, "all", phase="all", strict=False)
     if not result.ok:
-        codes = ", ".join(finding.code for finding in result.findings)
-        raise ValueError(f"starter six-model set failed validation: {codes}")
+        missing = [name for name in MODEL_NAMES if name not in result.hashes]
+        failed_scope = ", ".join(missing) if missing else "six-model set"
+        codes = ", ".join(dict.fromkeys(finding.code for finding in result.findings))
+        raise ValueError(f"starter model validation failed for {failed_scope}: {codes}")
     hashes: dict[str, str] = {}
     for name in MODEL_NAMES:
         digest = result.hashes.get(name, "")
