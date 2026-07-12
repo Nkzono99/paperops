@@ -2,51 +2,107 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://paperops.local/schemas/writer-patch.schema.json",
   "title": "PaperOps generated Writer patch",
-  "description": "Provisional version 1 patch contract pending the Writer patch DTO task.",
   "type": "object",
   "required": ["schema_version", "session_id", "compile_id", "changes", "findings"],
   "properties": {
     "schema_version": {"const": 1},
     "session_id": {"$ref": "#/$defs/safeId"},
     "compile_id": {"$ref": "#/$defs/safeId"},
-    "changes": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/change"}
-    },
-    "findings": {
-      "type": "array",
-      "items": {"$ref": "#/$defs/finding"}
-    }
+    "status": {"enum": ["ready", "blocked", "replan_required"]},
+    "applicable": {"type": "boolean"},
+    "source_mode": {"enum": ["authoritative", "shadow"]},
+    "base_manifest_hash": {"$ref": "#/$defs/hash"},
+    "candidate_snapshot_hash": {"$ref": "#/$defs/hash"},
+    "authority": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+    "write_scope": {"$ref": "#/$defs/jsonValue"},
+    "target_files": {"type": "array", "items": {"$ref": "#/$defs/targetFile"}},
+    "changes": {"type": "array", "items": {"$ref": "#/$defs/change"}},
+    "proposed_dispositions": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+    "introduced_references": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+    "mirror_impacts": {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+    "conservation_result": {"enum": ["pending", "blocked", "passed"]},
+    "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+    "patch_hash": {"$ref": "#/$defs/hash"}
   },
   "additionalProperties": false,
   "$defs": {
-    "safeId": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    "safeId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "relativePath": {"type": "string", "pattern": "^(?!.*\\x00)(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/$|//)).+$"},
+    "jsonValue": {
+      "anyOf": [
+        {"type": "string"}, {"type": "integer"}, {"type": "number"},
+        {"type": "boolean"}, {"type": "null"},
+        {"type": "array", "items": {"$ref": "#/$defs/jsonValue"}},
+        {"type": "object", "additionalProperties": {"$ref": "#/$defs/jsonValue"}}
+      ]
     },
-    "hash": {
-      "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$"
+    "fileState": {
+      "type": "object",
+      "required": ["identity", "type", "content_hash", "size", "mode"],
+      "properties": {
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "type": {"const": "regular"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "size": {"type": "integer", "minimum": 0},
+        "mode": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
     },
-    "relativePath": {
-      "type": "string",
-      "pattern": "^(?!.*\\x00)(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/)(?:\\.|\\.\\.)(?:/|$))(?!.*(?:/$|//)).+$"
+    "targetFile": {
+      "type": "object",
+      "required": ["identity", "preimage", "candidate"],
+      "properties": {
+        "identity": {"$ref": "#/$defs/relativePath"},
+        "preimage": {"$ref": "#/$defs/fileState"},
+        "candidate": {"$ref": "#/$defs/fileState"}
+      },
+      "additionalProperties": false
+    },
+    "endpoint": {
+      "type": "object",
+      "required": ["file", "position"],
+      "properties": {
+        "file": {"$ref": "#/$defs/relativePath"},
+        "position": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "blockState": {
+      "type": "object",
+      "required": ["marker_hash", "body_hash", "region_hash"],
+      "properties": {
+        "marker_hash": {"$ref": "#/$defs/hash"},
+        "body_hash": {"$ref": "#/$defs/hash"},
+        "region_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
     },
     "change": {
       "type": "object",
-      "required": [
-        "path",
-        "block_id",
-        "operation",
-        "preimage_hash",
-        "replacement_hash"
+      "anyOf": [
+        {"required": ["path", "block_id", "operation", "preimage_hash", "replacement_hash"]},
+        {"required": [
+          "typed_block_id", "raw_block_id", "operation", "from", "to", "base",
+          "candidate", "model_revision", "model_hash", "authorization", "reason"
+        ]}
       ],
       "properties": {
         "path": {"$ref": "#/$defs/relativePath"},
         "block_id": {"$ref": "#/$defs/safeId"},
-        "operation": {"enum": ["keep", "compress", "move", "merge", "split", "cut", "rewrite", "add"]},
         "preimage_hash": {"$ref": "#/$defs/hash"},
-        "replacement_hash": {"$ref": "#/$defs/hash"}
+        "replacement_hash": {"$ref": "#/$defs/hash"},
+        "typed_block_id": {"$ref": "#/$defs/safeId"},
+        "raw_block_id": {"type": "string", "pattern": "^[A-Za-z0-9:._-]+$"},
+        "operation": {"enum": ["keep", "compress", "move", "merge", "split", "cut", "rewrite", "add"]},
+        "from": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/endpoint"}]},
+        "to": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/endpoint"}]},
+        "base": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/blockState"}]},
+        "candidate": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/blockState"}]},
+        "model_revision": {"type": "integer", "minimum": 1},
+        "model_hash": {"$ref": "#/$defs/hash"},
+        "authorization": {"$ref": "#/$defs/safeId"},
+        "reason": {"type": "string", "minLength": 1}
       },
       "additionalProperties": false
     },
@@ -58,12 +114,7 @@
         "pointer": {"type": "string", "pattern": "^(?:$|/)"},
         "message": {"type": "string"},
         "severity": {"enum": ["error", "warning", "info"]},
-        "identity": {
-          "anyOf": [
-            {"const": ""},
-            {"$ref": "#/$defs/relativePath"}
-          ]
-        }
+        "identity": {"anyOf": [{"const": ""}, {"$ref": "#/$defs/relativePath"}]}
       },
       "additionalProperties": false
     }

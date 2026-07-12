@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- P3 Writer session APIを追加し、検証済みcompile bundleとliving `manuscript/`全体を`.paperops/writer/<session>/workspace/manuscript/`へ安全にsnapshotする。session/base manifestは全regular fileのbyte hash・mode、compile/bundle/authority/scope、TeX block inventory、typed/raw bindingへ固定し、symlink・special file・hardlinkを拒否する。candidate patchはliving driftとscopeを再検証し、生TeXを保存せずfile/block hash、endpoint、model authorizationだけを出す。scope外・preamble/shared/bib変更はblocked、未計画topologyは`replan_required`になる。
+
 - AIを起動しない`pops compile status|prepare|compare`を追加した。`all`/section/block指定をcurrent Manuscript topology、明示binding、JA/EN file、allowed operationからtyped scopeへ解決し、P2 transaction recovery後にTask 6のbundle APIだけを呼ぶ。human/JSONは同じversioned resultを描画し、compile commandでは通常のnetwork update noticeも実行しない。
 
 - P3 compile bundleを`.paperops/compile/<compile-id>/`へcontent-addressedかつ原子的に保存し、closed artifact manifest、canonical hash、DTO round-trip、compile ID、plan/packet参照を再検証するstrict loaderを追加した。同一入力はbyte-identicalに再利用し、破損は暗黙上書きせず、blocked compileは成功bundleと分離したdiagnostic namespaceだけへ保存する。二bundleのstory、move、claim role、result order、section placement、visual obligation、target/scopeだけを順位付けせず比較できる。

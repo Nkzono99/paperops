@@ -6,6 +6,7 @@
 .paperops/compile-diagnostics/
 .paperops/migrations/
 .paperops/snapshots/
+.paperops/writer/
 .claude/settings.local.json
 Makefile.local
 _handoff/*

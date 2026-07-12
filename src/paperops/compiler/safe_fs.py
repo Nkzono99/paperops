@@ -454,6 +454,8 @@ class SafeProjectReader:
             raise SafeCaptureError("capture directory depth limit exceeded")
         mode = stat.S_IMODE(metadata.st_mode)
         if stat.S_ISREG(metadata.st_mode):
+            if metadata.st_nlink != 1:
+                raise SafeCaptureError("capture file must not be hard-linked")
             content = self._read_regular(descriptor, metadata)
             destination.parent.mkdir(parents=True, exist_ok=True)
             with destination.open("wb") as stream:

@@ -30,6 +30,13 @@ from .privacy import (
     scan_private_material,
 )
 from .requests import CompileRequestError, resolve_compile_request
+from .patches import WriterPatchResult
+from .writer import (
+    WriterSessionResult,
+    build_patch,
+    inspect_writer_session,
+    start_writer_session,
+)
 from .storage import (
     atomic_write_json,
     canonical_json_bytes,
@@ -95,7 +102,9 @@ __all__ = [
     "TexFileSnapshot",
     "WriteScope",
     "WriterPacket",
+    "WriterPatchResult",
     "WriterPaths",
+    "WriterSessionResult",
     "atomic_write_json",
     "bind_typed_tex_blocks",
     "canonical_json_bytes",
@@ -115,4 +124,7 @@ __all__ = [
     "prepare_bundle",
     "semantic_hash",
     "writer_paths",
+    "build_patch",
+    "inspect_writer_session",
+    "start_writer_session",
 ]
