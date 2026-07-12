@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paperops.local/schemas/workflow-profile.schema.json",
+  "type": "object",
+  "required": ["profile_version", "macro_stages", "routes", "approval_kinds", "target_routes", "impact_relations"],
+  "properties": {
+    "profile_version": {"const": 1},
+    "macro_stages": {"const": ["INGESTED", "MODELED", "ARCHITECTED", "DRAFTED", "PUBLISHABLE"]},
+    "routes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9._-]*$"}},
+    "approval_kinds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9._:-]*$"}},
+    "target_routes": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "string"}},
+    "impact_relations": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z][a-z0-9._-]*$"}}
+  },
+  "additionalProperties": false
+}

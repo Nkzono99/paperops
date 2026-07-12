@@ -1,0 +1,16 @@
+profile_version: 1
+macro_stages: [INGESTED, MODELED, ARCHITECTED, DRAFTED, PUBLISHABLE]
+routes: [research, editorial, manuscript, publication]
+approval_kinds: [scientific, editorial, manuscript, publication, submission, waiver]
+target_routes:
+  claim: research
+  result: research
+  figure: research
+  scientific_gate: research
+  story_move: editorial
+  section: manuscript
+  block: manuscript
+  workflow_issue: editorial
+  review_round: editorial
+  publication: publication
+impact_relations: [dependency, claim_ref, result_ref, figure_ref, move_primary, move_echo, section_member, block_member, compile_input, publication_snapshot]
