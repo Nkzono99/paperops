@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from paperops.cli.project import find_project_root
-from paperops.cli.workflow_v2_commands import workflow_v2_plan, workflow_v2_status
+from paperops.cli.workflow_v2_commands import workflow_v2_mutation, workflow_v2_plan, workflow_v2_status
 
 
 WORKFLOW_REL = Path("_paperops") / "workflow"
@@ -49,6 +49,54 @@ def add_workflow_parser(
     plan_parser.add_argument("--json", action="store_true", help="Emit JSON.")
     plan_parser.set_defaults(func=cmd_workflow)
 
+    issue_parser = workflow_subcommands.add_parser("issue", help="Inspect or propose an independent workflow issue change.")
+    issue_actions = issue_parser.add_subparsers(dest="issue_action", required=True)
+    issue_status = issue_actions.add_parser("status")
+    issue_status.add_argument("issue_id", nargs="?", default="all")
+    issue_status.add_argument("--path", dest="workflow_path", type=Path)
+    issue_status.add_argument("--json", action="store_true")
+    for name in ("route", "close", "reopen"):
+        parser = issue_actions.add_parser(name)
+        parser.add_argument("issue_id")
+        if name == "route":
+            parser.add_argument("route")
+        parser.add_argument("--reason", required=True)
+        if name == "close":
+            parser.add_argument("--verification", action="append", default=[], required=True)
+        parser.add_argument("--path", dest="workflow_path", type=Path)
+        parser.add_argument("--json", action="store_true")
+    issue_parser.set_defaults(func=cmd_workflow)
+
+    approval_parser = workflow_subcommands.add_parser("approval", help="Inspect or propose an owner-local approval decision.")
+    approval_actions = approval_parser.add_subparsers(dest="approval_action", required=True)
+    approval_status = approval_actions.add_parser("status")
+    approval_status.add_argument("target_id")
+    approval_status.add_argument("--path", dest="workflow_path", type=Path)
+    approval_status.add_argument("--json", action="store_true")
+    approval_decide = approval_actions.add_parser("decide")
+    approval_decide.add_argument("target_id")
+    approval_decide.add_argument("kind")
+    approval_decide.add_argument("decision", choices=("approved", "rejected", "revoked"))
+    approval_decide.add_argument("--reason", required=True)
+    approval_decide.add_argument("--profile", default="")
+    approval_decide.add_argument("--path", dest="workflow_path", type=Path)
+    approval_decide.add_argument("--json", action="store_true")
+    approval_parser.set_defaults(func=cmd_workflow)
+
+    apply_parser = workflow_subcommands.add_parser("apply", help="Apply a confirmed workflow mutation plan.")
+    apply_parser.add_argument("plan_id")
+    apply_parser.add_argument("path", nargs="?", type=Path)
+    apply_parser.add_argument("--yes", action="store_true")
+    apply_parser.add_argument("--json", action="store_true")
+    apply_parser.set_defaults(func=cmd_workflow)
+
+    rollback_parser = workflow_subcommands.add_parser("rollback", help="Rollback one applied workflow transaction.")
+    rollback_parser.add_argument("transaction_id")
+    rollback_parser.add_argument("path", nargs="?", type=Path)
+    rollback_parser.add_argument("--yes", action="store_true")
+    rollback_parser.add_argument("--json", action="store_true")
+    rollback_parser.set_defaults(func=cmd_workflow)
+
     next_parser = workflow_subcommands.add_parser("next", help="Show likely next transition.")
     next_parser.add_argument("path", nargs="?", type=Path, help="Project directory.")
     next_parser.set_defaults(func=cmd_workflow)
@@ -85,7 +133,7 @@ def add_workflow_parser(
 
 
 def cmd_workflow(args: argparse.Namespace) -> int:
-    root = find_project_root(args.path or Path.cwd())
+    root = find_project_root(getattr(args, "path", None) or getattr(args, "workflow_path", None) or Path.cwd())
     if root is None:
         print("error: this does not look like a paper harness project.", file=sys.stderr)
         return 2
@@ -107,6 +155,12 @@ def cmd_workflow(args: argparse.Namespace) -> int:
             )
         except (OSError, ValueError):
             print("error: workflow impact plan could not be prepared.", file=sys.stderr)
+            return 1
+    if args.workflow_action in {"issue", "approval", "apply", "rollback"}:
+        try:
+            return workflow_v2_mutation(args, root)
+        except (OSError, ValueError, json.JSONDecodeError):
+            print("error: typed workflow operation could not be completed.", file=sys.stderr)
             return 1
 
     try:
