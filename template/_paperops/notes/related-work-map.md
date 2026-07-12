@@ -2,7 +2,7 @@
 
 Deep research の結果を、そのまま文献レビュー本文へ流し込まず、論文の問い、主張、反論、位置づけへ翻訳するための作業ノート。
 
-広い探索や web search の raw output は `_paperops/refs/research/` に一時保持し、採用する文献だけ `_paperops/refs/summaries/`、`manuscript/shared/bib/references.bib`、必要なら `_paperops/evidence/sources/` と `_paperops/notes/views/claim-evidence-map.md` へ昇格する。
+広い探索や web search の raw output は `_paperops/refs/research/` に一時保持し、採用する文献だけ `_paperops/refs/summaries/`、`manuscript/shared/bib/references.bib`、必要なら `_paperops/model/research/sources/` と `_paperops/notes/views/claim-evidence-map.md` へ昇格する。
 
 Web、GitHub、動画、RSS、SNS、議論サイトなど複数の外部 source channel を使う場合は、先に `_paperops/notes/source-reach.md` と `/source-reach-scan` で到達経路、credential need、raw capture policy、refs への昇格先を決める。
 

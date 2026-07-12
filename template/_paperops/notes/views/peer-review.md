@@ -2,16 +2,16 @@
 view_type: pure_overview
 starter_example_rows: true
 source_of_truth:
-  - _paperops/review/rounds/
-  - _paperops/review/feedback/
-  - _paperops/review/responses/
+  - _paperops/model/issues/rounds/
+  - _paperops/model/issues/feedback/
+  - _paperops/model/issues/responses/
 authoritative_for:
   - overview
 ---
 
 # 査読・返答ビュー
 
-このファイルは `_paperops/review/feedback/`、`_paperops/review/rounds/`、`_paperops/review/responses/` のカードを人間が俯瞰するためのビューである。個別コメントの正本は feedback card に置く。
+このファイルは `_paperops/model/issues/feedback/`、`_paperops/model/issues/rounds/`、`_paperops/model/issues/responses/` のカードを人間が俯瞰するためのビューである。個別コメントの正本は feedback card に置く。
 
 初期状態の `*-0001` 行は例示行であり、対応する実カードはまだ作成されていない。実カードを作成したら、この行を実 ID に置き換えるか削除し、`starter_example_rows` を `false` にする。
 
@@ -19,7 +19,7 @@ authoritative_for:
 
 | round ID | card | scope | status | blocking concerns | Editorial architecture audit | Subagent delegation ledger | highest-priority route |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| RVW-0001 | `_paperops/review/rounds/RVW-0001.md` | section / weekly / pre-submit / peer-review / editor-response | draft | 未記入 | story spine / Results hierarchy / Discussion functions | delegated_role / subagent_report / integration decision / orchestrator | `/integrate-writing-feedback` |
+| RVW-0001 | `_paperops/model/issues/rounds/RVW-0001.md` | section / weekly / pre-submit / peer-review / editor-response | draft | 未記入 | story spine / Results hierarchy / Discussion functions | delegated_role / subagent_report / integration decision / orchestrator | `/integrate-writing-feedback` |
 
 ## Feedback matrix
 

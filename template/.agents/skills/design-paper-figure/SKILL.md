@@ -9,15 +9,15 @@ description: Use when creating or revising an individual manuscript figure, figu
 
 ## 最初に読むファイル
 
-- `_paperops/claims/claims/`
-- `_paperops/evidence/results/`
-- `_paperops/evidence/figures/`
+- `_paperops/model/research/claims/`
+- `_paperops/model/research/results/`
+- `_paperops/model/research/figures/`
 - `_paperops/notes/views/storyline.md`
 - `_paperops/notes/views/claim-evidence-map.md`
 - `_paperops/notes/views/result-pattern-map.md`
 - `_paperops/notes/views/condition-context-map.md`
 - `_paperops/refs/links.toml`
-- `_paperops/requests/analysis/`
+- `_paperops/model/issues/analysis/`
 - 対象 figure / table、caption、参照する本文 block
 - runops など外部生成元がある場合は import state と request card
 
@@ -70,7 +70,7 @@ acceptance_criteria:
 9. heatmap / colormap は perceptually ordered で、color_accessibility と color-bin saturation を確認する。rainbow 的な順序誤読、色覚多様性、print 時の劣化を避ける。
 10. annotation_plan と caption_plan を図の一部として扱う。caption は run list ではなく、図が支える contrast、boundary、mechanism、not-claiming を先に言う。
 11. final size で読めるかを確認する。axis label、legend、panel label、line width、marker size、caption との重複を点検する。
-12. runops_handoff が必要なら `_paperops/requests/analysis/` に、plot recipe ではなく reader_task、takeaway_sentence、source data、required panels、public labels、denominator、export format、acceptance_criteria を渡す。
+12. runops_handoff が必要なら `_paperops/model/issues/analysis/` に、plot recipe ではなく reader_task、takeaway_sentence、source data、required panels、public labels、denominator、export format、acceptance_criteria を渡す。
 13. rendered output を見て、acceptance_criteria を満たさない場合は「使える図」として採用しない。figure card の route を manuscript / result-card / claim-card / analysis-request / supplement / discard に戻す。
 
 ## Runops handoff 最小形
@@ -104,3 +104,8 @@ runops_handoff:
 - runops で作られた図でも、paper 側の claim、caption、denominator、public label に合わなければ analysis request へ戻す。
 - `plan-figure-story` の visual obligation と、`figure-story-audit` の denominator / caption /本文参照監査の間をつなぐ。
 - 図中に内部 run label、target label、作業用略語が残る場合は public label map または request card に戻す。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

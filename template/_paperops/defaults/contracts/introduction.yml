@@ -18,7 +18,7 @@ inputs:
   - _paperops/notes/reviewer-model.md
   - _paperops/notes/related-work-map.md
   - _paperops/notes/views/claim-evidence-map.md
-  - _paperops/claims/claims/
+  - _paperops/model/research/claims/
   - _paperops/refs/summaries/
 
 outputs:

@@ -2,16 +2,16 @@
 view_type: pure_overview
 starter_example_rows: true
 source_of_truth:
-  - _paperops/claims/gates/
-  - _paperops/claims/claims/
-  - _paperops/evidence/
+  - _paperops/model/research/gates/
+  - _paperops/model/research/claims/
+  - _paperops/model/research/
 authoritative_for:
   - overview
 ---
 
 # 科学的ゲートビュー
 
-このファイルは `_paperops/claims/gates/` の gate card を人間が俯瞰するためのビューである。gate 判定の正本は gate card に置く。
+このファイルは `_paperops/model/research/gates/` の gate card を人間が俯瞰するためのビューである。gate 判定の正本は gate card に置く。
 
 初期状態の `*-0001` 行は例示行であり、対応する実カードはまだ作成されていない。実カードを作成したら、この行を実 ID に置き換えるか削除し、`starter_example_rows` を `false` にする。
 
@@ -62,7 +62,7 @@ Gate status は `ready-to-write`、`analysis-needed`、`assumption-blocked`、`s
 
 | issue ID | claim ID | type | 内容 | route | owner | status |
 | --- | --- | --- | --- | --- | --- | --- |
-| SG-0001 | CLM-0001 | analysis-needed / assumption-blocked / refs-needed / figure-needed | 未記入 | `/map-result-patterns` / `/research-related-work` / `_paperops/requests/analysis/` | human / AI | open |
+| SG-0001 | CLM-0001 | analysis-needed / assumption-blocked / refs-needed / figure-needed | 未記入 | `/map-result-patterns` / `/research-related-work` / `_paperops/model/issues/analysis/` | human / AI | open |
 
 ## Approved writing scope
 

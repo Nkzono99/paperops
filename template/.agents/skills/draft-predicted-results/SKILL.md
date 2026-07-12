@@ -27,9 +27,9 @@ description: Use when manuscript writing is blocked by missing but feasible addi
 ## 入力
 
 - 対象 claim / section / `% block:` ID
-- `_paperops/claims/gates/` の gate status と `must_not_claim`
-- `_paperops/evidence/results/` と `_paperops/notes/views/result-pattern-map.md`
-- `_paperops/requests/analysis/` の既存 request
+- `_paperops/model/research/gates/` の gate status と `must_not_claim`
+- `_paperops/model/research/results/` と `_paperops/notes/views/result-pattern-map.md`
+- `_paperops/model/issues/analysis/` の既存 request
 - `_paperops/refs/links.toml` と runops / simulation project link
 - Figure を含む場合は `design-paper-figure` の Figure design brief
 
@@ -38,7 +38,7 @@ description: Use when manuscript writing is blocked by missing but feasible addi
 1. 欠けているものを一文で書く。metric、denominator、unit of analysis、comparison、figure panel、Discussion function のどれが未確定かを分ける。
 2. feasibility table を作る。追加シミュレーション、既存条件との差分、必要 walltime / storage、入力変更、出力 artifact、解析 script、失敗時の代替 route を書く。
 3. prediction basis を作る。期待される符号、順位、範囲、uncertainty、外れた場合の解釈を、既存 evidence かモデル理由に接続する。
-4. `_paperops/requests/analysis/` に analysis request を作成または更新する。Acceptance criteria には artifact、metric / estimand、denominator、validated scope、not covered、result card update を入れる。予測稿を使う場合は、planned_analysis、prediction、replacement、provenance_after_execution、reconciliation、analysis_plan_frozen_commit、data_not_seen_before_freeze、negative/null route も埋める。
+4. `_paperops/model/issues/analysis/` に analysis request を作成または更新する。Acceptance criteria には artifact、metric / estimand、denominator、validated scope、not covered、result card update を入れる。予測稿を使う場合は、planned_analysis、prediction、replacement、provenance_after_execution、reconciliation、analysis_plan_frozen_commit、data_not_seen_before_freeze、negative/null route も埋める。
 5. gate card は `analysis-needed` のままにする。`approved_writing_scope` には「予測稿のみ」「publish 不可」「実データ置換後に再 gate」と書き、`must_not_claim` を更新する。
 6. 本文へ予測稿を書く場合、対象 block の直前に次の comment block を置く。
 
@@ -60,7 +60,7 @@ description: Use when manuscript writing is blocked by missing but feasible addi
 - `Missing evidence`: 何が未実行か
 - `Feasibility table`: 現実的または既存の延長線上である理由
 - `Prediction basis`: 期待される結果と外れた場合の分岐
-- `Analysis request`: 作成または更新した `_paperops/requests/analysis/` card
+- `Analysis request`: 作成または更新した `_paperops/model/issues/analysis/` card
 - `Predicted manuscript block`: `% PREDICTED-RESULT:` / `% SIM-REQUEST:` / `% EXPECTATION-BASIS:` / `% REPLACE-XX:` つきの draft
 - `Figure design updates`: predicted panel と replacement artifact
 - `Gate updates`: `analysis-needed`、`must_not_claim`、再 gate 条件
@@ -73,3 +73,8 @@ description: Use when manuscript writing is blocked by missing but feasible addi
 - `PREDICTED-RESULT` comment がある block は final / accepted 扱いにしない。
 - 投稿前に必ず実データへ置換し、`xx`、予測 comment、未解決 request が残っていないことを確認する。
 - `manuscript/` の authoring source には予測を管理してよいが、submission candidate / round snapshot には残さない。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

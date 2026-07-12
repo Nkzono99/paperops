@@ -9,7 +9,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from paperops_checks import Finding, emit_findings, read_text
-from paperops_paths import display_path, internal_path
+from paperops_paths import display_path
+from paperops_typed_views import indexed_documents
 
 
 FIGURE_RE = re.compile(r"\\includegraphics(?:\s*\[[^\]]*\])?\s*\{([^}]+)\}")
@@ -66,19 +67,8 @@ def collect_manuscript_uses(root: Path) -> list[ManuscriptUse]:
     return uses
 
 
-def card_files(root: Path, *parts: str) -> list[Path]:
-    base = internal_path(root, *parts)
-    if not base.exists():
-        return []
-    return sorted(
-        path
-        for path in base.rglob("*.md")
-        if not path.name.endswith("-template.md") and "README" not in path.name
-    )
-
-
-def card_texts(paths: list[Path]) -> list[str]:
-    return [read_text(path) for path in paths]
+def typed_texts(root: Path, model: str, record_type: str | None = None) -> list[str]:
+    return [repr(item.document) for item in indexed_documents(root, model, record_type)]
 
 
 def registered_figure(use: ManuscriptUse, texts: list[str]) -> bool:
@@ -104,15 +94,16 @@ def ledger_block_ids(root: Path) -> set[str]:
 
 def check(root: Path, strict: bool) -> list[Finding]:
     uses = collect_manuscript_uses(root)
-    figure_texts = card_texts(card_files(root, "evidence", "figures"))
-    source_texts = card_texts(card_files(root, "evidence", "sources"))
-    block_texts = card_texts(
-        card_files(root, "evidence")
-        + card_files(root, "claims")
-        + card_files(root, "review")
-        + card_files(root, "requests")
-    )
-    registered_blocks = ledger_block_ids(root)
+    figure_texts = typed_texts(root, "research", "figure")
+    source_texts = typed_texts(root, "research", "source")
+    block_documents = indexed_documents(root, "manuscript", "block")
+    block_texts = [repr(item.document) for item in block_documents]
+    registered_blocks = ledger_block_ids(root) | {
+        value
+        for item in block_documents
+        for value in (item.object_id, item.document.get("ja_tex_block_id"), item.document.get("en_tex_block_id"))
+        if isinstance(value, str) and value
+    }
     severity = "error" if strict else "warning"
     findings: list[Finding] = []
 
@@ -147,7 +138,7 @@ def check(root: Path, strict: bool) -> list[Finding]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="原稿内の図・引用・block ID が paperops card に接続されているか確認する。"
+        description="原稿内の図・引用・block ID が typed model に接続されているか確認する。"
     )
     parser.add_argument("--root", type=Path, default=Path("."))
     parser.add_argument("--strict", action="store_true")

@@ -159,7 +159,7 @@ class ResearchMigrationAdapterTest(unittest.TestCase):
         project = copy_template(parent)
         for relative in set(LEGACY_DIRECTORIES.values()):
             path = project / relative
-            shutil.rmtree(path)
+            shutil.rmtree(path, ignore_errors=True)
             path.mkdir(parents=True)
         for document in documents or self.documents():
             record_type = str(document["record_type"])

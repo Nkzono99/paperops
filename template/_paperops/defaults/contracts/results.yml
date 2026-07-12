@@ -20,10 +20,10 @@ paragraph_contract:
   - scientific_meaning
 
 inputs:
-  - _paperops/evidence/results/
-  - _paperops/evidence/figures/
-  - _paperops/claims/claims/
-  - _paperops/claims/gates/
+  - _paperops/model/research/results/
+  - _paperops/model/research/figures/
+  - _paperops/model/research/claims/
+  - _paperops/model/research/gates/
   - _paperops/notes/views/result-pattern-map.md
   - _paperops/notes/views/claim-evidence-map.md
   - _paperops/notes/views/condition-context-map.md

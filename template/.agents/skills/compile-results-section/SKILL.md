@@ -35,9 +35,9 @@ Results hierarchy の値は `_paperops/model/editorial/results-hierarchy.yml` �
 
 section plan を作る前に `python scripts/check-section-contracts.py --root . --strict` を実行し、`RHI-*` ID の一意性、各 `next_item_id` が配列上の次 item を指すこと、terminal item が空文字で終わることを確認する。typed file が存在する場合は strict checker が legacy Markdown より優先して読む。
 
-AI Writer が「この claim を強めるために必要な追加作業」「後で埋める」などの authoring intent を Results prose に書きそうな場合は、本文にしない。近傍の `% INTENT:` / `% TODO-PAPER:` comment に残し、追加解析が必要なら `_paperops/requests/` へ切り出す。公開本文として意図的に扱う場合だけ `% paperops: allow-authoring-intent -- reason` を直前に置く。
+AI Writer が「この claim を強めるために必要な追加作業」「後で埋める」などの authoring intent を Results prose に書きそうな場合は、本文にしない。近傍の `% INTENT:` / `% TODO-PAPER:` comment に残し、追加解析が必要なら `_paperops/model/issues/` へ切り出す。公開本文として意図的に扱う場合だけ `% paperops: allow-authoring-intent -- reason` を直前に置く。
 
-必要な定量値、比較、panel が未実行だが、投稿前に現実的な追加シミュレーションとして閉じられる場合は、Future Work や defensive caveat へ回す前に `draft-predicted-results` を使う。Results prose に `xx` や予測図を置く場合は、近傍に `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` を残し、対応する `_paperops/requests/analysis/` card があることを確認する。
+必要な定量値、比較、panel が未実行だが、投稿前に現実的な追加シミュレーションとして閉じられる場合は、Future Work や defensive caveat へ回す前に `draft-predicted-results` を使う。Results prose に `xx` や予測図を置く場合は、近傍に `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` を残し、対応する `_paperops/model/issues/analysis/` card があることを確認する。
 
 ## Section Depth
 
@@ -56,3 +56,8 @@ Draft 後は `review-block-flow` で block operation table を作る。各 block
 P2で四つのcompile authorityが採用済みなら、routineなcontext収集とscope検査を手作業で再実装せず、`pops compile prepare <SEC-ID>`、`pops write start <compile-id>`を使う。Writer workspaceは原稿全体を読み直せるので、candidate（候補）TeXを直接編集し、`pops write check <session-id>`で保存則、引用、数量、図、予測稿、JA/EN影響を確認する。局所修正ならcompile時に`--scope block --block <BLK-ID>`を明示する。
 
 候補を読み返してResults hierarchyや全体の証明順が不適切なら、scopeを黙って広げない。`design-paper-storyline`でManuscript / Editorial Modelを改訂し、再承認・再compileする。`pops write apply <session-id> --yes`は人間が候補を確認した後だけ使う。living TeXの直接編集も引き続き有効であり、P3は意味論的判断を機械検査へ置換しない。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

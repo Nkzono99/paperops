@@ -39,7 +39,7 @@ class SetupResumeSkillScopeTest(unittest.TestCase):
             "notes/handoff.md",
             "manuscript/mirror/status.md",
             "scientific-gate",
-            "review/feedback/",
+            "model/issues/feedback/",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, resume)

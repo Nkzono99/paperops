@@ -7,14 +7,14 @@ description: Use when judging claim readiness before Abstract, Conclusion, or ma
 
 本文を書く前に、書いてよい主張とまだ止めるべき主張を分ける。AI に原稿を生成させる前の claim package 監査として使う。
 
-Academic Research Skills の pipeline / integrity gate / material provenance の発想を参考にするが、paperops では `_paperops/claims/`、`_paperops/evidence/`、`_paperops/notes/views/`、`_paperops/refs/` にあるカードとビューへ接続する。外部スキルのテンプレートや文面をコピーしない。
+Academic Research Skills の pipeline / integrity gate / material provenance の発想を参考にするが、paperops では `_paperops/model/research/`、`_paperops/model/research/`、`_paperops/notes/views/`、`_paperops/refs/` にあるカードとビューへ接続する。外部スキルのテンプレートや文面をコピーしない。
 
 ## 最初に読むファイル
 
-- `_paperops/claims/README.md`
-- `_paperops/claims/claims/`
-- `_paperops/claims/gates/`
-- `_paperops/evidence/`
+- `_paperops/model/research/README.md`
+- `_paperops/model/research/claims/`
+- `_paperops/model/research/gates/`
+- `_paperops/model/research/`
 - `_paperops/notes/views/scientific-gate.md`
 - `_paperops/notes/views/result-pattern-map.md`
 - `_paperops/notes/views/claim-evidence-map.md`
@@ -45,7 +45,7 @@ Abstract、Conclusion、title、main figure caption では `ready-to-write` だ�
 
 ## Claim package
 
-各 claim について、`_paperops/claims/gates/` に gate card を作成または更新し、`_paperops/notes/views/scientific-gate.md` の claim package 表を俯瞰用に更新する。
+各 claim について、`_paperops/model/research/gates/` に gate card を作成または更新し、`_paperops/notes/views/scientific-gate.md` の claim package 表を俯瞰用に更新する。
 
 - claim ID と claim text
 - result pattern / evidence packet ID
@@ -75,8 +75,8 @@ method sanity、workflow QA、readiness table、overclaim consistency audit、co
 ## 手順
 
 1. 対象範囲を決める。Abstract / Conclusion / central claim / figure story / section claim のどれを gate するか明記する。
-2. `_paperops/evidence/` と `_paperops/notes/views/result-pattern-map.md` から claim に昇格しようとしている evidence packet を確認する。raw result を直接 claim にしない。
-3. `_paperops/claims/claims/` と `_paperops/notes/views/claim-evidence-map.md` の status と矛盾していないか確認する。
+2. `_paperops/model/research/` と `_paperops/notes/views/result-pattern-map.md` から claim に昇格しようとしている evidence packet を確認する。raw result を直接 claim にしない。
+3. `_paperops/model/research/claims/` と `_paperops/notes/views/claim-evidence-map.md` の status と矛盾していないか確認する。
 4. `_paperops/notes/reproducibility.md`、`_paperops/refs/links.toml`、`_paperops/refs/imports/`、`_paperops/notes/source-reach.md` から provenance と再現可能性を確認する。外部 bundle 由来の evidence は `make external-import-check` の warning を確認する。
 5. `_paperops/notes/related-work-map.md` と `_paperops/refs/summaries/` から関連研究、反論、引用可能な support を確認する。
 6. 各 claim を gate status へ分類し、gate card に block reason と次の route を書く。
@@ -105,7 +105,7 @@ method sanity、workflow QA、readiness table、overclaim consistency audit、co
 - `Assumption ledger updates`
 - `Claim stress-test / external validation gate updates`
 - `Assumption approvals needed`
-- `Routes`: `/map-result-patterns`、`/research-related-work`、`/source-reach-scan`、`/calibrate-claims`、`/figure-story-audit`、`/draft-predicted-results`、`/peer-review-manuscript`、`_paperops/requests/analysis/`
+- `Routes`: `/map-result-patterns`、`/research-related-work`、`/source-reach-scan`、`/calibrate-claims`、`/figure-story-audit`、`/draft-predicted-results`、`/peer-review-manuscript`、`_paperops/model/issues/analysis/`
 - `Files updated`
 - `Checks run`
 
@@ -115,4 +115,9 @@ method sanity、workflow QA、readiness table、overclaim consistency audit、co
 - `_paperops/refs/` と `_paperops/notes/` の作業用ドキュメントは日本語で書く。
 - 既存 source の DOI、metadata、投稿日、投稿先 policy、外部 repository の軽い確認は必要なら web で行い、出典リンクを残す。新規 source channel、credential、raw capture、SNS / 動画 / platform-specific source が絡む場合は先に `/source-reach-scan` へ戻す。
 - `assumption-blocked` を文章上の hedge だけで処理しない。承認または scope 変更へ戻す。
-- `analysis-needed` を最終 prose に見せない。予測稿が必要なら `draft-predicted-results` を使い、`PREDICTED-RESULT` comment と `_paperops/requests/analysis/` への接続を残す。
+- `analysis-needed` を最終 prose に見せない。予測稿が必要なら `draft-predicted-results` を使い、`PREDICTED-RESULT` comment と `_paperops/model/issues/analysis/` への接続を残す。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

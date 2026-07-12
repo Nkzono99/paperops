@@ -2,8 +2,8 @@
 view_type: controlled_authoring
 starter_example_rows: true
 source_of_truth:
-  - _paperops/evidence/results/
-  - _paperops/evidence/figures/
+  - _paperops/model/research/results/
+  - _paperops/model/research/figures/
 authoritative_for:
   - public_condition_names
   - denominator_wording

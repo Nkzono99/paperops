@@ -44,7 +44,7 @@ uvx --from paper-harness-cli pops links check
 - 論文向け export: `runops.publication.exports.list`, `runops.publication.export.inspect`
 - 追加解析・図表・実験要望: `runops.paper.request.draft`, `runops.paper.requests.list`, `runops.paper.request.plan`
 
-追加作業が必要な場合は、まず `_paperops/requests/analysis/` に paper 側の文脈を残し、`_paperops/notes/views/research-requests.md` で俯瞰する。runops 側へ渡す前に `runops.paper.request.draft` で候補 request を検証し、`data.valid = true` かつ `existing_queue.duplicate_id = false` の場合だけ `toml_snippet` を採用する。duplicate id warning がある場合は、snippet が返っていても追記せず、別の id で draft し直す。
+追加作業が必要な場合は、まず `_paperops/model/issues/analysis/` に paper 側の文脈を残し、`_paperops/notes/views/research-requests.md` で俯瞰する。runops 側へ渡す前に `runops.paper.request.draft` で候補 request を検証し、`data.valid = true` かつ `existing_queue.duplicate_id = false` の場合だけ `toml_snippet` を採用する。duplicate id warning がある場合は、snippet が返っていても追記せず、別の id で draft し直す。
 
 paper 側 request と linked queue の drift は `make research-request-handoff-check` で確認する。`runops_id = draft:*` は draft staged but not queued、queued ID は linked `paper_request_queue` 内の `[[requests]]` と照合する。投稿前や queue handoff を閉じる前は `python scripts/check-research-request-handoff.py --root . --strict` を使う。
 
@@ -54,9 +54,9 @@ paper 側 request と linked queue の drift は `make research-request-handoff-
 
 - 共有 link の意味: `_paperops/refs/links.toml`
 - 個人環境の絶対パス: `_paperops/refs/local/locations.toml`
-- 追加解析・図表・実験要望: `_paperops/requests/analysis/` と `_paperops/notes/views/research-requests.md`
+- 追加解析・図表・実験要望: `_paperops/model/issues/analysis/` と `_paperops/notes/views/research-requests.md`
 - 外部 bundle の取り込み状態: `_paperops/refs/imports/` と `make external-import-check`
-- 論文本文に使う証拠: `_paperops/evidence/`、`_paperops/claims/claims/`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/reproducibility.md`
+- 論文本文に使う証拠: `_paperops/model/research/`、`_paperops/model/research/claims/`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/reproducibility.md`
 
 ## Codex 実行メモ
 
@@ -65,3 +65,8 @@ paper 側 request と linked queue の drift は `make research-request-handoff-
 - 共有可能な情報は `_paperops/refs/local/aliases.md` や `_paperops/refs/summaries/` に残し、ローカル絶対パスを原稿や共有ドキュメントへ混ぜない。
 - export bundle から図表や CSV を読む前に、`_paperops/refs/imports/*.toml` が `source_index`、`integrity_manifest`、`claim_evidence_policy`、`must_not_claim` を持つか確認する。
 - runops project link では `.claude` 側の手順に従い、`runops.paper.request.draft` で検証してから request handoff する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

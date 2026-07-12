@@ -7,8 +7,9 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from paperops_checks import Finding, emit_findings, frontmatter, read_text, warning_severity
-from paperops_paths import display_path, internal_path
+from paperops_checks import Finding, emit_findings, read_text, warning_severity
+from paperops_paths import display_path
+from paperops_typed_views import indexed_documents
 
 
 PLACEHOLDER_RE = re.compile(r"(未記入|TBD|TODO|置き換えてください)")
@@ -37,50 +38,15 @@ def is_blank(value: str | None) -> bool:
     return value is None or not value.strip() or PLACEHOLDER_RE.search(value) is not None
 
 
-def result_cards(root: Path) -> list[Path]:
-    result_dir = internal_path(root, "evidence", "results")
-    if not result_dir.exists():
-        return []
-    return [
-        path
-        for path in sorted(result_dir.glob("*.md"))
-        if not path.name.endswith("-template.md")
-    ]
-
-
-def extract_quantity_contracts(path: Path) -> list[QuantityContract]:
-    front = frontmatter(read_text(path))
-    if not front or "quantity_contracts:" not in front:
-        return []
+def result_contracts(root: Path) -> list[QuantityContract]:
     contracts: list[QuantityContract] = []
-    current: dict[str, str] | None = None
-    in_contracts = False
-    current_key = ""
-    for line in front.splitlines():
-        if re.match(r"^quantity_contracts:\s*", line):
-            in_contracts = True
-            continue
-        if in_contracts and line and not line.startswith((" ", "-")):
-            break
-        if not in_contracts:
-            continue
-        item_match = re.match(r"^\s*-\s+([A-Za-z0-9_/-]+):\s*(.*)$", line)
-        if item_match:
-            if current is not None:
-                contracts.append(make_contract(path, current))
-            current = {item_match.group(1): item_match.group(2).strip().strip('"').strip("'")}
-            current_key = item_match.group(1)
-            continue
-        field_match = re.match(r"^\s+([A-Za-z0-9_/-]+):\s*(.*)$", line)
-        if field_match and current is not None:
-            current_key = field_match.group(1)
-            current[current_key] = field_match.group(2).strip().strip('"').strip("'")
-            continue
-        list_match = re.match(r"^\s+-\s*(.*)$", line)
-        if list_match and current is not None and current_key:
-            current[current_key] = (current.get(current_key, "") + " " + list_match.group(1).strip()).strip()
-    if current is not None:
-        contracts.append(make_contract(path, current))
+    for item in indexed_documents(root, "research", "result"):
+        for raw in item.document.get("quantity_contracts", []):
+            if isinstance(raw, dict):
+                fields = {str(key): " ".join(value) if isinstance(value, list) else str(value) for key, value in raw.items()}
+                fields["source_artifact"] = fields.get("source_artifact_id", "")
+                fields["manuscript_blocks"] = fields.get("manuscript_block_refs", "")
+                contracts.append(make_contract(item.path, fields))
     return contracts
 
 
@@ -110,8 +76,7 @@ def rel(path: Path, root: Path) -> str:
 def check(root: Path, strict: bool) -> list[Finding]:
     findings: list[Finding] = []
     contracts: list[QuantityContract] = []
-    for path in result_cards(root):
-        contracts.extend(extract_quantity_contracts(path))
+    contracts.extend(result_contracts(root))
 
     for contract in contracts:
         for field in REQUIRED_FIELDS:
@@ -135,14 +100,14 @@ def check(root: Path, strict: bool) -> list[Finding]:
                 Finding(
                     warning_severity(strict),
                     f"未登録の数量表現 `{value} of {denominator}` が manuscript にあります。"
-                    "`_paperops/evidence/results/` の quantity_contracts に value / denominator / unit_of_analysis を登録してください。",
+                    "typed Research result の quantity_contracts に value / denominator / unit_of_analysis を登録してください。",
                 )
             )
     if strict and seen_pairs and not contracts:
         findings.append(
             Finding(
                 "error",
-                "manuscript に count fraction がありますが `_paperops/evidence/results/` に quantity_contracts がありません",
+                "manuscript に count fraction がありますが typed Research result に quantity_contracts がありません",
             )
         )
     return findings

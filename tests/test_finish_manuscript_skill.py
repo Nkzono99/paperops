@@ -168,7 +168,7 @@ class FinishManuscriptSkillTest(unittest.TestCase):
                 "SIM-REQUEST",
                 "EXPECTATION-BASIS",
                 "REPLACE-XX",
-                "_paperops/requests/analysis/",
+                "_paperops/model/issues/analysis/",
                 "analysis-needed",
                 "Future Work",
                 "defensive",

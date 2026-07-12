@@ -1213,8 +1213,8 @@ class ManuscriptScannerTest(unittest.TestCase):
                 encoding="utf-8",
             )
             write(
-                root / "_paperops/requests/analysis/AREQ-0008.md",
-                "---\nid: AREQ-0008\ntype: analysis_request\nstatus: []\n---\nbody\n",
+                root / "_paperops/model/issues/analysis/AREQ-0008.yml",
+                "id: AREQ-0008\nrecord_type: analysis_request\nstatus: []\n",
             )
             ledger_path = root / "manuscript/mirror/block-ledger.yml"
             ledger = yaml.safe_load(ledger_path.read_text(encoding="utf-8"))
@@ -1325,20 +1325,17 @@ class ManuscriptScannerTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = scanner_project(tmp)
             write(
-                root / "_paperops/requests/analysis/AREQ-0008.md",
+                root / "_paperops/model/issues/analysis/AREQ-0008.yml",
                 """\
----
 id: AREQ-0008
-type: analysis_request
+record_type: analysis_request
 status: open
----
-
-Private working body /LARGE1/raw/reviewer-note must not be public.
+public_summary: Private working body /LARGE1/raw/reviewer-note must not be public.
 """,
             )
             write(
-                root / "_paperops/requests/analysis/nested/AREQ-9999.md",
-                "---\nid: AREQ-9999\ntype: analysis_request\nstatus: open\n---\nnested\n",
+                root / "_paperops/model/issues/analysis/nested/AREQ-9999.yml",
+                "id: AREQ-9999\nrecord_type: analysis_request\nstatus: open\n",
             )
 
             snapshot = scan_manuscript(root)
@@ -1347,29 +1344,29 @@ Private working body /LARGE1/raw/reviewer-note must not be public.
         request = snapshot.analysis_requests[0]
         self.assertEqual(
             (request.request_id, request.status, request.identity),
-            ("AREQ-0008", "open", "_paperops/requests/analysis/AREQ-0008.md"),
+            ("AREQ-0008", "open", "_paperops/model/issues/analysis/AREQ-0008.yml"),
         )
         self.assertRegex(request.content_hash, HASH_RE)
         self.assertEqual(len(snapshot.analysis_requests), 1)
-        self.assertNotIn("nested/AREQ-9999.md", snapshot.read_paths)
+        self.assertNotIn("nested/AREQ-9999.yml", snapshot.read_paths)
         self.assertNotIn("Private working body", repr(snapshot.to_dict()))
         self.assertNotIn("/LARGE1/raw/reviewer-note", repr(snapshot.to_dict()))
 
     def test_analysis_request_duplicate_id_bad_status_and_duplicate_frontmatter_key_are_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = scanner_project(tmp)
-            request_dir = root / "_paperops/requests/analysis"
+            request_dir = root / "_paperops/model/issues/analysis"
             write(
-                request_dir / "AREQ-A.md",
-                "---\nid: AREQ-0008\ntype: analysis_request\nstatus: mystery\n---\nbody\n",
+                request_dir / "AREQ-A.yml",
+                "id: AREQ-0008\nrecord_type: analysis_request\nstatus: mystery\n",
             )
             write(
-                request_dir / "AREQ-B.md",
-                "---\nid: AREQ-0008\ntype: analysis_request\nstatus: open\nstatus: running\n---\nbody\n",
+                request_dir / "AREQ-B.yml",
+                "id: AREQ-0008\nrecord_type: analysis_request\nstatus: open\nstatus: running\n",
             )
             write(
-                request_dir / "AREQ-C.md",
-                "---\nid: AREQ-0008\ntype: analysis_request\nstatus: running\n---\nbody\n",
+                request_dir / "AREQ-C.yml",
+                "id: AREQ-0008\nrecord_type: analysis_request\nstatus: running\n",
             )
 
             snapshot = scan_manuscript(root)
@@ -1383,8 +1380,8 @@ Private working body /LARGE1/raw/reviewer-note must not be public.
         with tempfile.TemporaryDirectory() as tmp:
             root = scanner_project(tmp)
             write(
-                root / "_paperops/requests/analysis/AREQ-private.md",
-                "---\nid: AREQ-ghp_abcdefghijklmnop\ntype: analysis_request\nstatus: open\n---\nbody\n",
+                root / "_paperops/model/issues/analysis/AREQ-private.yml",
+                "id: AREQ-ghp_abcdefghijklmnop\nrecord_type: analysis_request\nstatus: open\n",
             )
             nested = "leaf: value\n"
             for index in range(550):
@@ -1543,10 +1540,10 @@ Private working body /LARGE1/raw/reviewer-note must not be public.
                 if kind == "analysis_symlink":
                     outside = root / "outside-analysis"
                     write(
-                        outside / "AREQ-9999.md",
-                        "---\nid: AREQ-9999\ntype: analysis_request\nstatus: open\n---\nsecret\n",
+                        outside / "AREQ-9999.yml",
+                        "id: AREQ-9999\nrecord_type: analysis_request\nstatus: open\n",
                     )
-                    link = root / "_paperops/requests/analysis"
+                    link = root / "_paperops/model/issues/analysis"
                     link.parent.mkdir(parents=True, exist_ok=True)
                     link.symlink_to(outside, target_is_directory=True)
                 else:

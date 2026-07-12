@@ -17,7 +17,6 @@ class FigureStoryPlanningTemplateTest(unittest.TestCase):
         skill = read_template("template/.agents/skills/plan-figure-story/SKILL.md")
         profile = read_template("template/manuscript/writing-profile.yml")
         machine = read_template("template/_paperops/defaults/workflow/machine.yml")
-        current_state = read_template("template/_paperops/workflow/current-state.yml")
         makefile = read_template("template/Makefile")
 
         for required in [
@@ -39,22 +38,21 @@ class FigureStoryPlanningTemplateTest(unittest.TestCase):
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, machine)
-                self.assertIn(required, current_state)
 
         self.assertIn("figure-obligation-check", makefile)
         self.assertIn("scripts/check-figure-obligations.py --root .", makefile)
 
-    def test_claim_and_figure_templates_expose_visual_obligation_crosswalk(self) -> None:
-        claim = read_template("template/_paperops/claims/claims/claim-card-template.md")
-        figure = read_template("template/_paperops/evidence/figures/figure-card-template.md")
+    def test_claim_and_figure_schemas_expose_visual_obligation_crosswalk(self) -> None:
+        claim = read_template("template/_paperops/defaults/schemas/research-claim.schema.json")
+        figure = read_template("template/_paperops/defaults/schemas/research-figure.schema.json")
 
         for required in [
-            "visual_obligations",
+            "visual_obligation_refs",
             "no_figure_reason",
-            "satisfies_visual_obligations",
-            "current_manuscript_role",
+            "visual_obligation_refs",
+            "manuscript_role",
             "missing_action",
-            "main / supplement / notes-only / removed",
+            '"main"',
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, claim + "\n" + figure)

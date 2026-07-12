@@ -7,13 +7,13 @@ description: Use when turning results, figures, or run outputs into result patte
 
 raw result、figure data、analysis artifact、run output を、本文や claim に直接入れる前の result pattern へ束ねるために使う。
 
-Quarto manuscripts、showyourwork!、research compendium のような外部ハーネスは、計算・図表・原稿・環境の関係を明示する。paperops ではそれを全面的な DAG や別 authoring system にせず、`_paperops/evidence/results/` と `_paperops/evidence/figures/` のカードを正本、`_paperops/notes/views/result-pattern-map.md` を俯瞰ビューとして扱う。
+Quarto manuscripts、showyourwork!、research compendium のような外部ハーネスは、計算・図表・原稿・環境の関係を明示する。paperops ではそれを全面的な DAG や別 authoring system にせず、`_paperops/model/research/results/` と `_paperops/model/research/figures/` のカードを正本、`_paperops/notes/views/result-pattern-map.md` を俯瞰ビューとして扱う。
 
 ## 最初に読むファイル
 
-- `_paperops/evidence/README.md`
-- `_paperops/evidence/results/`
-- `_paperops/evidence/figures/`
+- `_paperops/model/research/README.md`
+- `_paperops/model/research/results/`
+- `_paperops/model/research/figures/`
 - `_paperops/notes/views/result-pattern-map.md`
 - `_paperops/notes/views/scientific-gate.md`
 - `_paperops/notes/views/condition-context-map.md`
@@ -51,7 +51,7 @@ Quarto manuscripts、showyourwork!、research compendium のような外部ハ�
 
 ### 2. Result pattern にする
 
-各 unit について、まず `_paperops/evidence/results/` に result card を作る。図表に関わる unit は `_paperops/evidence/figures/` に figure card も作る。そのうえで `_paperops/notes/views/result-pattern-map.md` の `結果パターン inventory` を更新する:
+各 unit について、まず `_paperops/model/research/results/` に result card を作る。図表に関わる unit は `_paperops/model/research/figures/` に figure card も作る。そのうえで `_paperops/notes/views/result-pattern-map.md` の `結果パターン inventory` を更新する:
 
 - `observed contrast`
 - `effect direction / magnitude`
@@ -87,13 +87,13 @@ packet は 1 つの result story として扱い、最低限以下を持つ:
 - `manuscript block`
 - `reproduce / provenance link`
 
-claim ID が未定なら `CLM-0001 / 未定` のように仮置きし、claim として採用する段階で `_paperops/claims/claims/` の claim card と `_paperops/notes/views/claim-evidence-map.md` に接続する。
+claim ID が未定なら `CLM-0001 / 未定` のように仮置きし、claim として採用する段階で `_paperops/model/research/claims/` の claim card と `_paperops/notes/views/claim-evidence-map.md` に接続する。
 
 ### 5. Manuscript routing を決める
 
 各 pattern を以下に分類する:
 
-- `promote to claim`: `_paperops/claims/claims/` の claim card に接続する
+- `promote to claim`: `_paperops/model/research/claims/` の claim card に接続する
 - `scientific gate`: `_paperops/notes/views/scientific-gate.md` で claim package と readiness を確認する
 - `figure story`: `figure-story-audit` で caption / 本文参照へ接続する
 - `condition context`: `condition-context-map` で公開条件名と scope を整理する
@@ -106,7 +106,7 @@ claim ID が未定なら `CLM-0001 / 未定` のように仮置きし、claim �
 - `Result pattern map`: pattern ID、observed contrast、effect direction、null cases、candidate interpretation
 - `Evidence packets`: 本文や図表に入れる result story
 - `Condition context handoff`: `/contextualize-conditions` へ渡す条件・denominator
-- `Claim promotion candidates`: `_paperops/claims/claims/` へ昇格できる候補
+- `Claim promotion candidates`: `_paperops/model/research/claims/` へ昇格できる候補
 - `Move to supplement / notes`: 本文から退避する材料
 - `Risks`: overclaim、coverage 不足、公開語不足、provenance 不足
 
@@ -121,6 +121,11 @@ claim ID が未定なら `CLM-0001 / 未定` のように仮置きし、claim �
 ## Codex 実行メモ
 
 - ユーザーが本文編集を明示しない限り、`manuscript/` は編集しない。
-- result pattern を作った後に claim へ昇格する場合は、`_paperops/claims/claims/` の claim card と `_paperops/notes/views/claim-evidence-map.md` の主張台帳も更新する。
+- result pattern を作った後に claim へ昇格する場合は、`_paperops/model/research/claims/` の claim card と `_paperops/notes/views/claim-evidence-map.md` の主張台帳も更新する。
 - 図表 caption まで進む場合は `/figure-story-audit`、条件数や denominator の翻訳へ進む場合は `/contextualize-conditions` を使う。
 - Abstract / Conclusion / central claim に入れる場合は、`/scientific-gate` で gate status を更新する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

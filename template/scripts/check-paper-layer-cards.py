@@ -8,23 +8,13 @@ from paperops_paths import display_path, internal_path
 
 
 REQUIRED_FILES = [
-    "evidence/README.md",
-    "evidence/results/result-card-template.md",
-    "evidence/figures/figure-card-template.md",
-    "evidence/sources/source-card-template.md",
-    "claims/README.md",
-    "claims/claims/claim-card-template.md",
-    "claims/gates/scientific-gate-card-template.md",
-    "claims/arguments/argument-card-template.md",
-    "review/README.md",
-    "review/block-flow/README.md",
-    "review/block-flow/block-flow-review-template.md",
-    "review/feedback/feedback-card-template.md",
-    "review/rounds/review-round-template.md",
-    "review/responses/response-card-template.md",
-    "requests/README.md",
-    "requests/analysis/analysis-request-template.md",
-    "requests/writing/writing-request-template.md",
+    "defaults/schemas/registry.yml",
+    "model/research/index.yml",
+    "model/editorial/editorial-model.yml",
+    "model/editorial/results-hierarchy.yml",
+    "model/manuscript/index.yml",
+    "model/issues/index.yml",
+    "model/publication/publication-model.yml",
     "notes/views/README.md",
     "notes/views/result-pattern-map.md",
     "notes/views/claim-evidence-map.md",
@@ -39,31 +29,7 @@ REQUIRED_FILES = [
 ]
 
 
-FRONTMATTER_REQUIREMENTS = {
-    "evidence/results/result-card-template.md": ["---", "type: result", "claim_links:"],
-    "evidence/figures/figure-card-template.md": [
-        "---",
-        "type: figure",
-        "supports_claims:",
-        "satisfies_visual_obligations:",
-    ],
-    "evidence/sources/source-card-template.md": ["---", "type: source", "source_kind:"],
-    "claims/claims/claim-card-template.md": [
-        "---",
-        "type: claim",
-        "depends_on:",
-        "visual_obligations:",
-        "no_figure_reason:",
-    ],
-    "claims/gates/scientific-gate-card-template.md": ["---", "type: scientific_gate", "gate_status:"],
-    "claims/arguments/argument-card-template.md": ["---", "type: argument", "claim_order:"],
-    "review/feedback/feedback-card-template.md": ["---", "type: feedback", "target:", "upstream_routes:"],
-    "review/block-flow/block-flow-review-template.md": ["---", "type: block_flow_review", "section:"],
-    "review/rounds/review-round-template.md": ["---", "type: review_round", "feedback_cards:"],
-    "review/responses/response-card-template.md": ["---", "type: response", "feedback_cards:"],
-    "requests/analysis/analysis-request-template.md": ["---", "type: analysis_request", "requested_outputs:"],
-    "requests/writing/writing-request-template.md": ["---", "type: writing_request", "target_blocks:"],
-}
+FRONTMATTER_REQUIREMENTS: dict[str, list[str]] = {}
 
 
 VIEW_FRONTMATTER_REQUIREMENTS = {
@@ -129,7 +95,7 @@ def check_legacy_views(root: Path, findings: list[Finding]) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="論文執筆カード層と互換ビューの外形を確認する。")
+    parser = argparse.ArgumentParser(description="typed model authority と互換ビューの外形を確認する。")
     parser.add_argument("--root", type=Path, default=Path("."))
     args = parser.parse_args()
 
@@ -140,9 +106,9 @@ def main() -> int:
     check_legacy_views(root, findings)
 
     return emit_findings(
-        "paper layer cards",
+        "paper typed layers",
         findings,
-        success_message="カード層と互換ビューの外形に問題は見つかりませんでした。",
+        success_message="typed model authority と互換ビューの外形に問題は見つかりませんでした。",
     )
 
 

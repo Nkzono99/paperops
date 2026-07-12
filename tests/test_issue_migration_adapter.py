@@ -76,7 +76,7 @@ class IssueMigrationAdapterTest(unittest.TestCase):
     def project(self, parent: Path, documents: list[dict] | None = None) -> Path:
         project = copy_template(parent)
         for relative in ROOTS.values():
-            shutil.rmtree(project / relative)
+            shutil.rmtree(project / relative, ignore_errors=True)
             (project / relative).mkdir(parents=True)
         for document in documents or self.documents():
             path = project / ROOTS[document["record_type"]] / f"{document['id']}.md"

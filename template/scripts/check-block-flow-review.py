@@ -20,6 +20,7 @@ from paperops_checks import (
     warning_severity,
 )
 from paperops_paths import display_path, internal_path
+from paperops_typed_views import indexed_documents, workflow_projection
 
 
 TARGET_SECTIONS = {
@@ -51,29 +52,11 @@ BLOCK_RE = re.compile(r"%\s*block:\s*([A-Za-z0-9_.:-]+)")
 
 
 def section_states(root: Path) -> dict[str, str]:
-    path = internal_path(root, "workflow", "current-state.yml")
-    if not path.exists():
-        return {}
-    current = load_mapping(path)
-    sections = current.get("sections", {})
-    if not isinstance(sections, dict):
-        return {}
-    states: dict[str, str] = {}
-    for name, section in sections.items():
-        if isinstance(section, dict):
-            states[str(name)] = str(section.get("state", "")).strip()
-    return states
+    return {key: value.upper() for key, value in workflow_projection(root)["sections"].items()}
 
 
 def overall_state(root: Path) -> str:
-    path = internal_path(root, "workflow", "current-state.yml")
-    if not path.exists():
-        return ""
-    current = load_mapping(path)
-    overall = current.get("overall", {})
-    if not isinstance(overall, dict):
-        return ""
-    return str(overall.get("state", "")).strip()
+    return str(workflow_projection(root)["stage"]).upper()
 
 
 def manuscript_blocks(root: Path, section: str) -> set[str]:
@@ -94,17 +77,9 @@ def meaningful(value: str) -> bool:
 
 
 def review_files(root: Path, section: str) -> list[Path]:
-    base = internal_path(root, "review", "block-flow")
-    if not base.exists():
-        return []
-    files: list[Path] = []
-    for path in sorted(base.glob("*.md")):
-        if path.name == "README.md" or path.name.endswith("-template.md"):
-            continue
-        front = frontmatter(read_text(path))
-        if scalar_value(front, "section") == section:
-            files.append(path)
-    return files
+    sections = [item for item in indexed_documents(root, "manuscript", "section") if item.document.get("section_kind") == section]
+    section_ids = {item.object_id for item in sections}
+    return [item.path for item in indexed_documents(root, "manuscript", "block") if item.document.get("section_id") in section_ids]
 
 
 def review_rows(root: Path, section: str, findings: list[Finding], severity: str) -> dict[str, dict[str, str]]:
@@ -149,63 +124,39 @@ def review_rows(root: Path, section: str, findings: list[Finding], severity: str
 def check(root: Path, strict: bool) -> list[Finding]:
     severity = warning_severity(strict)
     findings: list[Finding] = []
-    states = section_states(root)
-    overall = overall_state(root)
+    sections = {str(item.document.get("section_kind")): item for item in indexed_documents(root, "manuscript", "section")}
+    blocks = {item.object_id: item for item in indexed_documents(root, "manuscript", "block")}
     for section in ["results", "discussion"]:
-        section_state = states.get(section)
-        if overall in STRUCTURE_ACCEPTED_OR_LATER and section_state not in REVIEWED_SECTION_STATES:
+        record = sections.get(section)
+        if record is None:
+            continue
+        section_state = str(record.document.get("status", ""))
+        if section_state not in {"verified", "stale"}:
+            continue
+        ordered = set(record.document.get("ordered_block_ids", []))
+        if not ordered:
             findings.append(
                 Finding(
                     severity,
-                    f"`{overall}` requires `{section}` to be AUDITED / ACCEPTED before structure acceptance, "
-                    f"but current section state is `{section_state}`.",
+                    f"typed Manuscript section `{record.object_id}` は {section_state} ですが ordered block がありません。",
                 )
             )
             continue
-        if section_state not in REVIEWED_SECTION_STATES:
-            continue
-        blocks = manuscript_blocks(root, section)
-        if not blocks:
+        missing = ordered - set(blocks)
+        if missing:
             findings.append(
                 Finding(
                     severity,
-                    f"`{section}` は {section_state} ですが、manuscript section に `% block:` がありません。",
+                    f"typed Manuscript section `{record.object_id}` が未登録 block を参照しています: " + ", ".join(sorted(missing)),
                 )
             )
-            continue
-        files = review_files(root, section)
-        if not files:
-            findings.append(
-                Finding(
-                    severity,
-                    f"`{section}` は {section_state} ですが、"
-                    "`_paperops/review/block-flow/` に block-flow review artifact がありません。",
-                )
-            )
-            continue
-        rows = review_rows(root, section, findings, severity)
-        missing_blocks = blocks - set(rows)
-        if missing_blocks:
-            findings.append(
-                Finding(
-                    severity,
-                    f"`{section}` の block-flow review に manuscript block がありません: "
-                    + ", ".join(sorted(missing_blocks)),
-                )
-            )
-        for block_id in sorted(blocks & set(rows)):
-            row = rows[block_id]
-            missing_fields = [
-                field
-                for field in sorted(REQUIRED_NON_PLACEHOLDER)
-                if not meaningful(row.get(field, ""))
-            ]
-            if missing_fields:
+        for block_id in sorted(ordered & set(blocks)):
+            document = blocks[block_id].document
+            if not meaningful(str(document.get("reader_task", ""))) or document.get("operation") not in {"keep", "compress", "move", "merge", "split", "cut", "rewrite", "add"}:
                 findings.append(
                     Finding(
                         severity,
-                        f"`{section}` block `{block_id}` の block-flow review が未完了です: "
-                        + ", ".join(missing_fields),
+                        f"typed Manuscript block `{block_id}` の reader task / operation が未完了です。",
                     )
                 )
     return findings

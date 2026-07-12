@@ -29,7 +29,7 @@ class PredictedResultDraftingSkillTemplateTest(unittest.TestCase):
             "Future Work",
             "defensive",
             "analysis-needed",
-            "_paperops/requests/analysis/",
+            "_paperops/model/issues/analysis/",
             "現実的",
             "既存の延長線上",
             "must_not_claim",
@@ -86,7 +86,7 @@ class PredictedResultDraftingSkillTemplateTest(unittest.TestCase):
             "SIM-REQUEST",
             "予測稿",
             "Future Work",
-            "_paperops/requests/analysis/",
+            "_paperops/model/issues/analysis/",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, docs)

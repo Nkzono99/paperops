@@ -17,7 +17,7 @@ main agent は writer だけでなく orchestrator として動く。goal 中の
 - `revision`: 既存稿、AI 初稿、人間レビュー、PDF 指摘、editor decision のいずれかがある。`integrate-writing-feedback` と `route-manuscript-feedback` で戻る深さを決める。
 - `response`: 実査読への改訂が主目的。`respond-to-peer-review` を主ルートにし、この skill は Finish criteria と feedback loop を監督する。
 
-最初に読むものは最小にする。まず`pops workflow status --json`でprojectionとauthority modeを確認する。続いて`_paperops/notes/project-brief.md`、`manuscript/venue.md`、`_paperops/notes/views/storyline.md`、`manuscript/writing-profile.yml`、必要なreview / requestだけを確認し、詳細は専門skillに任せる。legacy modeの場合だけ`_paperops/workflow/current-state.yml`を状態正本として読む。
+最初に読むものは最小にする。まず`pops workflow status --json`でprojectionとauthority modeを確認する。続いて`_paperops/notes/project-brief.md`、`manuscript/venue.md`、`_paperops/notes/views/storyline.md`、`manuscript/writing-profile.yml`、必要なreview / requestだけを確認し、詳細は専門skillに任せる。legacy modeの場合だけ`pops workflow status --json`を状態正本として読む。
 
 対象原稿が repo 外なら `import-manuscript` で取り込む。raw confidential reviewer text や雑多な人間入力は `_handoff/` に置き、tracked card には要約、ID、route だけを残す。
 
@@ -29,7 +29,7 @@ main agent は writer だけでなく orchestrator として動く。goal 中の
 4. 追加シミュレーションが現実的で、結果の向きや図の形を根拠つきで予測できる場合は、Future Work や defensive prose に逃がさず `draft-predicted-results` で `% PREDICTED-RESULT:` 付きの予測稿と analysis request を作る。
 5. Writer に生の card ontology を直接渡さない。必要な card と controlled authoring view から `paper_ir` を作り、`compile-results-section`、`compile-discussion-section`、`compile-methods-section` で読者向け構造へ変換する。
 6. `DRAFTED -> AUDITED` の前に `review-block-flow` で block operation table を作り、keep / move / split / merge / delete / add と author stance を確認する。
-7. AI Writer の authoring intent、判断保留、後で埋める内容、作業計画は本文 prose に書かない。近傍の `% INTENT:` または `% TODO-PAPER:` に残し、未解決なら `_paperops/notes/` / `_paperops/requests/` へ移す。
+7. AI Writer の authoring intent、判断保留、後で埋める内容、作業計画は本文 prose に書かない。近傍の `% INTENT:` または `% TODO-PAPER:` に残し、未解決なら `_paperops/notes/` / `_paperops/model/issues/` へ移す。
 8. review 後や route が不明な feedback は `route-manuscript-feedback` に渡し、evidence / story / section / prose / submission loop のどこへ戻すか決める。
 9. 模擬査読や公開原稿確認が必要なら `review-public-manuscript` と `peer-review-manuscript` を回し、blocking / major concern を `integrate-writing-feedback` へ戻す。
 10. 投稿・外部共有・再投稿へ進む場合は `submission-gate` を読み、`manuscript/` の living authoring source と `submission/<venue>/round-*` の submission candidate / round snapshot を分ける。
@@ -43,7 +43,7 @@ Revision lane では、現稿の読みと feedback を分ける。AI 初稿や R
 
 Response lane では、`respond-to-peer-review` の comment inventory、response matrix、revision plan、response letter と本文変更を対応させる。査読対応だけで本文の claim scope を変える場合は `route-manuscript-feedback` へ戻す。
 
-投稿後や査読後に原稿修正が必要になったら、提出済み snapshot は編集せず、`manuscript/` を `revision-authoring` として更新する。再投稿は `revision-candidate` を新しい submission round として作り、`submission-gate` と `_paperops/workflow/submission-ledger.yml` に記録する。
+投稿後や査読後に原稿修正が必要になったら、提出済み snapshot は編集せず、`manuscript/` を `revision-authoring` として更新する。再投稿は `revision-candidate` を新しい submission round として作り、`submission-gate` と `_paperops/model/publication/publication-model.yml` に記録する。
 
 ## Stop Rules
 
@@ -52,3 +52,8 @@ Response lane では、`respond-to-peer-review` の comment inventory、response
 - AI の執筆メモを読者向け本文に混ぜない。`% INTENT:` / `% TODO-PAPER:` は回収可能な TeX comment として使い、公開本文に意図的に残す場合だけ `% paperops: allow-authoring-intent -- reason` を置く。
 - `/goal` 中は今の blocker、次の 1-3 手、Finish criteria の未達項目を短く更新する。
 - 迷ったら prose polish ではなく、evidence、story、section、feedback route のどこが詰まっているかを先に決める。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

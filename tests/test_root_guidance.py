@@ -47,13 +47,13 @@ class RootGuidanceTest(unittest.TestCase):
             with self.subTest(legacy_path=legacy_path):
                 self.assertNotIn(legacy_path, readme)
         for modern_path in [
-            "`_paperops/evidence/`",
-            "`_paperops/claims/`",
-            "`_paperops/review/`",
-            "`_paperops/requests/`",
+            "`_paperops/model/research/`",
+            "`_paperops/model/editorial/`",
+            "`_paperops/model/manuscript/`",
+            "`_paperops/model/issues/`",
+            "`_paperops/model/publication/`",
             "`_paperops/notes/views/`",
             "`_paperops/contracts/`",
-            "`_paperops/workflow/`",
             "`_paperops/refs/`",
         ]:
             with self.subTest(modern_path=modern_path):

@@ -2,7 +2,7 @@
 
 `_paperops/notes/views/` はカード層を人間が俯瞰し、本文へ変換するときの判断を置くための view 層である。
 
-正本は `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` のカードである。カードの status、依存関係、route と矛盾する場合はカード側を優先する。
+正本は `_paperops/model/research/`、`_paperops/model/research/`、`_paperops/model/issues/`、`_paperops/model/issues/` のカードである。カードの status、依存関係、route と矛盾する場合はカード側を優先する。
 
 ## View types
 
@@ -19,11 +19,11 @@ starter template の `CLM-0001`、`RES-0001`、`FIG-0001` などの `*-0001` 行
 
 pure overview view は、カード正本を人間が読むための集約である。必要なら手で更新してよいが、判断の正本は対応する card に戻す。
 
-- `claim-evidence-map.md`: claim / evidence / gate の総覧 cache。claim の正本は `_paperops/claims/claims/`、gate の正本は `_paperops/claims/gates/`、証拠の正本は `_paperops/evidence/` に置く。
-- `result-pattern-map.md`: result / figure card の見取り図。result の正本は `_paperops/evidence/results/` と `_paperops/evidence/figures/` に置く。
-- `scientific-gate.md`: gate card を人間が読むための総覧。判定の正本は `_paperops/claims/gates/` に置く。
-- `peer-review.md`: feedback / review round / response card の総覧。個別指摘の正本は `_paperops/review/feedback/` に置く。
-- `research-requests.md`: analysis / writing request card の総覧。依頼の正本は `_paperops/requests/` に置く。
+- `claim-evidence-map.md`: claim / evidence / gate の総覧 cache。claim の正本は `_paperops/model/research/claims/`、gate の正本は `_paperops/model/research/gates/`、証拠の正本は `_paperops/model/research/` に置く。
+- `result-pattern-map.md`: result / figure card の見取り図。result の正本は `_paperops/model/research/results/` と `_paperops/model/research/figures/` に置く。
+- `scientific-gate.md`: gate card を人間が読むための総覧。判定の正本は `_paperops/model/research/gates/` に置く。
+- `peer-review.md`: feedback / review round / response card の総覧。個別指摘の正本は `_paperops/model/issues/feedback/` に置く。
+- `research-requests.md`: analysis / writing request card の総覧。依頼の正本は `_paperops/model/issues/` に置く。
 - `assumption-ledger.md`, `claim-upgrade-gates.md`: gate card の assumption や upgrade blocker を読むための view。
 
 ### controlled authoring view
@@ -32,7 +32,7 @@ controlled authoring view は、カード正本の意味を本文語彙や読者
 
 - `concept-terms.md`: claim / argument / evidence card の意味を本文語彙へ写すときの view。concept-term compression、つまり強い英語名詞句への単語化を見つけたら、強調語として accepted にするか、普通の文へほどくか、avoid にして本文から外す。
 - `condition-context-map.md`: local condition、denominator、case count、run inventory を読者向けの公開条件名へ変換する view。
-- `argument-map.md`: section role、reader job、本文順序、defense budget を本文構成へ写す view。argument card の正本は `_paperops/claims/arguments/` に置く。
+- `argument-map.md`: section role、reader job、本文順序、defense budget を本文構成へ写す view。argument card の正本は `_paperops/model/editorial/editorial-model.yml` に置く。
 
 ## paper_ir への接続
 

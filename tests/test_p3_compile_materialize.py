@@ -1323,7 +1323,7 @@ class P3ApprovedCompileFixtureTest(unittest.TestCase):
     def test_analysis_request_identity_has_dedicated_snapshot_type(self) -> None:
         self.assertEqual(
             _input_type(
-                "_paperops/requests/analysis/AREQ-0001.md",
+                "_paperops/model/issues/analysis/AREQ-0001.yml",
                 frozenset(),
             ),
             "analysis-request",
@@ -1727,7 +1727,7 @@ class P3ApprovedCompileFixtureTest(unittest.TestCase):
                 Path(tmp),
                 analysis_request_refs=("AREQ-0001",),
             )
-            (project / "_paperops/requests/analysis/AREQ-0001.md").unlink()
+            (project / "_paperops/model/issues/analysis/AREQ-0001.yml").unlink()
             marker_lines = (
                 "% PREDICTED-RESULT: bounded expectation AREQ-0001\n"
                 "% SIM-REQUEST: AREQ-0001\n"
@@ -1752,10 +1752,9 @@ class P3ApprovedCompileFixtureTest(unittest.TestCase):
                 manuscript=missing_request,
             )
 
-            request_path = project / "_paperops/requests/analysis/AREQ-0001.md"
+            request_path = project / "_paperops/model/issues/analysis/AREQ-0001.yml"
             request_path.write_text(
-                "---\ntype: analysis_request\nid: AREQ-0001\nstatus: planned\n---\n\n"
-                "RAW REQUEST BODY MUST NOT ENTER THE PACKET.\n",
+                yaml.safe_dump({"record_type": "analysis_request", "id": "AREQ-0001", "status": "planned", "public_summary": "Bounded request."}, sort_keys=False),
                 encoding="utf-8",
             )
             open_request = scan_manuscript(project)
@@ -1825,7 +1824,7 @@ class P3ApprovedCompileFixtureTest(unittest.TestCase):
                 )
 
             request_path.write_text(
-                "---\ntype: analysis_request\nid: AREQ-0001\nstatus: reconciled\n---\n",
+                yaml.safe_dump({"record_type": "analysis_request", "id": "AREQ-0001", "status": "reconciled"}, sort_keys=False),
                 encoding="utf-8",
             )
             self.assert_blocked_with(
@@ -1851,9 +1850,9 @@ class P3ApprovedCompileFixtureTest(unittest.TestCase):
                     ),
                     encoding="utf-8",
                 )
-            request_path = project / "_paperops/requests/analysis/AREQ-0001.md"
+            request_path = project / "_paperops/model/issues/analysis/AREQ-0001.yml"
             request_path.write_text(
-                "---\ntype: analysis_request\nid: AREQ-0001\nstatus: planned\n---\n",
+                yaml.safe_dump({"record_type": "analysis_request", "id": "AREQ-0001", "status": "planned"}, sort_keys=False),
                 encoding="utf-8",
             )
 
@@ -1900,8 +1899,10 @@ class P3ApprovedCompileFixtureTest(unittest.TestCase):
                     ),
                     encoding="utf-8",
                 )
-            (project / "_paperops/requests/analysis/AREQ-0001.md").write_text(
-                "---\ntype: analysis_request\nid: AREQ-0001\nstatus: planned\n---\n",
+            typed_request = project / "_paperops/model/issues/analysis/AREQ-0001.yml"
+            typed_request.parent.mkdir(parents=True, exist_ok=True)
+            typed_request.write_text(
+                yaml.safe_dump({"record_type": "analysis_request", "id": "AREQ-0001", "status": "planned"}, sort_keys=False),
                 encoding="utf-8",
             )
             self.assert_blocked_with(
@@ -1940,9 +1941,8 @@ class P3ApprovedCompileFixtureTest(unittest.TestCase):
                 encoding="utf-8",
             )
             for request_id in ("AREQ-0001", "AREQ-0002"):
-                (project / f"_paperops/requests/analysis/{request_id}.md").write_text(
-                    "---\ntype: analysis_request\n"
-                    f"id: {request_id}\nstatus: planned\n---\n",
+                (project / f"_paperops/model/issues/analysis/{request_id}.yml").write_text(
+                    yaml.safe_dump({"record_type": "analysis_request", "id": request_id, "status": "planned"}, sort_keys=False),
                     encoding="utf-8",
                 )
             candidate = self.assert_blocked_with(

@@ -23,7 +23,7 @@ description: テンプレートから作成した新しい論文リポジトリ�
 - `.pops/manifest.toml`、`.venv/`、`tex-env.toml` の有無
 - `_paperops/refs/local/locations.example.toml` と `_paperops/refs/local/locations.toml` の有無
 - `_handoff/`、`_handoff/README.md`、`_handoff/.gitkeep` の有無
-- `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/notes/views/` の有無
+- `_paperops/model/research/`、`_paperops/model/research/`、`_paperops/model/issues/`、`_paperops/model/issues/`、`_paperops/notes/views/` の有無
 - `.gitignore` が `_handoff/*` と `_paperops/refs/source-reach/**/raw/**` を保護しているか
 - `.github/workflows/*.yml` に `YOUR_ORG/paperops` が残っているか
 - `manuscript/publication-metadata.toml` と `manuscript/venue.md` の placeholder
@@ -100,7 +100,7 @@ refs/source-reach/**/capture.generated.*
 
 - related work: `/research-related-work` に渡す初期 scope、source cluster、debate axis。
 - source reach: 外部 Web、GitHub、動画、RSS、SNS、議論サイトを使う可能性と raw capture 方針。
-- card layers: `_paperops/evidence/README.md`、`_paperops/claims/README.md`、`_paperops/review/README.md`、`_paperops/requests/README.md` を確認し、カード層を正本、`_paperops/notes/views/` を俯瞰ビューとして扱う。
+- card layers: `_paperops/model/research/README.md`、`_paperops/model/research/README.md`、`_paperops/model/issues/README.md`、`_paperops/model/issues/README.md` を確認し、カード層を正本、`_paperops/notes/views/` を俯瞰ビューとして扱う。
 - scientific gate: Abstract / Conclusion / main figure caption に出す前の gate status。evidence 未確定なら `analysis-needed` または `assumption-blocked` のままにする。
 - claim-evidence map: Core claim、essential results、Not claiming の仮案。evidence 未確定なら `draft` のままにする。
 - reviewer model / peer review: 投稿先候補、想定読者、likely skepticism、AI review / confidentiality の TODO。
@@ -130,3 +130,8 @@ make ci
 - Core claim、reader model、AI use log は埋められる範囲だけ starter として更新し、未定なら TODO にする。
 - `_paperops/refs/local/locations.toml` は自動作成・自動編集しない。
 - セットアップの決定は `_paperops/notes/decision-log.md` に短く記録する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

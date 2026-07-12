@@ -49,10 +49,10 @@ inputs:
   - _paperops/notes/views/scientific-gate.md
   - _paperops/notes/related-work-map.md
   - _paperops/notes/reviewer-model.md
-  - _paperops/claims/claims/
-  - _paperops/claims/arguments/
-  - _paperops/evidence/results/
-  - _paperops/evidence/figures/
+  - _paperops/model/research/claims/
+  - _paperops/model/editorial/editorial-model.yml
+  - _paperops/model/research/results/
+  - _paperops/model/research/figures/
   - _paperops/defaults/contracts/results.yml
   - _paperops/defaults/contracts/discussion.yml
   - manuscript/writing-profile.yml

@@ -2,11 +2,22 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+from pathlib import Path
+import yaml
 
 from tests.helpers import ROOT, copy_template, run_python_script
 
 
 SCRIPT = ROOT / "template" / "scripts" / "check-card-coverage.py"
+
+
+def add_record(root: Path, model: str, folder: str, document: dict) -> None:
+    index_path = root / ("_paperops/model/manuscript/index.yml" if model == "manuscript" else "_paperops/model/research/index.yml")
+    index = yaml.safe_load(index_path.read_text())
+    path = index_path.parent / folder / f"{document['id']}.yml"; path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(yaml.safe_dump(document, sort_keys=False))
+    index["records"].append({"id": document["id"], "record_type": document["record_type"], "document": path.relative_to(root).as_posix(), "expected_revision": 1, "expected_hash": "sha256:" + "0" * 64})
+    index_path.write_text(yaml.safe_dump(index, sort_keys=False))
 
 
 class CardCoverageCheckTest(unittest.TestCase):
@@ -57,37 +68,9 @@ class CardCoverageCheckTest(unittest.TestCase):
                 "\\end{figure}\n",
                 encoding="utf-8",
             )
-            figure_card = root / "_paperops" / "evidence" / "figures" / "FIG-9001.md"
-            figure_card.write_text(
-                "---\n"
-                "id: FIG-9001\n"
-                "type: figure\n"
-                "figure_ref: \"manuscript/shared/figures/new.png\"\n"
-                "manuscript_blocks:\n"
-                "  - results.new_claim.01\n"
-                "---\n",
-                encoding="utf-8",
-            )
-            result_card = root / "_paperops" / "evidence" / "results" / "RES-9001.md"
-            result_card.write_text(
-                "---\n"
-                "id: RES-9001\n"
-                "type: result\n"
-                "manuscript_blocks:\n"
-                "  - results.new_claim.01\n"
-                "---\n",
-                encoding="utf-8",
-            )
-            source_card = root / "_paperops" / "evidence" / "sources" / "SRC-9001.md"
-            source_card.write_text(
-                "---\n"
-                "id: SRC-9001\n"
-                "type: source\n"
-                "citation_keys:\n"
-                "  - Key2026\n"
-                "---\n",
-                encoding="utf-8",
-            )
+            add_record(root, "research", "figures", {"id": "FIG-9001", "record_type": "figure", "figure_ref": "manuscript/shared/figures/new.png"})
+            add_record(root, "research", "sources", {"id": "SRC-9001", "record_type": "source", "citation_keys": ["Key2026"]})
+            add_record(root, "manuscript", "blocks", {"id": "BLK-9001", "record_type": "block", "en_tex_block_id": "results.new_claim.01"})
 
             result = run_python_script(SCRIPT, "--root", root, "--strict")
 

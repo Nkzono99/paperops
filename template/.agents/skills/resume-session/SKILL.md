@@ -14,15 +14,15 @@ description: 執筆セッション開始時に原稿の状態を要約し、ミ�
 - `_paperops/notes/open-questions.md`
 - `_paperops/notes/project-brief.md`
 - `manuscript/mirror/status.md`
-- `_paperops/review/feedback/`
-- `_paperops/requests/`
+- `_paperops/model/issues/feedback/`
+- `_paperops/model/issues/`
 
 ## 必要時に読む
 
-- claim / evidence の判断が必要: `_paperops/claims/README.md`、`_paperops/evidence/README.md`、`_paperops/notes/views/claim-evidence-map.md`
-- scientific-gate で止まった claim を見る: `_paperops/notes/views/scientific-gate.md`、`_paperops/claims/gates/`
+- claim / evidence の判断が必要: `_paperops/model/research/README.md`、`_paperops/model/research/README.md`、`_paperops/notes/views/claim-evidence-map.md`
+- scientific-gate で止まった claim を見る: `_paperops/notes/views/scientific-gate.md`、`_paperops/model/research/gates/`
 - 関連研究や外部 source が次作業: `_paperops/notes/related-work-map.md`、`_paperops/notes/source-reach.md`、`_paperops/refs/`
-- reviewer / feedback loop が次作業: `_paperops/review/README.md`、`_paperops/notes/views/peer-review.md`、`_paperops/notes/reviewer-model.md`
+- reviewer / feedback loop が次作業: `_paperops/model/issues/README.md`、`_paperops/notes/views/peer-review.md`、`_paperops/notes/reviewer-model.md`
 - AI draft や開示が関係する: `_paperops/notes/ai-draft-polish.md`、`_paperops/notes/ai-use.md`
 
 ## 目的
@@ -48,3 +48,8 @@ description: 執筆セッション開始時に原稿の状態を要約し、ミ�
 - ユーザーには、現在状態、中心主張、次に安全に進める作業、未解決リスクを短く返す。
 - 追加の view は、次作業に必要なものだけ読む。
 - `_archives/` は通常読まない。明示的な restore / inspect / compare 指示がある場合だけ扱う。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

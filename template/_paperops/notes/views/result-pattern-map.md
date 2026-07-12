@@ -2,15 +2,15 @@
 view_type: pure_overview
 starter_example_rows: true
 source_of_truth:
-  - _paperops/evidence/results/
-  - _paperops/evidence/figures/
+  - _paperops/model/research/results/
+  - _paperops/model/research/figures/
 authoritative_for:
   - overview
 ---
 
 # 結果パターンビュー
 
-このファイルは `_paperops/evidence/results/` と `_paperops/evidence/figures/` のカードを人間が俯瞰するためのビューである。result の正本は result card / figure card に置く。
+このファイルは `_paperops/model/research/results/` と `_paperops/model/research/figures/` のカードを人間が俯瞰するためのビューである。result の正本は result card / figure card に置く。
 
 初期状態の `*-0001` 行は例示行であり、対応する実カードはまだ作成されていない。実カードを作成したら、この行を実 ID に置き換えるか削除し、`starter_example_rows` を `false` にする。
 
@@ -39,7 +39,7 @@ authoritative_for:
 - negative or null cases は、失敗、境界条件、negative control、不十分な coverage のどれかに分類されているか。
 - candidate interpretation は、データより強く言いすぎていないか。
 - 条件名、case count、denominator は `_paperops/notes/views/condition-context-map.md` で公開文脈へ翻訳されているか。
-- claim に昇格する場合、`_paperops/claims/claims/` の claim card と `_paperops/claims/gates/` の gate card に接続できるか。
+- claim に昇格する場合、`_paperops/model/research/claims/` の claim card と `_paperops/model/research/gates/` の gate card に接続できるか。
 
 ## 本文へ入れない provenance
 

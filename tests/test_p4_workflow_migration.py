@@ -22,9 +22,11 @@ class WorkflowMigrationTest(unittest.TestCase):
         self.project = Path(self.temp.name) / "paper"
         shutil.copytree(ROOT / "template", self.project)
         write_manifest(self.project)
-        current = json.loads((self.project / "_paperops/workflow/current-state.yml").read_text())
+        current_path = self.project / "_paperops/workflow/current-state.yml"
+        current_path.parent.mkdir(parents=True, exist_ok=True)
+        current = {"schema_version": 1, "overall": {"state": "SCOPED"}, "review": {"blocking_concerns": [], "major_concerns": []}}
         current["review"]["major_concerns"] = [{"summary": "Bound the claim.", "target_id": "ISS-0001", "target_type": "workflow_issue", "target_revision": 1, "target_hash": H, "route": "editorial"}]
-        (self.project / "_paperops/workflow/current-state.yml").write_text(json.dumps(current) + "\n")
+        current_path.write_text(json.dumps(current) + "\n")
 
     def tearDown(self) -> None:
         self.temp.cleanup()

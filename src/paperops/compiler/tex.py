@@ -998,12 +998,26 @@ def _parse_analysis_requests(
     findings: list[CompileFinding] = []
     seen: set[str] = set()
     for identity, content, content_hash in files:
-        document, parse_findings = _frontmatter(content, identity)
+        if identity.startswith("_paperops/model/issues/analysis/"):
+            loaded, parse_findings = _load_unique_yaml(
+                content, identity, "compile.analysis_request"
+            )
+            document = loaded if isinstance(loaded, dict) else None
+            if loaded is not None and document is None:
+                parse_findings.append(
+                    _generic_finding(
+                        "compile.analysis_request_document",
+                        "typed analysis request must be a mapping",
+                        identity,
+                    )
+                )
+        else:
+            document, parse_findings = _frontmatter(content, identity)
         findings.extend(parse_findings)
         if document is None:
             continue
         request_id = document.get("id")
-        request_type = document.get("type")
+        request_type = document.get("record_type", document.get("type"))
         status = document.get("status")
         invalid = False
         if not isinstance(request_id, str) or _ANALYSIS_REQUEST_ID_RE.fullmatch(request_id) is None:
@@ -1346,14 +1360,12 @@ def scan_manuscript(
                         )
 
             analysis_identities = capture_tree(
-                "_paperops/requests/analysis",
-                (".md",),
-                excluded=frozenset(
-                    {"_paperops/requests/analysis/analysis-request-template.md"}
-                ),
+                "_paperops/model/issues/analysis",
+                (".yml", ".yaml"),
+                excluded=frozenset(),
                 include=lambda identity: (
                     PurePosixPath(identity).parent.as_posix()
-                    == "_paperops/requests/analysis"
+                    == "_paperops/model/issues/analysis"
                 ),
             )
             bibliography_identities = [

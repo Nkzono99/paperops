@@ -26,7 +26,7 @@ class WorkflowMigrationCliTest(unittest.TestCase):
         args = build_parser().parse_args(["workflow", "migrate", "status", "--path", str(self.project), "--json"])
         self.assertEqual(args.migrate_action, "status")
         self.assertEqual(main(["workflow", "migrate", "status", "--path", str(self.project), "--json"]), 0)
-        self.assertEqual(main(["workflow", "migrate", "diff", "--path", str(self.project), "--json"]), 0)
+        self.assertEqual(main(["workflow", "migrate", "diff", "--path", str(self.project), "--json"]), 1)
 
 
 if __name__ == "__main__":

@@ -13,8 +13,8 @@ AI 初稿や Results / Discussion に出てくる `12 条件中 2 条件`、`8 �
 - `_paperops/notes/views/condition-context-map.md`
 - `_paperops/notes/views/argument-map.md`
 - `_paperops/notes/views/claim-evidence-map.md`
-- `_paperops/evidence/results/`
-- `_paperops/claims/claims/`
+- `_paperops/model/research/results/`
+- `_paperops/model/research/claims/`
 - `_paperops/notes/reviewer-model.md`
 - `_paperops/notes/reproducibility.md`
 - 対象の Results / Discussion / figure captions
@@ -34,7 +34,7 @@ AI 初稿や Results / Discussion に出てくる `12 条件中 2 条件`、`8 �
 3. 各 condition group を claim role に分類する。
 4. 本文で使う公開条件名と、notes / supplement に退避する provenance を分ける。
 5. `_paperops/notes/views/condition-context-map.md` の対応表を更新する。
-6. 必要に応じて `_paperops/evidence/results/` の result card、`_paperops/claims/claims/` の scope / limitation、`_paperops/notes/views/result-pattern-map.md`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/reproducibility.md` の条件集合・選別フローを更新する。
+6. 必要に応じて `_paperops/model/research/results/` の result card、`_paperops/model/research/claims/` の scope / limitation、`_paperops/notes/views/result-pattern-map.md`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/reproducibility.md` の条件集合・選別フローを更新する。
 7. 本文を編集する場合は、条件数ではなく、物理条件、対照、境界条件、機構を主語にする。
 
 ## 変換例
@@ -59,3 +59,8 @@ AI 初稿や Results / Discussion に出てくる `12 条件中 2 条件`、`8 �
 - `_paperops/refs/` と `_paperops/notes/` の作業用ドキュメントは日本語で書く。
 - 条件数を消しすぎて透明性を失わない。denominator は必要なら Methods、caption、supplement、`_paperops/notes/reproducibility.md` に残す。
 - 過度な抽象化で overclaim しない。抽象化後の主張は claim card と `claim-evidence` view の scope / limitation に接続する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

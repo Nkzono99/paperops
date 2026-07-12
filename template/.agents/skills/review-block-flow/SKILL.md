@@ -54,7 +54,7 @@ description: Use when a manuscript section has a draft, weak author stance, thin
 
 ## Output
 
-- `_paperops/review/block-flow/` の block operation table
+- `_paperops/model/manuscript/blocks/` の block operation table
 - new block order
 - author stance summary: assert / reject / boundary / hold
 - section_loop or prose_loop recommendation
@@ -73,3 +73,8 @@ description: Use when a manuscript section has a draft, weak author stance, thin
 P3 sessionでは`.paperops/writer/<session-id>/workspace/manuscript/`の全TeXを読み、candidate内でblockを直接move/split/merge/cut/add/rewriteできる。ただし実際に許されるoperationとwrite scopeはcurrent Manuscript revisionに固定される。`pops write check <session-id>`が`replan_required`を返した場合は、説明文で正当化せずblock operation tableとManuscript / Editorial Modelを更新し、再承認・再compileする。
 
 `pops write diff`はhash、block operation、mirror impactのsummaryであり、意味の良い流れを判定する代替ではない。candidate全体を再読してauthor stanceとsection間の流れを評価し、確認後だけ`pops write apply <session-id> --yes`を実行する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

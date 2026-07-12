@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from paperops_paths import internal_path
+from paperops_typed_views import workflow_projection
 
 
 CONTENT_GUARD_STATES = [
@@ -49,17 +50,15 @@ CONTENT_PATHS = (
     "manuscript/ja/",
     "manuscript/en/",
     "story/",
-    "_paperops/claims/",
-    "_paperops/evidence/",
+    "_paperops/model/research/",
+    "_paperops/model/editorial/",
+    "_paperops/model/manuscript/",
+    "_paperops/model/issues/",
     "_paperops/figures/",
     "_paperops/notes/views/storyline.md",
     "_paperops/notes/views/claim-evidence-map.md",
     "_paperops/notes/views/result-pattern-map.md",
     "_paperops/notes/reviewer-model.md",
-    "_paperops/review/",
-    "_paperops/requests/",
-    "_paperops/workflow/current-state.yml",
-    "_paperops/workflow/round-summary.yml",
     "claims/",
     "evidence/",
     "figures/",
@@ -73,6 +72,8 @@ CONTENT_PATHS = (
     "workflow/round-summary.yml",
 )
 SUBAGENT_REPORT_PATHS = (
+    "_paperops/model/issues/rounds/subagent-report-",
+    "_paperops/model/issues/rounds/subagent-reports/",
     "review/rounds/subagent-report-",
     "review/rounds/subagent-reports/",
 )
@@ -130,30 +131,19 @@ def main() -> int:
 
 def check(root: Path, phase: str, intent: str, changed_files: list[str], strict: bool) -> list[Finding]:
     findings: list[Finding] = []
-    current = load_mapping(internal_path(root, "workflow", "current-state.yml"))
-    missing = missing_content_guards(current)
-    content_first_missing = missing_guard_values(current, CONTENT_FIRST_GUARD)
-    content_blocker_open = any(missing.get(state) for state in CONTENT_GUARD_STATES)
+    projection = workflow_projection(root)
+    sections = projection["sections"]
+    missing_sections = [name for name in ("results", "discussion") if sections.get(name) != "verified"]
+    content_blocker_open = bool(missing_sections or projection["open_issue_ids"])
     changed_kinds = classify_changed_files(changed_files)
 
-    if content_first_missing:
-        findings.append(
-            Finding(
-                "error" if strict else "warning",
-                "CONTENT_FIRST guard is incomplete; record the current self-critique before treating this as manuscript progress: "
-                + ", ".join(content_first_missing)
-                + ".",
-            )
-        )
-
     if phase == "finish":
-        unfinished_states = [state for state in CONTENT_GUARD_STATES if missing.get(state)]
-        if unfinished_states:
+        if content_blocker_open:
             findings.append(
                 Finding(
                     "error" if strict else "warning",
-                    "finish-manuscript cannot complete before content guards pass: "
-                    + ", ".join(unfinished_states)
+                    "finish-manuscript cannot complete before typed Results/Discussion sections are verified and blocking issues close: "
+                    + ", ".join(missing_sections + list(projection["open_issue_ids"]))
                     + ".",
                 )
             )
@@ -162,7 +152,7 @@ def check(root: Path, phase: str, intent: str, changed_files: list[str], strict:
         findings.append(
             Finding(
                 "error" if strict else "warning",
-                "Submission hygiene is blocked until STRUCTURE_ACCEPTED; resolve manuscript content blocker first.",
+                "Submission hygiene is blocked until typed Results/Discussion sections are verified; resolve manuscript content blocker first.",
             )
         )
 
@@ -179,7 +169,7 @@ def check(root: Path, phase: str, intent: str, changed_files: list[str], strict:
             findings.append(
                 Finding(
                     "error" if strict else "warning",
-                    "subagent reports are not manuscript edits; convert the subagent_report into feedback cards, claim/evidence updates, or section plans before treating it as progress on a manuscript content blocker.",
+                    "subagent reports are not manuscript edits; convert the report into typed Issue/Research updates or Manuscript section plans before treating it as progress on a content blocker.",
                 )
             )
         if changed_kinds <= {"hygiene"}:

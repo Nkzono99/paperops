@@ -157,7 +157,7 @@ def render(findings: list[Finding]) -> None:
         print(
             "執筆上の意図、後で埋める内容、作業計画は本文 prose に置かず、"
             "`% INTENT:` または `% TODO-PAPER:` の TeX comment にするか、"
-            "`_paperops/notes/` / `_paperops/requests/` へ移してください。"
+            "`_paperops/notes/` または typed Issue Model へ移してください。"
         )
         print("意図的に公開本文として扱う場合は直前行に `% paperops: allow-authoring-intent -- reason` を置いてください。")
     else:

@@ -27,7 +27,7 @@ class SubmissionGateSkillTemplateTest(unittest.TestCase):
             "xx",
             "open AREQ",
             "check-predicted-results.py",
-            "submission-ledger.yml",
+            "publication-model.yml",
             "submission/<venue>/round-",
         ]:
             with self.subTest(required=required):
@@ -69,30 +69,30 @@ class SubmissionGateSkillTemplateTest(unittest.TestCase):
                 self.assertIn(required, docs)
 
     def test_analysis_request_template_supports_prediction_lifecycle(self) -> None:
-        template = read_template("template/_paperops/requests/analysis/analysis-request-template.md")
-        ledger = read_template("template/_paperops/workflow/submission-ledger.yml")
+        template = read_template("template/_paperops/defaults/schemas/issue-analysis-request.schema.json")
+        ledger = read_template("template/_paperops/defaults/schemas/publication-model.schema.json")
 
         for required in [
-            "Allowed status: planned | predicted | running | executed | reconciled | abandoned",
+            '"planned"',
             "analysis_plan_frozen_commit",
             "data_not_seen_before_freeze",
             "planned_analysis",
             "prediction",
             "replacement",
-            "provenance_after_execution",
+            "execution_provenance",
             "reconciliation",
-            "negative/null route",
+            "negative_null_route",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, template)
 
         for required in [
-            "authoring_axis",
-            "submission_axis",
-            "revision-authoring",
-            "revision-candidate",
+            "authoring",
+            "submission_state",
+            "revision_authoring",
+            "revision_candidate",
             "source_commit",
-            "gate_report",
+            "gate_report_ref",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, ledger)

@@ -5,8 +5,9 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from paperops_checks import Finding, emit_findings, frontmatter, read_text
-from paperops_paths import display_path, internal_path
+from paperops_checks import Finding, emit_findings
+from paperops_paths import display_path
+from paperops_typed_views import indexed_documents
 
 
 OBLIGATION_RE = re.compile(r"\bVO-[A-Za-z0-9_.-]+\b")
@@ -67,20 +68,16 @@ def meaningful_reason(value: str) -> bool:
 
 def claim_cards(root: Path) -> list[ClaimCard]:
     cards: list[ClaimCard] = []
-    for path in sorted(internal_path(root, "claims", "claims").glob("*.md")):
-        if path.name.endswith("-template.md"):
-            continue
-        front = frontmatter(read_text(path))
-        if not front:
-            continue
+    for item in indexed_documents(root, "research", "claim"):
+        document = item.document
         cards.append(
             ClaimCard(
-                claim_id=scalar_value(front, "id") or path.stem,
-                path=path,
-                status=scalar_value(front, "status"),
-                gate_status=scalar_value(front, "gate_status"),
-                obligations=obligation_ids(front, "visual_obligations"),
-                no_figure_reason=scalar_value(front, "no_figure_reason"),
+                claim_id=item.object_id,
+                path=item.path,
+                status=str(document.get("status", "")),
+                gate_status=str(document.get("gate_status", "")),
+                obligations=set(document.get("visual_obligation_refs", [])),
+                no_figure_reason=str(document.get("no_figure_reason", "")),
             )
         )
     return cards
@@ -88,20 +85,15 @@ def claim_cards(root: Path) -> list[ClaimCard]:
 
 def figure_cards(root: Path) -> list[FigureCard]:
     cards: list[FigureCard] = []
-    for path in sorted(internal_path(root, "evidence", "figures").glob("*.md")):
-        if path.name.endswith("-template.md"):
-            continue
-        front = frontmatter(read_text(path))
-        if not front:
-            continue
-        obligations = obligation_ids(front, "satisfies_visual_obligations")
-        obligations |= obligation_ids(front, "visual_obligations")
+    for item in indexed_documents(root, "research", "figure"):
+        document = item.document
+        obligations = set(document.get("visual_obligation_refs", []))
         cards.append(
             FigureCard(
-                figure_id=scalar_value(front, "id") or path.stem,
-                path=path,
-                status=scalar_value(front, "status"),
-                manuscript_role=scalar_value(front, "current_manuscript_role"),
+                figure_id=item.object_id,
+                path=item.path,
+                status=str(document.get("status", "")),
+                manuscript_role=str(document.get("manuscript_role", "")),
                 obligations=obligations,
             )
         )
@@ -131,11 +123,11 @@ def check(root: Path, strict: bool) -> list[Finding]:
                         Finding(
                             "error",
                             f"`{rel(claim.path, root)}` の figure obligation `{obligation_id}` は、"
-                            "`_paperops/evidence/figures/` の `satisfies_visual_obligations` から満たされていません。",
+                            "typed Research figure の `visual_obligation_refs` から満たされていません。",
                         )
                     )
         elif strict and (
-            claim.status == "supported" or claim.gate_status in {"ready-to-write", "ready"}
+            claim.status in {"supported", "approved"} or claim.gate_status in {"ready-to-write", "ready", "ready_to_write"}
         ):
             if not meaningful_reason(claim.no_figure_reason):
                 findings.append(
@@ -150,7 +142,7 @@ def check(root: Path, strict: bool) -> list[Finding]:
         findings.append(
             Finding(
                 "warning",
-                "`_paperops/claims/claims/` に claim card がありません。figure obligation は claim 作成後に確認してください。",
+                "typed Research Model に claim がありません。figure obligation は claim 作成後に確認してください。",
             )
         )
     return findings

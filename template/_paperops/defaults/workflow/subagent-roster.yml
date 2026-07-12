@@ -78,8 +78,8 @@
       "purpose": "Check whether quantities, denominators, assumptions, and claim support are sufficient for the manuscript claims.",
       "entry_condition": "Before claim-strengthening edits or when reviewer feedback questions evidence.",
       "allowed_inputs": [
-        "_paperops/claims/",
-        "_paperops/evidence/",
+        "_paperops/model/research/",
+        "_paperops/model/research/",
         "_paperops/notes/views/claim-evidence-map.md",
         "_paperops/notes/views/result-pattern-map.md"
       ],
@@ -98,8 +98,8 @@
         "_paperops/defaults/contracts/results.yml",
         "_paperops/notes/views/storyline.md",
         "manuscript/ja/sections/30_results.tex",
-        "_paperops/evidence/results/",
-        "_paperops/evidence/figures/"
+        "_paperops/model/research/results/",
+        "_paperops/model/research/figures/"
       ],
       "outputs": [
         "results_hierarchy_gap findings",
@@ -154,7 +154,7 @@
         "_paperops/notes/views/storyline.md",
         "manuscript/ja/sections/40_discussion.tex",
         "_paperops/refs/summaries/",
-        "_paperops/claims/"
+        "_paperops/model/research/"
       ],
       "outputs": [
         "discussion_function_gap findings",
@@ -169,8 +169,8 @@
       "entry_condition": "Before main figure order is treated as fixed.",
       "allowed_inputs": [
         "_paperops/defaults/contracts/figures.yml",
-        "_paperops/claims/",
-        "_paperops/evidence/figures/",
+        "_paperops/model/research/",
+        "_paperops/model/research/figures/",
         "Figure design brief fields prepared by design-paper-figure",
         "manuscript/shared/figures/",
         "manuscript/ja/"

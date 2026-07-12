@@ -12,4 +12,4 @@
 
 `submission/` は投稿先に合わせた提出版スロットであり、原稿正本ではない。投稿版で科学的意味を変えた場合は、必ず `manuscript/` 側へ戻す。
 
-Writer は `_paperops/defaults/contracts/`、必要な `_paperops/contracts/` overlay、`writing-profile.yml`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` と controlled authoring view から作った `paper_ir` を使い、Methods / Results / Discussion の reader question、answer、evidence、figure、caveat location を確認してから本文を書く。
+Writer は `_paperops/defaults/contracts/`、必要な `_paperops/contracts/` overlay、`writing-profile.yml`、`_paperops/model/research/`、`_paperops/model/research/`、`_paperops/model/issues/`、`_paperops/model/issues/` と controlled authoring view から作った `paper_ir` を使い、Methods / Results / Discussion の reader question、answer、evidence、figure、caveat location を確認してから本文を書く。

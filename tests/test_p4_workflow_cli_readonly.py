@@ -55,10 +55,10 @@ class WorkflowReadonlyCliTest(unittest.TestCase):
         manifest.parent.mkdir(parents=True, exist_ok=True)
         write_manifest_data_atomic(manifest, {"workflow": {"mode": "v2-authoritative"}})
         current = self.project / "_paperops/workflow/current-state.yml"
-        before = current.read_bytes()
+        self.assertFalse(current.exists())
         self.assertEqual(main(["workflow", "status", str(self.project)]), 0)
         self.assertEqual(main(["workflow", "invalidate", "CLM-0001", str(self.project)]), 2)
-        self.assertEqual(current.read_bytes(), before)
+        self.assertFalse(current.exists())
 
 
 if __name__ == "__main__":

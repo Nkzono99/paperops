@@ -90,3 +90,8 @@ AIは一度作った流れをcandidate全体から何度でも見直してよい
 - `finish-manuscript` の before-drafting gate として使う。
 - `audit-ai-draft`、`peer-review-manuscript`、`review-public-manuscript` で Results / Discussion の薄さを見つけたら、この skill へ戻す。
 - `_paperops/notes/views/storyline.md` は controlled authoring view なので、更新したら `make storyline-check` と `make section-contract-check` を実行する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

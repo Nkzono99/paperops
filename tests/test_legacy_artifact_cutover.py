@@ -54,6 +54,27 @@ class LegacyArtifactCutoverTest(unittest.TestCase):
             self.assertEqual(code, 0, err)
             self.assertEqual(legacy.read_text(), "project-owned\n")
 
+    def test_active_checkers_and_skills_use_typed_authority(self) -> None:
+        forbidden = (
+            "_paperops/claims/", "_paperops/evidence/", "_paperops/review/",
+            "_paperops/requests/", "_paperops/workflow/current-state.yml",
+            "_paperops/workflow/decisions.yml", "_paperops/workflow/round-summary.yml",
+            "_paperops/workflow/submission-ledger.yml",
+        )
+        sources = list((ROOT / "template/scripts").glob("check-*.py"))
+        sources += list((ROOT / "template/.agents/skills").glob("*/SKILL.md"))
+        for path in sources:
+            text = path.read_text(encoding="utf-8")
+            for value in forbidden:
+                self.assertNotIn(value, text, path.relative_to(ROOT))
+        mutation_skills = [path for path in sources if "template/.agents/skills" in path.as_posix() and "_paperops/model/" in path.read_text(encoding="utf-8")]
+        self.assertTrue(mutation_skills)
+        for path in mutation_skills:
+            self.assertIn("pops change plan", path.read_text(encoding="utf-8"), path.name)
+        compiler = "\n".join((ROOT / path).read_text(encoding="utf-8") for path in ["src/paperops/compiler/tex.py", "src/paperops/compiler/materialize.py"])
+        self.assertNotIn("_paperops/requests/analysis", compiler)
+        self.assertIn("_paperops/model/issues/analysis", compiler)
+
 
 if __name__ == "__main__":
     unittest.main()

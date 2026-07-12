@@ -4,13 +4,13 @@
 
 P2で四つのcompile authorityを採用したprojectでは、定型的なcompileとTeX transactionに`pops compile` / `pops write`を使う。Writer sessionは原稿全体をread contextとしてcopyするが、write scopeは別に固定する。candidate TeXは直接編集してよい。scope外変更や意味保存違反はscopeを黙って広げず、typed modelを改訂・再承認・再compileする。`pops write apply <session-id> --yes`は人間確認後だけ実行する。model、workflow、mirror ledgerは逆生成しない。living TeX直接編集は引き続き正当である。
 
-## P4 typed workflow（opt-in）
+## Typed workflow
 
-`pops workflow status --json`は六モデルから五段階macro stateをread-only投影する。定型的なimpact、Issue route / close / reopen、owner-local approvalは`pops workflow plan|issue|approval`でplan化し、tracked変更は人間確認後の`pops workflow apply <plan-id> --yes`だけで行う。AIはroute理由、科学的・編集的判断、人間との対話を担当し、hash、snapshot、recoveryを再実装しない。legacy projectは`pops workflow migrate diff`で比較してからopt-inし、legacy stateを削除・dual-writeしない。
+`pops workflow status --json`は六モデルから五段階macro stateをread-only投影する。定型的なimpact、Issue route / close / reopen、owner-local approvalはCLIでplan化する。既存legacy projectだけは`pops workflow migrate diff`で比較してからopt-inする。
 
-## P7 new-project default
+## Typed mutation
 
-このscaffoldを通常の`pops init`で作ったprojectは六モデルとworkflowが`v2-authoritative`である。`.pops/manifest.toml`のmodeとhashを確認し、model stateを正本、legacy card / workflow stateを互換参照として扱う。`setup`や`update-paperops`で既存projectが自動cutoverすることはない。legacy artifactを削除・逆生成・dual-writeしない。
+このscaffoldは六モデルとworkflowが`v2-authoritative`である。Agentは意味判断とcandidate documentを作るが、tracked model/index/hash/manifest/journalを直接編集しない。ignoredなchange requestへ全operationを明示し、`pops change plan|diff|apply`へ委譲する。既存legacy projectの移行時だけmigration readerを使う。
 
 ユーザーとは日本語でコミュニケーションする。
 
@@ -22,11 +22,11 @@ P2で四つのcompile authorityを採用したprojectでは、定型的なcompil
 - `CLAUDE.md` は paperops-managed core である。論文固有の恒久指示は `CLAUDE.project.md` に置き、標準ハーネス改善として汎用化できるものは `/feedback-paper-harness` で upstream へ戻す。
 - project 固有の tracked Make target は `Makefile.project`、個人環境だけの target や変数は ignored な `Makefile.local` に置く。
 - managed core file をどうしても project fork にする場合は、編集理由を `pops detach <path> . --reason "<reason>"` で `.pops/manifest.toml` に登録する。detached file は `update-paperops` の自動更新候補から外れ、手動 rebase 後に `pops reattach <path> .` で管理対象へ戻す。
-- 人間は主に原稿レビュー、自然文の指示、story seed の判断を出す。Agent は必要に応じて `/integrate-writing-feedback` で `_paperops/review/` の feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
+- 人間は主に原稿レビュー、自然文の指示、story seed の判断を出す。Agent は必要に応じて `/integrate-writing-feedback` で `_paperops/model/issues/` の feedback card にし、claim / gate / evidence / request / manuscript へ遡って反映する。
 - `story/` は人間向けの構想層である。研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を書く。
-- `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` はカード正本である。
+- `_paperops/model/research/`、`editorial/`、`manuscript/`、`issues/`、`publication/`が意味論と構造の正本である。
 - `_paperops/notes/views/` は pure overview view と controlled authoring view を含む。`view_type` と `source_of_truth` を確認し、`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
-- `_paperops/defaults/schemas/registry.yml`、JSON Schema、checkerはpaperops-managed、Research / Editorial / Results hierarchy / Manuscript / Issue / Publicationのmodel stateはproject-ownedであり混同しない。定型移行は`pops model status|validate|diff|adopt|rollback`へ渡し、AI Agentがindex、hash、snapshot、journalを手操作しない。AIはscientific / editorial judgmentと人間承認を支援するが、未解決fieldへ架空値を補わない。P2/P4後もlegacy card / review / request / workflowを削除しない。
+- `_paperops/defaults/schemas/registry.yml`、JSON Schema、checkerはpaperops-managed、六モデルstateはproject-ownedであり混同しない。通常変更は`pops change`、既存project移行は`pops model` / `pops workflow migrate`へ渡す。AIはscientific / editorial judgmentと人間承認を支援するが、未解決fieldへ架空値を補わない。
 - `make schema-check` は `editorial-model.yml` を含むproject-owned stateを schema / references / semantics / approvals / dependencies / hash phasesでadvisory検査する。authority切替前は明示strict検査と人間承認を要求し、legacy controlled viewを維持する。
 - `_paperops/defaults/contracts/` は paperops-managed の標準 section / figure story 契約であり、文章テンプレートではない。論文固有の契約差分だけ `_paperops/contracts/` に同名 overlay として置く。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
 - legacy modeでは`_paperops/workflow/`が現在状態、review loop、stale伝播、人間判断を保持する。v2-authoritativeでは六モデルが正本でmacro stateは投影値になる。本文編集前に`pops workflow status --json`でmodeに応じた状態を確認する。
@@ -48,6 +48,9 @@ uvx --from paper-harness-cli pops model validate research --strict
 uvx --from paper-harness-cli pops model diff research
 uvx --from paper-harness-cli pops model adopt research --yes
 uvx --from paper-harness-cli pops model rollback research
+uvx --from paper-harness-cli pops change plan .paperops/change-request.yml
+uvx --from paper-harness-cli pops change diff CHG-0123456789abcdef
+uvx --from paper-harness-cli pops change apply CHG-0123456789abcdef --yes
 uvx --from paper-harness-cli pops workflow status --json
 uvx --from paper-harness-cli pops workflow migrate diff --json
 uvx --from paper-harness-cli pops workflow issue route ISS-0001 editorial --reason "story architecture changed"
@@ -72,21 +75,21 @@ make figure-reference-check
 make figure-obligation-check
 ```
 
-`make ci` は構造と壊れやすい不整合の確認、`make audit` は執筆品質の advisory check、`make pre-submit` は投稿・外部共有前の厳しめ確認に使う。`manuscript/` は living authoring source であり、投稿後や査読後も編集してよい。投稿用の submission candidate / round snapshot は `submission/` と `_paperops/workflow/submission-ledger.yml` に記録し、`make finish-manuscript-check` で claim-evidence drift を、`make submission-gate` で予測稿、open AREQ、`xx`、AI intent、submission drift を strict に落とす。`authoring-intent-check` は、AI Writer が執筆意図、後で埋める内容、作業計画を公開本文へ漏らしていないか確認する。TeX 環境がない場合、ビルド系 helper は構造検証へフォールバックする。
+`make ci` は構造と壊れやすい不整合の確認、`make audit` は執筆品質の advisory check、`make pre-submit` は投稿・外部共有前の厳しめ確認に使う。`manuscript/` は living authoring source であり、投稿後や査読後も編集してよい。投稿用の submission candidate / round snapshot は `submission/` と `_paperops/model/publication/publication-model.yml` に記録し、`make finish-manuscript-check` で claim-evidence drift を、`make submission-gate` で予測稿、open AREQ、`xx`、AI intent、submission drift を strict に落とす。`authoring-intent-check` は、AI Writer が執筆意図、後で埋める内容、作業計画を公開本文へ漏らしていないか確認する。TeX 環境がない場合、ビルド系 helper は構造検証へフォールバックする。
 
 ## 執筆フロー
 
 1. `/resume-session` で前回の状態を読む。
 2. `story/story-seed.md` で高次ストーリーを確認する。
-3. 必要なら `/map-result-patterns` で raw result や figure data を `_paperops/evidence/` の card にする。
+3. 必要なら `/map-result-patterns` で raw result や figure data を `_paperops/model/research/` の card にする。
 4. 外部 export bundle を使う場合は `_paperops/refs/imports/README.md` に従って import state を確認する。
 5. Abstract、Conclusion、main figure caption に使う主張は `/scientific-gate` で readiness を確認する。
 6. 原稿内容を進めるときは `/develop-manuscript-content` を入口にし、claims、storyline、figure story、section compiler、予測稿、block-flow review、本文 prose を扱う。Results は `_paperops/model/editorial/results-hierarchy.yml` の `RHI-*` ID と `next_item_id` chain を `python scripts/check-section-contracts.py --root . --strict` で確認してから本文へ変換する。`/finish-manuscript` は投稿可能状態までの監督入口として使う。
 7. 図表が本文の主張を支える場合は `/plan-figure-story` を入口にし、必要な個別図だけ `design-paper-figure` や `figure-story-audit` へ進める。
-8. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/develop-manuscript-content` 内の予測稿 route で扱う。本文内には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` を置き、`xx` と `_paperops/requests/analysis/` を実データ置換まで追跡する。
+8. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/develop-manuscript-content` 内の予測稿 route で扱う。本文内には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` を置き、`xx` と `_paperops/model/issues/analysis/` を実データ置換まで追跡する。
 9. DRAFTED section は block flow を見直してから AUDITED 扱いにする。直接 `review-block-flow` を呼ぶのは、block 構成の再設計が明示された場合に限る。
-10. subagent を使う場合、main agent は orchestrator として role brief と integration decision を `_paperops/review/rounds/` に残す。通常は `/develop-manuscript-content` または `/finish-manuscript` から必要時に委譲する。
-11. AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose に書かず、近傍の `% INTENT:` または `% TODO-PAPER:` コメントに置く。解決できない場合は `_paperops/notes/` または `_paperops/requests/` へ移す。公開本文として意図的に扱う場合だけ、直前に `% paperops: allow-authoring-intent -- reason` を置く。
+10. subagent を使う場合、main agent は orchestrator として role brief と integration decision を `_paperops/model/issues/rounds/` に残す。通常は `/develop-manuscript-content` または `/finish-manuscript` から必要時に委譲する。
+11. AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose に書かず、近傍の `% INTENT:` または `% TODO-PAPER:` コメントに置く。解決できない場合は `_paperops/notes/` または `_paperops/model/issues/` へ移す。公開本文として意図的に扱う場合だけ、直前に `% paperops: allow-authoring-intent -- reason` を置く。
 12. 強い英語名詞句や hyphen / slash compound は `_paperops/notes/views/concept-terms.md` に記録し、残す語・普通の文へほどく語・避ける語を分ける。
 13. 図表を主図に入れる場合は、caption だけでなく本文側から `\ref{fig:...}` で narrative に接続する。
 14. `manuscript/ja/` を中心に書き、必要な block を `manuscript/en/` へ同期する。
@@ -125,10 +128,10 @@ _paperops/model/editorial/     project-owned の typed editorial state
 _paperops/contracts/           project 固有の contract overlay
 _paperops/workflow/            現在状態、review loop、stale 伝播、人間判断、任意の workflow overlay
 _paperops/refs/                文献、外部 source、外部 link、import state、local path alias
-_paperops/evidence/            result / figure / source card
-_paperops/claims/              claim / scientific gate / argument card
-_paperops/review/              feedback / review round / block-flow review / response card
-_paperops/requests/            analysis / writing request card
+_paperops/model/research/            result / figure / source card
+_paperops/model/research/              claim / scientific gate / argument card
+_paperops/model/issues/              feedback / review round / block-flow review / response card
+_paperops/model/issues/            analysis / writing request card
 _paperops/notes/views/         pure overview view と controlled authoring view
 _paperops/notes/               AI 利用、再現性、handoff、decision log
 _handoff/                      未整理ファイルの一時受け取り箱

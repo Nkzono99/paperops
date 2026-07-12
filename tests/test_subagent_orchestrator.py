@@ -64,9 +64,10 @@ class SubagentOrchestratorTemplateTest(unittest.TestCase):
         combined = "\n".join(
             (ROOT / path).read_text(encoding="utf-8")
             for path in [
-                "template/_paperops/review/rounds/review-round-template.md",
-                "template/_paperops/review/feedback/feedback-card-template.md",
+                "template/_paperops/defaults/schemas/issue-review-round.schema.json",
+                "template/_paperops/defaults/schemas/issue-feedback.schema.json",
                 "template/_paperops/notes/views/peer-review.md",
+                "template/.agents/skills/orchestrate-manuscript-subagents/SKILL.md",
             ]
         )
 

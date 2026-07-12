@@ -28,8 +28,13 @@ raw confidential reviewer text、未公開データ、個人情報、ローカ�
 
 ## Integration
 
-main agent は各 `subagent_report` を読んで重複をまとめ、`_paperops/review/rounds/` の Subagent delegation ledger に delegated_role、target、route recommendation、integration decision を記録する。
+main agent は各 `subagent_report` を読んで重複をまとめ、`_paperops/model/issues/rounds/` の Subagent delegation ledger に delegated_role、target、route recommendation、integration decision を記録する。
 
-受理した指摘は `_paperops/review/feedback/`、`_paperops/claims/`、`_paperops/evidence/`、`_paperops/requests/`、`_paperops/notes/views/storyline.md`、section plan のどれかへ先に反映し、その後に本文を編集する。
+受理した指摘は `_paperops/model/issues/feedback/`、`_paperops/model/research/`、`_paperops/model/research/`、`_paperops/model/issues/`、`_paperops/notes/views/storyline.md`、section plan のどれかへ先に反映し、その後に本文を編集する。
 
 `integration decision` は `accepted_to_feedback_card`、`accepted_to_claim_or_evidence_update`、`accepted_to_section_plan`、`deferred_with_reason`、`rejected_with_reason`、`requires_human_decision` のいずれかを使う。判断不能なものは本文へ混ぜず、人間判断か feedback card へ戻す。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

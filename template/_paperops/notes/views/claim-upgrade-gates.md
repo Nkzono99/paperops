@@ -2,14 +2,14 @@
 view_type: pure_overview
 starter_example_rows: true
 source_of_truth:
-  - _paperops/claims/gates/
+  - _paperops/model/research/gates/
 authoritative_for:
   - overview
 ---
 
 # Claim Upgrade Gates View
 
-このファイルは external validation needs、claim stress-test、observational boundary など、claim を強める前に止める gate を俯瞰するビューである。正本は `_paperops/claims/gates/` の scientific gate card と、必要な `_paperops/requests/analysis/` / `_paperops/review/responses/` のカードに置く。
+このファイルは external validation needs、claim stress-test、observational boundary など、claim を強める前に止める gate を俯瞰するビューである。正本は `_paperops/model/research/gates/` の scientific gate card と、必要な `_paperops/model/issues/analysis/` / `_paperops/model/issues/responses/` のカードに置く。
 
 初期状態の `*-0001` 行は例示行であり、対応する実カードはまだ作成されていない。実カードを作成したら、この行を実 ID に置き換えるか削除し、`starter_example_rows` を `false` にする。
 

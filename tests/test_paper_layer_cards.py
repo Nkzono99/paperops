@@ -19,20 +19,19 @@ class PaperLayerCardsTest(unittest.TestCase):
         result = run_python_script(SCRIPT, "--root", ROOT / "template")
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("paper layer cards", result.stdout)
-        self.assertIn("カード層と互換ビューの外形に問題は見つかりませんでした", result.stdout)
+        self.assertIn("paper typed layers", result.stdout)
+        self.assertIn("typed model authority", result.stdout)
 
-    def test_missing_feedback_template_is_error(self) -> None:
+    def test_missing_typed_index_is_error(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)
-            feedback_template = target / "_paperops" / "review" / "feedback" / "feedback-card-template.md"
-            if feedback_template.exists():
-                feedback_template.unlink()
+            feedback_template = target / "_paperops" / "model" / "issues" / "index.yml"
+            feedback_template.unlink()
 
             result = run_python_script(SCRIPT, "--root", target)
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("`_paperops/review/feedback/feedback-card-template.md` が見つかりません", result.stdout)
+        self.assertIn("`_paperops/model/issues/index.yml` が見つかりません", result.stdout)
 
     def test_view_metadata_is_required(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -59,7 +58,7 @@ class PaperLayerCardsTest(unittest.TestCase):
 
     def test_source_templates_define_promotion_decisions(self) -> None:
         source_template = (
-            ROOT / "template" / "_paperops" / "evidence" / "sources" / "source-card-template.md"
+            ROOT / "template" / "_paperops" / "defaults" / "schemas" / "research-source.schema.json"
         ).read_text(encoding="utf-8")
         summary_template = (
             ROOT / "template" / "_paperops" / "refs" / "summaries" / "summary-template.md"

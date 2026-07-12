@@ -46,7 +46,7 @@ description: Use when collecting TeX review diffs and inline comments into a rev
    - inline comment ごとの resolution_route: manuscript-change-closed / manuscript-clarified-open-analysis / moved-to-research-request / moved-to-harness-feedback / figure-redesign-open / human-decision-open
    - route/status label に対する prose explanation
    - open question
-5. 本文を直す前に、反映方針を提示する。科学的意味、主張、証拠、図表、追加解析に関わる指摘は `/integrate-writing-feedback` に渡し、`_paperops/review/feedback/` の feedback card から上流へ遡らせる。ユーザーが明示的に「反映して」「修正して」「apply」などを依頼している場合も、本文だけで済む修正か feedback card 化が必要な修正かを分ける。
+5. 本文を直す前に、反映方針を提示する。科学的意味、主張、証拠、図表、追加解析に関わる指摘は `/integrate-writing-feedback` に渡し、`_paperops/model/issues/feedback/` の feedback card から上流へ遡らせる。ユーザーが明示的に「反映して」「修正して」「apply」などを依頼している場合も、本文だけで済む修正か feedback card 化が必要な修正かを分ける。
 6. response matrix へ渡す場合、raw comment を保存せず、要約、resolution_route、prose explanation、closure_status、not_closed_reason、next_required_evidence を残す。`figure-redesign-open` や `moved-to-research-request` の label だけで終わらせない。
 
 ## Apply フェーズ
@@ -55,7 +55,7 @@ description: Use when collecting TeX review diffs and inline comments into a rev
 
 1. `manuscript/mirror/status.md` に別段の記載がない限り、`manuscript/ja/` を科学的 source of truth として編集する。
 2. `% block: ...` を保持する。削除、改名、番号振り直しはしない。
-3. 解決済み inline comment は削除する。未解決のものは台帳、`_paperops/notes/todo.md`、`_paperops/requests/`、または原稿内 comment のいずれに残すか明記する。AI が本文生成中に残した `% INTENT:` は public prose ではなく authoring intent として扱い、必要なら本文文言、上流 card、または request へ移す。`% PREDICTED-RESULT:` は未検証の予測稿として扱い、対応する `% SIM-REQUEST:` と analysis request が閉じるまで解決済みにしない。
+3. 解決済み inline comment は削除する。未解決のものは台帳、`_paperops/notes/todo.md`、`_paperops/model/issues/`、または原稿内 comment のいずれに残すか明記する。AI が本文生成中に残した `% INTENT:` は public prose ではなく authoring intent として扱い、必要なら本文文言、上流 card、または request へ移す。`% PREDICTED-RESULT:` は未検証の予測稿として扱い、対応する `% SIM-REQUEST:` と analysis request が閉じるまで解決済みにしない。
 4. 人間の直接編集 diff は尊重し、意図が曖昧な箇所だけ open question に戻す。
 5. claim / evidence / gate に影響する変更は、`/integrate-writing-feedback` で feedback card と上流 card を更新してから本文へ反映する。
 6. JA の科学的意味を変えた場合は、対応する `manuscript/en` block を更新するか、`manuscript/mirror/change-queue.md` に残す。
@@ -91,3 +91,8 @@ description: Use when collecting TeX review diffs and inline comments into a rev
 - `% REVIEW:`, `% AI:`, `% Q:`, `% KEEP?:`, `% INTENT:`, `% TODO-PAPER:`, `% PREDICTED-RESULT:`, `% SIM-REQUEST:`, `% EXPECTATION-BASIS:`, `% REPLACE-XX:` を file / line / `% block:` に紐付けて読む。
 - 本文反映を依頼されている場合は、まず source-of-truth 側を整え、解決済み inline comment を削除し、必要な `manuscript/en` block を同期する。
 - 原稿本文または mirror を変えたら `make mirror-check` を実行する。構造、引用、refs、build に触れた場合は `make ci` を実行する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

@@ -33,7 +33,6 @@ class StorylineLayerTemplateTest(unittest.TestCase):
                 "template/_paperops/notes/views/storyline.md",
                 "template/.agents/skills/design-paper-storyline/SKILL.md",
                 "template/_paperops/defaults/workflow/machine.yml",
-                "template/_paperops/workflow/current-state.yml",
                 "template/Makefile",
                 "Makefile",
                 "docs/skill-catalog.md",
@@ -86,7 +85,7 @@ class StorylineLayerTemplateTest(unittest.TestCase):
 
         self.assertIn("_paperops/model/editorial/results-hierarchy.yml", combined)
         self.assertIn("typed Results hierarchy", combined)
-        self.assertIn("legacy Markdown", combined)
+        self.assertNotIn("legacy Markdown", read_template("template/_paperops/notes/views/storyline.md"))
 
     def test_writing_and_review_skills_route_through_editorial_architect_view(self) -> None:
         combined = "\n".join(

@@ -176,7 +176,7 @@ def check_manuscript_smells(root: Path, findings: list[Finding]) -> None:
                     Finding(
                         "warning",
                         f"`{rel_path}:{number}` に direct comparator 未確認の比較・方法新規性 claim らしい表現があります。"
-                        " matched comparator が無い場合は `not collapsed to ...` のような使用範囲表現に落とし、`_paperops/requests/analysis/` に比較依頼を残してください",
+                        " matched comparator が無い場合は `not collapsed to ...` のような使用範囲表現に落とし、typed Issue Model の analysis_request に比較依頼を残してください",
                     )
                 )
             if COMPLETION_WORD_RE.search(stripped) and EQUILIBRIUM_WORD_RE.search(stripped):
@@ -251,7 +251,7 @@ def main() -> int:
         for finding in warnings:
             print(f"- {finding.message}")
         print("")
-        print("AI 初稿を改稿する前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`、必要なら `/scientific-gate` で `_paperops/evidence/`、`_paperops/claims/`、`_paperops/notes/views/` のカードとビューを更新してください。claim lock 後の文体 polish だけなら `/polish-ai-draft` を使ってください。")
+        print("AI 初稿を改稿する前に `/map-result-patterns`、`/audit-ai-draft`、`/contextualize-conditions`、必要なら `/scientific-gate` で typed Research Model と `_paperops/notes/views/` を更新してください。tracked model の更新は `pops change` を使い、claim lock 後の文体 polish だけなら `/polish-ai-draft` を使ってください。")
         print("")
     if not findings:
         print("論旨設計メモと本文の argument focus に明らかな問題は見つかりませんでした。")

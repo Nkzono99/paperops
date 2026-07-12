@@ -9,7 +9,7 @@ Review 後や人間コメント後に、Reviewer にそのまま改稿させず�
 
 ## Workflow Phase
 
-本文編集前に`pops workflow status --json`を確認する。v2-authoritativeならmacro stageは保存値ではなく五段階projectionであり、review / submission / section / approval / stale軸を別々に読む。legacy modeだけ`pops workflow next`と`_paperops/workflow/current-state.yml`を使う。
+本文編集前に`pops workflow status --json`を確認する。v2-authoritativeならmacro stageは保存値ではなく五段階projectionであり、review / submission / section / approval / stale軸を別々に読む。legacy modeだけ`pops workflow next`と`pops workflow status --json`を使う。
 
 `UNDER_REVIEW` 後は一方向に進めず、Issue Router で evidence / story / section / prose / submission loop のどこへ戻るかを決める。
 
@@ -17,7 +17,7 @@ claim、result、figure、section contractを更新した場合、v2-authoritati
 
 ## Issue Router
 
-`_paperops/review/feedback/` の指摘を見て、まず次のどれかに分類する。
+`_paperops/model/issues/feedback/` の指摘を見て、まず次のどれかに分類する。
 
 - `evidence_loop`: 数値、比較、収束、対照、artifact provenance が不足している。
 - `story_loop`: 中心主張、figure story、結果階層、主図と補足図の切り分けが揺れている。
@@ -47,3 +47,8 @@ feedback は必ず次のどれに属するかを判定する。
 - `submission_hygiene_only`: 投稿前 hygiene だけの問題。STRUCTURE_ACCEPTED 後にだけ扱う。
 
 この判定をせずに本文だけを直すと、次の review loop で同じ問題が戻る。`_paperops/refs/` と `_paperops/notes/` に作る作業ドキュメントは日本語で書く。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

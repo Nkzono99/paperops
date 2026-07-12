@@ -14,7 +14,7 @@ description: Use when checking whether figures support claims, evidence, caption
 - `_paperops/notes/views/result-pattern-map.md`
 - `_paperops/notes/views/claim-evidence-map.md`
 - `_paperops/notes/views/condition-context-map.md`
-- `_paperops/claims/gates/`
+- `_paperops/model/research/gates/`
 - 対象の figure/table caption
 - caption を参照する本文 block
 - `_paperops/notes/reproducibility.md`
@@ -64,3 +64,8 @@ description: Use when checking whether figures support claims, evidence, caption
 - state variable visualized、outcome-only figure risk、state visualization is not comparator を figure card に残す。
 - `make figure-reference-check` を使い、main-text figure label が本文から参照されているか確認する。
 - provenance が変わる場合は `_paperops/notes/reproducibility.md` を更新する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

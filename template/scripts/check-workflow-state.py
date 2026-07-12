@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from paperops_paths import display_path, internal_path
+from paperops_typed_views import TypedViewError, workflow_projection
 
 
 REQUIRED_OVERALL_STATES = {
@@ -61,15 +62,16 @@ def main() -> int:
     root = args.root.resolve()
     findings: list[str] = []
     machine = load_mapping(root, internal_path(root, "workflow", "machine.yml"), findings)
-    current = load_mapping(root, internal_path(root, "workflow", "current-state.yml"), findings)
-    load_mapping(root, internal_path(root, "workflow", "decisions.yml"), findings)
-    load_mapping(root, internal_path(root, "workflow", "round-summary.yml"), findings)
     subagent_roster = load_mapping(root, internal_path(root, "workflow", "subagent-roster.yml"), findings)
 
-    if machine and current:
+    if machine:
         validate_machine(machine, findings)
-        validate_current(machine, current, findings)
-        validate_state_consistency(current, findings)
+    try:
+        projection = workflow_projection(root)
+        if projection["submission"] not in {"authoring", "candidate", "gated", "revision_candidate", "frozen", "submitted", "under_review", "resubmitted", "accepted", "rejected", "withdrawn"}:
+            findings.append("typed Publication Model has an unknown submission state")
+    except TypedViewError as error:
+        findings.append(str(error))
     if subagent_roster:
         validate_subagent_roster(subagent_roster, findings)
 

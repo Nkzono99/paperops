@@ -11,8 +11,8 @@ description: 原稿の主張強度を evidence strength に合わせる。防御
 
 - `_paperops/notes/views/scientific-gate.md`
 - `_paperops/notes/views/claim-evidence-map.md`
-- `_paperops/claims/claims/`
-- `_paperops/claims/gates/`
+- `_paperops/model/research/claims/`
+- `_paperops/model/research/gates/`
 - `_paperops/notes/reviewer-model.md`
 - `manuscript/mirror/status.md`
 - 対象の `manuscript/ja/**/*.tex` と必要な `manuscript/en/**/*.tex`
@@ -29,7 +29,7 @@ description: 原稿の主張強度を evidence strength に合わせる。防御
 4. 証拠が十分な箇所は、`may`, `might`, `could`, `suggest` に逃げず、scope を明示して言い切る。
 5. 証拠が局所的な条件集合に依存する場合は、`may suggest` に逃げず、`この条件軸では`、`tested boundary conditions では`、`この保持仮定の範囲では` のように scope を明示して言い切る。
 6. limitation は claim 文に混ぜすぎず、後続文または boundary claim として分離する。
-7. `_paperops/claims/claims/` と `_paperops/claims/gates/` の status、scope、limitation を必要に応じて更新し、`_paperops/notes/views/claim-evidence-map.md` と `_paperops/notes/views/scientific-gate.md` を俯瞰用に更新する。
+7. `_paperops/model/research/claims/` と `_paperops/model/research/gates/` の status、scope、limitation を必要に応じて更新し、`_paperops/notes/views/claim-evidence-map.md` と `_paperops/notes/views/scientific-gate.md` を俯瞰用に更新する。
 
 ## 出力
 
@@ -43,7 +43,12 @@ description: 原稿の主張強度を evidence strength に合わせる。防御
 
 ## Codex 実行メモ
 
-- `_paperops/claims/claims/`、`_paperops/claims/gates/`、`_paperops/notes/views/scientific-gate.md`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/reviewer-model.md`、`manuscript/mirror/status.md` を先に読む。
+- `_paperops/model/research/claims/`、`_paperops/model/research/gates/`、`_paperops/notes/views/scientific-gate.md`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/reviewer-model.md`、`manuscript/mirror/status.md` を先に読む。
 - 防御的すぎる hedge と過剰主張の両方を点検する。
 - 条件数が少ない証拠は、弱い主張なのか境界条件として鋭い証拠なのかを分ける。
 - 本文を編集したら `make mirror-check`、必要なら `/sync-ja-en` を実行する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

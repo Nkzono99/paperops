@@ -12,10 +12,10 @@ description: Use before drafting Results or locking ARCHITECTURE_LOCKED, to desi
 - `_paperops/defaults/contracts/figures.yml`
 - `_paperops/contracts/figures.yml` if project overlay exists
 - `manuscript/writing-profile.yml`
-- `_paperops/claims/claims/`
-- `_paperops/claims/gates/`
-- `_paperops/evidence/results/`
-- `_paperops/evidence/figures/`
+- `_paperops/model/research/claims/`
+- `_paperops/model/research/gates/`
+- `_paperops/model/research/results/`
+- `_paperops/model/research/figures/`
 - `_paperops/refs/links.toml`
 - `_paperops/refs/imports/`
 - `_paperops/notes/views/result-pattern-map.md`
@@ -30,7 +30,7 @@ description: Use before drafting Results or locking ARCHITECTURE_LOCKED, to desi
 2. `_paperops/defaults/contracts/figures.yml`、必要な `_paperops/contracts/figures.yml` overlay、`manuscript/writing-profile.yml` を重ね、paper type が要求する role を確認する。
 3. computational modeling では、空間分解された状態量が新規性の入口なら `model_or_state_visualization`、経路依存推定量や threshold が claim を支えるなら `estimator_or_decision_criterion` を原則 required にする。
 4. 利用可能な result、figure data、linked artifact、既存 plot script を確認し、採用候補を `.paperops/cache/figure-candidates.yml` に一時整理する。生成物なので Git 管理しない。
-5. 採用する図だけを `_paperops/evidence/figures/` の figure card に昇格し、`satisfies_visual_obligations` に対応する `VO-*` ID を記録する。
+5. 採用する図だけを `_paperops/model/research/figures/` の figure card に昇格し、`satisfies_visual_obligations` に対応する `VO-*` ID を記録する。
    その後、個別の図や panel を作る前に `design-paper-figure` で reader_task、takeaway_sentence、encoding_choice、scale_and_denominator、runops handoff、acceptance criteria を固定する。
 6. claim card には `visual_obligations` を残す。図が不要な claim は `no_figure_reason` を明示する。
 7. 主図と補足図の切り分けを決める。sensitivity / screening 図は、中心 claim を読むための前提でなければ supplement を既定にする。
@@ -79,3 +79,8 @@ current_manuscript_role: main
 - 図の存在が決まっただけで採用しない。実際の plot、panel、caption、runops request は `design-paper-figure` で読者タスクから設計してから使う。
 - max / p95 / fraction / sample count を主図で使う場合は、同じ denominator、unit of analysis、independence caveat を `figure-story-audit` に引き継ぐ。
 - figure candidate は `.paperops/cache/` の生成一時物に置き、採用図だけを card 化する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

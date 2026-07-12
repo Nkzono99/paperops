@@ -1,9 +1,9 @@
 ---
 view_type: controlled_authoring
 source_of_truth:
-  - _paperops/claims/claims/
-  - _paperops/claims/arguments/
-  - _paperops/evidence/
+  - _paperops/model/research/claims/
+  - _paperops/model/editorial/editorial-model.yml
+  - _paperops/model/research/
 authoritative_for:
   - manuscript_terminology
   - plain_language_expansion

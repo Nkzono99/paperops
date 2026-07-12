@@ -81,7 +81,7 @@ Humanizer 系スキルの「AI らしい文章パターンを検出して自然�
 - つなぎ語を増やさず、論理関係を文の配置で示す。
 - 日本語原稿では、硬い論文語を保ちながらも、無内容な名詞句を削る。
 - 英語原稿では、AI らしい promotional phrase、過剰な em dash、空疎な metadiscourse を減らす。
-- AI の判断保留や作業計画は自然な本文に言い換えて隠さない。公開読者に必要な内容なら reader-facing claim / limitation / future work へ翻訳し、未解決なら `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ移す。
+- AI の判断保留や作業計画は自然な本文に言い換えて隠さない。公開読者に必要な内容なら reader-facing claim / limitation / future work へ翻訳し、未解決なら `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/model/issues/` へ移す。
 
 ### 4. Integrity pass
 
@@ -102,3 +102,8 @@ rewrite 後に、元の claim / evidence / scope から逸脱していないか�
 - 本文を編集した場合は `make mirror-check`、概念語を変えた場合は `make concept-term-check`、公開語を変えた場合は `make public-terms-check`、AI 執筆意図を整理した場合は `make authoring-intent-check` を実行する。
 - 原稿構造や claim strength を変える必要がある場合は、`/paragraph-surgery`、`/calibrate-claims`、`/scientific-gate` へ戻す。
 - `_paperops/notes/ai-use.md` の AI 利用ログや開示文案を消さない。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

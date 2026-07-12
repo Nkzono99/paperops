@@ -25,7 +25,7 @@ Methods を bookkeeping と物理モデル説明に分け、読者が再実装�
 
 Results や figure caption に出る推定量、baseline/control、comparison、decision criterion、threshold、verification は、Methods definition registry に登録してから本文へ出す。登録単位は `estimand_and_unit_of_analysis`、`comparison_or_baseline`、`decision_criteria`、`verification_or_convergence` を最低限とし、`_paperops/notes/views/storyline.md` の `Methods definition registry` へ definition location と manuscript block を残す。
 
-AI Writer が Methods prose に「後で埋める」「TODO」「authoring note」のような未解決作業を混ぜる場合は本文にしない。近傍の `% INTENT:` / `% TODO-PAPER:` comment、または `_paperops/requests/` へ残す。
+AI Writer が Methods prose に「後で埋める」「TODO」「authoring note」のような未解決作業を混ぜる場合は本文にしない。近傍の `% INTENT:` / `% TODO-PAPER:` comment、または `_paperops/model/issues/` へ残す。
 
 配置判断は次の語彙を使う。
 
@@ -44,3 +44,8 @@ method unit の plan には、`role_in_claim`、`nonstandard_choice`、`sensitiv
 P2 authority採用済みprojectでは、routineな入力snapshotとcontract解決を`pops compile prepare <SEC-ID>`へ渡し、`pops write start <compile-id>`のcandidate TeXを直接編集する。全原稿contextを再読してResultsのestimand、baseline、criterionとMethods定義の対応を見直し、`pops write check <session-id>`でscopeと参照保存を検査する。
 
 Methods definition registryやsection topology自体が不足する場合はcandidateだけで推測せず、Manuscript Modelを改訂・再承認して再compileする。確認済みcandidateだけ`pops write apply <session-id> --yes`で反映する。CLIはhashとtransactionを担い、再現可能性や方法選択の意味論は著者・reviewerが判断する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

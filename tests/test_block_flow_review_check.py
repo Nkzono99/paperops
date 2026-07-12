@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import json
 import tempfile
 import unittest
 from pathlib import Path
+import yaml
 
 from tests.helpers import ROOT, copy_template, make_var_tokens, run_python_script
 
@@ -11,98 +11,43 @@ from tests.helpers import ROOT, copy_template, make_var_tokens, run_python_scrip
 SCRIPT = ROOT / "template" / "scripts" / "check-block-flow-review.py"
 
 
-def set_section_state(root: Path, section: str, state: str) -> None:
-    state_path = root / "_paperops" / "workflow" / "current-state.yml"
-    current = json.loads(state_path.read_text(encoding="utf-8"))
-    current["sections"][section]["state"] = state
-    state_path.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
-def set_overall_state(root: Path, state: str) -> None:
-    state_path = root / "_paperops" / "workflow" / "current-state.yml"
-    current = json.loads(state_path.read_text(encoding="utf-8"))
-    current["overall"]["state"] = state
-    state_path.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
-
-def write_block_flow_review(root: Path, section: str, table_rows: str) -> Path:
-    reviews = root / "_paperops" / "review" / "block-flow"
-    reviews.mkdir(parents=True, exist_ok=True)
-    path = reviews / f"{section}-review.md"
-    header = f"""\
----
-id: BFR-9001
-type: block_flow_review
-section: {section}
-status: reviewed
----
-
-# {section} block-flow review
-
-| block_id | reader_question | author_move | why_here | next_block_expectation | operation |
-| --- | --- | --- | --- | --- | --- |
-"""
-    path.write_text(header + table_rows + "\n", encoding="utf-8")
-    return path
+def write_manuscript(root: Path, *, ordered: list[str], blocks: list[dict], status: str = "verified") -> None:
+    section = {"id": "SEC-0001", "record_type": "section", "section_kind": "results", "status": status, "ordered_block_ids": ordered}
+    documents = [section, *blocks]; records = []
+    for document in documents:
+        folder = "sections" if document["record_type"] == "section" else "blocks"
+        path = root / f"_paperops/model/manuscript/{folder}/{document['id']}.yml"; path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(yaml.safe_dump(document, sort_keys=False))
+        records.append({"id": document["id"], "record_type": document["record_type"], "document": path.relative_to(root).as_posix(), "expected_revision": 1, "expected_hash": "sha256:" + "0" * 64})
+    index = root / "_paperops/model/manuscript/index.yml"; index.parent.mkdir(parents=True, exist_ok=True)
+    index.write_text(yaml.safe_dump({"model_name": "manuscript", "schema_version": 1, "index_revision": 1, "records": records, "extensions": {}, "metadata": {"updated_at": ""}}, sort_keys=False))
 
 
 class BlockFlowReviewCheckTest(unittest.TestCase):
-    def test_strict_requires_results_and_discussion_review_states_after_structure_acceptance(self) -> None:
+    def test_strict_requires_ordered_blocks_for_verified_results(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)
-            set_overall_state(root, "STRUCTURE_ACCEPTED")
-            set_section_state(root, "results", "DRAFTED")
-            set_section_state(root, "discussion", "DRAFTED")
+            write_manuscript(root, ordered=[], blocks=[])
 
             result = run_python_script(SCRIPT, "--root", root, "--strict")
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn("STRUCTURE_ACCEPTED", result.stdout)
-        self.assertIn("results", result.stdout)
-        self.assertIn("discussion", result.stdout)
-        self.assertIn("AUDITED / ACCEPTED", result.stdout)
+        self.assertIn("ordered block", result.stdout)
 
-    def test_strict_requires_review_artifact_for_audited_results(self) -> None:
+    def test_strict_rejects_missing_typed_block(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)
-            set_section_state(root, "results", "AUDITED")
+            write_manuscript(root, ordered=["BLK-0001"], blocks=[])
 
             result = run_python_script(SCRIPT, "--root", root, "--strict")
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn("results", result.stdout)
-        self.assertIn("_paperops/review/block-flow", result.stdout)
+        self.assertIn("BLK-0001", result.stdout)
 
-    def test_strict_flags_placeholder_block_operation_rows(self) -> None:
+    def test_passes_when_verified_section_has_typed_block_operations(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_template(tmp)
-            set_section_state(root, "results", "AUDITED")
-            write_block_flow_review(
-                root,
-                "results",
-                "| results.traceability.01 | 未記入 | keep | 未記入 | 未記入 | keep |\n"
-                "| results.refs.01 | 未記入 | keep | 未記入 | 未記入 | keep |\n"
-                "| results.mirror.01 | 未記入 | keep | 未記入 | 未記入 | keep |",
-            )
-
-            result = run_python_script(SCRIPT, "--root", root, "--strict")
-
-        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertIn("reader_question", result.stdout)
-        self.assertIn("why_here", result.stdout)
-        self.assertIn("next_block_expectation", result.stdout)
-
-    def test_passes_when_all_audited_section_blocks_have_review_rows(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            root = copy_template(tmp)
-            set_section_state(root, "results", "AUDITED")
-            write_block_flow_review(
-                root,
-                "results",
-                "| results.traceability.01 | What state must persist across sessions? | assert traceability as the first result | it frames why workflow state matters before refs | asks how references reuse the same state | keep |\n"
-                "| results.refs.01 | How are references reused? | connect refs summaries to reusable citation work | it extends state persistence to knowledge assets | asks how bilingual drift is controlled | keep |\n"
-                "| results.mirror.01 | How is bilingual drift detected? | close with the mechanical mirror check | it turns the previous claims into a verifiable check | section can hand off to discussion tradeoffs | keep |",
-            )
+            write_manuscript(root, ordered=["BLK-0001"], blocks=[{"id": "BLK-0001", "record_type": "block", "section_id": "SEC-0001", "reader_task": "Understand the bounded result.", "operation": "keep"}])
 
             result = run_python_script(SCRIPT, "--root", root, "--strict")
 

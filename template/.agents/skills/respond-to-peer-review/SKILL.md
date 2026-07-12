@@ -11,15 +11,15 @@ description: Use when organizing reviewer comments, rebuttal, revision plan, or 
 
 - reviewer letter や editor correspondence は confidential な場合がある。外部検索語にそのまま使わず、tracked notes へ丸写ししない。
 - 実査読コメントを AI に処理させてよいか、投稿先・出版社ポリシーとユーザーの明示許可を先に確認する。許可が未確認または不可の場合は、本文や raw comment を読まず、人間が使う response matrix / checklist の雛形だけを出す。
-- raw letter は `_handoff/` やユーザーが渡したローカルファイルに置き、`_paperops/review/feedback/` と `_paperops/notes/views/peer-review.md` には要約、comment ID、対応方針、変更先だけを残す。
+- raw letter は `_handoff/` やユーザーが渡したローカルファイルに置き、`_paperops/model/issues/feedback/` と `_paperops/notes/views/peer-review.md` には要約、comment ID、対応方針、変更先だけを残す。
 - response draft では、実施していない変更、未確認の line/page number、存在しない追加解析を主張しない。
 
 ## 最初に読むファイル
 
 - editor / reviewer comments（ユーザー指定ファイルまたは貼り付け）
 - `_paperops/notes/views/peer-review.md`
-- `_paperops/review/feedback/`
-- `_paperops/review/responses/`
+- `_paperops/model/issues/feedback/`
+- `_paperops/model/issues/responses/`
 - `_paperops/notes/views/scientific-gate.md`
 - `_paperops/notes/views/claim-evidence-map.md`
 - `_paperops/notes/views/result-pattern-map.md`
@@ -58,7 +58,7 @@ reviewer の文脈を壊さず、扱いやすい単位へ分割する。
 
 ### 3. Response matrix を作る
 
-`_paperops/review/feedback/` と `_paperops/notes/views/peer-review.md` に反映する場合は、raw comment ではなく要約で残す。
+`_paperops/model/issues/feedback/` と `_paperops/notes/views/peer-review.md` に反映する場合は、raw comment ではなく要約で残す。
 
 | comment ID | issue | response stance | manuscript change | evidence / source | owner | status |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -81,11 +81,11 @@ closure audit を必ず追加する。
 - `manuscript/ja/` の本文 block
 - figure / caption / table
 - `manuscript/shared/bib/` と `_paperops/refs/summaries/`
-- `_paperops/claims/gates/`
-- `_paperops/claims/claims/`
-- `_paperops/evidence/results/`
-- `_paperops/evidence/figures/`
-- `_paperops/requests/analysis/`
+- `_paperops/model/research/gates/`
+- `_paperops/model/research/claims/`
+- `_paperops/model/research/results/`
+- `_paperops/model/research/figures/`
+- `_paperops/model/issues/analysis/`
 - `_paperops/notes/reproducibility.md`
 - response letter only
 
@@ -125,10 +125,15 @@ line/page number は最終レイアウト確定後に入れる。未確定なら
 ## Codex 実行メモ
 
 - `manuscript/mirror/status.md` で source-of-truth を確認する。
-- `_paperops/review/feedback/` や `_paperops/notes/views/peer-review.md` を更新する場合は raw quote ではなく要約と comment ID を中心にする。
+- `_paperops/model/issues/feedback/` や `_paperops/notes/views/peer-review.md` を更新する場合は raw quote ではなく要約と comment ID を中心にする。
 - raw comment を保存せず、要約、resolution_route、prose explanation、closure_status、evidence route だけを tracked card に残す。
 - 追加文献が必要なら `/research-related-work` または `/update-refs` へ渡す。
 - 外部 source channel の到達経路が未整理なら `/source-reach-scan` へ渡す。
 - reviewer comment が中心主張の assumption を突いている場合は `/scientific-gate` へ戻す。
-- 追加解析が必要なら `_paperops/requests/analysis/` に切り出す。
+- 追加解析が必要なら `_paperops/model/issues/analysis/` に切り出す。
 - 原稿や refs を編集したら `make mirror-check`、`make citation-check`、必要に応じて `make ci` を実行する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

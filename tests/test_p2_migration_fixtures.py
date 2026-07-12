@@ -79,7 +79,7 @@ class P2MigrationFixtureTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             project = ResearchMigrationAdapterTest().project(Path(tmp))
-            shutil.rmtree(project / "_paperops/evidence/sources")
+            shutil.rmtree(project / "_paperops/evidence/sources", ignore_errors=True)
             candidate = ResearchAdapter().materialize(MigrationInput(project, "research", ()))
             self.assertIn("migration.missing", [item.code for item in candidate.findings])
 

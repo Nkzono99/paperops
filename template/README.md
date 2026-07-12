@@ -38,22 +38,22 @@ P2で四つのcompile authorityを採用した後は、`pops compile prepare <se
 3. `pops workflow status` と `pops workflow next` で、全体状態と stale section を確認する。
 4. 原稿内容を進めるときは `/develop-manuscript-content` を入口にし、claims、storyline、figure story、section compiler、block-flow review、本文 prose を扱う。新規 scaffold の Results hierarchy は `_paperops/model/editorial/results-hierarchy.yml` を正本にする。`/finish-manuscript` は投稿可能状態までの監督入口として使う。
 5. 図表が本文の主張を支える場合は `/plan-figure-story` を入口にし、必要な個別図だけ `design-paper-figure` や `figure-story-audit` へ進める。
-6. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/develop-manuscript-content` 内の予測稿 route で扱う。本文には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` と `xx` 置換条件を残し、`_paperops/requests/analysis/` と接続する。
+6. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/develop-manuscript-content` 内の予測稿 route で扱う。本文には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` と `xx` 置換条件を残し、`_paperops/model/issues/analysis/` と接続する。
 7. DRAFTED section は block flow を見直してから AUDITED 扱いにする。直接 `review-block-flow` を呼ぶのは、block 構成の再設計が明示された場合に限る。
-8. subagent を使う場合、main agent は orchestrator として role brief と integration decision を `_paperops/review/rounds/` に残す。通常は `/finish-manuscript` から必要時に委譲する。
-9. `manuscript/ja/` を中心に書く。AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose ではなく `% INTENT:` または `% TODO-PAPER:` コメントに置き、必要なら `_paperops/notes/` / `_paperops/requests/` へ移す。
+8. subagent を使う場合、main agent は orchestrator として role brief と integration decision を `_paperops/model/issues/rounds/` に残す。通常は `/finish-manuscript` から必要時に委譲する。
+9. `manuscript/ja/` を中心に書く。AI Writer の執筆意図、判断保留、後で埋める内容は本文 prose ではなく `% INTENT:` または `% TODO-PAPER:` コメントに置き、必要なら `_paperops/notes/` / `_paperops/model/issues/` へ移す。
 10. 必要な block を `manuscript/en/` に同期する。
 11. 人間レビューや自然文の指示は `/integrate-writing-feedback` で feedback card にし、`route-manuscript-feedback` と `pops workflow route-review` で戻る深さを決める。
-12. Submission hygiene と投稿メタデータは STRUCTURE_ACCEPTED 後に主作業にする。`manuscript/` は living authoring source で、投稿後や査読後も revision-authoring に戻して編集できる。投稿用の submission candidate / round snapshot は `submission/` と `_paperops/workflow/submission-ledger.yml` に記録し、完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `submission-gate`、`make submission-gate`、ORCID や affiliation を含む `manuscript/publication-metadata.toml` の `[submission]`、`[open_research]`、`[human_verification]` を埋めた `make pre-submit` を実行する。
+12. Submission hygiene と投稿メタデータは STRUCTURE_ACCEPTED 後に主作業にする。`manuscript/` は living authoring source で、投稿後や査読後も revision-authoring に戻して編集できる。投稿用の submission candidate / round snapshot は `submission/` と `_paperops/model/publication/publication-model.yml` に記録し、完了前は `finalize-manuscript` と `make finish-manuscript-check`、共有前は `make ci` と `make audit`、投稿前は `submission-gate`、`make submission-gate`、ORCID や affiliation を含む `manuscript/publication-metadata.toml` の `[submission]`、`[open_research]`、`[human_verification]` を埋めた `make pre-submit` を実行する。
 
 ## 中間層
 
 - `story/`: 人間が読む高次ストーリーと story seed
-- `_paperops/evidence/`: result / figure / source card の正本
-- `_paperops/claims/`: claim / scientific gate / argument card の正本
-- `_paperops/review/`: feedback / review round / response card の正本
-- `_paperops/review/block-flow/`: AUDITED / ACCEPTED 前の block operation table と author stance
-- `_paperops/requests/`: analysis / writing request card の正本
+- `_paperops/model/research/`: result / figure / source card の正本
+- `_paperops/model/research/`: claim / scientific gate / argument card の正本
+- `_paperops/model/issues/`: feedback / review round / response card の正本
+- `_paperops/model/manuscript/blocks/`: AUDITED / ACCEPTED 前の block operation table と author stance
+- `_paperops/model/issues/`: analysis / writing request card の正本
 - `_paperops/notes/views/`: `view_type` / `source_of_truth` つきの pure overview view と controlled authoring view
 - `_paperops/model/editorial/results-hierarchy.yml`: project-owned の typed Results hierarchy 正本。各 item は `RHI-*` ID と `next_item_id` で読者順を表す。
 - `_paperops/model/editorial/editorial-model.yml`: project-owned の story candidate、選択・棄却理由、argument move の正本。
@@ -81,7 +81,7 @@ P2で四つのcompile authorityを採用した後は、`pops compile prepare <se
 - `_paperops/refs/summaries/`: 採用する文献や外部 source の確認済み要約。
 - `_paperops/refs/research/`: 関連研究調査の設計と raw finding。
 - `_paperops/refs/source-reach/`: Web、GitHub、動画、RSS、SNS など外部 source channel の調査メモ。
-- `_paperops/evidence/sources/`: summary だけでは足りない claim_boundary、parameter_choice、reviewer_objection、method_precedent の source card。
+- `_paperops/model/research/sources/`: summary だけでは足りない claim_boundary、parameter_choice、reviewer_objection、method_precedent の source card。
 - `_paperops/refs/links.toml`: 共有できる外部 project / directory link の意味。
 - `_paperops/refs/imports/`: 外部 export bundle の source index、integrity、claim role、取り込み状態。
 - `_paperops/refs/local/locations.toml`: 個人環境の実パス。Git 管理しない。
@@ -117,7 +117,7 @@ P2で四つのcompile authorityを採用した後は、`pops compile prepare <se
 - `_paperops/contracts/`: Introduction / Methods / Results / Discussion / Conclusion と figure story の project overlay
 - `_paperops/workflow/`: 現在状態、review round summary、人間判断、任意の workflow overlay
 - `_paperops/refs/`: 文献、外部 source、外部 link、ローカルパス alias
-- `_paperops/evidence/`, `_paperops/claims/`, `_paperops/review/`, `_paperops/requests/`: 論文を書く前後のカード層
+- `_paperops/model/research/`, `_paperops/model/research/`, `_paperops/model/issues/`, `_paperops/model/issues/`: 論文を書く前後のカード層
 - `_paperops/notes/`: AI 利用、再現性、handoff、decision log、controlled authoring view
 - `_handoff/`: 未整理入力の一時受け取り箱
 - `_archives/`: sealed scratch archive

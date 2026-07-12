@@ -6,15 +6,23 @@ import unittest
 import subprocess
 import sys
 from pathlib import Path
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "template" / "scripts" / "check-figure-obligations.py"
 
 
-def write_card(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(textwrap.dedent(text).lstrip(), encoding="utf-8")
+def write_research(root: Path, documents: list[dict]) -> None:
+    records = []
+    for document in documents:
+        kind = document["record_type"]
+        path = root / f"_paperops/model/research/{kind}s/{document['id']}.yml"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(yaml.safe_dump(document, sort_keys=False))
+        records.append({"id": document["id"], "record_type": kind, "document": path.relative_to(root).as_posix(), "expected_revision": 1, "expected_hash": "sha256:" + "0" * 64})
+    index = root / "_paperops/model/research/index.yml"; index.parent.mkdir(parents=True, exist_ok=True)
+    index.write_text(yaml.safe_dump({"model_name": "research", "schema_version": 1, "index_revision": 1, "records": records, "extensions": {}, "metadata": {"updated_at": ""}}, sort_keys=False))
 
 
 def run_python_script(script: Path, *args: object) -> subprocess.CompletedProcess[str]:
@@ -30,22 +38,7 @@ class FigureObligationCheckTest(unittest.TestCase):
     def test_fails_when_declared_visual_obligation_has_no_figure_route(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write_card(
-                root / "_paperops" / "claims" / "claims" / "CLM-0001.md",
-                """
-                ---
-                id: CLM-0001
-                type: claim
-                status: supported
-                visual_obligations:
-                  - id: VO-STATE-0001
-                    role: model_or_state_visualization
-                    required: true
-                ---
-
-                # Claim
-                """,
-            )
+            write_research(root, [{"id": "CLM-0001", "record_type": "claim", "status": "approved", "gate_status": "ready_to_write", "visual_obligation_refs": ["VO-STATE-0001"], "no_figure_reason": ""}])
 
             result = run_python_script(SCRIPT, "--root", root)
 
@@ -56,38 +49,10 @@ class FigureObligationCheckTest(unittest.TestCase):
     def test_passes_when_visual_obligation_is_satisfied_by_figure_card(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write_card(
-                root / "_paperops" / "claims" / "claims" / "CLM-0001.md",
-                """
-                ---
-                id: CLM-0001
-                type: claim
-                status: supported
-                visual_obligations:
-                  - id: VO-CRITERION-0001
-                    role: estimator_or_decision_criterion
-                    required: true
-                ---
-
-                # Claim
-                """,
-            )
-            write_card(
-                root / "_paperops" / "evidence" / "figures" / "FIG-0001.md",
-                """
-                ---
-                id: FIG-0001
-                type: figure
-                status: draft
-                figure_ref: "fig:criterion"
-                current_manuscript_role: main
-                satisfies_visual_obligations:
-                  - VO-CRITERION-0001
-                ---
-
-                # Figure
-                """,
-            )
+            write_research(root, [
+                {"id": "CLM-0001", "record_type": "claim", "status": "approved", "gate_status": "ready_to_write", "visual_obligation_refs": ["VO-CRITERION-0001"], "no_figure_reason": ""},
+                {"id": "FIG-0001", "record_type": "figure", "status": "draft", "manuscript_role": "main", "visual_obligation_refs": ["VO-CRITERION-0001"]},
+            ])
 
             result = run_python_script(SCRIPT, "--root", root)
 
@@ -97,20 +62,7 @@ class FigureObligationCheckTest(unittest.TestCase):
     def test_strict_fails_supported_claim_without_obligation_or_no_figure_reason(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write_card(
-                root / "_paperops" / "claims" / "claims" / "CLM-0001.md",
-                """
-                ---
-                id: CLM-0001
-                type: claim
-                status: supported
-                gate_status: ready-to-write
-                visual_obligations: []
-                ---
-
-                # Claim
-                """,
-            )
+            write_research(root, [{"id": "CLM-0001", "record_type": "claim", "status": "approved", "gate_status": "ready_to_write", "visual_obligation_refs": [], "no_figure_reason": ""}])
 
             result = run_python_script(SCRIPT, "--root", root, "--strict")
 

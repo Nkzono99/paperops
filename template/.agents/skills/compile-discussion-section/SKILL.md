@@ -14,7 +14,7 @@ Discussion を observation の繰り返しや limitation 羅列から、解釈�
 - `_paperops/notes/views/storyline.md`
 - `_paperops/notes/views/claim-evidence-map.md`
 - `_paperops/notes/related-work-map.md`
-- `_paperops/review/feedback/`
+- `_paperops/model/issues/feedback/`
 - `manuscript/writing-profile.yml`
 - necessary claim / evidence / source cards
 
@@ -30,7 +30,7 @@ Discussion functions は、少なくとも `principal_finding`、`mechanism_warr
 
 baseline、control、reference condition、comparator を Results の中心に置いた場合、Discussion ではその control が支える解釈と支えない解釈を分ける。baseline 結果を real-world mechanism claim に拡張する場合は、足りない coupled process、boundary condition、decisive next test を明示する。
 
-AI Writer の作業計画を Discussion prose に混ぜない。`claim を強めるための追加作業` は、公開読者に必要なら `decisive_next_test` や limitation/future work として翻訳し、未解決の執筆意図なら `% INTENT:` / `% TODO-PAPER:` または `_paperops/requests/` へ移す。ただし追加シミュレーションを投稿前に実施でき、結果の予測根拠がある場合は、一般的な Future Work や defensive prose にせず `draft-predicted-results` へ戻す。予測解釈を書く場合は `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` と `_paperops/requests/analysis/` を必ず接続する。
+AI Writer の作業計画を Discussion prose に混ぜない。`claim を強めるための追加作業` は、公開読者に必要なら `decisive_next_test` や limitation/future work として翻訳し、未解決の執筆意図なら `% INTENT:` / `% TODO-PAPER:` または `_paperops/model/issues/` へ移す。ただし追加シミュレーションを投稿前に実施でき、結果の予測根拠がある場合は、一般的な Future Work や defensive prose にせず `draft-predicted-results` へ戻す。予測解釈を書く場合は `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` と `_paperops/model/issues/analysis/` を必ず接続する。
 
 ## Section Depth
 
@@ -49,3 +49,8 @@ Draft 後は `review-block-flow` で block operation table を作る。各 block
 P2 authority採用済みprojectでは、`pops compile prepare <SEC-ID>`から全体storyとsection planを固定し、`pops write start <compile-id>`で原稿全体を読めるcandidateを作る。TeXはcandidate内で直接再構成し、`pops write check <session-id>`と`pops write diff <session-id>`でscope・意味保存・mirror impactを確認する。定型snapshot、hash、recovery、rollbackをAgentのshell手順にしない。
 
 Discussionの解釈順、alternative、scope、decisive next testをcandidateの局所rewriteだけで直せない場合は、scopeを拡張せずEditorial / Manuscript revisionへ戻り、再compileする。承認済み反映だけ`pops write apply <session-id> --yes`を使い、必要なら`pops write rollback <transaction-id>`で既知hashへ戻す。P3はproseの科学的妥当性を自動承認しない。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

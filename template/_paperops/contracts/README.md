@@ -14,4 +14,4 @@ overlay は全文コピーよりも、差分が分かる小さな変更として
 4. `draft-section`: section plan だけを主入力にして本文を書く。
 5. `audit-section`: 公開原稿と contract を読み、契約違反を返す。
 
-生成された section plan や figure candidate inventory は `.paperops/cache/` など Git 管理しない場所へ置く。正本は `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` の card と controlled authoring view に置く。
+生成された section plan や figure candidate inventory は `.paperops/cache/` など Git 管理しない場所へ置く。正本は `_paperops/model/research/`、`_paperops/model/research/`、`_paperops/model/issues/`、`_paperops/model/issues/` の card と controlled authoring view に置く。

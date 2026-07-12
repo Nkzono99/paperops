@@ -29,7 +29,7 @@ description: Use when manuscript work may drift from content repair into submiss
 - `deferred_hygiene`: 今は扱わない Submission hygiene / downstream harness 作業。
 - `route`: story_loop / section_loop / evidence_loop / prose_loop / submission_loop のどれか。
 
-`_paperops/workflow/current-state.yml` の `CONTENT_FIRST.next_action_reduces_content_blocker` を満たせない場合、本文編集や Submission hygiene に入らず、`design-paper-storyline`、`integrate-writing-feedback`、または evidence / claim repair へ戻る。
+`pops workflow status --json` の `CONTENT_FIRST.next_action_reduces_content_blocker` を満たせない場合、本文編集や Submission hygiene に入らず、`design-paper-storyline`、`integrate-writing-feedback`、または evidence / claim repair へ戻る。
 
 ## Course-correction checkpoint
 
@@ -47,3 +47,8 @@ description: Use when manuscript work may drift from content repair into submiss
 完了宣言の直前に `make finish-manuscript-check` を実行する。`STRUCTURE_ACCEPTED` が未達、または reviewer loop の blocking / major concern が閉じていない場合、`make pre-submit` の一部が通っていても `/goal` を完了しない。
 
 `check-content-first.py` は進路変更時の gate、`finish-manuscript-check` は goal 終了前の gate として使い分ける。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

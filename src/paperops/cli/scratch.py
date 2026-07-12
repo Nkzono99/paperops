@@ -28,6 +28,7 @@ SCRATCH_ARCHIVE_PATHS = (
     "submission",
     "_paperops/notes",
     "_paperops/refs",
+    "_paperops/model",
     "_paperops/evidence",
     "_paperops/claims",
     "_paperops/review",

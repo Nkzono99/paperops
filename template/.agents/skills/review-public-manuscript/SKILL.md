@@ -89,7 +89,7 @@ description: Use when reviewing public manuscript text for reader assumptions an
 7. authoring intent leak を確認する:
    - `claim を強めるための追加作業`、`後で埋める`、`TODO`、`authoring note`、`drafting note` が本文 prose に出ていないか
    - 本文に必要な future work / limitation なのか、AI Writer の作業メモなのかを分ける
-   - 作業メモなら `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ移す
+   - 作業メモなら `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/model/issues/` へ移す
 8. 追加解析候補を High / Medium / Low に分類する。
 9. 対応を以下に分解する:
    - 原稿修正
@@ -147,3 +147,8 @@ repo-aware editor と public-only reviewer を同じ判断に混ぜない。publ
 - 未定義語、ローカル語、暗黙前提、再現性ギャップ、図表 cleanup、Data availability 追記、rewrite patch plan、対応チェックリストに分けて返す。
 - repo-aware editor と public-only reviewer を混ぜず、public-only review は読者が詰まる箇所の検出に限定する。修正実装や内部台帳反映は通常の repo 文脈で行う。
 - authoring intent leak を見つけたら、`make authoring-intent-check` または `scripts/check-authoring-intent.py --root . --strict` で機械検査できるか確認する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

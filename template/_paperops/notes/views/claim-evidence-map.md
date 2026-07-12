@@ -2,16 +2,16 @@
 view_type: pure_overview
 starter_example_rows: true
 source_of_truth:
-  - _paperops/claims/claims/
-  - _paperops/claims/gates/
-  - _paperops/evidence/
+  - _paperops/model/research/claims/
+  - _paperops/model/research/gates/
+  - _paperops/model/research/
 authoritative_for:
   - overview
 ---
 
 # 主張と証拠のビュー
 
-このファイルは `_paperops/claims/claims/`、`_paperops/claims/gates/`、`_paperops/evidence/` のカードを人間が俯瞰するためのビューである。claim の正本は claim card に置く。
+このファイルは `_paperops/model/research/claims/`、`_paperops/model/research/gates/`、`_paperops/model/research/` のカードを人間が俯瞰するためのビューである。claim の正本は claim card に置く。
 
 初期状態の `*-0001` 行は例示行であり、対応する実カードはまだ作成されていない。実カードを作成したら、この行を実 ID に置き換えるか削除し、`starter_example_rows` を `false` にする。
 
@@ -29,7 +29,7 @@ authoritative_for:
 
 | 主張ID | card | 主張 | 証拠 | 論拠・推論 | 適用範囲 | 限界 | 本文ブロック | 図表 | 状態 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| CLM-0001 | `_paperops/claims/claims/CLM-0001.md` | 未記入 | RES-0001 / SRC-0001 | 未記入 | 未記入 | 未記入 | 未記入 | FIG-0001 | draft |
+| CLM-0001 | `_paperops/model/research/claims/CLM-0001.md` | 未記入 | RES-0001 / SRC-0001 | 未記入 | 未記入 | 未記入 | 未記入 | FIG-0001 | draft |
 
 `supported` に昇格する前に、中心主張は対応する gate card でも `ready-to-write` になっているか確認する。`analysis-needed` や `assumption-blocked` の主張は Abstract / Conclusion / main figure caption に使わない。
 
@@ -61,7 +61,7 @@ authoritative_for:
 
 | 主張ID | gate card | gate status | block reason | approved writing scope | allowed wording | must-not-claim | next route |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| CLM-0001 | `_paperops/claims/gates/GATE-0001.md` | ready-to-write / analysis-needed / assumption-blocked / supplement-only / defer | 未記入 | 未記入 | 未記入 | 未記入 | `/scientific-gate` / `/map-result-patterns` / `/research-related-work` |
+| CLM-0001 | `_paperops/model/research/gates/GATE-0001.md` | ready-to-write / analysis-needed / assumption-blocked / supplement-only / defer | 未記入 | 未記入 | 未記入 | 未記入 | `/scientific-gate` / `/map-result-patterns` / `/research-related-work` |
 
 ## Assumption / upgrade gate links
 

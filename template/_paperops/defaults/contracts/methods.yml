@@ -14,9 +14,9 @@ logic_chain:
   - validity_domain
 
 inputs:
-  - _paperops/evidence/results/
-  - _paperops/evidence/figures/
-  - _paperops/claims/gates/
+  - _paperops/model/research/results/
+  - _paperops/model/research/figures/
+  - _paperops/model/research/gates/
   - _paperops/notes/reproducibility.md
   - _paperops/refs/imports/
   - _paperops/refs/links.toml

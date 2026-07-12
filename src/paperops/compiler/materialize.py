@@ -660,8 +660,8 @@ def _input_type(identity: str, bibliography: frozenset[str]) -> str:
         return "terminology"
     if identity.endswith("concept-terms.md"):
         return "concept-terms"
-    if identity.startswith("_paperops/requests/analysis/") and identity.endswith(
-        ".md"
+    if identity.startswith("_paperops/model/issues/analysis/") and identity.endswith(
+        (".yml", ".yaml")
     ):
         return "analysis-request"
     if identity.endswith(".tex"):
@@ -2400,7 +2400,7 @@ def materialize_compile(
                         item.to_dict()
                         for item in manuscript_snapshot.read_files
                         if not item.identity.startswith(
-                            "_paperops/requests/analysis/"
+                            "_paperops/model/issues/analysis/"
                         )
                         or item.identity in request_identities
                     ],

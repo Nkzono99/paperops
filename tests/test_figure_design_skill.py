@@ -35,21 +35,21 @@ class FigureDesignSkillTemplateTest(unittest.TestCase):
             with self.subTest(required=required):
                 self.assertIn(required, skill)
 
-    def test_figure_card_exposes_design_brief_for_individual_figures(self) -> None:
-        figure_card = read_template("template/_paperops/evidence/figures/figure-card-template.md")
+    def test_figure_model_exposes_design_brief_for_individual_figures(self) -> None:
+        figure_card = read_template("template/_paperops/defaults/schemas/research-figure.schema.json")
 
         for required in [
             "design_review",
             "reader_task",
-            "takeaway_sentence",
-            "encoding_choice",
-            "scale_and_denominator",
-            "uncertainty_or_distribution",
+            "takeaway",
+            "encoding",
+            "scale_denominator",
+            "uncertainty",
             "caption_plan",
-            "color_accessibility",
-            "runops_handoff",
+            "accessibility",
+            "runops_handoff_id",
             "acceptance_criteria",
-            "## Figure design brief",
+            "design_review",
         ]:
             with self.subTest(required=required):
                 self.assertIn(required, figure_card)

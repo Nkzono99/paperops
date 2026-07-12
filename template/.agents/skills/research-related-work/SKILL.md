@@ -115,7 +115,7 @@ raw findings は `_paperops/refs/research/<topic-slug>/results/` に一時保存
 
 `_paperops/refs/summaries/` は採用文献の要約であり、すべてを source card にしない。背景、分野整理、関連研究の列挙だけなら summary の `promotion_decision: hold` に留める。
 
-次のいずれかに該当する場合は `_paperops/evidence/sources/` の source card に昇格し、`promotion_required_when` と理由を記録する。
+次のいずれかに該当する場合は `_paperops/model/research/sources/` の source card に昇格し、`promotion_required_when` と理由を記録する。
 
 - `claim_boundary`: 本稿の claim scope、支えられない主張、比較範囲を決める。
 - `parameter_choice`: Methods のパラメータ、閾値、比較条件、評価指標、データ選別を正当化する。
@@ -151,3 +151,8 @@ raw findings は `_paperops/refs/research/<topic-slug>/results/` に一時保存
 - ユーザーが明示しない限り、`manuscript/` は編集しない。
 - `_paperops/refs/research/**/results/` と `report.generated.md` は一時成果物として扱う。
 - bib を編集したら `/update-refs` または `make lint-bib` / `make citation-check` で確認する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。

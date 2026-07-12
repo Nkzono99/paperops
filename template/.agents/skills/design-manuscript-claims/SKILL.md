@@ -14,8 +14,8 @@ description: 原稿を作業報告型から主張中心の論文構造へ再設�
 - `manuscript/mirror/status.md`
 - `_paperops/notes/project-brief.md`
 - `_paperops/notes/contribution-claims.md`
-- `_paperops/claims/`
-- `_paperops/evidence/`
+- `_paperops/model/research/`
+- `_paperops/model/research/`
 - `_paperops/notes/views/scientific-gate.md`
 - `_paperops/notes/related-work-map.md`
 - `_paperops/notes/views/result-pattern-map.md`
@@ -82,17 +82,17 @@ Abstract、Conclusion、主要図表、中心 claim に入れる候補は、`_pa
 |-------|--------------------|---------------------|----------|--------|----------------|
 
 `Current blocks` には `% block: ...` ID または section file を入れる。block ID がない範囲は section と近い見出しで示す。
-設計後、ユーザーが了承した claim / evidence / scope / limitation は `_paperops/claims/claims/` の claim card と `_paperops/notes/views/claim-evidence-map.md` に反映する。
+設計後、ユーザーが了承した claim / evidence / scope / limitation は `_paperops/model/research/claims/` の claim card と `_paperops/notes/views/claim-evidence-map.md` に反映する。
 
 ### 3.5 条件数を論文コンテキストへ抽象化する
 
 `12 条件中 2 条件`、`8 条件中 0 条件`、保存時刻数、run 数、screening 条件は、そのまま `Essential results` に入れない。まず `/contextualize-conditions` の方針で、各結果を `mechanism`、`contrast`、`boundary`、`robustness`、`exception`、`provenance-only` のどれかへ分類する。
 
 - 条件数は claim ではなく evidence metadata として扱う。
-- result pattern は claim ではなく観察単位として扱い、claim に昇格するものだけ `_paperops/claims/claims/` と `_paperops/notes/views/claim-evidence-map.md` へ移す。
+- result pattern は claim ではなく観察単位として扱い、claim に昇格するものだけ `_paperops/model/research/claims/` と `_paperops/notes/views/claim-evidence-map.md` へ移す。
 - 0 条件は「失敗」ではなく、negative evidence、boundary、insufficient coverage のどれかへ分類する。
 - `_paperops/notes/views/condition-context-map.md` に denominator の意味、公開条件名、本文での言い方を残す。
-- `_paperops/claims/claims/` と `_paperops/notes/views/claim-evidence-map.md` には `condition role` と `public scope` を反映する。
+- `_paperops/model/research/claims/` と `_paperops/notes/views/claim-evidence-map.md` には `condition role` と `public scope` を反映する。
 
 ### 4. 本文の配置を決める
 
@@ -154,8 +154,13 @@ Abstract、Conclusion、主要図表、中心 claim に入れる候補は、`_pa
 ## Codex 実行メモ
 
 - `review-public-manuscript` とは分けて使う。この skill は `_paperops/notes/project-brief.md`、`_paperops/notes/contribution-claims.md`、`_paperops/notes/views/scientific-gate.md`、`_paperops/notes/related-work-map.md`、`_paperops/notes/views/claim-evidence-map.md`、`_paperops/notes/reviewer-model.md`、`manuscript/mirror/status.md`、JA source of truth を読んで、主張と証拠の階層を設計する。
-- 設計した claim / evidence / scope / limitation は、ユーザーが了承した範囲で `_paperops/claims/claims/` の claim card と `_paperops/notes/views/claim-evidence-map.md` に反映する。
+- 設計した claim / evidence / scope / limitation は、ユーザーが了承した範囲で `_paperops/model/research/claims/` の claim card と `_paperops/notes/views/claim-evidence-map.md` に反映する。
 - 先に abstract、introduction、conclusion、section headings、figure captions を読み、Core claim と Essential results を圧縮する。
 - 作業報告 smell、keep/compress/move/cut、over-claiming risk、block ID 単位の rewrite plan を出す。
 - run label、export 名、directory 名、script 名、artifact 名が本文に残る場合は、公開語へ置換するか `_paperops/notes/` / `_paperops/refs/` 側の provenance に退避する。
 - ユーザーが rewrite を明示した場合だけ `manuscript/ja/` を編集する。`% block: ...` ID を保持し、EN mirror は `sync-ja-en` の方針で同期する。
+
+
+## Typed mutation contract
+
+六モデルの tracked document、index、revision、hash、dependency、approval、manifest、journal を直接編集しない。意味判断と candidate document の作成後、ignored な YAML/JSON change request に必要な upsert/delete をすべて明示し、`pops change plan <request.yml>`、`pops change diff <change-id>`、`pops change apply <change-id> --yes` に適用を委譲する。delete cascade は推測せず、dependent update/delete を同じ request に含める。raw review、credential、private/local path は request や tracked model に入れない。既存 legacy project を読む場合だけ migration reader を使い、通常 authoring では legacy card や macro-state file に fallback しない。
