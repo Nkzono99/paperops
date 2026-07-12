@@ -65,7 +65,7 @@ uvx --from paper-harness-cli pops doctor
 
 PaperOps 2 P1-B は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の正確な六モデルを提供する。P2 は `pops model` の deterministic migrationとして、legacy inventory、shadow diff、strict validation、model単位のadopt、snapshot rollbackをAIなしで反復できるようにする。authorityは`legacy-authoritative`、`shadow-compare`、`v2-authoritative`をmodelごとに持ち、Editorial / Results hierarchyだけはcompanionとして同時に切り替える。
 
-AI Agentはscientific / editorial judgment、候補の選択理由、未解決fieldを埋めるための人間との対話を担当し、定型的なfile discovery、hash、conservation、transaction、recoveryを直接操作しない。P3 compiler / WriterとP4 workflow writerの導入後もlegacy互換artifactとhuman-edited TeXを維持し、物理削除は利用観測と別の削除判断が揃うまで行わない。
+AI Agentはscientific / editorial judgment、候補の選択理由、未解決fieldを埋めるための人間との対話を担当し、定型的なfile discovery、hash、conservation、transaction、recoveryを直接操作しない。P3 compiler / WriterとP4 workflow writerの導入後もhuman-edited living TeXを維持する。legacy互換artifactは新規scaffoldから削除済みで、既存projectのproject-owned artifactだけを明示migrationと確認が終わるまで保持する。
 
 検証phaseは schema → references → semantics → canonical semantic-v1 hash の順で、mechanism-led、boundary-led、negative-result-led の三つの合成fixtureを回帰corpusとして維持する。
 

@@ -19,7 +19,7 @@ authoritative_for:
 
 | round ID | card | scope | status | blocking concerns | Editorial architecture audit | Subagent delegation ledger | highest-priority route |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| RVW-0001 | `_paperops/model/issues/rounds/RVW-0001.md` | section / weekly / pre-submit / peer-review / editor-response | draft | 未記入 | story spine / Results hierarchy / Discussion functions | delegated_role / subagent_report / integration decision / orchestrator | `/integrate-writing-feedback` |
+| RVW-0001 | `_paperops/model/issues/rounds/RVW-0001.yml` | section / weekly / pre-submit / peer-review / editor-response | draft | 未記入 | story spine / Results hierarchy / Discussion functions | delegated_role / subagent_report / integration decision / orchestrator | `/integrate-writing-feedback` |
 
 ## Feedback matrix
 

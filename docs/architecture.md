@@ -29,7 +29,7 @@ P2 はこのkernelへdeterministic model migrationを接続する。`pops model 
 
 `.paperops/migrations/<transaction-id>/`はcandidate、report、journal、`.paperops/snapshots/<transaction-id>/`はbyte-exact rollback snapshotを置くignored stateである。source/candidate drift、unknown manual edit、snapshot corruptionは自動上書きせず停止する。CLIはnetworkやAI modelを呼ばず、AIはscientific / editorial judgmentと人間承認だけを担当する。
 
-P2/P3/P4はlegacy card、human-edited TeX、review/request、submission ledgerを削除しない。P7は新規`pops init`だけを六モデル・workflowのdefault v2へ切り替え、既存projectのtyped section compiler / Writer / workflow migrationは引き続き明示採用とする。legacy removalは利用観測と復元検証を満たす別判断へ分離する。Publication Modelはliving candidateとimmutable submitted roundを分離し、artifact本体をmigration candidateへコピーしない。
+P2/P3/P4はtyped compiler / Writer / workflow migrationを導入し、P7で新規`pops init`を六モデル・workflowのdefault v2へ切り替えた。1.0.0の新規scaffoldからlegacy card、review/request、workflow macro-state、submission ledgerを削除する一方、human-edited living TeXと既存project向けのread-only migration readerは維持する。既存projectのauthority切替とproject-owned legacy artifact整理は引き続き明示採用とする。Publication Modelはliving candidateとimmutable submitted roundを分離し、artifact本体をmigration candidateへコピーしない。
 
 ## 下流論文層
 

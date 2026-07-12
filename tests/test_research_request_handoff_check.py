@@ -135,8 +135,8 @@ class ResearchRequestHandoffCheckTest(unittest.TestCase):
             text = view.read_text(encoding="utf-8")
             view.write_text(
                 text.replace(
-                    "| AREQ-0001 | `_paperops/model/issues/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | planned |",
-                    "| AREQ-0001 | `_paperops/model/issues/analysis/AREQ-0001.md` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | planned |\n"
+                    "| AREQ-0001 | `_paperops/model/issues/analysis/AREQ-0001.yml` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | planned |",
+                    "| AREQ-0001 | `_paperops/model/issues/analysis/AREQ-0001.yml` | FB-0001 | CLM-0001 | _paperops/refs/links.toml | 未記入 | denominator / independence / convergence / external validation / figure redesign | blank / draft:* / queued ID | planned |\n"
                     "| RR-0008 | `_paperops/model/issues/analysis/RR-0008.yml` | FB-0001 | CLM-0001 | runops-main | verification table | convergence | blank | open |",
                 ),
                 encoding="utf-8",
