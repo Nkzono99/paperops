@@ -12,7 +12,7 @@ from unittest import mock
 from tests.helpers import ROOT, copy_template, run_cli
 
 from paperops import __version__  # noqa: E402
-from paperops.authority_bootstrap import bootstrap_v2_authority  # noqa: E402
+from paperops.authority_bootstrap import bootstrap_legacy_authority, bootstrap_v2_authority  # noqa: E402
 from paperops.cli.main import write_manifest  # noqa: E402
 from paperops.cli.manifest import applied_migrations  # noqa: E402
 from paperops.cli.migrations import get_migration  # noqa: E402
@@ -99,23 +99,13 @@ class PopsCliTest(unittest.TestCase):
             self.assertEqual(code, 1, err or raw)
             self.assertIn("state.hash_mismatch", raw)
 
-    def test_init_legacy_records_explicit_legacy_authority_and_warns(self) -> None:
+    def test_init_rejects_removed_legacy_authority_option(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = Path(tmp) / "paper-demo"
-
-            code, out, err = run_cli(["init", str(target), "--authority", "legacy"])
-
-            self.assertEqual(code, 0, err)
-            manifest = tomllib.loads(
-                (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
-            )
-            self.assertEqual(manifest["workflow"]["mode"], "legacy")
-            self.assertTrue(
-                all(manifest["models"][name]["mode"] == "legacy-authoritative" for name in MODEL_NAMES)
-            )
-            self.assertIn("Authority: legacy-authoritative", out)
-            self.assertIn("deprecated", err)
-            self.assertIn("removal is not scheduled", err)
+            with self.assertRaises(SystemExit) as raised:
+                run_cli(["init", str(target), "--authority", "legacy"])
+            self.assertEqual(raised.exception.code, 2)
+            self.assertFalse(target.exists())
 
     def test_init_rejects_v2_force_copy_into_nonempty_target(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -127,7 +117,7 @@ class PopsCliTest(unittest.TestCase):
             code, _out, err = run_cli(["init", str(target), "--force"])
 
             self.assertEqual(code, 2)
-            self.assertIn("--authority legacy", err)
+            self.assertIn("setup/update-paperops", err)
             self.assertEqual(marker.read_text(encoding="utf-8"), "keep\n")
             self.assertFalse((target / ".pops").exists())
 
@@ -219,28 +209,6 @@ class PopsCliTest(unittest.TestCase):
             self.assertFalse(target.exists())
             self.assertNotIn("no space", err)
 
-    def test_legacy_force_copy_preserves_existing_v2_authority(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            target = Path(tmp) / "paper-demo"
-            code, _out, err = run_cli(["init", str(target)])
-            self.assertEqual(code, 0, err)
-            before = tomllib.loads(
-                (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
-            )
-            (target / "project-owned.txt").write_text("keep\n", encoding="utf-8")
-
-            code, _out, err = run_cli(
-                ["init", str(target), "--force", "--authority", "legacy"]
-            )
-
-            self.assertEqual(code, 0, err)
-            after = tomllib.loads(
-                (target / ".pops" / "manifest.toml").read_text(encoding="utf-8")
-            )
-            self.assertEqual(after["models"], before["models"])
-            self.assertEqual(after["workflow"], before["workflow"])
-            self.assertEqual((target / "project-owned.txt").read_text(encoding="utf-8"), "keep\n")
-
     def test_setup_of_existing_legacy_scaffold_does_not_invent_authority_tables(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             target = copy_template(tmp)
@@ -260,10 +228,10 @@ class PopsCliTest(unittest.TestCase):
                 with self.subTest(authority=authority):
                     target = Path(tmp) / f"paper-{authority}"
                     args = ["init", str(target)]
-                    if authority == "legacy":
-                        args.extend(["--authority", "legacy"])
                     code, _out, err = run_cli(args)
                     self.assertEqual(code, 0, err)
+                    if authority == "legacy":
+                        bootstrap_legacy_authority(target)
                     manifest_path = target / ".pops" / "manifest.toml"
                     before = tomllib.loads(manifest_path.read_text(encoding="utf-8"))
                     managed = target / "_paperops" / "defaults" / "contracts" / "results.yml"
@@ -356,24 +324,16 @@ class PopsCliTest(unittest.TestCase):
             self.assertTrue((target / "_paperops" / "defaults" / "workflow" / "focus-policy.yml").is_file())
             self.assertTrue((target / "_paperops" / "defaults" / "workflow" / "subagent-roster.yml").is_file())
             self.assertFalse((target / "_paperops" / "workflow" / "machine.yml").exists())
-            self.assertTrue((target / "_paperops" / "workflow" / "current-state.yml").is_file())
-            self.assertTrue((target / "_paperops" / "workflow" / "decisions.yml").is_file())
-            self.assertTrue((target / "_paperops" / "workflow" / "round-summary.yml").is_file())
+            self.assertFalse((target / "_paperops" / "workflow" / "current-state.yml").exists())
+            self.assertFalse((target / "_paperops" / "workflow" / "decisions.yml").exists())
+            self.assertFalse((target / "_paperops" / "workflow" / "round-summary.yml").exists())
             self.assertTrue((target / "manuscript" / "writing-profile.yml").is_file())
             troubleshooting = (target / "TROUBLESHOOTING.md").read_text(encoding="utf-8")
             self.assertIn("Skill descriptions were shortened", troubleshooting)
             self.assertIn("通常執筆", troubleshooting)
-            self.assertTrue((target / "_paperops" / "evidence" / "results" / "result-card-template.md").is_file())
-            self.assertTrue((target / "_paperops" / "evidence" / "figures" / "figure-card-template.md").is_file())
-            self.assertTrue((target / "_paperops" / "evidence" / "sources" / "source-card-template.md").is_file())
-            self.assertTrue((target / "_paperops" / "claims" / "claims" / "claim-card-template.md").is_file())
-            self.assertTrue((target / "_paperops" / "claims" / "gates" / "scientific-gate-card-template.md").is_file())
-            self.assertTrue((target / "_paperops" / "claims" / "arguments" / "argument-card-template.md").is_file())
-            self.assertTrue((target / "_paperops" / "review" / "feedback" / "feedback-card-template.md").is_file())
-            self.assertTrue((target / "_paperops" / "review" / "rounds" / "review-round-template.md").is_file())
-            self.assertTrue((target / "_paperops" / "review" / "responses" / "response-card-template.md").is_file())
-            self.assertTrue((target / "_paperops" / "requests" / "analysis" / "analysis-request-template.md").is_file())
-            self.assertTrue((target / "_paperops" / "requests" / "writing" / "writing-request-template.md").is_file())
+            self.assertTrue((target / "_paperops" / "model" / "research" / "index.yml").is_file())
+            self.assertTrue((target / "_paperops" / "model" / "issues" / "index.yml").is_file())
+            self.assertTrue((target / "_paperops" / "model" / "manuscript" / "index.yml").is_file())
             self.assertTrue((target / "scripts" / "check-figure-obligations.py").is_file())
             self.assertTrue(
                 (target / ".agents" / "skills" / "plan-figure-story" / "SKILL.md").is_file()

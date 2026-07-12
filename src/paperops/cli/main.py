@@ -11,7 +11,7 @@ import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 
-from paperops.authority_bootstrap import bootstrap_legacy_authority, bootstrap_v2_authority
+from paperops.authority_bootstrap import bootstrap_v2_authority
 from paperops.cli.constants import PACKAGE_NAME, UPSTREAM_REPO
 from paperops.cli.compile_commands import add_compile_parser
 from paperops.cli.change_commands import add_change_parser
@@ -100,12 +100,6 @@ def build_parser() -> argparse.ArgumentParser:
         "--force",
         action="store_true",
         help="Copy into an existing directory without overwriting files.",
-    )
-    init_parser.add_argument(
-        "--authority",
-        choices=("v2", "legacy"),
-        default="v2",
-        help="Initial authority mode (default: v2; legacy is deprecated).",
     )
     init_parser.add_argument(
         "--template-ref",
@@ -326,34 +320,23 @@ def cmd_init(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 2
-    if nonempty and args.authority == "v2":
+    if nonempty:
         print(
             "error: v2 authority cannot be claimed while force-copying into "
             "a non-empty target.",
             file=sys.stderr,
         )
         print(
-            "hint: use --authority legacy for additive copy, or migrate the existing project explicitly.",
+            "hint: use pops setup/update-paperops, then migrate the existing project explicitly.",
             file=sys.stderr,
         )
         return 2
 
     try:
-        preserved_authority = False
-        if nonempty:
-            preserved_authority = (target / ".pops" / "manifest.toml").is_file()
-            with scaffold_source() as source:
-                plan = copy_scaffold(source, target, overwrite=False)
-            write_manifest(target, template_ref=args.template_ref)
-            if not preserved_authority:
-                bootstrap_legacy_authority(target)
-            hashes: dict[str, str] = {}
-        else:
-            plan, hashes = _initialize_staged_project(
-                target,
-                authority=args.authority,
-                template_ref=args.template_ref,
-            )
+        plan, hashes = _initialize_staged_project(
+            target,
+            template_ref=args.template_ref,
+        )
     except ValueError as error:
         print(f"error: initialization failed: {error}", file=sys.stderr)
         return 1
@@ -367,23 +350,11 @@ def cmd_init(args: argparse.Namespace) -> int:
     args.project_root = target
     print(f"Initialized paper project: {target}")
     print_copy_summary(plan)
-    if args.authority == "v2":
-        print("Authority: v2-authoritative")
-        print("Workflow: v2-authoritative")
-        print("Model hashes:")
-        for name, digest in hashes.items():
-            print(f"  {name}: {digest}")
-    else:
-        if preserved_authority:
-            print("Authority: unchanged")
-            print("Workflow: unchanged")
-        else:
-            print("Authority: legacy-authoritative")
-            print("Workflow: legacy")
-        print(
-            "warning: --authority legacy is deprecated; removal is not scheduled.",
-            file=sys.stderr,
-        )
+    print("Authority: v2-authoritative")
+    print("Workflow: v2-authoritative")
+    print("Model hashes:")
+    for name, digest in hashes.items():
+        print(f"  {name}: {digest}")
     warn_ignored_bootstrap_options(args)
 
     print_next_steps(target)
@@ -393,7 +364,6 @@ def cmd_init(args: argparse.Namespace) -> int:
 def _initialize_staged_project(
     target: Path,
     *,
-    authority: str,
     template_ref: str,
 ) -> tuple[CopyPlan, dict[str, str]]:
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -437,11 +407,7 @@ def _initialize_staged_project(
         with scaffold_source() as source:
             plan = copy_scaffold(source, staging, overwrite=False)
         write_manifest(staging, template_ref=template_ref)
-        if authority == "v2":
-            hashes = bootstrap_v2_authority(staging)
-        else:
-            bootstrap_legacy_authority(staging)
-            hashes = {}
+        hashes = bootstrap_v2_authority(staging)
         if not _is_empty_reservation(target, reservation_identity):
             raise FileExistsError(f"target changed during initialization: {target}")
         os.replace(staging, target)
