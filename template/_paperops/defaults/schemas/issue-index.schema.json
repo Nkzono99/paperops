@@ -56,7 +56,8 @@
                         "analysis_request",
                         "writing_request",
                         "response",
-                        "review_round"
+                        "review_round",
+                        "workflow_issue"
                     ]
                 },
                 "document": {

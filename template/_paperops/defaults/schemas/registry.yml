@@ -124,6 +124,11 @@ models:
         path_prefix: _paperops/model/issues/rounds/
         id_pattern: ^RVW-[0-9]{4,}$
         hash_excluded_paths: [/approvals, /metadata/updated_at]
+      workflow_issue:
+        schema: issue-workflow-issue.schema.json
+        path_prefix: _paperops/model/issues/workflow/
+        id_pattern: ^ISS-[0-9]{4,}$
+        hash_excluded_paths: [/approvals, /metadata/updated_at]
     dependency_profile: dependency-v1
   publication:
     document_kind: aggregate

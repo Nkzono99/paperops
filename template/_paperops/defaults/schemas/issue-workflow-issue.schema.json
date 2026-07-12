@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paperops.local/schemas/issue-workflow-issue.schema.json",
+  "title": "PaperOps independent workflow issue",
+  "type": "object",
+  "required": ["schema_version", "record_type", "id", "revision", "status", "dependencies", "approvals", "extensions", "metadata", "severity", "route", "targets", "review_round_ref", "confidentiality", "public_summary", "closure_criteria", "blocking_dependency_refs", "impacts", "route_history", "closure", "escalation"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "record_type": {"const": "workflow_issue"},
+    "id": {"type": "string", "pattern": "^ISS-[0-9]{4,}$"},
+    "revision": {"type": "integer", "minimum": 1},
+    "status": {"enum": ["open", "routed", "resolved", "waived", "closed"]},
+    "dependencies": {"$ref": "#/$defs/dependencies"},
+    "approvals": {"$ref": "#/$defs/approvals"},
+    "extensions": {"type": "object", "additionalProperties": true},
+    "metadata": {"$ref": "#/$defs/metadata"},
+    "severity": {"enum": ["info", "minor", "major", "blocking"]},
+    "route": {"type": "string", "minLength": 1},
+    "targets": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/target"}},
+    "review_round_ref": {"type": "string", "pattern": "^(|RVW-[0-9]{4,})$"},
+    "confidentiality": {"enum": ["public", "internal_summary", "confidential_local_only"]},
+    "public_summary": {"type": "string", "minLength": 1},
+    "closure_criteria": {"$ref": "#/$defs/strings"},
+    "blocking_dependency_refs": {"$ref": "#/$defs/strings"},
+    "impacts": {"type": "array", "items": {"$ref": "#/$defs/impact"}},
+    "route_history": {"type": "array", "items": {"$ref": "#/$defs/route_event"}},
+    "closure": {
+      "type": "object", "required": ["decision", "reason", "verification_refs"],
+      "properties": {"decision": {"enum": ["pending", "resolved", "waived", "closed"]}, "reason": {"type": "string"}, "verification_refs": {"$ref": "#/$defs/strings"}},
+      "additionalProperties": false
+    },
+    "escalation": {
+      "type": "object", "required": ["level", "reason"],
+      "properties": {"level": {"enum": ["none", "owner", "editor", "human"]}, "reason": {"type": "string"}},
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "strings": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "metadata": {"type": "object", "required": ["created_at", "updated_at"], "properties": {"created_at": {"type": "string"}, "updated_at": {"type": "string"}}, "additionalProperties": false},
+    "target": {"type": "object", "required": ["kind", "id", "revision", "hash"], "properties": {"kind": {"type": "string", "minLength": 1}, "id": {"type": "string", "minLength": 1}, "revision": {"type": "integer", "minimum": 1}, "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}}, "additionalProperties": false},
+    "dependency": {"type": "object", "required": ["target_id", "relation", "expected_hash"], "properties": {"target_id": {"type": "string", "minLength": 1}, "relation": {"type": "string", "minLength": 1}, "expected_revision": {"type": "integer", "minimum": 1}, "expected_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}}, "additionalProperties": false},
+    "dependencies": {"type": "array", "items": {"$ref": "#/$defs/dependency"}},
+    "approval": {"type": "object", "required": ["approval_id", "kind", "decision", "object_revision", "object_hash", "actor", "note"], "properties": {"approval_id": {"type": "string", "pattern": "^APR-[0-9]{4,}$"}, "kind": {"type": "string", "pattern": "^[a-z][a-z0-9._:-]*$"}, "decision": {"enum": ["approved", "rejected", "revoked", "superseded"]}, "object_revision": {"type": "integer", "minimum": 1}, "object_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "actor": {"const": "human"}, "note": {"type": "string"}}, "additionalProperties": false},
+    "approvals": {"type": "array", "items": {"$ref": "#/$defs/approval"}},
+    "impact": {"type": "object", "required": ["target_id", "target_type", "expected_revision", "expected_hash", "state", "verification_refs"], "properties": {"target_id": {"type": "string", "minLength": 1}, "target_type": {"type": "string", "minLength": 1}, "expected_revision": {"type": "integer", "minimum": 1}, "expected_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "state": {"enum": ["open", "resolved", "waived"]}, "verification_refs": {"$ref": "#/$defs/strings"}}, "additionalProperties": false},
+    "route_event": {"type": "object", "required": ["from", "to", "reason", "at", "actor"], "properties": {"from": {"type": "string"}, "to": {"type": "string", "minLength": 1}, "reason": {"type": "string", "minLength": 1}, "at": {"type": "string"}, "actor": {"const": "human"}}, "additionalProperties": false}
+  }
+}

@@ -156,6 +156,9 @@
         "feedback_refs": {
             "$ref": "#/$defs/strings"
         },
+        "issue_refs": {
+            "$ref": "#/$defs/strings"
+        },
         "review_profile": {
             "type": "string"
         },

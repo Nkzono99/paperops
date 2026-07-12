@@ -139,7 +139,7 @@ class IssueModelTest(unittest.TestCase):
         registry = load_registry(ROOT / "template")
         self.assertEqual(set(registry.entries), {"editorial", "results_hierarchy", "research", "manuscript", "issue", "publication"})
         entry = registry.entries["issue"]
-        self.assertEqual(set(entry.record_sets), set(DOCUMENTS))
+        self.assertEqual(set(entry.record_sets), set(DOCUMENTS) | {"workflow_issue"})
         self.assertEqual(entry.authority, "project-owned")
         self.assertEqual(entry.dependency_profile, "dependency-v1")
 

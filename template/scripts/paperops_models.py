@@ -83,7 +83,7 @@ MODEL_OBJECT_TYPES: dict[str, frozenset[str]] = {
     "research": frozenset({"claim", "result", "figure", "source", "scientific_gate"}),
     "manuscript": frozenset({"section", "block"}),
     "issue": frozenset(
-        {"feedback", "analysis_request", "writing_request", "response", "review_round"}
+        {"feedback", "analysis_request", "writing_request", "response", "review_round", "workflow_issue"}
     ),
     "publication": frozenset(),
 }
@@ -100,7 +100,7 @@ REFERENCE_CONTRACTS: dict[str, dict[str, frozenset[str]]] = {
     "block": {"section_id": frozenset({"section"}), "claim_refs": frozenset({"claim"}), "result_refs": frozenset({"result"}), "figure_refs": frozenset({"figure"}), "source_refs": frozenset({"source"})},
 }
 ISSUE_OBJECT_TYPES = frozenset(
-    {"feedback", "analysis_request", "writing_request", "response", "review_round"}
+    {"feedback", "analysis_request", "writing_request", "response", "review_round", "workflow_issue"}
 )
 ISSUE_REFERENCE_CONTRACTS: dict[str, dict[str, frozenset[str]]] = {
     record_type: {
@@ -146,6 +146,7 @@ ISSUE_REFERENCE_CONTRACTS["response"].update(
 ISSUE_REFERENCE_CONTRACTS["review_round"].update(
     {
         "feedback_refs": frozenset({"feedback"}),
+        "issue_refs": frozenset({"workflow_issue"}),
         "delegation_ledger/*/target_ref": frozenset().union(
             *MODEL_OBJECT_TYPES.values()
         ),
@@ -162,6 +163,7 @@ ISSUE_TARGET_TYPES = {
     "feedback": frozenset({"feedback"}), "analysis_request": frozenset({"analysis_request"}),
     "writing_request": frozenset({"writing_request"}), "response": frozenset({"response"}),
     "review_round": frozenset({"review_round"}),
+    "workflow_issue": frozenset({"workflow_issue"}),
 }
 
 
@@ -518,6 +520,33 @@ def validate_issue_semantics(catalog: ObjectCatalog) -> list[ModelFinding]:
                         "Issue state may contain only public summaries and opaque local-reference IDs",
                     )
                 )
+
+        if obj.object_type == "workflow_issue" and obj.document.get("status") == "closed":
+            impacts = obj.document.get("impacts", [])
+            unresolved = [
+                row for row in impacts
+                if not isinstance(row, dict) or row.get("state") not in {"resolved", "waived"}
+            ] if isinstance(impacts, list) else [impacts]
+            if unresolved:
+                findings.append(_issue_finding("semantic.workflow_issue_closure", obj, "/impacts", "closed workflow issue cannot retain open impacts"))
+            blockers = obj.document.get("blocking_dependency_refs", [])
+            if not isinstance(blockers, list) or blockers:
+                findings.append(_issue_finding("semantic.workflow_issue_closure", obj, "/blocking_dependency_refs", "closed workflow issue cannot retain blocking dependencies"))
+            closure = obj.document.get("closure")
+            if not isinstance(closure, dict) or closure.get("decision") != "closed" or not closure.get("verification_refs"):
+                findings.append(_issue_finding("semantic.workflow_issue_verification", obj, "/closure", "closed workflow issue requires current verification references"))
+            if isinstance(impacts, list) and any(isinstance(row, dict) and row.get("state") == "waived" for row in impacts):
+                approvals = obj.document.get("approvals", [])
+                current_waiver = any(
+                    isinstance(approval, dict)
+                    and approval.get("kind") == "waiver"
+                    and approval.get("decision") == "approved"
+                    and approval.get("object_revision") == obj.revision
+                    and approval.get("object_hash") == obj.object_hash
+                    for approval in approvals
+                ) if isinstance(approvals, list) else False
+                if not current_waiver:
+                    findings.append(_issue_finding("approval.missing", obj, "/approvals", "waived impact requires a current owner-local waiver approval"))
 
         if obj.object_type != "analysis_request":
             continue
