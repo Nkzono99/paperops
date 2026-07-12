@@ -4,7 +4,7 @@
 
 ## 1.0.0 - 2026-07-12
 
-- `pops change plan|status|diff|apply|rollback`を追加した。ignoredなYAML/JSON requestからregistryでtracked identityを解決し、indexed/aggregate record、index revision/hash、六モデルvalidation、manifest hashを一つの復旧可能なtransactionで更新する。`apply` / `rollback`は明示確認とcurrent hash一致を要求し、公開出力へcandidate本文やprivate pathを出さない。
+- `pops change plan|status|diff|apply|rollback`を追加した。ignoredなYAML/JSON requestからregistryでtracked identityを解決し、indexed/aggregate record、index revision/hash、六モデルvalidation、manifest hashを一つの復旧可能なtransactionで更新する。change/transaction IDとcache pathを閉じ、planをdirectory単位でatomic publishし、apply/rollback/recoveryを同一lockとfsync済みjournalで直列化する。`apply` / `rollback`は明示確認、current hash一致、warning delta再検証を要求し、公開出力へcandidate本文やprivate pathを出さない。
 - 新規scaffoldからlegacy claim/evidence/review/request card、workflow macro-state/decision/round summary、submission ledgerを削除し、checker/skillをtyped Research / Editorial / Manuscript / Issue / Publication authorityへ切り替えた。`storyline.md`はcontrolled authoring viewとして残し、Results hierarchyの値はtyped modelだけを参照する。
 - `pops init --authority legacy`を削除し、新規projectをv2-onlyにした。既存projectのlegacy artifactはproject-ownedとして`setup` / `update-paperops`で削除せず、model/workflow migrationのinventory、shadow、adopt、rollback readerを維持する。移行手順は`docs/migrations/1.0.0-typed-authority.md`を参照する。
 

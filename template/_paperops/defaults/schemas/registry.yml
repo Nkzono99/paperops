@@ -3,6 +3,7 @@ validator_profile: paperops-schema-v1
 models:
   editorial:
     document_kind: aggregate
+    aggregate_id: EDT-0001
     schema: editorial-model.schema.json
     schema_version: 1
     authority: project-owned
@@ -12,6 +13,7 @@ models:
       - /metadata/updated_at
   results_hierarchy:
     document_kind: aggregate
+    aggregate_id: RHI-main
     schema: results-hierarchy.schema.json
     schema_version: 1
     authority: project-owned
@@ -132,6 +134,7 @@ models:
     dependency_profile: dependency-v1
   publication:
     document_kind: aggregate
+    aggregate_id: PUB-main
     schema: publication-model.schema.json
     schema_version: 1
     authority: project-owned

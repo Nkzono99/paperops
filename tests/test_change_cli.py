@@ -34,11 +34,20 @@ class ChangeCliTest(unittest.TestCase):
                 self.assertNotIn("CLI Venue", raw); change_id = plan["change_id"]
                 for action in ("status", "diff"):
                     code, raw, err = run_cli(["change", action, change_id, "--json"])
-                    self.assertEqual(code, 0, err); self.assertEqual(json.loads(raw)["change_id"], change_id)
+                    self.assertEqual(code, 0, err); payload = json.loads(raw)
+                    self.assertEqual(payload["change_id"], change_id)
+                    if action == "status":
+                        self.assertEqual(payload["state"], "PLANNED")
+                    else:
+                        self.assertTrue(payload["changes"])
+                        self.assertIn("before_hash", payload["changes"][0])
+                        self.assertIn("after_hash", payload["changes"][0])
                 code, _raw, _err = run_cli(["change", "apply", change_id, "--json"])
                 self.assertEqual(code, 2)
                 code, raw, err = run_cli(["change", "apply", change_id, "--yes", "--json"])
                 self.assertEqual(code, 0, err); tx = json.loads(raw)["transaction_id"]
+                code, raw, err = run_cli(["change", "status", change_id, "--json"])
+                self.assertEqual(code, 0, err); self.assertEqual(json.loads(raw)["state"], "COMMITTED")
                 code, raw, err = run_cli(["change", "rollback", tx, "--yes", "--json"])
                 self.assertEqual(code, 0, err); self.assertTrue(json.loads(raw)["transaction_id"].startswith("RBK-"))
 

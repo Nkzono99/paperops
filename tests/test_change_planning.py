@@ -50,6 +50,17 @@ class ChangePlanningTest(unittest.TestCase):
             with self.assertRaises(ChangePlanningError):
                 plan_change(project, self.request(parent, [invalid]))
 
+    def test_revisionless_results_hierarchy_uses_canonical_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp); project = self.project(parent)
+            target = project / "_paperops/model/editorial/results-hierarchy.yml"
+            document = yaml.safe_load(target.read_text()); digest = semantic_hash(document)
+            document["items"][0]["answer"] = "A checked hierarchy answer."
+            operation = {"action": "upsert", "model": "results_hierarchy", "record_type": "results_hierarchy", "id": "RHI-main", "expected_revision": 0, "expected_hash": digest, "document": document}
+            plan = plan_change(project, self.request(parent, [operation]))
+            self.assertEqual(plan.operations[0].candidate_revision, None)
+            self.assertEqual(plan.replacements[0].identity, "_paperops/model/editorial/results-hierarchy.yml")
+
     def test_plan_is_deterministic_and_corrupt_cache_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp); project = self.project(parent)
@@ -64,6 +75,38 @@ class ChangePlanningTest(unittest.TestCase):
             cache.write_text("{}\n")
             with self.assertRaises(ChangePlanningError):
                 plan_change(project, request)
+
+    def test_read_rejects_traversal_and_does_not_create_missing_cache(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp); project = self.project(parent)
+            outside = parent / "escape"
+            with self.assertRaises(ChangePlanningError):
+                read_change_plan(project, "CHG-../../escape")
+            self.assertFalse(outside.exists())
+            missing = "CHG-" + "a" * 20
+            with self.assertRaises(ChangePlanningError):
+                read_change_plan(project, missing)
+            self.assertFalse((project / ".paperops/changes" / missing).exists())
+
+    def test_read_rejects_symlinked_change_cache(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp); project = self.project(parent)
+            change_id = "CHG-" + "b" * 20
+            outside = parent / "outside"; outside.mkdir()
+            changes = project / ".paperops/changes"; changes.mkdir(parents=True, exist_ok=True)
+            (changes / change_id).symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(ChangePlanningError, "unsafe"):
+                read_change_plan(project, change_id)
+
+    def test_aggregate_id_is_registry_canonical(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            parent = Path(tmp); project = self.project(parent)
+            target = project / "_paperops/model/publication/publication-model.yml"
+            document = yaml.safe_load(target.read_text()); digest = semantic_hash(document)
+            document["revision"] = 1
+            operation = {"action": "upsert", "model": "publication", "record_type": "publication", "id": "PUB-other", "expected_revision": 0, "expected_hash": digest, "document": document}
+            with self.assertRaisesRegex(ChangePlanningError, "canonical"):
+                plan_change(project, self.request(parent, [operation]))
 
 
 if __name__ == "__main__":

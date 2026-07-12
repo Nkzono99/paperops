@@ -47,6 +47,7 @@ class RegistryEntry:
     hash_profile: str
     hash_excluded_paths: tuple[str, ...]
     document_kind: str = "aggregate"
+    aggregate_id: str | None = None
     record_sets: dict[str, RecordSetEntry] = field(default_factory=dict)
     dependency_profile: str | None = None
 
@@ -97,6 +98,7 @@ REGISTRY_KEYS = frozenset({"registry_version", "validator_profile", "models"})
 ENTRY_KEYS = frozenset(
     {
         "document_kind",
+        "aggregate_id",
         "schema",
         "schema_version",
         "authority",
@@ -500,7 +502,10 @@ def load_registry(
             )
         record_sets: dict[str, RecordSetEntry] = {}
         dependency_profile: str | None = None
+        aggregate_id: str | None = None
         if document_kind == "index":
+            if "aggregate_id" in entry:
+                raise _registry_error("invalid", f"models.{name} index entry cannot define aggregate_id")
             if "document_kind" not in entry:
                 raise _registry_error(
                     "invalid", f"models.{name}.document_kind is required"
@@ -524,6 +529,13 @@ def load_registry(
                 "invalid",
                 f"models.{name} aggregate entry cannot define record_sets or dependency_profile",
             )
+        else:
+            aggregate_id = entry.get("aggregate_id")
+            if aggregate_id is not None and (
+                not isinstance(aggregate_id, str)
+                or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", aggregate_id) is None
+            ):
+                raise _registry_error("invalid", f"models.{name}.aggregate_id is invalid")
         entries[name] = RegistryEntry(
             name=name,
             schema_path=_resolve_registry_schema(
@@ -541,6 +553,7 @@ def load_registry(
             hash_profile=hash_profile,
             hash_excluded_paths=raw_exclusions,
             document_kind=document_kind,
+            aggregate_id=aggregate_id,
             record_sets=record_sets,
             dependency_profile=dependency_profile,
         )

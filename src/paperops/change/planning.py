@@ -6,16 +6,17 @@ import base64
 import hashlib
 import json
 import os
+import re
 import shutil
 import stat
 import tempfile
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from types import MappingProxyType
 from typing import Any
 
 import yaml
 
-from paperops.model_state import MODEL_NAMES, read_model_states
+from paperops.model_state import HASH_PATTERN, MODEL_NAMES, read_model_states
 from paperops.model_validation import run_model_validation
 from paperops.workflow_v2.mutation import canonical_json, raw_hash
 
@@ -28,18 +29,55 @@ class ChangePlanningError(ValueError):
     pass
 
 
-def _safe_cache(root: Path, change_id: str | None = None) -> Path:
+CHANGE_ID_PATTERN = re.compile(r"^CHG-[0-9a-f]{20}$")
+
+
+def _fsync_directory(path: Path) -> None:
+    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _cache_root(root: Path, *, create: bool) -> Path:
     current = root
-    for name in (".paperops", "changes", change_id):
-        if name is None:
-            continue
+    for name in (".paperops", "changes"):
         current = current / name
+        if current.is_symlink():
+            raise ChangePlanningError("change cache path is unsafe")
         if not current.exists():
+            if not create:
+                raise ChangePlanningError("change plan cache is missing or corrupt")
             current.mkdir(mode=0o700)
+            _fsync_directory(current.parent)
         metadata = current.lstat()
         if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISDIR(metadata.st_mode):
             raise ChangePlanningError("change cache path is unsafe")
     return current
+
+
+def _change_directory(root: Path, change_id: str, *, create_base: bool) -> Path:
+    if not isinstance(change_id, str) or CHANGE_ID_PATTERN.fullmatch(change_id) is None:
+        raise ChangePlanningError("invalid change id")
+    base = _cache_root(root, create=create_base)
+    directory = base / change_id
+    if directory.exists() or directory.is_symlink():
+        metadata = directory.lstat()
+        if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISDIR(metadata.st_mode):
+            raise ChangePlanningError("change cache path is unsafe")
+    elif not create_base:
+        raise ChangePlanningError("change plan cache is missing or corrupt")
+    return directory
+
+
+def _write_json(path: Path, value: Any) -> None:
+    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    try:
+        os.write(descriptor, canonical_json(value, pretty=True).encode())
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
 
 
 def _read_yaml(path: Path) -> dict[str, Any]:
@@ -83,10 +121,12 @@ def _check_precondition(operation: Operation, current: dict[str, Any] | None, re
     if current is not None and (revision != operation.expected_revision or digest != operation.expected_hash):
         raise ChangePlanningError("change precondition revision/hash drifted")
     if operation.document is not None:
-        candidate_revision = operation.document.get("revision", 0)
-        if expected_existing and candidate_revision != revision + 1:
+        candidate_revision = operation.document.get("revision")
+        if expected_existing and current is not None and "revision" in current and candidate_revision != revision + 1:
             raise ChangePlanningError("updated document revision must increment by one")
-        if not expected_existing and candidate_revision not in {0, 1}:
+        if expected_existing and current is not None and "revision" not in current and candidate_revision is not None:
+            raise ChangePlanningError("revisionless aggregate must remain revisionless")
+        if not expected_existing and candidate_revision is not None and candidate_revision not in {0, 1}:
             raise ChangePlanningError("new document revision must start at zero or one")
 
 
@@ -124,6 +164,7 @@ def _serialize_operation(operation: Operation) -> dict[str, Any]:
         "record_type": operation.record_type, "id": operation.object_id,
         "expected_revision": operation.expected_revision,
         "expected_hash": operation.expected_hash,
+        "candidate_revision": operation.candidate_revision,
         "candidate_hash": raw_hash(yaml_bytes(dict(operation.document))) if operation.document is not None else "",
     }
 
@@ -143,11 +184,16 @@ def plan_change(root: Path, request_path: Path) -> ChangePlan:
     if any(baseline.hashes.get(name) != states[name].current_hash for name in MODEL_NAMES):
         raise ChangePlanningError("manifest model hash drifted from current authority")
     replacements: dict[str, Replacement] = {}
+    resolved_identities: set[str] = set()
     with tempfile.TemporaryDirectory(prefix="paperops-change-") as tmp:
         candidate_root = Path(tmp) / "candidate"
         shutil.copytree(root, candidate_root, symlinks=True, ignore=shutil.ignore_patterns(".paperops"))
         for operation in request.operations:
             try:
+                resolved_identity = identity_for(candidate_root, operation.model, operation.record_type, operation.object_id)
+                if resolved_identity in resolved_identities:
+                    raise ChangePlanningError("request contains duplicate registry-resolved target identity")
+                resolved_identities.add(resolved_identity)
                 identity, current, revision, digest = _current(candidate_root, operation)
             except (CatalogError, OSError) as exc:
                 raise ChangePlanningError(str(exc)) from exc
@@ -184,51 +230,101 @@ def plan_change(root: Path, request_path: Path) -> ChangePlan:
     }
     change_id = "CHG-" + hashlib.sha256(canonical_json(summary).encode()).hexdigest()[:20]
     summary["change_id"] = change_id
-    directory = _safe_cache(root, change_id)
+    directory = _change_directory(root, change_id, create_base=True)
     plan_path = directory / "plan.json"
     payload_path = directory / "payload.json"
-    if plan_path.exists() or payload_path.exists():
+    if directory.exists():
         cached = read_change_plan(root, change_id)
         if canonical_json({key: value for key, value in summary.items()}) != canonical_json(json.loads(plan_path.read_text())):
             raise ChangePlanningError("change plan cache is corrupt")
         return cached
     payload = {item.identity: base64.b64encode(item.content).decode() if item.content is not None else None for item in replacements.values()}
-    for path, value in ((plan_path, summary), (payload_path, payload)):
-        temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-        descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    base = directory.parent
+    staging = Path(tempfile.mkdtemp(prefix=f".{change_id}.", dir=base))
+    try:
+        _write_json(staging / "plan.json", summary)
+        _write_json(staging / "payload.json", payload)
+        _fsync_directory(staging)
         try:
-            os.write(descriptor, canonical_json(value, pretty=True).encode())
-            os.fsync(descriptor)
-        finally:
-            os.close(descriptor)
-        os.replace(temporary, path)
+            os.rename(staging, directory)
+        except FileExistsError:
+            return read_change_plan(root, change_id)
+        _fsync_directory(base)
+    finally:
+        if staging.exists():
+            shutil.rmtree(staging, ignore_errors=True)
     return read_change_plan(root, change_id)
 
 
 def read_change_plan(root: Path, change_id: str) -> ChangePlan:
-    if not isinstance(change_id, str) or not change_id.startswith("CHG-"):
-        raise ChangePlanningError("invalid change id")
-    directory = _safe_cache(root.expanduser().resolve(), change_id)
+    directory = _change_directory(root.expanduser().resolve(), change_id, create_base=False)
     try:
         plan = json.loads((directory / "plan.json").read_text(encoding="utf-8"))
         payload = json.loads((directory / "payload.json").read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise ChangePlanningError("change plan cache is missing or corrupt") from exc
     required = {"schema_version", "reason", "operations", "base_model_hashes", "candidate_model_hashes", "replacements", "change_id"}
-    if set(plan) != required or plan.get("schema_version") != 1 or plan.get("change_id") != change_id or not isinstance(payload, dict):
+    if not isinstance(plan, dict) or set(plan) != required or plan.get("schema_version") != 1 or plan.get("change_id") != change_id or not isinstance(plan.get("reason"), str) or not isinstance(payload, dict):
         raise ChangePlanningError("change plan cache identity is corrupt")
     digest_input = dict(plan); digest_input.pop("change_id")
     expected = "CHG-" + hashlib.sha256(canonical_json(digest_input).encode()).hexdigest()[:20]
     if expected != change_id:
         raise ChangePlanningError("change plan content hash is corrupt")
-    request_ops = []
-    replacements = []
-    for row in plan["operations"]:
-        request_ops.append(Operation(row["action"], row["model"], row["record_type"], row["id"], row["expected_revision"], row["expected_hash"], None))
-    for row in plan["replacements"]:
+    operations = plan.get("operations")
+    replacement_rows = plan.get("replacements")
+    base_hashes = plan.get("base_model_hashes")
+    candidate_hashes = plan.get("candidate_model_hashes")
+    if not isinstance(operations, list) or not operations or not isinstance(replacement_rows, list):
+        raise ChangePlanningError("change plan cache shape is corrupt")
+    for hashes in (base_hashes, candidate_hashes):
+        if not isinstance(hashes, dict) or set(hashes) != set(MODEL_NAMES) or any(
+            not isinstance(value, str) or HASH_PATTERN.fullmatch(value) is None
+            for value in hashes.values()
+        ):
+            raise ChangePlanningError("change plan model hashes are corrupt")
+    request_ops: list[Operation] = []
+    operation_keys = {"action", "model", "record_type", "id", "expected_revision", "expected_hash", "candidate_revision", "candidate_hash"}
+    for row in operations:
+        if not isinstance(row, dict) or set(row) != operation_keys:
+            raise ChangePlanningError("change plan operation is corrupt")
+        if row["action"] not in {"upsert", "delete"} or row["model"] not in MODEL_NAMES:
+            raise ChangePlanningError("change plan operation is corrupt")
+        if not all(isinstance(row[key], str) for key in ("record_type", "id", "expected_hash", "candidate_hash")):
+            raise ChangePlanningError("change plan operation is corrupt")
+        for revision in (row["expected_revision"], row["candidate_revision"]):
+            if revision is not None and (type(revision) is not int or revision < 0):
+                raise ChangePlanningError("change plan revision is corrupt")
+        for digest in (row["expected_hash"], row["candidate_hash"]):
+            if digest and HASH_PATTERN.fullmatch(digest) is None:
+                raise ChangePlanningError("change plan operation hash is corrupt")
+        request_ops.append(Operation(row["action"], row["model"], row["record_type"], row["id"], row["expected_revision"], row["expected_hash"], None, row.get("candidate_revision")))
+    replacements: list[Replacement] = []
+    identities: set[str] = set()
+    for row in replacement_rows:
+        if not isinstance(row, dict) or set(row) != {"identity", "before_hash", "after_hash"}:
+            raise ChangePlanningError("change plan replacement is corrupt")
+        identity = row.get("identity")
+        identity_path = PurePosixPath(identity) if isinstance(identity, str) else PurePosixPath("/")
+        if (
+            not isinstance(identity, str)
+            or identity in identities
+            or identity_path.is_absolute()
+            or any(part in {"", ".", ".."} for part in identity_path.parts)
+            or not identity.startswith("_paperops/model/")
+        ):
+            raise ChangePlanningError("change plan replacement identity is corrupt")
+        identities.add(identity)
+        for digest in (row.get("before_hash"), row.get("after_hash")):
+            if not isinstance(digest, str) or (digest and HASH_PATTERN.fullmatch(digest) is None):
+                raise ChangePlanningError("change plan replacement hash is corrupt")
         encoded = payload.get(row["identity"])
-        content = base64.b64decode(encoded, validate=True) if isinstance(encoded, str) else None
+        try:
+            content = base64.b64decode(encoded, validate=True) if isinstance(encoded, str) else None
+        except (ValueError, TypeError) as exc:
+            raise ChangePlanningError("change plan payload is corrupt") from exc
         if (raw_hash(content) if content is not None else "") != row["after_hash"]:
             raise ChangePlanningError("change plan payload hash is corrupt")
         replacements.append(Replacement(row["identity"], row["before_hash"], row["after_hash"], content))
-    return ChangePlan(1, change_id, plan["reason"], tuple(sorted({row["model"] for row in plan["operations"]})), tuple(request_ops), tuple(replacements), MappingProxyType(dict(plan["base_model_hashes"])), MappingProxyType(dict(plan["candidate_model_hashes"])))
+    if set(payload) != identities:
+        raise ChangePlanningError("change plan payload identities are corrupt")
+    return ChangePlan(1, change_id, plan["reason"], tuple(sorted({row["model"] for row in operations})), tuple(request_ops), tuple(replacements), MappingProxyType(dict(base_hashes)), MappingProxyType(dict(candidate_hashes)))

@@ -109,7 +109,17 @@ def _operation(request_path: Path, value: object) -> Operation:
             raise ChangeRequestError("candidate document id disagrees with operation.id")
     elif "document" in row:
         raise ChangeRequestError("delete must not contain a candidate document")
-    return Operation(action, model, record_type, object_id, revision, digest, frozen_mapping(document) if document is not None else None)
+    candidate_revision = document.get("revision") if document is not None else None
+    return Operation(
+        action,
+        model,
+        record_type,
+        object_id,
+        revision,
+        digest,
+        frozen_mapping(document) if document is not None else None,
+        candidate_revision if isinstance(candidate_revision, int) else None,
+    )
 
 
 def load_change_request(path: Path) -> ChangeRequest:

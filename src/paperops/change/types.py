@@ -16,6 +16,7 @@ class Operation:
     expected_revision: int | None
     expected_hash: str
     document: Mapping[str, Any] | None
+    candidate_revision: int | None = None
 
 
 @dataclass(frozen=True)

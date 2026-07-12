@@ -38,6 +38,8 @@ def model_entry(root: Path, model: str) -> dict[str, Any]:
 def identity_for(root: Path, model: str, record_type: str, object_id: str) -> str:
     entry = model_entry(root, model)
     if entry.get("document_kind") == "aggregate":
+        if object_id != entry.get("aggregate_id"):
+            raise CatalogError(f"aggregate model `{model}` requires canonical id `{entry.get('aggregate_id')}`")
         identity = entry.get("default_path")
     else:
         record_sets = entry.get("record_sets")

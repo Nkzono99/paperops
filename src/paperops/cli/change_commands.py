@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from paperops.change.planning import ChangePlanningError, plan_change, read_change_plan
-from paperops.change.transaction import ChangeTransactionError, apply_change, rollback_change
+from paperops.change.transaction import ChangeTransactionError, apply_change, change_status, rollback_change
 from paperops.cli.project import find_project_root
 
 
@@ -60,6 +60,37 @@ def _summary(plan: Any, action: str) -> dict[str, Any]:
     }
 
 
+def _status_summary(root: Path, plan: Any) -> dict[str, Any]:
+    payload = _summary(plan, "status")
+    state, transaction_id = change_status(root, plan.change_id)
+    payload["state"] = state
+    payload["transaction_id"] = transaction_id
+    return payload
+
+
+def _diff_summary(plan: Any) -> dict[str, Any]:
+    payload = _summary(plan, "diff")
+    payload["changes"] = [
+        {
+            "identity": row.identity,
+            "before_hash": row.before_hash,
+            "after_hash": row.after_hash,
+        }
+        for row in plan.replacements
+    ]
+    payload["revision_changes"] = [
+        {
+            "model": row.model,
+            "record_type": row.record_type,
+            "id": row.object_id,
+            "before_revision": row.expected_revision,
+            "after_revision": row.candidate_revision,
+        }
+        for row in plan.operations
+    ]
+    return payload
+
+
 def _emit(args: argparse.Namespace, payload: dict[str, Any]) -> None:
     if args.json_output:
         print(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")))
@@ -67,8 +98,12 @@ def _emit(args: argparse.Namespace, payload: dict[str, Any]) -> None:
     if payload.get("ok"):
         if payload.get("change_id"):
             print(f"change: {payload['change_id']} ({payload['action']})")
+            if payload.get("state"):
+                print(f"state: {payload['state']} ({payload['transaction_id']})")
             for row in payload.get("operations", []):
                 print(f"- {row['action']} {row['model']}/{row['record_type']}/{row['id']}")
+            for row in payload.get("changes", []):
+                print(f"  {row['identity']}: {row['before_hash'] or '<missing>'} -> {row['after_hash'] or '<deleted>'}")
         else:
             print(f"change transaction: {payload['transaction_id']} ({payload['state']})")
     else:
@@ -89,8 +124,10 @@ def cmd_change(args: argparse.Namespace) -> int:
     try:
         if action == "plan":
             payload = _summary(plan_change(root, args.request), action)
-        elif action in {"status", "diff"}:
-            payload = _summary(read_change_plan(root, args.change_id), action)
+        elif action == "status":
+            payload = _status_summary(root, read_change_plan(root, args.change_id))
+        elif action == "diff":
+            payload = _diff_summary(read_change_plan(root, args.change_id))
         elif action == "apply":
             payload = {"schema_version": 1, "ok": True, "action": action, "transaction_id": apply_change(root, args.change_id, confirmed=True), "state": "COMMITTED", "findings": []}
         elif action == "rollback":
