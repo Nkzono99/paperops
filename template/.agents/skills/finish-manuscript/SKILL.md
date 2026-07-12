@@ -17,7 +17,7 @@ main agent は writer だけでなく orchestrator として動く。goal 中の
 - `revision`: 既存稿、AI 初稿、人間レビュー、PDF 指摘、editor decision のいずれかがある。`integrate-writing-feedback` と `route-manuscript-feedback` で戻る深さを決める。
 - `response`: 実査読への改訂が主目的。`respond-to-peer-review` を主ルートにし、この skill は Finish criteria と feedback loop を監督する。
 
-最初に読むものは最小にする。`_paperops/notes/project-brief.md`、`manuscript/venue.md`、`_paperops/notes/views/storyline.md`、`_paperops/workflow/current-state.yml`、`manuscript/writing-profile.yml`、`_paperops/review/feedback/`、`_paperops/review/rounds/`、`_paperops/requests/` を確認し、必要な詳細は専門 skill に任せる。
+最初に読むものは最小にする。まず`pops workflow status --json`でprojectionとauthority modeを確認する。続いて`_paperops/notes/project-brief.md`、`manuscript/venue.md`、`_paperops/notes/views/storyline.md`、`manuscript/writing-profile.yml`、必要なreview / requestだけを確認し、詳細は専門skillに任せる。legacy modeの場合だけ`_paperops/workflow/current-state.yml`を状態正本として読む。
 
 対象原稿が repo 外なら `import-manuscript` で取り込む。raw confidential reviewer text や雑多な人間入力は `_handoff/` に置き、tracked card には要約、ID、route だけを残す。
 

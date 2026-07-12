@@ -32,7 +32,7 @@ raw confidential text は `_handoff/` やローカル入力に留め、tracked c
 
 ## 手順
 
-1. 指摘を 1 論点 1 feedback card に分ける。ファイル名は `_paperops/review/feedback/FB-YYYYMMDD-short-slug.md` など、衝突しないものにする。
+1. 指摘を1論点1recordに分ける。v2-authoritativeではIssue Modelの`workflow_issue`（`ISS-*`）を使い、review roundは`issue_refs`で束ねる。legacy modeでは従来のfeedback cardを使う。
 2. `_paperops/review/feedback/feedback-card-template.md` の front matter を使い、`target`、`issue_type`、`severity`、`upstream_routes` を埋める。
 3. 本文だけで済むか、上流へ戻すべきかを判定する。
    - overclaim、主張の順序、caveat の格上げ/格下げ: `claim_scope_change`、必要なら `scientific_gate_reopen`
@@ -51,7 +51,7 @@ raw confidential text は `_handoff/` やローカル入力に留め、tracked c
 6. 追加作業が必要なら `_paperops/requests/analysis/` または `_paperops/requests/writing/` に request card を作る。
 7. 原稿を直す場合は `manuscript/mirror/status.md` の source-of-truth 言語を尊重し、`% block:` ID を保持する。
 8. route/status label は field として保持してよいが、隣に prose explanation を書く。何を前提に、どの evidence / claim / figure に遡り、本文 claim へどう影響するかを一文で説明する。
-9. 解決済み feedback card は `status: resolved` にし、反映ログへ更新 card、本文 block、検証コマンドを書く。未解決なら `status: open` のまま route と closure blocker を明確にする。
+9. v2-authoritativeの定型route / closureは`pops workflow issue route|close|reopen`でplan化し、`pops workflow apply <plan-id> --yes`だけが反映する。解決済みIssueはverification refを伴って個別にcloseする。legacy feedback cardは従来どおり`status: resolved`へ更新する。
 
 ## 出力
 

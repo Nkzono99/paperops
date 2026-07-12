@@ -2,7 +2,11 @@
 
 ## P3 typed compiler / Writer
 
-P2で四つのcompile authorityを採用したprojectでは、定型的なcompileとTeX transactionに`pops compile` / `pops write`を使う。Writer sessionは原稿全体をread contextとしてcopyするが、write scopeは別に固定する。candidate TeXは直接編集してよい。scope外変更や意味保存違反はscopeを黙って広げず、typed modelを改訂・再承認・再compileする。`pops write apply <session-id> --yes`は人間確認後だけ実行する。model、workflow、mirror ledgerは逆生成しない。living TeX直接編集は引き続き正当で、P4 workflow writer cutoverは未実装である。
+P2で四つのcompile authorityを採用したprojectでは、定型的なcompileとTeX transactionに`pops compile` / `pops write`を使う。Writer sessionは原稿全体をread contextとしてcopyするが、write scopeは別に固定する。candidate TeXは直接編集してよい。scope外変更や意味保存違反はscopeを黙って広げず、typed modelを改訂・再承認・再compileする。`pops write apply <session-id> --yes`は人間確認後だけ実行する。model、workflow、mirror ledgerは逆生成しない。living TeX直接編集は引き続き正当である。
+
+## P4 typed workflow（opt-in）
+
+`pops workflow status --json`は六モデルから五段階macro stateをread-only投影する。定型的なimpact、Issue route / close / reopen、owner-local approvalは`pops workflow plan|issue|approval`でplan化し、tracked変更は人間確認後の`pops workflow apply <plan-id> --yes`だけで行う。AIはroute理由、科学的・編集的判断、人間との対話を担当し、hash、snapshot、recoveryを再実装しない。legacy projectは`pops workflow migrate diff`で比較してからopt-inし、legacy stateを削除・dual-writeしない。
 
 ユーザーとは日本語でコミュニケーションする。
 
@@ -18,10 +22,10 @@ P2で四つのcompile authorityを採用したprojectでは、定型的なcompil
 - `story/` は人間向けの構想層である。研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を書く。
 - `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` はカード正本である。
 - `_paperops/notes/views/` は pure overview view と controlled authoring view を含む。`view_type` と `source_of_truth` を確認し、`pure_overview` はカード総覧、`controlled_authoring` は本文語彙・条件名・読者順序の統制 view として扱う。
-- `_paperops/defaults/schemas/registry.yml`、JSON Schema、checkerはpaperops-managed、Research / Editorial / Results hierarchy / Manuscript / Issue / Publicationのmodel stateはproject-ownedであり混同しない。定型移行は`pops model status|validate|diff|adopt|rollback`へ渡し、AI Agentがindex、hash、snapshot、journalを手操作しない。AIはscientific / editorial judgmentと人間承認を支援するが、未解決fieldへ架空値を補わない。P2後もlegacy card / review / requestを削除せず、P3まではhuman-edited TeX、P4までは既存workflow writerをauthorityとして維持する。
+- `_paperops/defaults/schemas/registry.yml`、JSON Schema、checkerはpaperops-managed、Research / Editorial / Results hierarchy / Manuscript / Issue / Publicationのmodel stateはproject-ownedであり混同しない。定型移行は`pops model status|validate|diff|adopt|rollback`へ渡し、AI Agentがindex、hash、snapshot、journalを手操作しない。AIはscientific / editorial judgmentと人間承認を支援するが、未解決fieldへ架空値を補わない。P2/P4後もlegacy card / review / request / workflowを削除しない。
 - `make schema-check` は `editorial-model.yml` を含むproject-owned stateを schema / references / semantics / approvals / dependencies / hash phasesでadvisory検査する。authority切替前は明示strict検査と人間承認を要求し、legacy controlled viewを維持する。
 - `_paperops/defaults/contracts/` は paperops-managed の標準 section / figure story 契約であり、文章テンプレートではない。論文固有の契約差分だけ `_paperops/contracts/` に同名 overlay として置く。論文種別や投稿先の上書きは `manuscript/writing-profile.yml` に置く。
-- `_paperops/workflow/` は現在状態、review loop、stale 伝播、人間判断の状態正本である。標準の状態機械、focus policy、subagent roster は `_paperops/defaults/workflow/` にあり、本文編集前に `pops workflow status` を確認する。
+- legacy modeでは`_paperops/workflow/`が現在状態、review loop、stale伝播、人間判断を保持する。v2-authoritativeでは六モデルが正本でmacro stateは投影値になる。本文編集前に`pops workflow status --json`でmodeに応じた状態を確認する。
 - subagent を使う執筆では通常 `/develop-manuscript-content` または `/finish-manuscript` から必要時に `orchestrate-manuscript-subagents` へ委譲し、main agent は orchestrator として brief、privacy、integration decision、カード反映を管理する。
 - `_paperops/` の作業用ドキュメントは日本語で書く。citation key、TOML field name、外部ツール名は英語のままでよい。
 - raw PDF、未整理ファイル、個人環境の絶対パス、confidential reviewer correspondence は tracked file へ混ぜない。
@@ -40,6 +44,10 @@ uvx --from paper-harness-cli pops model validate research --strict
 uvx --from paper-harness-cli pops model diff research
 uvx --from paper-harness-cli pops model adopt research --yes
 uvx --from paper-harness-cli pops model rollback research
+uvx --from paper-harness-cli pops workflow status --json
+uvx --from paper-harness-cli pops workflow migrate diff --json
+uvx --from paper-harness-cli pops workflow issue route ISS-0001 editorial --reason "story architecture changed"
+uvx --from paper-harness-cli pops workflow apply WPLAN-0123456789abcdef --yes
 
 make ci
 make audit

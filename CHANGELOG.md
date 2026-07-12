@@ -2,7 +2,11 @@
 
 ## Unreleased
 
-- P3 downstream interfaceを完成し、Results / Discussion / Methods compiler、storyline設計、block-flow review、AGENTS / CLAUDE / README、architecture / CLI / skill docsをtyped compile / Writer routeへ接続した。全原稿read contextと固定write scopeを分離し、candidate TeXの直接編集と全体再読を許しつつ、局所scopeを越える意味論・構成変更はtyped model revisionへ戻す。legacy writerとliving TeX直接編集を保持し、P4 workflow writerとP7 default cutoverは後続に残す。
+- PaperOps 2 P4 typed workflow projection / writerを追加した。六モデルから`INGESTED -> MODELED -> ARCHITECTED -> DRAFTED -> PUBLISHABLE`をread-only投影し、review / submission / section / effective stale / owner-local approvalを直交軸として返す。`workflow_issue`を一論点一recordとして独立route / close / reopenし、`pops workflow status|plan|issue|approval|apply|rollback|migrate`がimpact計算、承認plan、journal transaction、legacy shadow/adopt/rollbackをAIなしで扱う。v2-authoritative時だけP3 compileが選択sectionのopen impactを停止する。
+
+- P4はopt-inであり、legacy workflowを削除・dual-writeしない。既存下流はmanaged workflow profile、Issue schema/registry/checker、AGENTS / CLAUDE / READMEと関連skillを更新し、`.paperops/workflow/`をignoreしてから`pops workflow migrate diff`で保存的変換を確認する。`migrate adopt`はplan生成、tracked反映は`pops workflow apply <plan-id> --yes`、復元は明示transactionの`workflow rollback`を使う。default cutoverとlegacy removalはP7へ残す。
+
+- P3 downstream interfaceを完成し、Results / Discussion / Methods compiler、storyline設計、block-flow review、AGENTS / CLAUDE / README、architecture / CLI / skill docsをtyped compile / Writer routeへ接続した。全原稿read contextと固定write scopeを分離し、candidate TeXの直接編集と全体再読を許しつつ、局所scopeを越える意味論・構成変更はtyped model revisionへ戻す。legacy writerとliving TeX直接編集を保持し、P7 default cutoverは後続に残す。
 
 - AIを起動しない`pops write start|status|check|diff|apply|rollback`を追加した。compile IDから全原稿candidate workspaceを開始し、scope・保存則・mirror impactを検査して、`apply --yes`だけがjournal transactionを実行する。全操作はP2/P3 recoveryを先行し、human/JSONを同じ公開DTOから描画して生TeX・private path・例外詳細を出さない。同一apply/rollbackは検証済みno-opになり、wheel単体でもproject-managed checker/contractsを使うcompile→write→rollback lifecycleを実行できる。
 

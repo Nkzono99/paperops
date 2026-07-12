@@ -6,6 +6,7 @@
 .paperops/migrations/
 .paperops/snapshots/
 .paperops/writer/
+.paperops/workflow/
 _handoff/
 # Agent session designs and implementation plans are local working state.
 docs/superpowers/

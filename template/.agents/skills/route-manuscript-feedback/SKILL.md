@@ -9,11 +9,11 @@ Review 後や人間コメント後に、Reviewer にそのまま改稿させず�
 
 ## Workflow Phase
 
-本文編集前に `pops workflow status` と `pops workflow next` を確認する。`_paperops/workflow/current-state.yml` に stale section がある場合、全文改稿へ進まず、該当 section の route を確認する。
+本文編集前に`pops workflow status --json`を確認する。v2-authoritativeならmacro stageは保存値ではなく五段階projectionであり、review / submission / section / approval / stale軸を別々に読む。legacy modeだけ`pops workflow next`と`_paperops/workflow/current-state.yml`を使う。
 
 `UNDER_REVIEW` 後は一方向に進めず、Issue Router で evidence / story / section / prose / submission loop のどこへ戻るかを決める。
 
-claim、result、figure、section contract を更新した場合は `pops workflow invalidate <artifact-id>` を実行し、依存 section を `STALE` にする。guard を満たさない場合は、文章だけで `DRAFTED` や `STRUCTURE_ACCEPTED` に進めない。
+claim、result、figure、section contractを更新した場合、v2-authoritativeでは`pops workflow plan --changed <artifact-id> --json`でdirect / transitive / unaffectedを確認する。legacy modeだけ`pops workflow invalidate <artifact-id>`を使う。無関係sectionへscopeを広げず、文章だけでstageを進めない。
 
 ## Issue Router
 
@@ -27,7 +27,7 @@ claim、result、figure、section contract を更新した場合は `pops workfl
 
 `submission_loop` は content-first gate の後段である。Results hierarchy、Discussion functions、claim scope、figure story、major review blocker が未解決なら、`submission_loop` ではなく `story_loop` または `section_loop` へ戻す。
 
-分類したら `pops workflow route-review --issue-class <class>` で戻る深さを確認する。状態へ反映する場合だけ `--apply` を付ける。同じ issue class が既定回数を超えて再発した場合は、人間判断へ戻す。
+v2-authoritativeでは一論点一`ISS-*`に分け、`pops workflow issue route <ISS-ID> <research|editorial|manuscript|publication> --reason "<public reason>"`でproposalを作る。表示されたplanを人間が確認してから`pops workflow apply <plan-id> --yes`で反映する。Issueごとにroute / close / reopenし、round全体を一括routeしない。legacy modeだけ`pops workflow route-review --issue-class <class>`を使い、状態へ反映する場合だけ`--apply`を付ける。同じ論点が再発する場合はAIが自動承認せず、人間判断へ戻す。
 
 ## Backward propagation
 

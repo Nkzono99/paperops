@@ -2,7 +2,7 @@
 
 ## P3 typed compiler / Writer boundary
 
-`pops compile` / `pops write`によるP3は承認済みResearch / Editorial / Results hierarchy / Manuscriptをread-only authorityとして読み、`.paperops/compile/`へdeterministic bundle、`.paperops/writer/`へ全`manuscript/`のcandidate copyを置く。`manuscript/`はhuman-edited living authorityである。Writerは全原稿を読み直してcandidate TeXを直接編集できるが、patchはcompile時のblock / section / manuscript scopeとauthority revision/hashを越えられない。claim、result、quantity、figure、citation、argument move、predicted materialを保存検査し、局所patchで直せない全体構造は`replan_required`としてtyped model revisionへ戻す。apply/rollbackはjournalとsnapshotを持ち、未知の人間編集を上書きしない。P4 workflow writer cutoverは後続である。
+`pops compile` / `pops write`によるP3は承認済みResearch / Editorial / Results hierarchy / Manuscriptをread-only authorityとして読み、`.paperops/compile/`へdeterministic bundle、`.paperops/writer/`へ全`manuscript/`のcandidate copyを置く。`manuscript/`はhuman-edited living authorityである。Writerは全原稿を読み直してcandidate TeXを直接編集できるが、patchはcompile時のblock / section / manuscript scopeとauthority revision/hashを越えられない。claim、result、quantity、figure、citation、argument move、predicted materialを保存検査し、局所patchで直せない全体構造は`replan_required`としてtyped model revisionへ戻す。apply/rollbackはjournalとsnapshotを持ち、未知の人間編集を上書きしない。P4はopt-inのtyped workflow projection / writerとして追加し、legacy workflowはrollback用に保持する。
 
 `paperops` は、テンプレート保守と個別論文執筆を分ける。目的は、AI に原稿を直接書かせることではなく、研究状態を検証可能な中間層へ整理し、承認済みの材料だけを論文本文へ変換することである。
 
@@ -29,7 +29,7 @@ P2 はこのkernelへdeterministic model migrationを接続する。`pops model 
 
 `.paperops/migrations/<transaction-id>/`はcandidate、report、journal、`.paperops/snapshots/<transaction-id>/`はbyte-exact rollback snapshotを置くignored stateである。source/candidate drift、unknown manual edit、snapshot corruptionは自動上書きせず停止する。CLIはnetworkやAI modelを呼ばず、AIはscientific / editorial judgmentと人間承認だけを担当する。
 
-P2/P3はlegacy card、human-edited TeX、review/request、submission ledger、既存writerを削除しない。typed section compiler / Writer boundaryはP3で追加済みだがopt-inであり、workflow writer cutoverはP4へdeferする。Publication Modelはliving candidateとimmutable submitted roundを分離し、artifact本体をmigration candidateへコピーしない。
+P2/P3/P4はlegacy card、human-edited TeX、review/request、submission ledger、既存writerを削除しない。typed section compiler / Writer boundaryとworkflow writerはopt-inであり、default cutoverとlegacy removalはP7へdeferする。Publication Modelはliving candidateとimmutable submitted roundを分離し、artifact本体をmigration candidateへコピーしない。
 
 ## 下流論文層
 
@@ -150,7 +150,15 @@ section compiler は、`finish-manuscript` から呼ばれる専門 skill 群と
 
 これにより、AI が持っている情報を均等に説明したり、内部 label を本文へ漏らしたり、limitation だけを過剰に複製したりする失敗を減らす。
 
-## workflow state machine
+## P4 typed workflow projection / writer
+
+P4は六モデルの事実から`INGESTED -> MODELED -> ARCHITECTED -> DRAFTED -> PUBLISHABLE`をread-onlyに投影する。macro stageは保存せず、review、submission、section、approval、effective staleを直交軸として返す。typed dependency graphは変更IDからdirect / transitive / unaffectedを決定的に算出し、無関係sectionを巻き戻さない。
+
+査読論点はIssue Modelの`workflow_issue`（`ISS-*`）として一論点一recordにし、review roundは`issue_refs`で束ねるだけにする。route / close / reopenはIssueごとに独立し、approvalは対象を所有するmodel record内のowner-local historyとしてsubject revision/hashへ固定する。proposalはignored `.paperops/workflow/plans/`へ置き、tracked authorityは`pops workflow apply <plan-id> --yes`だけがjournal transactionで更新する。
+
+cutoverは`legacy -> shadow-compare -> v2-authoritative`のopt-inである。`pops workflow migrate diff`はlegacy concernを`mapped / deferred / local-only / unsupported`へ保存的に分類し、曖昧なrouteやtargetを推測しない。adopt planとrollbackはlegacy artifactを削除せず、v2-authoritative時だけP3が選択scopeのopen impactをcompile blockerとして扱う。
+
+## legacy workflow state machine
 
 `_paperops/workflow/` は、論文執筆を直列パイプラインではなく階層型状態機械として扱うための状態正本である。全体状態は `SCOPED` から `SUBMISSION_READY` までの固定列を持つが、review 後は一方向に進めず、Issue Router が `evidence_loop`、`story_loop`、`section_loop`、`prose_loop`、`submission_loop` のどこへ戻るかを決める。
 

@@ -120,6 +120,13 @@ uvx --from paper-harness-cli pops doctor
 - `pops links list [path]`: `_paperops/refs/links.toml` の外部 link を表示する。
 - `pops links check [path]`: link registry と local location の対応を検証する。
 - `pops workflow status [path]`: 論文全体と section の workflow state を表示する。
+- `pops workflow status [path] --json`: 六モデルから五段階macro stateと直交軸をread-only投影する。
+- `pops workflow plan [path] --changed <ID>... [--issue <ISS>]... [--json]`: direct / transitive / unaffected impact planをignored stateへ作る。
+- `pops workflow issue status|route|close|reopen ...`: 一つの`workflow_issue`を独立に確認・提案する。route / close / reopenはtracked fileを直接変更しない。
+- `pops workflow approval status|decide ...`: owner-local approval historyを確認し、current subject revision/hashに結び付くdecision planを作る。
+- `pops workflow apply <plan-id> [path] --yes`: 確認済みplanだけをjournal transactionで反映する。
+- `pops workflow rollback <transaction-id> [path] --yes`: 後続の未知編集がないtransactionをbyte-exactに復元する。
+- `pops workflow migrate status|diff|adopt|rollback ...`: legacy inventory、shadow比較、opt-in cutover、rollbackを扱う。`adopt`はplanを作り、反映は`workflow apply`で行う。
 - `pops workflow next [path]`: 次に進める全体状態と guard の未達項目を表示する。
 - `pops workflow advance <state> [path]`: guard が満たされた場合だけ全体状態を進める。
 - `pops workflow invalidate <artifact-id> [path]`: claim / result / figure などに依存する section を stale にする。
@@ -231,6 +238,14 @@ uvx --from paper-harness-cli pops workflow route-review --issue-class story-loop
 `_paperops/defaults/workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`_paperops/workflow/machine.yml` があれば project overlay として優先する。`_paperops/workflow/current-state.yml` は現在状態と section の `depends_on` を持つ。starter の依存は空なので、claim / result / figure / contract card を作った後に対応 section の `depends_on` を埋める。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
 
 `submission_loop` は STRUCTURE_ACCEPTED 後の route である。`pops workflow route-review --issue-class submission-loop --apply` は、storyline / section / structure guard が未達なら拒否される。原稿完成作業中に author metadata、license、readiness-check、Makefile、script、skill 改修へ逸れそうな場合は、`make content-first-check` または `scripts/check-content-first.py --phase progress --intent <intent> --strict` で進路を確認する。
+
+P4を採用したprojectでは、legacyの`advance` / `invalidate` / `route-review`を新しい正本へdual-writeしない。まず`pops workflow migrate diff --json`を確認し、`pops workflow migrate adopt <WMIG-ID>`で採用planを作り、`pops workflow apply <WPLAN-ID> --yes`で`v2-authoritative`へ切り替える。その後の定型routeは、たとえば`pops workflow issue route ISS-0001 research --reason "evidence changed"`でplanを作る。科学的・編集的なroute理由とapproval decisionは人間が決め、CLIは検証・hash・snapshot・recoveryだけを隠蔽する。
+
+```sh
+pops workflow issue route ISS-0001 editorial --reason "story architecture changed"
+pops workflow approval decide CLM-0001 scientific_scope approved --reason "scope verified"
+pops workflow apply WPLAN-0123456789abcdef --yes
+```
 
 ## Scratch Archives
 
