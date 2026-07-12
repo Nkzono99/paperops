@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,30 @@ class WorkflowCatalogSnapshot:
 
 def _semantic_hash(raw: bytes) -> str:
     return "sha256:" + hashlib.sha256(raw).hexdigest()
+
+
+def _virtual_documents(document: dict[str, Any]) -> list[tuple[dict[str, Any], str]]:
+    result: list[tuple[dict[str, Any], str]] = []
+    revision = document.get("revision", 1)
+    specs = (
+        ("story_candidates", "story_id", "story"),
+        ("argument_moves", "move_id", "move"),
+        ("visual_obligations", "visual_id", "visual"),
+        ("items", "item_id", "results_item"),
+    )
+    for field, id_key, object_type in specs:
+        rows = document.get(field, [])
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            object_id = row.get(id_key) if isinstance(row, dict) else None
+            if not isinstance(object_id, str) or not object_id:
+                continue
+            virtual = dict(row)
+            virtual.update({"id": object_id, "record_type": object_type, "revision": row.get("revision", revision)})
+            content = json.dumps(virtual, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
+            result.append((virtual, _semantic_hash(content)))
+    return result
 
 
 def _refs(value: object, parent_key: str = "") -> list[tuple[str, str]]:
@@ -72,6 +97,7 @@ def load_workflow_catalog(root: Path) -> WorkflowCatalogSnapshot:
         if not isinstance(raw, dict):
             continue
         documents.append((raw, metadata.content_hash))
+        documents.extend(_virtual_documents(raw))
     nodes: dict[str, WorkflowNode] = {}
     for raw, content_hash in documents:
         object_id = raw.get("id")

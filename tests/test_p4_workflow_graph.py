@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import unittest
+import tempfile
+import json
+from pathlib import Path
 
-from paperops.workflow_v2.catalog import WorkflowCatalogSnapshot
+from paperops.workflow_v2.catalog import WorkflowCatalogSnapshot, load_workflow_catalog
 from paperops.workflow_v2.graph import build_dependency_graph, plan_workflow_impact
 from paperops.workflow_v2.types import WorkflowEdge, WorkflowNode
 
@@ -44,6 +47,18 @@ class WorkflowGraphTest(unittest.TestCase):
         unknown = plan_workflow_impact(graph, changed_ids=("CLM-9999",))
         self.assertFalse(unknown.ready)
         self.assertEqual(unknown.findings[0].code, "workflow.changed.unknown")
+
+    def test_aggregate_editorial_objects_enter_the_typed_graph(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path = root / "_paperops/model/editorial/editorial-model.yml"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({"model_id": "EDT-0001", "revision": 2, "story_candidates": [{"story_id": "STY-0001"}], "argument_moves": [{"move_id": "MOV-0001", "claim_ids": ["CLM-0001"]}], "visual_obligations": [{"visual_id": "VIS-0001", "figure_ids": []}]}) + "\n")
+            snapshot = load_workflow_catalog(root)
+            types = {node.object_id: node.object_type for node in snapshot.nodes}
+            self.assertEqual(types["STY-0001"], "story")
+            self.assertEqual(types["MOV-0001"], "move")
+            self.assertEqual(types["VIS-0001"], "visual")
 
 
 if __name__ == "__main__":
