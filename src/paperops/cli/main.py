@@ -70,7 +70,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         parser.print_help()
         return 0
     code = args.func(args)
-    if getattr(args, "command", "") not in {"compile", "write"}:
+    if getattr(args, "command", "") not in {"compile", "write", "workflow"}:
         maybe_print_update_notice(args, code)
     return code
 

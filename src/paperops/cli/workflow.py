@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from paperops.cli.project import find_project_root
+from paperops.cli.workflow_v2_commands import workflow_v2_plan, workflow_v2_status
 
 
 WORKFLOW_REL = Path("_paperops") / "workflow"
@@ -38,7 +39,15 @@ def add_workflow_parser(
 
     status_parser = workflow_subcommands.add_parser("status", help="Show workflow state.")
     status_parser.add_argument("path", nargs="?", type=Path, help="Project directory.")
+    status_parser.add_argument("--json", action="store_true", help="Emit the typed read-only projection as JSON.")
     status_parser.set_defaults(func=cmd_workflow)
+
+    plan_parser = workflow_subcommands.add_parser("plan", help="Plan selective impact without changing tracked files.")
+    plan_parser.add_argument("path", nargs="?", type=Path, help="Project directory.")
+    plan_parser.add_argument("--changed", action="append", default=[], help="Changed typed object id (repeatable).")
+    plan_parser.add_argument("--issue", action="append", default=[], help="Workflow issue id (repeatable).")
+    plan_parser.add_argument("--json", action="store_true", help="Emit JSON.")
+    plan_parser.set_defaults(func=cmd_workflow)
 
     next_parser = workflow_subcommands.add_parser("next", help="Show likely next transition.")
     next_parser.add_argument("path", nargs="?", type=Path, help="Project directory.")
@@ -81,6 +90,24 @@ def cmd_workflow(args: argparse.Namespace) -> int:
         print("error: this does not look like a paper harness project.", file=sys.stderr)
         return 2
     args.project_root = root
+
+    if args.workflow_action == "status" and getattr(args, "json", False):
+        try:
+            return workflow_v2_status(root, json_output=True)
+        except (OSError, ValueError) as exc:
+            print("error: typed workflow projection is unavailable.", file=sys.stderr)
+            return 1
+    if args.workflow_action == "plan":
+        try:
+            return workflow_v2_plan(
+                root,
+                changed=tuple(args.changed),
+                issues=tuple(args.issue),
+                json_output=args.json,
+            )
+        except (OSError, ValueError):
+            print("error: workflow impact plan could not be prepared.", file=sys.stderr)
+            return 1
 
     try:
         machine = load_mapping(
