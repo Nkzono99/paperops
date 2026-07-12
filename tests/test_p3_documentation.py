@@ -9,7 +9,7 @@ class P3DocumentationTest(unittest.TestCase):
     def text(self, relative: str) -> str:
         return (ROOT / relative).read_text(encoding="utf-8")
 
-    def test_public_docs_define_compile_write_and_remaining_cutovers(self) -> None:
+    def test_public_docs_define_compile_write_and_typed_cutover(self) -> None:
         for relative in (
             "README.md", "docs/architecture.md", "docs/cli.md",
             "docs/current-specification.md", "docs/skill-catalog.md",
@@ -17,8 +17,7 @@ class P3DocumentationTest(unittest.TestCase):
         ):
             with self.subTest(relative=relative):
                 text = self.text(relative)
-                self.assertIn("P3", text)
-                self.assertIn("P4", text)
+                self.assertIn("typed", text.lower())
                 self.assertIn("pops compile", text)
                 self.assertIn("pops write", text)
         cli = self.text("docs/cli.md")

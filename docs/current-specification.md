@@ -12,7 +12,8 @@
 | architecture / layer contract | `docs/architecture.md` | root 層、下流論文層、`_paperops/`、`paper_ir`、workflow state、submission axis |
 | PaperOps 2 P1-B six-model kernel | `template/_paperops/defaults/schemas/registry.yml`, `template/_paperops/defaults/schemas/*.schema.json`, `template/scripts/paperops_schema.py`, `template/scripts/paperops_models.py`, `template/scripts/check-paperops-models.py`, `docs/migrations/v0.md` | Research / Editorial / Results hierarchy / Manuscript / Issue / Publication、schema / references / semantics / approvals / dependencies / hash、M0-0005 compatibility |
 | PaperOps 2 P2 deterministic model migration | `src/paperops/model_migration/`, `src/paperops/model_state.py`, `src/paperops/cli/model_commands.py`, `docs/cli.md`, `docs/migrations/v0.md` | model単位のstatus / validate / diff / adopt / rollback、conservation、shadow、journal recovery、dependency cascade |
-| CLI and checker behavior | `docs/cli.md`, `src/paperops/cli/`, `template/scripts/` | `pops init`、`pops update-paperops`、`pops scratch`、`pops workflow`、Makefile checks |
+| typed compile / Writer | `src/paperops/compiler/`, `src/paperops/cli/compile_commands.py`, `src/paperops/cli/write_commands.py`, `docs/cli.md` | `pops compile`、`pops write`、全体read context、固定write scope、living TeX transaction |
+| CLI and checker behavior | `docs/cli.md`, `src/paperops/cli/`, `template/scripts/` | `pops init`、`pops change`、`pops update-paperops`、`pops scratch`、`pops workflow`、Makefile checks |
 | migrations | `docs/migrations/` | 下流互換、legacy path、overlay migration |
 | release and distribution | `docs/distribution.md`, `CHANGELOG.md`, `.agents/skills/release/SKILL.md` | package / tag / PyPI / scaffold version |
 | skill routing | `docs/skill-catalog.md`, `template/.agents/skills/*/SKILL.md` | `.agents/skills/` が共通手順の source of truth |
@@ -23,11 +24,11 @@
 ## Current Invariants
 
 - root repository はテンプレート管理層であり、`template/` は下流論文 project に配布される scaffold である。
-- 下流作成は `pops init` を正道とし、新規projectは六モデルとworkflowを`v2-authoritative`で開始する。`--authority legacy`は非推奨の明示退避で、既存projectの`setup`とmanaged updateはauthorityを変更しない。下流の project-owned extension は `AGENTS.project.md`、`CLAUDE.project.md`、`Makefile.project` に置く。
+- 下流作成は `pops init` を正道とし、新規projectは六モデルとworkflowを`v2-authoritative`で開始する。legacy init入口はなく、既存projectの`setup`とmanaged updateはauthorityやproject-owned legacy artifactを変更・削除しない。下流の project-owned extension は `AGENTS.project.md`、`CLAUDE.project.md`、`Makefile.project` に置く。
 - 人間が普段触る入口は `story/`、`manuscript/`、`submission/`、review comments である。AI / harness が使う internal state は `_paperops/` に置く。
 - `_paperops/defaults/schemas/*` は managed default、`_paperops/model/editorial/editorial-model.yml` と `results-hierarchy.yml` は project-owned Editorial state である。既存下流は M0-0004 の strict opt-in と人間承認まで legacy controlled view を維持する。
 - P1-A の合成 fixture は mechanism-led、boundary-led、negative-result-led の三 category で、期待値に canonical semantic-v1 hash を持つ。
-- P1-B の現行 model scope は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六つである。P2 model migration、P3の`pops compile` / `pops write`、P4 typed workflowを実装し、P7で新規initだけをdefault v2へ切り替えた。既存projectは明示migrationまでlegacyを維持し、legacy artifact、互換reader、living TeX直接編集の物理削除は別判断とする。
+- model scopeはResearch、Editorial、Results hierarchy、Manuscript、Issue、Publicationの六つである。P3 typed compiler / WriterとP4 typed workflowを含め、新規scaffoldにlegacy card / macro-state / submission ledgerは含めず、通常mutationは`pops change`へ委譲する。既存projectは明示migrationまでlegacyを維持し、migration readerとliving TeX直接編集を残す。
 - 定型移行は`pops model`が扱い、AI Agentはscientific / editorial judgmentや人間承認を代替しない。shadowとsnapshotはignored `.paperops/`に置き、tracked modelを`diff`で変更しない。
 - 旧 top-level `notes/`、`refs/`、`claims/`、`evidence/`、`contracts/`、`workflow/` などは互換読み取り対象に留める。
 - `paper_ir` と section plan は生成一時物であり、必要な場合だけ `.paperops/cache/` に置く。

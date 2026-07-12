@@ -6,12 +6,23 @@
 
 ```sh
 uvx --from paper-harness-cli pops init paper-my-topic
-uvx --from paper-harness-cli pops init paper-legacy --authority legacy
 ```
 
-`pops init`の既定は`--authority v2`である。scaffoldをtargetと同じfilesystemの一時directoryへ展開し、project-managed checkerでResearch / Editorial / Results hierarchy / Manuscript / Issue / Publicationを一括検証する。errorがなく六つのsemantic hashが得られた場合だけ、六モデルを`origin = "init-v2"`、workflowを`v2-authoritative`としてmanifestへ一度に書き、予約した空targetをproject directoryへ切り替える。`model status`とcompilerはこのoriginではmigration journalの代わりにexact six-model setとlive hashを再検証する。warningは未記入starterの状態として許容し、通常のvalidation / I/O例外では予約を回収して部分projectを残さない。
+`pops init`はv2-onlyである。scaffoldをtargetと同じfilesystemの一時directoryへ展開し、project-managed checkerでResearch / Editorial / Results hierarchy / Manuscript / Issue / Publicationを一括検証する。errorがなく六つのsemantic hashが得られた場合だけ、六モデルを`origin = "init-v2"`、workflowを`v2-authoritative`としてmanifestへ一度に書き、予約した空targetをproject directoryへ切り替える。warningは未記入starterの状態として許容し、通常のvalidation / I/O例外では予約を回収して部分projectを残さない。
 
-`--authority legacy`は六モデルを`legacy-authoritative`、workflowを`legacy`として作る非推奨の退避導線であり、削除時期は未定である。非空directoryへの`--force`は`--authority legacy`との組合せだけを許し、missing scaffold fileを追加するが、既存manifestのauthority tableは変更しない。`setup`と`update-paperops`も既存authorityを切り替えない。既存projectのv2移行には下記のmodel migrationとP4 workflow migrationを使う。
+`--authority`は1.0.0で削除した。既存projectのauthorityとproject-owned legacy artifactは`setup`と`update-paperops`で変更・削除しない。v2移行には下記のmodel migrationとworkflow migrationを使う。
+
+## Typed model change
+
+```sh
+pops change plan .paperops/change-request.yml
+pops change status CHG-...
+pops change diff CHG-...
+pops change apply CHG-... --yes
+pops change rollback CTX-... --yes
+```
+
+requestは`schema_version: 1`、公開可能な`reason`、一つ以上の`upsert` / `delete` operationを持つignored YAML/JSONである。tracked pathは指定せず、model / record type / IDとexpected revision/hash、candidate documentを指定する。CLIがregistryからpathとindex rowを解決し、六モデルをcandidate treeで一括検証する。applyは`--yes`必須で、manifest hashを含むjournal transactionとして適用する。delete cascadeは推測しないため、dependent update/deleteを同じrequestに明示する。plan/diffの公開出力にcandidate本文、raw review、credential、absolute pathは含めない。
 
 ## PaperOps 2 model migration
 
@@ -97,7 +108,7 @@ uvx --from paper-harness-cli pops doctor
 
 - `make ci`: 構造、引用、mirror、公開語彙、カード層、card coverage、link、build fallback など、壊れていると作業を続けにくい項目を確認する。
 - `make audit`: argument focus、concept-term compression、AI authoring intent leak、content-first intent、main-text figure reference、figure obligation、claim evidence、card coverage、外部 bundle import state、research request handoff、submission drift など、執筆品質や handoff drift の advisory checks を確認する。
-- `make authoring-intent-check`: AI Writer の執筆意図、後で埋める内容、TODO、作業計画が TeX コメントではなく公開本文 prose に漏れていないか advisory に確認する。保持したい作業意図は `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/requests/` へ移す。
+- `make authoring-intent-check`: AI Writer の執筆意図、後で埋める内容、TODO、作業計画が TeX コメントではなく公開本文 prose に漏れていないか advisory に確認する。保持したい作業意図は `% INTENT:` / `% TODO-PAPER:`、`_paperops/notes/`、`_paperops/model/issues/` へ移す。
 - `make section-contract-check`: `_paperops/notes/views/storyline.md` の Results hierarchy、Discussion functions、Methods definition registry が、読者質問・baseline rationale・判定基準定義を持つか advisory に確認する。
 - `make section-depth-check`: Results / Discussion が `manuscript/writing-profile.yml` の `section_depth` floor を大きく下回っていないか advisory に確認する。JA は `ja_chars`、EN は `en_words` として数える。
 - `make card-coverage-check`: 原稿中の図、citation、block ID が card 層へ接続されているかを advisory に確認する。投稿前やレビュー前に厳しく見る場合は `python scripts/check-card-coverage.py --root . --strict` を使う。
@@ -163,7 +174,7 @@ uvx --from paper-harness-cli pops doctor
 
 互換期間中は、checkpoint migration 用に legacy top-level の `contracts/*` と `workflow/*` も managed update 判定に含める。これは新規 scaffold の正道ではなく、`M0-0002` 後の migration horizon で削除候補にする。
 
-`README.md`、`story/`、`manuscript/`、`submission/`、`_paperops/model/`、`_paperops/contracts/`、`_paperops/workflow/current-state.yml`、`_paperops/workflow/decisions.yml`、`_paperops/workflow/round-summary.yml`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/refs/`、`_paperops/notes/` はプロジェクト固有内容として自動更新しない。`manuscript/writing-profile.yml` は論文ごとの overlay なので、既存プロジェクトでは手動で追加・調整する。
+`README.md`、`story/`、`manuscript/`、`submission/`、`_paperops/model/`、`_paperops/contracts/`、`pops workflow status --json`、`_paperops/model/editorial/editorial-model.yml`、`_paperops/model/issues/rounds/`、`_paperops/model/research/`、`_paperops/model/research/`、`_paperops/model/issues/`、`_paperops/model/issues/`、`_paperops/refs/`、`_paperops/notes/` はプロジェクト固有内容として自動更新しない。`manuscript/writing-profile.yml` は論文ごとの overlay なので、既存プロジェクトでは手動で追加・調整する。
 
 project repo で paperops-managed core を直接編集し続けると update 時に drift が増える。通常は次の project-owned extension point を使う。
 
@@ -221,7 +232,7 @@ uvx --from paper-harness-cli pops links list --resolve-local
 uvx --from paper-harness-cli pops links check
 ```
 
-`kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。追加解析や図表要望は `_paperops/requests/analysis/` に切り出してから runops 側へ渡す。
+`kind = "runops_project"` の link は、runops MCP から publication export、analysis artifact、survey summary、paper request queue を確認する入口として扱う。追加解析や図表要望は `_paperops/model/issues/analysis/` に切り出してから runops 側へ渡す。
 下流 skill としては `/resolve-local-paths` が runops ディレクトリリンクの入口であり、`pops links list --resolve-local` と `pops links check` で `runops-main` の共有 link と個人環境パスを分けて確認する。
 
 runops queue へ渡す予定の request は、下流 repo で `make research-request-handoff-check` または `make audit` を実行して静的に確認する。通常は warning のみで、`python scripts/check-research-request-handoff.py --root . --strict` は投稿前の記録整合に使う。linked runops queue を実際に読む live drift 確認は `make research-request-handoff-live-check` または `python scripts/check-research-request-handoff.py --root . --live --strict` として明示的に実行する。
@@ -230,11 +241,11 @@ runops queue へ渡す予定の request は、下流 repo で `make research-req
 
 ## paper_ir
 
-`paper_ir` は、card 正本と controlled authoring view から Writer に渡す context を作る生成一時物である。`pops` の永続管理対象ではなく、通常は skill が必要に応じて作る。手書き正本は `_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/` に置き、`paper_ir` は Methods / Results / Discussion の section compiler へ渡す一時的な変換結果として扱う。
+`paper_ir` は、card 正本と controlled authoring view から Writer に渡す context を作る生成一時物である。`pops` の永続管理対象ではなく、通常は skill が必要に応じて作る。手書き正本は `_paperops/model/research/`、`_paperops/model/research/`、`_paperops/model/issues/`、`_paperops/model/issues/` に置き、`paper_ir` は Methods / Results / Discussion の section compiler へ渡す一時的な変換結果として扱う。
 
 section compiler は、`_paperops/defaults/contracts/<section>.yml` の入出力契約、必要な `_paperops/contracts/<section>.yml` project overlay、`manuscript/writing-profile.yml` の paper type / venue overlay を重ねる。`plan-section` で作る一時 plan は必要なら `.paperops/cache/` に置き、Git 管理しない。
 
-AI Writer が section draft 中に「この claim を強めるための追加作業」「後で埋める」「authoring note」のような執筆意図を本文へ書きそうな場合は、本文 prose にせず近傍の `% INTENT:` または `% TODO-PAPER:` へ残す。追加解析や人間判断が必要なら `_paperops/requests/` または `_paperops/notes/` へ移し、完了前に `make authoring-intent-check` または `scripts/check-authoring-intent.py --root . --strict` を実行する。公開本文として意図的に扱う必要がある場合だけ、直前行に `% paperops: allow-authoring-intent -- reason` を置く。
+AI Writer が section draft 中に「この claim を強めるための追加作業」「後で埋める」「authoring note」のような執筆意図を本文へ書きそうな場合は、本文 prose にせず近傍の `% INTENT:` または `% TODO-PAPER:` へ残す。追加解析や人間判断が必要なら `_paperops/model/issues/` または `_paperops/notes/` へ移し、完了前に `make authoring-intent-check` または `scripts/check-authoring-intent.py --root . --strict` を実行する。公開本文として意図的に扱う必要がある場合だけ、直前行に `% paperops: allow-authoring-intent -- reason` を置く。
 
 ## Workflow
 
@@ -246,7 +257,7 @@ uvx --from paper-harness-cli pops workflow invalidate CLM-0001
 uvx --from paper-harness-cli pops workflow route-review --issue-class story-loop --apply
 ```
 
-`_paperops/defaults/workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`_paperops/workflow/machine.yml` があれば project overlay として優先する。`_paperops/workflow/current-state.yml` は現在状態と section の `depends_on` を持つ。starter の依存は空なので、claim / result / figure / contract card を作った後に対応 section の `depends_on` を埋める。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
+`_paperops/defaults/workflow/machine.yml` は固定の全体状態、section 状態、issue class、transition guard、loop policy を持つ。`_paperops/workflow/machine.yml` があれば project overlay として優先する。`pops workflow status --json` は現在状態と section の `depends_on` を持つ。starter の依存は空なので、claim / result / figure / contract card を作った後に対応 section の `depends_on` を埋める。上流 artifact を更新した場合は `pops workflow invalidate <artifact-id>` で依存 section を `STALE` にし、review 後は `pops workflow route-review` で戻る深さを決める。
 
 `submission_loop` は STRUCTURE_ACCEPTED 後の route である。`pops workflow route-review --issue-class submission-loop --apply` は、storyline / section / structure guard が未達なら拒否される。原稿完成作業中に author metadata、license、readiness-check、Makefile、script、skill 改修へ逸れそうな場合は、`make content-first-check` または `scripts/check-content-first.py --phase progress --intent <intent> --strict` で進路を確認する。
 
@@ -267,7 +278,7 @@ uvx --from paper-harness-cli pops scratch reset --yes
 uvx --from paper-harness-cli pops scratch restore <archive-id> --yes
 ```
 
-`pops scratch archive` は `story/`、`manuscript/`、`submission/` と `_paperops/notes/`、`_paperops/refs/`、`_paperops/evidence/`、`_paperops/claims/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/contracts/`、`_paperops/workflow/` を `_archives/<id>/archive.zip.partNNNN` に分割保存する。旧互換の `notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`contracts/`、`workflow/` も対象にする。既定の part size は 48 MiB で、GitHub の単一ファイル制限にかからないようにする。
+`pops scratch archive` は `story/`、`manuscript/`、`submission/` と `_paperops/notes/`、`_paperops/refs/`、`_paperops/model/research/`、`_paperops/model/research/`、`_paperops/model/issues/`、`_paperops/model/issues/`、`_paperops/contracts/`、`_paperops/workflow/` を `_archives/<id>/archive.zip.partNNNN` に分割保存する。旧互換の `notes/`、`refs/`、`evidence/`、`claims/`、`review/`、`requests/`、`contracts/`、`workflow/` も対象にする。既定の part size は 48 MiB で、GitHub の単一ファイル制限にかからないようにする。
 
 `pops scratch restart --yes` は archive 作成と reset を一操作で行う。`--include-handoff` を付けると `_handoff/` payload も封印してから starter 状態へ戻す。既存稿を残さず1から執筆へ戻したい場合は、`archive` と `reset` を別々に実行するより `restart` を使う。
 

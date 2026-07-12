@@ -1,8 +1,8 @@
 # paperops
 
-## PaperOps 2 P7
+## PaperOps 2 1.0
 
-P3の`pops compile` / `pops write`とP4 typed workflowを実装し、P7では新規`pops init`を六モデル・workflowの`v2-authoritative`既定へ切り替えた。既存projectのauthorityは`setup`やmanaged updateで変更しない。legacyで新規作成する必要がある場合だけ`pops init --authority legacy`を明示できるが、この入口は非推奨で削除時期は未定である。legacy artifact、互換reader、human-edited living TeXは削除しない。
+新規`pops init`はResearch / Editorial / Results hierarchy / Manuscript / Issue / Publicationの六モデルだけを権威として作る。通常の構造化変更は`pops change`がindex、revision/hash、依存検証、manifest、journal、rollbackを処理する。旧cardとmacro-stateは新規scaffoldに含めないが、既存projectのartifactは`setup`やmanaged updateで削除せず、`pops model` / `pops workflow migrate`のread-only migration readerを維持する。
 
 `paperops` は、AI エージェントと論文を書くためのプロジェクトハーネスである。
 
@@ -41,16 +41,17 @@ uvx --from paper-harness-cli pops doctor
 
 下流の論文リポジトリでは、原稿だけでなく中間層も明示的に持つ。
 
-- `_paperops/evidence/`: result / figure / source card の正本
-- `_paperops/claims/`: claim / scientific gate / argument card の正本
-- `_paperops/review/`: 人間レビュー、査読コメント、返答のカード
-- `_paperops/requests/`: 追加解析や改稿依頼のカード
+- `_paperops/model/research/`: claim / result / figure / source / scientific gate
+- `_paperops/model/editorial/`: story decision と Results hierarchy
+- `_paperops/model/manuscript/`: section / block topology と operation
+- `_paperops/model/issues/`: feedback / request / response / review round / workflow issue
+- `_paperops/model/publication/`: submission candidate / approval / round snapshot reference
 - `_paperops/notes/views/`: pure overview view と controlled authoring view
 - `_paperops/model/editorial/results-hierarchy.yml`: project-owned の typed Results hierarchy 正本
 - `_paperops/defaults/schemas/`: paperops-managed の schema default
 - `_paperops/defaults/contracts/`: paperops-managed の標準 section / figure story 契約
 - `_paperops/contracts/`: 論文固有の contract overlay
-- `_paperops/workflow/`: 全体状態、section 状態、review loop、stale 伝播
+- `pops workflow status`: 六モデルから全体状態、review、submission、section、staleを投影
 - `manuscript/writing-profile.yml`: 論文種別・投稿先ごとの overlay
 - `manuscript/ja`, `manuscript/en`: block ID で対応する原稿
 - `_paperops/refs/`: 文献サマリー、外部 source、外部 project link
@@ -58,9 +59,9 @@ uvx --from paper-harness-cli pops doctor
 - `_handoff/`: 人間から AI へ渡す未整理ファイルの一時置き場
 - `_archives/`: 同じ repo で1から書き直すために封印した過去稿 archive
 
-人間は主に原稿レベルのレビューや自然文の指示を出す。Agent はそれを `_paperops/review/feedback/` の card にし、必要なら claim / gate / evidence / request / manuscript へ遡って反映する。本文生成の前には、必要に応じて `pops workflow status`、`_paperops/defaults/contracts/`、`_paperops/contracts/`、`manuscript/writing-profile.yml` を確認し、`plan-figure-story` で visual obligation と主図構成を決めてから、card と controlled view から `paper_ir` を作り、Results / Discussion / Methods の section compiler を通す。
+人間は主に原稿レベルのレビューや自然文の指示を出す。Agent はそれを `_paperops/model/issues/feedback/` の card にし、必要なら claim / gate / evidence / request / manuscript へ遡って反映する。本文生成の前には、必要に応じて `pops workflow status`、`_paperops/defaults/contracts/`、`_paperops/contracts/`、`manuscript/writing-profile.yml` を確認し、`plan-figure-story` で visual obligation と主図構成を決めてから、card と controlled view から `paper_ir` を作り、Results / Discussion / Methods の section compiler を通す。
 
-新規 scaffold では typed Results hierarchy を使う。既存下流 project は M0-0003 採用まで legacy Markdown fallback を維持でき、移行時は managed schema default を更新したうえで project-owned typed state を opt-in で作成する。
+新規 scaffold ではtyped modelだけを使う。既存下流 projectのlegacy artifactは移行完了まで読み取り可能であり、1.0.0への更新だけでは削除されない。
 
 PaperOps 2 P1-B は Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の正確な六モデルを提供する。P2 は `pops model` の deterministic migrationとして、legacy inventory、shadow diff、strict validation、model単位のadopt、snapshot rollbackをAIなしで反復できるようにする。authorityは`legacy-authoritative`、`shadow-compare`、`v2-authoritative`をmodelごとに持ち、Editorial / Results hierarchyだけはcompanionとして同時に切り替える。
 
@@ -80,6 +81,10 @@ uvx --from paper-harness-cli pops model status all
 uvx --from paper-harness-cli pops model diff research
 uvx --from paper-harness-cli pops model adopt research --yes
 uvx --from paper-harness-cli pops model rollback research
+uvx --from paper-harness-cli pops change plan .paperops/request.yml
+uvx --from paper-harness-cli pops change apply CHG-... --yes
+uvx --from paper-harness-cli pops compile prepare all
+uvx --from paper-harness-cli pops write start CMP-...
 uvx --from paper-harness-cli pops scratch archive --label before-rewrite
 uvx --from paper-harness-cli pops scratch reset --yes
 ```

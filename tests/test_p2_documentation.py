@@ -21,8 +21,8 @@ class P2DocumentationTest(unittest.TestCase):
         current = self.text("docs/current-specification.md")
         for text in (architecture, current):
             self.assertIn("P2", text)
-            self.assertIn("P3", text)
-            self.assertIn("P4", text)
+            self.assertIn("typed", text)
+            self.assertIn("workflow", text)
             self.assertIn("deterministic", text)
         self.assertIn("model migration", current)
 
@@ -36,8 +36,8 @@ class P2DocumentationTest(unittest.TestCase):
             self.assertIn("pops model adopt", text)
             self.assertIn("pops model rollback", text)
             self.assertIn("AI", text)
-            self.assertIn("P3", text)
-            self.assertIn("P4", text)
+            self.assertIn("pops change", text)
+            self.assertIn("workflow", text)
 
     def test_skill_and_disposition_docs_keep_legacy_writers(self) -> None:
         skill = self.text("docs/skill-catalog.md")

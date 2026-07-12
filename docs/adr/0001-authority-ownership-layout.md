@@ -41,7 +41,8 @@ human-edited manuscript source について、Writer は patch を生成する�
 | `_paperops/defaults/schemas/`、`_paperops/defaults/workflow/` | paperops-managed default | typed schema、workflow default、focus policy、subagent roster |
 | `_paperops/contracts/` | project-owned contract overlay | 標準 contract から外れる論文固有差分。managed contract ではない |
 | `_paperops/model/editorial/` | project-owned typed state | 現行の typed Results hierarchy を含む |
-| `_paperops/claims/`、`_paperops/evidence/`、`_paperops/review/`、`_paperops/requests/`、`_paperops/workflow/` | project-owned card/model/workflow state | 論文固有の card、review、request、workflow fact |
+| `_paperops/model/` | project-owned six-model state | Research / Editorial / Results hierarchy / Manuscript / Issue / Publication |
+| 既存projectのlegacy card / workflow path | project-owned migration input | managed updateでは削除せず、read-only adapterだけが参照する |
 | `_paperops/notes/views/ (pure overview views)` | generated read-only projection | 同一 container (`_paperops/notes/views/`) でも file type ごとに authority が異なる。pure overview は card / typed state から再生成でき、正本にしない |
 | `_paperops/notes/views/ (controlled authoring views)` | project-owned editable decision | 同一 container (`_paperops/notes/views/`) でも file type ごとに authority が異なる。story spine、概念語、条件名など人間が編集する判断を保持する |
 | `.paperops/cache/` | generated cache | compile packet、judge output、materialized view。未追跡で正本にしない |

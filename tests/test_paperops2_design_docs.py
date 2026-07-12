@@ -269,7 +269,7 @@ class PaperOps2DesignDocsTest(unittest.TestCase):
             | checker_files
             | self.make_targets("template/Makefile"),
         }
-        allowed_dispositions = {"retain", "adapt", "redirect", "deprecate", "investigate"}
+        allowed_dispositions = {"retain", "adapt", "redirect", "deprecate", "investigate", "remove from new scaffold"}
 
         for heading, expected_assets in expected.items():
             rows = self.disposition_rows(text, heading)

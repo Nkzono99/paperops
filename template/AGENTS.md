@@ -10,7 +10,7 @@ P2で四つのcompile authorityを採用したprojectでは、定型的なcompil
 
 ## Typed mutation
 
-このscaffoldは六モデルとworkflowが`v2-authoritative`である。Agentは意味判断とcandidate documentを作るが、tracked model/index/hash/manifest/journalを直接編集しない。ignoredなchange requestへ全operationを明示し、`pops change plan|diff|apply`へ委譲する。既存legacy projectの移行時だけmigration readerを使う。
+このscaffoldはResearch / Editorial / Results hierarchy / Manuscript / Issue / Publicationの六モデルとworkflowが`v2-authoritative`である。Agentは意味判断とcandidate documentを作るが、tracked model/index/hash/manifest/journalを直接編集しない。ignoredなchange requestへ全operationを明示し、`pops change plan|diff|apply`へ委譲する。既存legacy projectの移行時だけmigration readerを使う。
 
 ユーザーとは日本語でコミュニケーションする。
 
@@ -126,12 +126,13 @@ _paperops/                     AI/ハーネス内部 state
 _paperops/defaults/            paperops-managed の標準 contract、schema、workflow kernel
 _paperops/model/editorial/     project-owned の typed editorial state
 _paperops/contracts/           project 固有の contract overlay
-_paperops/workflow/            現在状態、review loop、stale 伝播、人間判断、任意の workflow overlay
+_paperops/workflow/            任意の workflow overlay（macro state は六モデルから投影）
 _paperops/refs/                文献、外部 source、外部 link、import state、local path alias
-_paperops/model/research/            result / figure / source card
-_paperops/model/research/              claim / scientific gate / argument card
-_paperops/model/issues/              feedback / review round / block-flow review / response card
-_paperops/model/issues/            analysis / writing request card
+_paperops/model/research/      claim / result / figure / source / scientific gate
+_paperops/model/editorial/     story decision / argument move / Results hierarchy
+_paperops/model/manuscript/    section / block topology
+_paperops/model/issues/        feedback / request / response / review round / workflow issue
+_paperops/model/publication/   submission candidate / approval / round snapshot reference
 _paperops/notes/views/         pure overview view と controlled authoring view
 _paperops/notes/               AI 利用、再現性、handoff、decision log
 _handoff/                      未整理ファイルの一時受け取り箱

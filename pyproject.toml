@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "paper-harness-cli"
-version = "0.13.0"
+version = "1.0.0"
 description = "CLI kernel for bootstrapping and maintaining paper-harness projects"
 readme = "README.md"
 requires-python = ">=3.11"

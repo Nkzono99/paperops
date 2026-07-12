@@ -1,14 +1,14 @@
 # paper-my-topic
 
-## P7 new-project default
+## 1.0 typed authority
 
-通常の`pops init`で作成したprojectは、Research / Editorial / Results hierarchy / Manuscript / Issue / Publicationとtyped workflowを`v2-authoritative`で開始する。六モデルのstarter hashは`.pops/manifest.toml`に記録される。既存projectの`setup` / managed updateはauthorityを変えず、legacy artifact、互換reader、living TeXを削除しない。
+`pops init`で作成したprojectは、Research / Editorial / Results hierarchy / Manuscript / Issue / Publicationとtyped workflowを`v2-authoritative`で開始する。Agentはtracked modelを直接編集せず、ignored change requestと`pops change`で更新する。既存projectの`setup` / managed updateはauthorityを変えず、legacy artifactやliving TeXを削除しない。
 
-## P4 typed workflow（opt-in）
+## Typed workflow
 
 P4では`pops workflow status --json`が六モデルから`INGESTED / MODELED / ARCHITECTED / DRAFTED / PUBLISHABLE`を投影する。査読論点は独立した`ISS-*`として`pops workflow issue route|close|reopen`でplan化し、owner-local approvalは`pops workflow approval decide`で対象revision/hashへ固定する。tracked反映は`pops workflow apply <plan-id> --yes`だけが行う。既存projectは`pops workflow migrate diff`でshadowを確認してから採用し、legacy workflowを削除しない。
 
-## P3 typed compile / Writer（opt-in）
+## Typed compile / Writer
 
 P2で四つのcompile authorityを採用した後は、`pops compile prepare <section|all>`で全体文脈と固定scopeを生成し、`pops write start <compile-id>`で原稿全体を読めるcandidateを作る。candidate TeXは直接編集し、`pops write check` / `diff`、人間確認後の`apply --yes`、必要時の`rollback`を使う。read contextとwrite scopeは別であり、局所scopeでは直せない場合はEditorial / Manuscript Modelを改訂して再compileする。P3はliving TeX直接編集やlegacy writerを削除しない。
 
@@ -35,7 +35,7 @@ P2で四つのcompile authorityを採用した後は、`pops compile prepare <se
 
 1. `/resume-session` で前回の状態を読む。
 2. `story/story-seed.md` で、研究質問、初期メカニズム仮説、期待する evidence path、結果が外れた場合の分岐を確認する。
-3. `pops workflow status` と `pops workflow next` で、全体状態と stale section を確認する。
+3. `pops workflow status --json` で、全体状態と stale section を確認する。
 4. 原稿内容を進めるときは `/develop-manuscript-content` を入口にし、claims、storyline、figure story、section compiler、block-flow review、本文 prose を扱う。新規 scaffold の Results hierarchy は `_paperops/model/editorial/results-hierarchy.yml` を正本にする。`/finish-manuscript` は投稿可能状態までの監督入口として使う。
 5. 図表が本文の主張を支える場合は `/plan-figure-story` を入口にし、必要な個別図だけ `design-paper-figure` や `figure-story-audit` へ進める。
 6. 未実行だが投稿前に現実的に実施できる追加シミュレーションがあり、期待結果の根拠を書ける場合は `/develop-manuscript-content` 内の予測稿 route で扱う。本文には `% PREDICTED-RESULT:`、`% SIM-REQUEST:`、`% EXPECTATION-BASIS:`、`% REPLACE-XX:` と `xx` 置換条件を残し、`_paperops/model/issues/analysis/` と接続する。
@@ -49,28 +49,28 @@ P2で四つのcompile authorityを採用した後は、`pops compile prepare <se
 ## 中間層
 
 - `story/`: 人間が読む高次ストーリーと story seed
-- `_paperops/model/research/`: result / figure / source card の正本
-- `_paperops/model/research/`: claim / scientific gate / argument card の正本
-- `_paperops/model/issues/`: feedback / review round / response card の正本
+- `_paperops/model/research/`: claim / result / figure / source / scientific gate の正本
+- `_paperops/model/editorial/`: story decision / argument move / Results hierarchy の正本
+- `_paperops/model/issues/`: feedback / request / response / review round / workflow issue の正本
 - `_paperops/model/manuscript/blocks/`: AUDITED / ACCEPTED 前の block operation table と author stance
-- `_paperops/model/issues/`: analysis / writing request card の正本
+- `_paperops/model/publication/`: submission candidate / approval / round snapshot reference の正本
 - `_paperops/notes/views/`: `view_type` / `source_of_truth` つきの pure overview view と controlled authoring view
 - `_paperops/model/editorial/results-hierarchy.yml`: project-owned の typed Results hierarchy 正本。各 item は `RHI-*` ID と `next_item_id` で読者順を表す。
 - `_paperops/model/editorial/editorial-model.yml`: project-owned の story candidate、選択・棄却理由、argument move の正本。
 - `_paperops/defaults/schemas/registry.yml` と JSON Schema: paperops-managed の registry / schema default。project-owned model state は置かない。
 - `_paperops/defaults/contracts/`: paperops-managed の標準 section / figure story 契約
 - `_paperops/contracts/`: project 固有の contract overlay
-- `_paperops/workflow/`: 現在状態、section 状態、issue class、stale 伝播、人間判断
+- `pops workflow status --json`: 六モデルから現在状態、section、issue、staleを投影
 - `_paperops/defaults/workflow/subagent-roster.yml`: subagent role、delegation contract、orchestrator の integration decision 契約
 - `manuscript/writing-profile.yml`: 論文種別・投稿先ごとの overlay と `section_depth` floor。JA は `ja_chars`、EN は `en_words` として数え、長さは target ではなく floor として扱う。
 
 `paper_ir` は card と controlled authoring view から Writer に渡す context を作る生成一時物であり、手書き正本にはしない。
 
-既存下流 project は M0-0003 を採用するまで `storyline.md` の legacy Markdown Results hierarchy を fallback として利用できる。移行時は `uvx --from paper-harness-cli pops update-paperops --apply --only _paperops/defaults/schemas/` で managed schema を更新し、project-owned の typed file を opt-in で作成する。`python scripts/check-section-contracts.py --root . --strict` が成功する前に legacy Markdown を削除しない。
+既存下流 projectはmanaged schema/checkerを更新した後、`pops model diff|adopt`と`pops workflow migrate`で明示移行する。legacy artifactはupdateで削除されず、移行確認後にproject側で整理する。
 
 新規 project は `pops init` で Research、Editorial、Results hierarchy、Manuscript、Issue、Publication の六モデル starter を受け取る。Research / Manuscript / Issue は架空 record のない空 index、Publication は未提出のaggregate starterである。既存projectはmanaged registry / schema / checkerを更新した後、`pops model status|validate|diff|adopt|rollback`でmodel単位に移行する。定型的なinventory、hash、snapshot、recoveryはdeterministic CLIが扱い、AIはscientific / editorial judgmentや人間承認を代替しない。
 
-既存projectでは、最初に`pops model diff <model>`でshadowだけを作り、reportと`pops model validate <model> --strict`を確認する。authority切替は`pops model adopt <model> --yes`、復元は`pops model rollback <model>`を使う。P2後もlegacy card / review / requestを削除せず、human-edited TeXを維持する。既存workflow authorityも`pops workflow migrate diff`から別途opt-inし、採用まではlegacyをrollback可能なまま保持する。
+既存projectでは、最初に`pops model diff <model>`でshadowだけを作り、reportとstrict validationを確認する。authority切替は`pops model adopt <model> --yes`、復元は`pops model rollback <model>`を使う。既存workflow authorityも`pops workflow migrate diff`から別途opt-inする。
 
 `make schema-check` は schema / references / semantics / hash phaseをadvisoryに検査する。`editorial-model.yml`を含むproject-owned stateのauthority切替前は明示strict検査と人間承認を要求し、legacy controlled viewを維持する。
 
@@ -117,7 +117,7 @@ P2で四つのcompile authorityを採用した後は、`pops compile prepare <se
 - `_paperops/contracts/`: Introduction / Methods / Results / Discussion / Conclusion と figure story の project overlay
 - `_paperops/workflow/`: 現在状態、review round summary、人間判断、任意の workflow overlay
 - `_paperops/refs/`: 文献、外部 source、外部 link、ローカルパス alias
-- `_paperops/model/research/`, `_paperops/model/research/`, `_paperops/model/issues/`, `_paperops/model/issues/`: 論文を書く前後のカード層
+- `_paperops/model/`: 六モデルのproject-owned authority
 - `_paperops/notes/`: AI 利用、再現性、handoff、decision log、controlled authoring view
 - `_handoff/`: 未整理入力の一時受け取り箱
 - `_archives/`: sealed scratch archive

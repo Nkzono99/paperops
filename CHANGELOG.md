@@ -2,9 +2,15 @@
 
 ## Unreleased
 
+## 1.0.0 - 2026-07-12
+
+- `pops change plan|status|diff|apply|rollback`を追加した。ignoredなYAML/JSON requestからregistryでtracked identityを解決し、indexed/aggregate record、index revision/hash、六モデルvalidation、manifest hashを一つの復旧可能なtransactionで更新する。`apply` / `rollback`は明示確認とcurrent hash一致を要求し、公開出力へcandidate本文やprivate pathを出さない。
+- 新規scaffoldからlegacy claim/evidence/review/request card、workflow macro-state/decision/round summary、submission ledgerを削除し、checker/skillをtyped Research / Editorial / Manuscript / Issue / Publication authorityへ切り替えた。`storyline.md`はcontrolled authoring viewとして残し、Results hierarchyの値はtyped modelだけを参照する。
+- `pops init --authority legacy`を削除し、新規projectをv2-onlyにした。既存projectのlegacy artifactはproject-ownedとして`setup` / `update-paperops`で削除せず、model/workflow migrationのinventory、shadow、adopt、rollback readerを維持する。移行手順は`docs/migrations/1.0.0-typed-authority.md`を参照する。
+
 - PaperOps 2 P7として、新規`pops init`を六モデル・typed workflowの`v2-authoritative`既定へ切り替えた。scaffoldを同一filesystem上でstageし、予約した空targetの同一性とproject-managed checkerの六つのsemantic hashを確認してからatomic replaceするため、通常のvalidation / I/O失敗では部分projectを残さず競合targetを上書きしない。`init-v2` originではmigration journalの代わりにexact six-model setとlive hashを再検証し、成功時はmodeとhashをCLIへ表示する。
 
-- 既存projectの`setup`、managed update、非空targetへの追加的copyはauthorityを変更しない。`pops init --authority legacy`は非推奨の明示退避として残し、削除時期は未定である。legacy artifact、互換reader、human-edited living TeXの削除・dual-write・reverse migrationは行わない。
+- 既存projectの`setup`とmanaged updateはauthorityを変更せず、project-owned legacy artifactを削除しない。
 
 - PaperOps 2 P4 typed workflow projection / writerを追加した。六モデルから`INGESTED -> MODELED -> ARCHITECTED -> DRAFTED -> PUBLISHABLE`をread-only投影し、review / submission / section / effective stale / owner-local approvalを直交軸として返す。`workflow_issue`を一論点一recordとして独立route / close / reopenし、`pops workflow status|plan|issue|approval|apply|rollback|migrate`がimpact計算、承認plan、journal transaction、legacy shadow/adopt/rollbackをAIなしで扱う。v2-authoritative時だけP3 compileが選択sectionのopen impactを停止する。
 
