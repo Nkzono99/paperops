@@ -45,6 +45,8 @@ build の test は `xelatex` と `bibtex` があるときだけ動く。京大�
   方針は `harness.py` の block、手順は skill に置く。
 - **CLI が読む書式（SPEC §4）を変えたら、雛形・skill・test を同時に直す。**
 - **利用者に見える変更は `README.md` と `CHANGELOG.md` に反映する。**
+  README の画像は `.github/assets/make_readme_art.py` が生成する（matplotlib が要る）。文言を変えたら
+  script を直して SVG を作り直す。
 
 ## Git
 
