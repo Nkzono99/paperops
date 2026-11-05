@@ -33,7 +33,8 @@ uv run ruff check src tests
 uv run pytest
 ```
 
-build の test は `xelatex` と `bibtex` があるときだけ動く。京大スパコンでは、test は計算ノードで実行する。
+build の test は `xelatex` と `bibtex` があるときだけ、図の helper の test は matplotlib（dev の依存）が
+あるときだけ動く。京大スパコンでは、test は計算ノードで実行する。
 
 ## 変更するとき
 

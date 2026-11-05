@@ -37,6 +37,7 @@ packages = ["src/paperops"]
 
 [dependency-groups]
 dev = [
+  "matplotlib>=3.8",  # only for testing the figure helpers in _scaffold/figures/
   "pytest>=7.0",
   "ruff>=0.4",
 ]

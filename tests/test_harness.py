@@ -57,3 +57,5 @@ def test_scaffold_keeps_the_formats_the_cli_reads() -> None:
     assert "\n## 候補" in style and "\n## 共有待ち" in style
     figure = (scaffold / "figures/_template/figure.md").read_text(encoding="utf-8")
     assert "\n状態: draft\n" in figure and "\n## メッセージ" in figure and "\n## 推敲記録" in figure
+    # The design sections that paper-figure fills in before any drawing.
+    assert "\n## 描く量と形" in figure and "\n## 載せないもの" in figure
