@@ -15,6 +15,7 @@ MAIN = r"""\documentclass{article}
 \input{sections/abstract}
 \end{abstract}
 \input{sections/results}
+\bibliographystyle{plainnat}
 \bibliography{refs}
 \end{document}
 ignored after the end

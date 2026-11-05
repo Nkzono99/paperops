@@ -18,7 +18,7 @@ _HEADING_RE = re.compile(r"\\(section|subsection|subsubsection|paragraph)\*?\s*(
 _BEGIN_RE = re.compile(r"\\begin\{([^}]+)\}")
 _LABEL_RE = re.compile(r"\\label\{([^}]+)\}")
 _STRUCTURAL_RE = re.compile(
-    r"\\(?:label|maketitle|tableofcontents|bibliography|bibliographystyle|appendix|newpage"
+    r"\\(?:label|maketitle|tableofcontents|bibliographystyle|bibliography|appendix|newpage"
     r"|clearpage|vspace\*?|smallskip|medskip|bigskip|noindent|centering|printbibliography)"
     r"(?:\[[^\]]*\])?(?:\{[^{}]*\})?"
 )
