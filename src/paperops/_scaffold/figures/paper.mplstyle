@@ -1,0 +1,33 @@
+# 全ての図に共通の見た目。図への添削で決まった設定（文字の大きさ、色、線の太さ）はここに書く。
+
+figure.figsize: 3.4, 2.4
+figure.constrained_layout.use: True
+figure.dpi: 150
+
+font.family: sans-serif
+font.sans-serif: Arial, Helvetica, DejaVu Sans
+font.size: 8
+axes.labelsize: 8
+axes.titlesize: 8
+xtick.labelsize: 7
+ytick.labelsize: 7
+legend.fontsize: 7
+mathtext.fontset: dejavusans
+
+axes.linewidth: 0.6
+lines.linewidth: 1.2
+lines.markersize: 3.5
+xtick.direction: in
+ytick.direction: in
+xtick.major.width: 0.6
+ytick.major.width: 0.6
+xtick.minor.width: 0.4
+ytick.minor.width: 0.4
+legend.frameon: False
+
+# Okabe-Ito: 色覚の違いに強い配色。主役の系列に先頭の色を使う。
+axes.prop_cycle: cycler('color', ['0072B2', 'D55E00', '009E73', 'CC79A7', 'E69F00', '56B4E9', '000000'])
+image.cmap: viridis
+
+pdf.fonttype: 42
+savefig.pad_inches: 0.02

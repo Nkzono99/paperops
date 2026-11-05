@@ -1,0 +1,29 @@
+% 日本語草稿用の preamble（XeLaTeX）。投稿先の class や style に合わせて書き換えてよい。
+\usepackage{fontspec}
+\IfFontExistsTF{Noto Serif CJK JP}{%
+  \setmainfont{Noto Serif CJK JP}\setsansfont{Noto Sans CJK JP}%
+}{\IfFontExistsTF{IPAexMincho}{%
+  \setmainfont{IPAexMincho}\setsansfont{IPAexGothic}%
+}{\IfFontExistsTF{Hiragino Mincho ProN}{%
+  \setmainfont{Hiragino Mincho ProN}\setsansfont{Hiragino Sans}%
+}{}}}
+\XeTeXlinebreaklocale "ja"
+\XeTeXlinebreakskip=0pt plus 1pt
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[authoryear,round]{natbib}
+\usepackage{xcolor}
+\usepackage[unicode,colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+% 図は figures/<name>/<name>.pdf にある: \includegraphics{<name>/<name>}
+\graphicspath{{../figures/}}
+
+\renewcommand{\abstractname}{要旨}
+\renewcommand{\refname}{参考文献}
+\renewcommand{\figurename}{図}
+\renewcommand{\tablename}{表}
+
+% PDF に見える形で残す著者向けのメモ（要出典、確認待ちなど）。
+\newcommand{\note}[1]{\textcolor{blue}{[Note: #1]}}

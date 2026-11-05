@@ -1,0 +1,27 @@
+.DS_Store
+.venv/
+__pycache__/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# local working state of agents and earlier designs
+.codex-tmp/
+.paperops/
+.superpowers/
+.worktrees/
+.review-rename.*/
+_handoff/
+docs/superpowers/
+
+# BEGIN harnessops
+.harnessops/lock.json
+.harnessops/cache/*
+!.harnessops/cache/.gitkeep
+.harnessops/tmp/
+.harnessops/migrations/
+harness-lab/
+harness-feedback/
+# END harnessops

@@ -1,0 +1,20 @@
+# paperops project の設定。著者も agent も編集する。
+
+[paper]
+title = {{title}}
+lang = {{lang}}                # 草稿を書く言語（ja | en）
+main = "manuscript/main.tex"
+
+[build]
+engine = "xelatex"             # xelatex | lualatex | pdflatex | uplatex
+bib = "bibtex"                 # bibtex | biber | none
+tex_bin = ""                   # TeX の bin directory（PATH に無いとき）
+
+[style]
+shared = {{shared_style}}      # 論文をまたいで使う著者の好み。空文字にすると使わない
+
+# 結果の出どころ。runops project ならその root を指す。複数書ける。
+# [[sources]]
+# name = "cylindrical_hole"
+# path = "/path/to/project_cylindrical_hole"
+# note = "空洞の深さを振った系列"

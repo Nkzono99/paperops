@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "paper-harness-cli"
+version = "2.0.0"
+description = "Minimal harness for writing a paper with AI agents: brief, figures, review comments, learned style"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+authors = [
+  { name = "paperops maintainers" },
+]
+
+[project.urls]
+Homepage = "https://github.com/Nkzono99/paperops"
+Repository = "https://github.com/Nkzono99/paperops"
+Issues = "https://github.com/Nkzono99/paperops/issues"
+
+[project.scripts]
+pops = "paperops.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/paperops"]
+
+[dependency-groups]
+dev = [
+  "pytest>=7.0",
+  "ruff>=0.4",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+extend-exclude = ["src/paperops/_scaffold"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+  "RUF001",  # Japanese punctuation in strings is intended
+  "RUF002",
+  "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/paperops/harness.py" = ["E501"]
+"tests/*" = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
