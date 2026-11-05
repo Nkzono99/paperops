@@ -13,7 +13,14 @@ from paperops.project import load_project
 
 from .conftest import write
 
-SKILLS = ["paper-brief", "paper-check", "paper-draft", "paper-figure", "paper-revise"]
+SKILLS = [
+    "paper-brief",
+    "paper-check",
+    "paper-draft",
+    "paper-figure",
+    "paper-predict",
+    "paper-revise",
+]
 
 
 def test_init_creates_project_and_harness(paper: Path, tmp_path: Path) -> None:
@@ -137,7 +144,10 @@ def test_context_reads_project_state(paper: Path, tmp_path: Path, capsys) -> Non
     write(
         paper / "BRIEF.md",
         "# BRIEF\n\n状態: approved\n<!-- 状態: draft -->\n\n## 主張（1文）\n\n<!-- hint -->\n"
-        "深い空洞の底は低く帯電する。\n\n## 未決\n\n- 太陽風条件を増やすか\n- \n",
+        "深い空洞の底は低く帯電する。\n\n## 主要な発見\n\n<!--\n### C0 hint\n- 状態: 予想\n-->\n"
+        "### C1 底は 12 V 低い\n- 状態: 確認済み\n- 根拠: 図 1\n\n"
+        "### C2 流束で説明できる\n- 根拠: 見積もり\n- 状態: 予想（確信度: 中）\n\n### C3 状態なし\n\n"
+        "## 未決\n\n- 太陽風条件を増やすか\n- \n",
     )
     write(
         paper / "STYLE.md",
@@ -147,7 +157,8 @@ def test_context_reads_project_state(paper: Path, tmp_path: Path, capsys) -> Non
     write(
         paper / "manuscript/sections/results.tex",
         "\\section{結果}\n%> 結論を先に\n%> 条件は Methods へ\n本研究の条件では電位が下がる。\n\n"
-        "空洞は深い。 %> これは要らない\n% ordinary comment\n50\\% の差がある。\n",
+        "空洞は深い。 %> これは要らない\n% ordinary comment \\pred{ignored}\n50\\% の差がある。\n"
+        "流束は \\fluxRatio 倍になり、\\pred{電位の低下を説明する}。\n",
     )
     main_tex = paper / "manuscript/main.tex"
     main_tex.write_text(
@@ -155,6 +166,10 @@ def test_context_reads_project_state(paper: Path, tmp_path: Path, capsys) -> Non
             "\\end{document}", "\\input{sections/results}\n\\end{document}"
         ),
         encoding="utf-8",
+    )
+    numbers = paper / "manuscript/numbers.tex"
+    numbers.write_text(
+        numbers.read_text("utf-8") + "\\newcommand{\\fluxRatio}{\\pred{0.3}}\n", encoding="utf-8"
     )
     write(paper / "figures/floor/make.py", "")
     write(
@@ -171,6 +186,11 @@ def test_context_reads_project_state(paper: Path, tmp_path: Path, capsys) -> Non
         "exists": True,
         "status": "approved",
         "message": "深い空洞の底は低く帯電する。",
+        "findings": [
+            {"id": "C1", "status": "確認済み"},
+            {"id": "C2", "status": "予想"},
+            {"id": "C3", "status": ""},
+        ],
         "open_items": 1,
     }
     assert state["style"]["project"]["rules"] == 2
@@ -212,12 +232,21 @@ def test_context_reads_project_state(paper: Path, tmp_path: Path, capsys) -> Non
         },
     ]
     assert any("2 open review comments" in hint for hint in state["next"])
+    assert state["predictions"] == {
+        "marks": 2,
+        "files": {"manuscript/numbers.tex": 1, "manuscript/sections/results.tex": 1},
+    }
 
     assert main(["context"]) == 0
     text = capsys.readouterr().out
     assert "brief: approved  message: 深い空洞の底は低く帯電する。" in text
     assert "runs/flat/scan/_analysis/speed/README.md" in text
     assert "manuscript/sections/results.tex:2: 結論を先に 条件は Methods へ" in text
+    assert "  findings: C1 確認済み, C2 予想, C3 (no status)" in text
+    assert (
+        "predictions: 2 \\pred marks (manuscript/numbers.tex 1, manuscript/sections/results.tex 1)"
+        in text
+    )
     assert "  - bare: (no message in figure.md)" in text
     assert "  - floor: 底は低く帯電する。" in text
 
@@ -228,6 +257,7 @@ def test_context_on_fresh_project_points_to_brief(paper: Path, capsys) -> None:
     assert "message: (not written)" in text
     assert "paper-brief" in text
     assert "comments: none open" in text
+    assert "predictions: no \\pred marks" in text
 
 
 def test_context_warns_when_harness_is_older(paper: Path, capsys) -> None:

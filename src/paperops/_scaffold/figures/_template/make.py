@@ -1,6 +1,6 @@
 """Template for a figure script. Copy this directory to figures/<name>/ and edit.
 
-Run from anywhere:  .venv/bin/python figures/<name>/make.py
+Run from anywhere:  .venv/bin/python figures/<name>/make.py [--refresh]
 Writes <name>.pdf (for the manuscript) and <name>.png (for review) next to this file.
 """
 
@@ -14,8 +14,20 @@ import common  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
+# True while the result does not exist yet and the figure shows what is expected.
+PREDICTED = False
+
 HERE = Path(__file__).resolve().parent
-DATA = HERE / "data" / "reduced.npz"
+DATA = HERE / "data" / ("predicted.npz" if PREDICTED else "reduced.npz")
+
+
+def predict() -> None:
+    """Write the expected data from a stated basis, so the author can inspect the reasoning.
+
+    Use an estimate, a scaling law, or an extrapolation of existing runs; say which in figure.md.
+    """
+    x = np.linspace(0.0, 1.0, 50)
+    np.savez(DATA, x=x, y=x**2)
 
 
 def reduce() -> None:
@@ -26,7 +38,6 @@ def reduce() -> None:
     """
     # src = common.source("<source name>")
     # ... read from src / "runs/..." ...
-    DATA.parent.mkdir(exist_ok=True)
     x = np.linspace(0.0, 1.0, 50)
     np.savez(DATA, x=x, y=x**2)
 
@@ -38,10 +49,13 @@ def draw() -> None:
     ax.plot(data["x"], data["y"])
     ax.set_xlabel("x (unit)")
     ax.set_ylabel("y (unit)")
+    if PREDICTED:
+        common.mark_predicted(fig)
     common.save(fig, __file__)
 
 
 if __name__ == "__main__":
-    if not DATA.is_file() or "--reduce" in sys.argv:
-        reduce()
+    if not DATA.is_file() or "--refresh" in sys.argv:
+        DATA.parent.mkdir(exist_ok=True)
+        (predict if PREDICTED else reduce)()
     draw()

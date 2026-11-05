@@ -41,6 +41,23 @@ def use_style() -> None:
     plt.style.use(FIGURES / "paper.mplstyle")
 
 
+def mark_predicted(fig) -> None:
+    """Stamp a figure that is drawn from an expectation, not from results."""
+    fig.text(
+        0.5,
+        0.5,
+        "PREDICTED",
+        ha="center",
+        va="center",
+        rotation=30,
+        fontsize=22,
+        fontweight="bold",
+        color="#d98200",
+        alpha=0.18,
+        zorder=100,
+    )
+
+
 def save(fig, script: str, dpi: int = 300) -> Path:
     """Write ``<name>.pdf`` for the manuscript and ``<name>.png`` for review, next to ``script``."""
     out = Path(script).resolve().parent

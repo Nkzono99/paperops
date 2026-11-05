@@ -10,11 +10,14 @@ from pathlib import Path
 from paperops import __version__
 from paperops.harness import deployed_version
 from paperops.project import Project, Source
-from paperops.tex import find_comments, outline
+from paperops.tex import find_comments, outline, read_lines
 
 _HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 _STATUS_RE = re.compile(r"^(?:状態|status)\s*[:：]\s*(\S+)", re.MULTILINE)
 _ROUND_RE = re.compile(r"^- R\d+", re.MULTILINE)
+_FINDING_RE = re.compile(r"^###\s+(\S+)")
+_FINDING_STATUS_RE = re.compile(r"^-\s*(?:状態|status)\s*[:：]\s*([^\s（(]+)")
+PREDICTION_MARK = "\\pred{"
 _MAX_TOPICS = 40
 _RUN_TREE_DEPTH = 5
 
@@ -47,6 +50,29 @@ def _day(path: Path) -> str:
     return time.strftime("%Y-%m-%d", time.localtime(path.stat().st_mtime))
 
 
+def _findings(lines: list[str]) -> list[dict]:
+    """Findings (``### C1 ...``) with their ``- 状態:`` (e.g. 確認済み or 予想)."""
+    found: list[dict] = []
+    for line in lines:
+        heading = _FINDING_RE.match(line)
+        status = _FINDING_STATUS_RE.match(line)
+        if heading:
+            found.append({"id": heading.group(1), "status": ""})
+        elif status and found and not found[-1]["status"]:
+            found[-1]["status"] = status.group(1)
+    return found
+
+
+def prediction_marks(tex_files: list[Path], root: Path) -> dict:
+    """Where ``\\pred{`` marks remain: results written ahead of the runs that will confirm them."""
+    files = {}
+    for path in tex_files:
+        count = sum(line.text.count(PREDICTION_MARK) for line in read_lines(path))
+        if count:
+            files[str(path.relative_to(root))] = count
+    return {"marks": sum(files.values()), "files": files}
+
+
 def brief_state(root: Path) -> dict:
     path = root / "BRIEF.md"
     text = _read(path)
@@ -54,15 +80,19 @@ def brief_state(root: Path) -> dict:
     status = _STATUS_RE.search(text)
     message = ""
     open_items = 0
+    findings: list[dict] = []
     for heading, lines in sections.items():
         if heading.startswith("主張") and not message:
             message = next((ln.strip() for ln in lines if ln.strip()), "")
         elif heading.startswith("未決"):
             open_items = _bullets(lines)
+        elif heading.startswith("主要な発見"):
+            findings = _findings(lines)
     return {
         "exists": path.is_file(),
         "status": status.group(1) if status else "draft",
         "message": message,
+        "findings": findings,
         "open_items": open_items,
     }
 
@@ -214,6 +244,7 @@ def gather(project: Project) -> dict:
         },
         "build": build,
         "figures": figure_states(root),
+        "predictions": prediction_marks(tex_files, root),
         "comments": comments,
         "next": hints,
     }
@@ -223,6 +254,9 @@ def render(state: dict) -> str:
     out = [f"paper: {state['title'] or '(untitled)'}  [{state['lang']}]"]
     brief = state["brief"]
     out.append(f"brief: {brief['status']}  message: {brief['message'] or '(not written)'}")
+    if brief["findings"]:
+        listed = ", ".join(f"{f['id']} {f['status'] or '(no status)'}" for f in brief["findings"])
+        out.append(f"  findings: {listed}")
     if brief["open_items"]:
         out.append(f"  open items in BRIEF.md: {brief['open_items']}")
 
@@ -263,6 +297,13 @@ def render(state: dict) -> str:
             f"      {fig['status']}, {fig['rounds']} review rounds, "
             f"output {fig['output']}"
         )
+
+    predictions = state["predictions"]
+    if predictions["marks"]:
+        where = ", ".join(f"{name} {n}" for name, n in predictions["files"].items())
+        out.append(f"predictions: {predictions['marks']} \\pred marks ({where})")
+    else:
+        out.append("predictions: no \\pred marks")
 
     comments = state["comments"]
     out.append(f"comments: {len(comments)} open" if comments else "comments: none open")

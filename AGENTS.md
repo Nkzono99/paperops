@@ -16,7 +16,7 @@ src/paperops/
 ├── context.py     pops context
 ├── tex.py         %> コメントと骨子の抽出
 ├── build.py       PDF の build と log の要約
-├── skills/        論文 project に配る skill（paper-brief, -draft, -figure, -revise, -check）
+├── skills/        論文 project に配る skill（paper-brief, -draft, -figure, -revise, -predict, -check）
 └── _scaffold/     論文 project の雛形
 tests/             pytest
 ```

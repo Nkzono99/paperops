@@ -3,9 +3,13 @@
 % 丸め方、区間の定義、単位の約束もここに書く。
 %
 % 例:
-% % source: cylindrical_hole, runs/depth-scan/_analysis/potential/out/summary.csv
-% %         (R20261015-0003 .. R20261015-0008), figures/floor-potential/make.py
-% \newcommand{\phiFloorDrop}{12}   % V, 深さ/直径 = 2 の底面と平坦面の電位差
+% % source: pipe_flow, runs/roughness-scan/_analysis/pressure/out/summary.csv
+% %         (R20261015-0003 .. R20261015-0008), figures/pressure-loss/make.py
+% \newcommand{\lossRatio}{3}   % 粗さ 2% の管と滑らかな管の圧力損失の比
 
-% 値が未確定の箇所に置く。確定したら数値のマクロに差し替える。
+% まだ得ていない値は、予想を \pred{} で書く。結果が出たら \pred を外して出典を書く。
+% % 予想: 粗さに比例するとした見積もり（BRIEF C2）。roughness-scan の再計算で置き換える
+% \newcommand{\stressRatio}{\pred{2.8}}
+
+% 予想も立てられない値に置く。
 \newcommand{\pending}{\textcolor{red}{[pending]}}

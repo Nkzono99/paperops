@@ -1,7 +1,8 @@
 # 図の名前
 
 状態: draft
-<!-- draft: 推敲中。reviewed: agent の推敲が済み、著者の確認待ち。approved: 著者が了承した。 -->
+<!-- draft: 推敲中。reviewed: agent の推敲が済み、著者の確認待ち。approved: 著者が了承した。
+     predicted: 予想で描いた図。結果が出たら実際の data に差し替える。 -->
 
 ## メッセージ（1文）
 
@@ -17,7 +18,7 @@
 
 ## データ
 
-<!-- source 名、run id、読むファイル、data/ に置く縮約データの内容。 -->
+<!-- source 名、run id、読むファイル、data/ に置く縮約データの内容。予想の図では、予想の根拠。 -->
 
 ## 掲載
 

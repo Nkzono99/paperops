@@ -15,6 +15,6 @@ shared = {{shared_style}}      # 論文をまたいで使う著者の好み。�
 
 # 結果の出どころ。runops project ならその root を指す。複数書ける。
 # [[sources]]
-# name = "cylindrical_hole"
-# path = "/path/to/project_cylindrical_hole"
-# note = "空洞の深さを振った系列"
+# name = "pipe_flow"
+# path = "/path/to/project_pipe_flow"
+# note = "壁の粗さを振った系列"
