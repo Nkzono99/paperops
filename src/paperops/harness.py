@@ -85,6 +85,11 @@ BLOCK = """\
   次の session と著者の目に入ります。新しい未決は `- [ ]` で書き、解決・取り下げの際は `- [x]` にするか項目を消して、決定と理由を `LOG.md` に残します。
 - **英語版は依頼されたら作る。** `manuscript/en/` に `main.tex` と `sections/` を置き、`numbers.tex`、
   `refs.bib`、`figures/` は共有します（`pops build --main manuscript/en/main.tex`）。
+- **執筆の区切りをローカル commit に残す。** 著者や利用先の repository に明示の方針があれば、それを優先します。
+  Git の履歴がまだ無ければ、最初の編集前に、雛形や既存原稿を比較の起点として記録します。
+  作業後は差分と stage 済みの内容を確認し、原稿・図・再現用 script・縮約データなどから今回の変更だけを選びます。
+  別作業の差分と build・cache を外し、変更があれば commit して、確認結果と commit ID を報告します。
+  push と release は著者が依頼したときに行います。
 
 ## Skills
 

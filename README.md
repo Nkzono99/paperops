@@ -110,6 +110,8 @@ paper-rough-pipe/
 
 `build/` は Git の対象外です。論文をまたいで使う著者の好みは `~/.config/paperops/STYLE.md` に溜まります
 （`pops init --style FILE` で場所を変えられます）。
+エージェントは履歴のない論文では編集前の状態を記録し、以後は草稿や添削が一区切りするたびにローカルで commit します。
+著者や利用先の Git 方針を優先し、push・release は依頼時に行います。
 
 ## 何を言う論文かが伝わるように
 

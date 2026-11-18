@@ -31,6 +31,8 @@ AI エージェントが論文 1 本を主張の設計から PDF まで作り、
    手順は skill に書き、同じことを 2 か所に書かない。
 6. **管理するものと project のものを分ける。** `pops update` が書き換えるのは `AGENTS.md` の管理 block と
    `paper-*` skill だけ。それ以外は project のもので、`pops init` も既存のファイルを上書きしない。
+7. **執筆の履歴は Git に残す。** 配布先では agent が編集前の起点と作業の区切りをローカルに commit する。
+   著者と利用先の明示の Git 方針を優先し、push・release は依頼時に行う。
 
 ## 3. project の構成
 
