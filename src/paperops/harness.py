@@ -82,7 +82,7 @@ BLOCK = """\
   解析の path）をコメントに残します。文献は実在を確認できたものを `refs.bib` に入れ、未確認の箇所は
   `\\note{{要出典: ...}}` で PDF に見える形にします。
 - **決定は `LOG.md` に、著者の判断が要る点は `BRIEF.md` の未決に書く。** 未決は `pops context` に出るので、
-  次の session と著者の目に入ります。解決したら未決から消し、決定を `LOG.md` に移します。
+  次の session と著者の目に入ります。新しい未決は `- [ ]` で書き、解決・取り下げの際は `- [x]` にするか項目を消して、決定と理由を `LOG.md` に残します。
 - **英語版は依頼されたら作る。** `manuscript/en/` に `main.tex` と `sections/` を置き、`numbers.tex`、
   `refs.bib`、`figures/` は共有します（`pops build --main manuscript/en/main.tex`）。
 

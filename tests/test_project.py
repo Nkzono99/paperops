@@ -192,6 +192,7 @@ def test_context_reads_project_state(paper: Path, tmp_path: Path, capsys) -> Non
             {"id": "C3", "status": ""},
         ],
         "open_items": 1,
+        "open_item_texts": ["太陽風条件を増やすか"],
     }
     assert state["style"]["project"]["rules"] == 2
     assert state["style"]["project"]["candidates"] == 1
@@ -255,9 +256,36 @@ def test_context_on_fresh_project_points_to_brief(paper: Path, capsys) -> None:
     assert main(["context"]) == 0
     text = capsys.readouterr().out
     assert "message: (not written)" in text
+    assert "open items in BRIEF.md: 0" in text
     assert "paper-brief" in text
     assert "comments: none open" in text
     assert "predictions: no \\pred marks" in text
+
+
+def test_context_lists_only_unresolved_brief_items(paper: Path, capsys) -> None:
+    write(
+        paper / "BRIEF.md",
+        "## 未決\n- [ ] 図を選ぶ\n- [x] 著者が承認済み\n- [X] 取り下げ\n- [ ]\n"
+        "- [旧稿] 表を残すか\n<!-- - [ ] 書き方の例 -->\n  - 補足\n"
+        "- 結論を確認する\n- [ ] 題を決める\n## これから要る計算\n- [ ] 計算する\n",
+    )
+    assert main(["context", "--json"]) == 0
+    brief = json.loads(capsys.readouterr().out)["brief"]
+    assert brief["open_items"] == 4
+    assert brief["open_item_texts"] == [
+        "図を選ぶ",
+        "[旧稿] 表を残すか",
+        "結論を確認する",
+        "題を決める",
+    ]
+
+    assert main(["context"]) == 0
+    text = capsys.readouterr().out
+    assert (
+        "open items in BRIEF.md: 4\n    - 図を選ぶ\n    - [旧稿] 表を残すか\n    - 結論を確認する"
+        in text
+    )
+    assert "題を決める" not in text
 
 
 def test_context_warns_when_harness_is_older(paper: Path, capsys) -> None:

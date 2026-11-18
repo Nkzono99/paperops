@@ -17,6 +17,7 @@ _STATUS_RE = re.compile(r"^(?:状態|status)\s*[:：]\s*(\S+)", re.MULTILINE)
 _ROUND_RE = re.compile(r"^- R\d+", re.MULTILINE)
 _FINDING_RE = re.compile(r"^###\s+(\S+)")
 _FINDING_STATUS_RE = re.compile(r"^-\s*(?:状態|status)\s*[:：]\s*([^\s（(]+)")
+_CHECKBOX_RE = re.compile(r"^\[([ xX])\](?:\s+|$)")
 PREDICTION_MARK = "\\pred{"
 _MAX_TOPICS = 40
 _RUN_TREE_DEPTH = 5
@@ -44,6 +45,22 @@ def _sections(text: str) -> dict[str, list[str]]:
 
 def _bullets(lines: list[str]) -> int:
     return sum(1 for line in lines if line.startswith("- ") and line[2:].strip())
+
+
+def _open_items(lines: list[str]) -> list[str]:
+    items = []
+    for line in lines:
+        if not line.startswith("- "):
+            continue
+        item = line[2:].strip()
+        checkbox = _CHECKBOX_RE.match(item)
+        if checkbox:
+            if checkbox[1].lower() == "x":
+                continue
+            item = item[checkbox.end() :]
+        if item:
+            items.append(item)
+    return items
 
 
 def _day(path: Path) -> str:
@@ -79,13 +96,13 @@ def brief_state(root: Path) -> dict:
     sections = _sections(text)
     status = _STATUS_RE.search(text)
     message = ""
-    open_items = 0
+    open_items: list[str] = []
     findings: list[dict] = []
     for heading, lines in sections.items():
         if heading.startswith("主張") and not message:
             message = next((ln.strip() for ln in lines if ln.strip()), "")
         elif heading.startswith("未決"):
-            open_items = _bullets(lines)
+            open_items.extend(_open_items(lines))
         elif heading.startswith("主要な発見"):
             findings = _findings(lines)
     return {
@@ -93,7 +110,8 @@ def brief_state(root: Path) -> dict:
         "status": status.group(1) if status else "draft",
         "message": message,
         "findings": findings,
-        "open_items": open_items,
+        "open_items": len(open_items),
+        "open_item_texts": open_items,
     }
 
 
@@ -257,8 +275,8 @@ def render(state: dict) -> str:
     if brief["findings"]:
         listed = ", ".join(f"{f['id']} {f['status'] or '(no status)'}" for f in brief["findings"])
         out.append(f"  findings: {listed}")
-    if brief["open_items"]:
-        out.append(f"  open items in BRIEF.md: {brief['open_items']}")
+    out.append(f"  open items in BRIEF.md: {brief['open_items']}")
+    out.extend(f"    - {item}" for item in brief["open_item_texts"][:3])
 
     for key, label in (("project", "STYLE.md"), ("shared", "shared")):
         style = state["style"][key]
