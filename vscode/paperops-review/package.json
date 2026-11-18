@@ -1,0 +1,19 @@
+{
+  "name": "paperops-review",
+  "displayName": "Paperops Review",
+  "description": "原稿を agent と同時に添削するための VS Code テキストエディター",
+  "version": "0.1.0",
+  "publisher": "paperops-local",
+  "repository": { "type": "git", "url": "https://github.com/Nkzono99/paperops.git", "directory": "vscode/paperops-review" },
+  "engines": { "vscode": "^1.95.0" },
+  "extensionKind": ["workspace"],
+  "categories": ["Other"],
+  "activationEvents": ["onFileSystem:paperops-review"],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [{ "command": "paperops.openReview", "title": "Paperops: 添削用タブを開く" }],
+    "menus": { "editor/title": [{ "command": "paperops.openReview", "when": "resourceExtname == .tex && resourceScheme != paperops-review", "group": "2_review" }] }
+  },
+  "dependencies": { "node-diff3": "3.2.0" },
+  "scripts": { "test": "node --test test/*.test.js" }
+}
