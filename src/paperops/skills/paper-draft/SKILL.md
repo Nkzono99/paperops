@@ -18,7 +18,7 @@ BRIEF が決まっていれば、図から PDF までを著者の手を借りず
    Results は図を説明する文章なので、図が決まってから書くと書き直しが減る。
 
 3. **数値を `manuscript/numbers.tex` に集める。** 本文に出す数値をマクロにし、出典（source 名、run id、
-   解析の path、script）を上のコメントに書く。値は source のファイルを開いて確かめる。
+   解析の path、script）と、集計値なら何をどう集計したかを上のコメントに書く。値は source のファイルを開いて確かめる。
    まだ得ていない値は、予想の値を `\pred{}` で書く。予想も立てられない値だけを `\pending` にする。
 
 4. **本文を書く。** `manuscript/sections/<name>.tex` を作り、`main.tex` から `\input` する。

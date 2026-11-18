@@ -1,11 +1,11 @@
 % 本文に出す数値。本文ではここのマクロを使い、解析をやり直したらここだけを更新する。
 % 各 block の上に出典を書く: source 名、run id、解析の path、値を作った script。
-% 丸め方、区間の定義、単位の約束もここに書く。
+% 集計値は対象の区間と統計量（平均、窓ごとの範囲、上限など）を書く。丸め方と単位もここに書く。
 %
 % 例:
 % % source: pipe_flow, runs/roughness-scan/_analysis/pressure/out/summary.csv
 % %         (R20261015-0003 .. R20261015-0008), figures/pressure-loss/make.py
-% \newcommand{\lossRatio}{3}   % 粗さ 2% の管と滑らかな管の圧力損失の比
+% \newcommand{\lossRatio}{3}   % 粗さ 2% の管と滑らかな管の、定常区間の平均圧力損失の比
 
 % まだ得ていない値は、予想を \pred{} で書く。結果が出たら \pred を外して出典を書く。
 % % 予想: 粗さに比例するとした見積もり（BRIEF C2）。roughness-scan の再計算で置き換える
