@@ -37,7 +37,7 @@ uv run pytest
 
 build の test は `xelatex` と `bibtex` があるときだけ、図の helper の test は matplotlib（dev の依存）が
 あるときだけ動く。京大スパコンでは、test は計算ノードで実行する。
-VS Code 拡張を変えたときは、`vscode/paperops-review/` で `npm ci` と `npm test` を実行する（CI は Python だけを見る）。
+VS Code 拡張を変えたときは、`vscode/paperops-review/` で `npm ci` と `npm test` を実行する（CI の `vscode-extension` job と同じ）。
 
 ## 変更するとき
 
