@@ -19,10 +19,12 @@ src/paperops/
 ├── skills/        論文 project に配る skill（paper-brief, -draft, -figure, -revise, -predict, -check）
 └── _scaffold/     論文 project の雛形
 tests/             pytest
+docs/              skill の手引きを作ったときの背景（設計の考え方、原著の読解）。配布しない
+vscode/paperops-review/   任意の VS Code 拡張（並行添削の 3 方向マージ）。PyPI の配布物には入らない
 ```
 
 論文 project に配るもの（`skills/`、`_scaffold/`、`harness.py` の block）と、この repository を開発するための
-もの（この file、`SPEC.md`）を分けて考える。
+もの（この file、`SPEC.md`、`docs/`）を分けて考える。
 
 ## 確認
 
@@ -35,6 +37,7 @@ uv run pytest
 
 build の test は `xelatex` と `bibtex` があるときだけ、図の helper の test は matplotlib（dev の依存）が
 あるときだけ動く。京大スパコンでは、test は計算ノードで実行する。
+VS Code 拡張を変えたときは、`vscode/paperops-review/` で `npm ci` と `npm test` を実行する（CI は Python だけを見る）。
 
 ## 変更するとき
 
