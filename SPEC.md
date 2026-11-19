@@ -91,7 +91,7 @@ run directory（`manifest.toml` を持つ）と `_` で始まる directory の�
 | `paper-brief` | source、著者の狙い | `BRIEF.md`（著者の承認） |
 | `paper-draft` | `BRIEF.md`、STYLE | 図、`numbers.tex`、`sections/`、PDF、著者への引き渡し |
 | `paper-figure` | 図のメッセージ、source の data | `figures/<name>/`（設計、図、推敲記録）、初見の読者が読み取った内容 |
-| `paper-revise` | `%>` コメント、会話の指摘 | 直した原稿、STYLE の規則、報告 |
+| `paper-revise` | `%>` コメント、会話、著者の書き換え。振り返りでは改稿履歴 | 添削した原稿と STYLE の規則。振り返りでは判断の根拠と適用範囲 |
 | `paper-predict` | 主張に必要でまだ無い結果、source の case と過去の run | 予想の発見、これから要る計算、行わない検証、答え合わせの結果 |
 | `paper-check` | PDF、通常の点検では `BRIEF.md` など | 読者テストと照合。指定 PDF だけの講評では該当箇所と取捨の理由 |
 
