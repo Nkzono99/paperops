@@ -13,8 +13,8 @@ src/paperops/
 ├── project.py     paper.toml の読み込み
 ├── scaffold.py    init と update
 ├── harness.py     AGENTS.md の管理 block、skill の配置
-├── context.py     pops context
-├── tex.py         %> コメントと骨子の抽出
+├── context/       pops context の集約、ノートと source の読み取り、表示
+├── tex/           TeX の読み込み、%> コメント、骨子の抽出
 ├── build.py       PDF の build と log の要約
 ├── skills/        論文 project に配る skill（paper-brief, -draft, -figure, -revise, -predict, -check）
 └── _scaffold/     論文 project の雛形
