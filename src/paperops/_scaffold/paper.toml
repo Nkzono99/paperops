@@ -3,6 +3,8 @@
 [paper]
 title = {{title}}
 lang = {{lang}}                # 草稿を書く言語（ja | en）
+track = {{track}}              # 論文の区分。submission: 投稿を目指す（主張に関わる変更は著者が決める）
+                               # progress: 進捗を論文の形でまとめる（推奨案は agent が反映して報告する）
 main = "manuscript/main.tex"
 
 [build]

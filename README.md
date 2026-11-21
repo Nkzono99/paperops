@@ -31,6 +31,8 @@ cd paper-rough-pipe
 `--source` は結果の出どころで、runops project の root などを指します。複数書け、後から足すこともできます。
 できた directory で Codex か Claude Code を起動して、書きたい論文について話しかけてください。
 英語で書き始めるときは `--lang en` を付けます。
+投稿の前に進捗を論文の形でまとめておく論文には `--track progress` を付けます。主張や本文に推奨する変更があれば、
+agent が反映してから報告します。既定の `submission` では、主張に関わる変更は著者が決めます（`paper.toml` で替えられます）。
 
 ## 頼めること
 
@@ -113,7 +115,7 @@ STYLE の「候補」「共有待ち」も手掛かりになります。実際�
 
 ```text
 paper-rough-pipe/
-├── paper.toml              source・言語・build の設定
+├── paper.toml              論文の区分・source・言語・build の設定
 ├── BRIEF.md                何を言う論文か（主張 1 文、発見、載せないもの、段落骨子）
 ├── STYLE.md                添削から学んだ、この論文での書き方
 ├── manuscript/

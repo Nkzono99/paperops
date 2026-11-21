@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from paperops import __version__
-from paperops.project import DEFAULT_SHARED_STYLE, PaperopsError, load_project
+from paperops.project import DEFAULT_SHARED_STYLE, DEFAULT_TRACK, PaperopsError, load_project
 
 
 def _init(args: argparse.Namespace) -> int:
@@ -19,6 +19,7 @@ def _init(args: argparse.Namespace) -> int:
         target,
         title=args.title,
         lang=args.lang,
+        track=args.track,
         sources=[Path(p) for p in args.source],
         shared_style=args.style,
     )
@@ -80,6 +81,13 @@ def make_parser() -> argparse.ArgumentParser:
     init.add_argument("dir", nargs="?", default=".")
     init.add_argument("--title", default="", help="working title (default: directory name)")
     init.add_argument("--lang", default="ja", help="language the draft is written in: ja or en")
+    init.add_argument(
+        "--track",
+        default=DEFAULT_TRACK,
+        help="submission: aimed at a journal, the author settles changes to the claim (default); "
+        "progress: progress written up as a paper, the agent applies its recommended changes "
+        "and reports them",
+    )
     init.add_argument(
         "--source",
         action="append",

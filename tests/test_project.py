@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import tomllib
 from pathlib import Path
 
@@ -54,6 +55,7 @@ def test_init_creates_project_and_harness(paper: Path, tmp_path: Path) -> None:
     project = load_project(paper)
     assert project.title == "paper-test"
     assert project.lang == "ja"
+    assert project.track == "submission"
     assert project.shared_style == tmp_path / "shared" / "STYLE.md"
     assert f"paperops-version: {__version__}" in (paper / "AGENTS.md").read_text("utf-8")
 
@@ -65,14 +67,18 @@ def test_init_records_sources_and_language(tmp_path: Path) -> None:
     second.mkdir(parents=True)
     root = tmp_path / "paper"
     args = ["init", str(root), "--lang", "en", "--title", 'A "quoted" title', "--style", ""]
-    assert main([*args, "--source", str(first), "--source", str(second)]) == 0
+    assert (
+        main([*args, "--track", "progress", "--source", str(first), "--source", str(second)]) == 0
+    )
 
     config = tomllib.loads((root / "paper.toml").read_text("utf-8"))
     assert config["paper"] == {
         "title": 'A "quoted" title',
         "lang": "en",
+        "track": "progress",
         "main": "manuscript/main.tex",
     }
+    assert load_project(root).track == "progress"
     assert [s["name"] for s in config["sources"]] == ["hole", "hole-2"]
     assert config["sources"][0]["path"] == str(first)
     assert "fontspec" not in (root / "manuscript/preamble.tex").read_text("utf-8")
@@ -96,6 +102,51 @@ def test_init_rejects_missing_source(tmp_path: Path, capsys) -> None:
     assert main(["init", str(tmp_path / "p"), "--source", str(tmp_path / "nope")]) == 1
     assert "not a directory" in capsys.readouterr().err
     assert not (tmp_path / "p").exists()
+
+
+def test_init_rejects_unknown_track(tmp_path: Path, capsys) -> None:
+    assert main(["init", str(tmp_path / "p"), "--track", "pre-draft", "--style", ""]) == 1
+    assert "--track must be one of submission, progress" in capsys.readouterr().err
+    assert not (tmp_path / "p").exists()
+
+
+def test_track_decides_how_context_asks(paper: Path, capsys) -> None:
+    config = paper / "paper.toml"
+    original = config.read_text("utf-8")
+    write(paper / "BRIEF.md", "状態: draft\n\n## 主張（1文）\n\n粗い壁ほど損失は大きい。\n")
+
+    assert main(["context"]) == 0
+    text = capsys.readouterr().out
+    assert (
+        text.splitlines()[1] == "track: submission (投稿: changes to the claim wait for the author)"
+    )
+    assert "get the author's approval" in text
+
+    config.write_text(
+        original.replace('track = "submission"', 'track = "progress"'), encoding="utf-8"
+    )
+    assert main(["context", "--json"]) == 0
+    state = json.loads(capsys.readouterr().out)
+    assert state["track"] == "progress"
+    assert any("(progress): apply the recommended option" in hint for hint in state["next"])
+    assert not any("get the author's approval" in hint for hint in state["next"])
+
+    config.write_text(re.sub(r"^track = .*\n", "", original, flags=re.M), encoding="utf-8")
+    assert main(["context"]) == 0
+    text = capsys.readouterr().out
+    assert "track: (not set in paper.toml)" in text
+    assert 'no [paper] track: settle "submission" or "progress"' in text
+
+    config.write_text(original.replace('track = "submission"', 'track = "draft"'), encoding="utf-8")
+    assert main(["context"]) == 1
+    assert "track must be one of submission, progress, not 'draft'" in capsys.readouterr().err
+
+
+def test_harness_explains_both_tracks(paper: Path) -> None:
+    agents = (paper / "AGENTS.md").read_text("utf-8")
+    assert "`paper.toml` の `[paper] track`" in agents
+    assert "`submission`（投稿）" in agents and "`progress`（進捗）" in agents
+    assert "「投稿前」" in agents
 
 
 def test_update_refreshes_harness_and_keeps_project_files(paper: Path) -> None:

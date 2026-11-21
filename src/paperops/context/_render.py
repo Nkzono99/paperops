@@ -1,8 +1,14 @@
 """Render the project summary as plain text."""
 
+from paperops.project import TRACKS
+
 
 def render(state: dict) -> str:
     out = [f"paper: {state['title'] or '(untitled)'}  [{state['lang']}]"]
+    track = state.get("track", "")
+    out.append(
+        f"track: {track} ({TRACKS[track]})" if track in TRACKS else "track: (not set in paper.toml)"
+    )
     brief = state["brief"]
     out.append(f"brief: {brief['status']}  message: {brief['message'] or '(not written)'}")
     if brief["findings"]:

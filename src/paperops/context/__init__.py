@@ -69,10 +69,21 @@ def gather(project: Project) -> dict:
         hints.append(
             f"harness is from paperops {deployed}, installed is {__version__}: pops update"
         )
+    if not project.track:
+        hints.append(
+            'paper.toml has no [paper] track: settle "submission" or "progress" with the author'
+        )
     if not brief["message"]:
         hints.append("BRIEF.md has no message yet: start with the paper-brief skill")
     elif brief["status"] != "approved":
-        hints.append("BRIEF.md is a draft: get the author's approval, or their word to go ahead")
+        if project.track == "progress":
+            hints.append(
+                "BRIEF.md is a draft (progress): apply the recommended option, then report it"
+            )
+        else:
+            hints.append(
+                "BRIEF.md is a draft: get the author's approval, or their word to go ahead"
+            )
     if comments:
         hints.append(f"{len(comments)} open review comments: paper-revise skill")
     build = build_state(project, tex_files)
@@ -83,6 +94,7 @@ def gather(project: Project) -> dict:
         "paperops": __version__,
         "title": project.title,
         "lang": project.lang,
+        "track": project.track,
         "brief": brief,
         "style": {
             "project": style_state(root / "STYLE.md"),

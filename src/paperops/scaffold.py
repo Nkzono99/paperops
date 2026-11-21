@@ -8,7 +8,14 @@ from importlib import resources
 from pathlib import Path
 
 from paperops.harness import deploy_skills, write_harness
-from paperops.project import CONFIG_NAME, DEFAULT_SHARED_STYLE, PaperopsError, load_project
+from paperops.project import (
+    CONFIG_NAME,
+    DEFAULT_SHARED_STYLE,
+    DEFAULT_TRACK,
+    TRACKS,
+    PaperopsError,
+    load_project,
+)
 
 LANGS = ("ja", "en")
 # Scaffold files stored under another name: git would read a nested ``.gitignore`` here,
@@ -38,12 +45,15 @@ def init_project(
     *,
     title: str = "",
     lang: str = "ja",
+    track: str = DEFAULT_TRACK,
     sources: list[Path] | None = None,
     shared_style: str = DEFAULT_SHARED_STYLE,
 ) -> list[str]:
     """Create a paper project in ``target``; existing files are kept as they are."""
     if lang not in LANGS:
         raise PaperopsError(f"--lang must be one of {', '.join(LANGS)}")
+    if track not in TRACKS:
+        raise PaperopsError(f"--track must be one of {', '.join(TRACKS)}")
     target = target.resolve()
     if (target / CONFIG_NAME).exists():
         raise PaperopsError(f"{target} is already a paperops project; use `pops update`")
@@ -79,6 +89,7 @@ def init_project(
             text = (
                 text.replace("{{title}}", _toml_string(title))
                 .replace("{{lang}}", _toml_string(lang))
+                .replace("{{track}}", _toml_string(track))
                 .replace("{{shared_style}}", _toml_string(shared_style))
             )
             taken: set[str] = set()

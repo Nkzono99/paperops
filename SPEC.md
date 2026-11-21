@@ -42,7 +42,7 @@ AI エージェントが論文 1 本を主張の設計から PDF まで作り、
 
 | path | 持ち主 | 内容 |
 |---|---|---|
-| `paper.toml` | project | `[paper] title, lang, main`、`[build] engine, bib, tex_bin`、`[style] shared`、`[[sources]] name, path, note` |
+| `paper.toml` | project | `[paper] title, lang, track, main`、`[build] engine, bib, tex_bin`、`[style] shared`、`[[sources]] name, path, note` |
 | `BRIEF.md` | project | 状態、主張 1 文、問いと意義、主要な発見（発見ごとに状態・根拠・成立条件と置き場、賭けなら確かめ方・外れたら）、載せないもの、図の割り当て、段落骨子、これから要る計算（発表までに要るものと、行わない検証）、未決 |
 | `STYLE.md` | project | この論文の規則。節: 文章、構成、図、用語と表記、候補、共有待ち |
 | 共有 STYLE（既定 `~/.config/paperops/STYLE.md`） | 著者 | 論文をまたぐ規則。`pops init` が無ければ作る |
@@ -57,6 +57,11 @@ AI エージェントが論文 1 本を主張の設計から PDF まで作り、
 ## 4. CLI が読む書式
 
 `pops context` と `pops outline` は次の書式だけに依存する。skill と雛形はこれを保つ。
+
+- `paper.toml`: `[paper] track` は論文の区分で、`submission`（投稿を目指す。主張に関わる変更は著者が決める）か
+  `progress`（進捗を論文の形でまとめる。推奨案は agent が反映して報告する）。無ければ未設定で、管理区間の規則は
+  BRIEF の状態（`draft` / `approved`）で決める。他の値は error。`pops init --track` の既定は `submission`。
+  `pops context` は区分を 2 行目に出し、未設定なら著者と決めるよう促す。JSON は `track`（未設定は空文字）。
 
 - `BRIEF.md`、`figure.md`: 行頭の `状態: <語>`。BRIEF は `draft` / `approved`、図は `draft` / `reviewed` / `approved` / `predicted`。
 - `BRIEF.md`: `## 主張` で始まる見出しの下の最初の行が主張 1 文。`## 未決` で始まる節の直下では、

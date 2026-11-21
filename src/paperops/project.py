@@ -8,6 +8,13 @@ from pathlib import Path
 
 CONFIG_NAME = "paper.toml"
 DEFAULT_SHARED_STYLE = "~/.config/paperops/STYLE.md"
+# The paper's track ([paper] track) decides who settles changes to the claim: the author
+# (submission) or the agent with its recommended option, reported afterwards (progress).
+TRACKS = {
+    "submission": "投稿: changes to the claim wait for the author",
+    "progress": "進捗: recommended changes are applied, then reported",
+}
+DEFAULT_TRACK = "submission"
 
 
 class PaperopsError(Exception):
@@ -32,6 +39,7 @@ class Project:
     root: Path
     title: str = ""
     lang: str = "ja"
+    track: str = ""  # one of TRACKS, or "" when paper.toml does not say
     main: Path = Path("manuscript/main.tex")
     engine: str = "xelatex"
     bib: str = "bibtex"
@@ -92,11 +100,18 @@ def load_project(start: Path | None = None) -> Project:
             )
         )
 
+    track = str(paper.get("track", "")).strip()
+    if track and track not in TRACKS:
+        raise PaperopsError(
+            f"{CONFIG_NAME}: [paper] track must be one of {', '.join(TRACKS)}, not {track!r}"
+        )
+
     shared = str(style.get("shared", DEFAULT_SHARED_STYLE)).strip()
     return Project(
         root=root,
         title=str(paper.get("title", "")),
         lang=str(paper.get("lang", "ja")),
+        track=track,
         main=Path(str(paper.get("main", "manuscript/main.tex"))),
         engine=str(build.get("engine", "xelatex")),
         bib=str(build.get("bib", "bibtex")),
