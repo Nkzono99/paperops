@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.5.0（2026-11-21）
 
 - 論文の区分 `paper.toml` の `[paper] track` を足した。`submission`（投稿を目指す論文）では、主張・発見・載せないもの、
   それに関わる本文の変更は推奨案を添えて著者に見せ、答えを待つ（BRIEF が `draft` でも）。`progress`（進捗を論文の形で
@@ -8,6 +8,7 @@
   確認は「これから要る計算」に「投稿前」として残し、投稿へ移るときに行う。管理区間の規則、`paper-brief`・`paper-predict`、
   `pops context`（2 行目に区分、未設定なら促す）、`pops init --track`（既定は `submission`）が区分を扱う。
   区分の無い既存の論文は従来どおり BRIEF の状態で決める。
+- 内部: `pops context` の集約・表示と TeX の読み込みを、責務ごとの module（`context/`、`tex/`）に分けた。動作は同じ。
 
 ## 2.4.0（2026-11-19）
 
