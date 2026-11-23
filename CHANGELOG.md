@@ -1,5 +1,9 @@
 # Changelog
 
+## 未リリース
+
+- `paper-figure` に公開データと寄託パッケージの作成ガイド（`references/open-data.md`）を追加し、`paper-check` から寄託時の任意検証へ参照できるようにした。
+
 ## 2.5.0（2026-11-21）
 
 - 論文の区分 `paper.toml` の `[paper] track` を足した。`submission`（投稿を目指す論文）では、主張・発見・載せないもの、
