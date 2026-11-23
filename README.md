@@ -158,6 +158,10 @@ paperops は次の順で進めて、それを防ぎます。
 そのもとにした原著 12 本の読解は
 [読解の記録](https://github.com/Nkzono99/paperops/blob/main/docs/results-and-model-readings.md)にあります。
 
+## 図を再現する公開データを用意する
+
+図と主要数値を再現できる公開用データをまとめたい場合は、「図を再現できるデータを Zenodo 向けにまとめて」と依頼する。`paper-figure` の拡張ガイドに沿って、再現に必要な最小データ、実行スクリプト、設定スナップショット、説明用 `README.md`、外部寄託時のアーカイブと `SHA256SUMS` を整え、展開後の再実行と照合まで確認した一式を得られる。[公開データの手順](src/paperops/skills/paper-figure/references/open-data.md)
+
 ## 1.x から移る
 
 2.0 は作り直しで、1.x の `_paperops/` や `pops change` などはありません。1.x の project は
