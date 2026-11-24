@@ -160,7 +160,11 @@ paperops は次の順で進めて、それを防ぎます。
 
 ## 図を再現する公開データを用意する
 
-図と主要数値を再現できる公開用データをまとめたい場合は、「図を再現できるデータを Zenodo 向けにまとめて」と依頼する。`paper-figure` の拡張ガイドに沿って、再現に必要な最小データ、実行スクリプト、設定スナップショット、説明用 `README.md`、外部寄託時のアーカイブと `SHA256SUMS` を整え、展開後の再実行と照合まで確認した一式を得られる。[公開データの手順](src/paperops/skills/paper-figure/references/open-data.md)
+投稿に合わせて図の再現データを公開するときは、「図を再現できるデータを Zenodo 向けにまとめて」のように頼みます。
+`paper-figure` が、各図の縮約データと描画の部分を `open_data/` に集め、入力、依存の一覧、`README.md`、
+寄託用のアーカイブと `SHA256SUMS` を用意します。アーカイブは別の場所に展開して図を描き直し、元の図と照合します。
+license の選択、upload と公開は著者が行います。手順は
+[公開データの手引き](https://github.com/Nkzono99/paperops/blob/main/src/paperops/skills/paper-figure/references/open-data.md)にあります。
 
 ## 1.x から移る
 
