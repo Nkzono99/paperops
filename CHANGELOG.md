@@ -1,6 +1,6 @@
 # Changelog
 
-## 未リリース
+## 2.6.0（2026-11-25）
 
 - 図を再現する公開データの手引き（`paper-figure` の `references/open-data.md`）を足した。各図の `make.py` のうち
   縮約データを読む描画の部分だけを `open_data/` に移し、`reduce()` と公開しない source を持ち込まない。
